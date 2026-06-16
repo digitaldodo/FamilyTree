@@ -12,7 +12,6 @@ import {
   Briefcase,
   Heart,
   Users,
-  ImageIcon,
   Camera,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,6 +19,8 @@ import { MemberForm } from './member-form';
 import { MemberDeleteDialog } from './member-delete-dialog';
 import { useMemberMutations } from '@/hooks/use-member-mutations';
 import { MemoryGallery, Memory } from '../memories/memory-gallery';
+import { generationLabel } from '@/utils/helpers';
+import { calculateGenerations, getMaxGeneration } from '@/utils/generation';
 import * as React from 'react';
 
 interface MemberModalProps {
@@ -44,6 +45,19 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
   const member = selectedMemberId
     ? members.find((m) => m.id === selectedMemberId)
     : undefined;
+
+  // Calculate dynamic generation for this member
+  const generationMap = React.useMemo(
+    () => calculateGenerations(members),
+    [members]
+  );
+  const totalGenerations = React.useMemo(
+    () => getMaxGeneration(members),
+    [members]
+  );
+  const memberGeneration = member
+    ? generationMap.get(member.id) ?? 0
+    : 0;
 
   if (!member && !isEditingMember) return null;
 
@@ -122,8 +136,8 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
           {/* Avatar + Name Overlay */}
-          <div className="absolute bottom-3 left-4 right-4 flex items-end gap-3">
-            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border-3 border-white/90 dark:border-zinc-800 overflow-hidden bg-muted flex items-center justify-center shadow-lg shrink-0">
+          <div className="absolute bottom-3 left-4 right-14 flex items-end gap-3">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl border-2 border-white/90 dark:border-zinc-800 overflow-hidden bg-muted flex items-center justify-center shadow-lg shrink-0">
               {member?.avatar ? (
                 <img
                   src={member.avatar}
@@ -131,7 +145,7 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <User2 className="w-7 h-7 text-muted-foreground" />
+                <User2 className="w-6 h-6 text-muted-foreground" />
               )}
             </div>
             <div className="flex-1 min-w-0 pb-0.5">
@@ -142,13 +156,8 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                   </h2>
                   <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-xs font-medium text-white/90">
-                      Gen {member.generation}
+                      Gen {memberGeneration + 1} · {generationLabel(memberGeneration, totalGenerations)}
                     </span>
-                    {member.occupation && (
-                      <span className="text-xs text-white/70 truncate">
-                        {member.occupation}
-                      </span>
-                    )}
                     {age !== null && (
                       <span className="text-xs text-white/70">
                         {member.deathDate
@@ -189,7 +198,7 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
         </div>
 
         {/* ── Scrollable Content ── */}
-        <div className="px-5 py-4 max-h-[55vh] sm:max-h-[60vh] overflow-y-auto space-y-5">
+        <div className="px-5 py-4 max-h-[55vh] sm:max-h-[60vh] overflow-y-auto space-y-4 modal-scroll">
           {isEditingMember ? (
             <div>
               <MemberForm
@@ -204,27 +213,28 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
               <>
                 {/* ── Bio ── */}
                 {member.bio ? (
-                  <div>
-                    <p className="text-sm leading-relaxed text-muted-foreground italic border-l-2 border-primary/30 pl-3">
-                      {member.bio}
-                    </p>
-                  </div>
+                  <p className="text-sm leading-relaxed text-muted-foreground italic border-l-2 border-primary/30 pl-3">
+                    {member.bio}
+                  </p>
                 ) : (
-                  !readOnly && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground/60 italic">
-                      <span>No biography yet — </span>
-                      <button
-                        onClick={() => setIsEditingMember(true)}
-                        className="text-primary hover:underline"
-                      >
-                        add one
-                      </button>
-                    </div>
-                  )
+                  <p className="text-sm text-muted-foreground/50 italic">
+                    No bio added yet
+                    {!readOnly && (
+                      <>
+                        {' — '}
+                        <button
+                          onClick={() => setIsEditingMember(true)}
+                          className="text-primary hover:underline"
+                        >
+                          add one
+                        </button>
+                      </>
+                    )}
+                  </p>
                 )}
 
                 {/* ── Details Grid ── */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2.5">
                   {member.birthDate && (
                     <div className="flex items-center gap-2 text-sm">
                       <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
@@ -266,16 +276,26 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                       </span>
                     </div>
                   )}
-                  {member.address && (
+                  {member.address ? (
                     <div className="flex items-center gap-2 text-sm">
                       <MapPin className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                       <span className="truncate">{member.address}</span>
                     </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground/40">
+                      <MapPin className="w-3.5 h-3.5 shrink-0" />
+                      <span className="italic">Location not added</span>
+                    </div>
                   )}
-                  {member.occupation && (
+                  {member.occupation ? (
                     <div className="flex items-center gap-2 text-sm">
                       <Briefcase className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                       <span className="truncate">{member.occupation}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground/40">
+                      <Briefcase className="w-3.5 h-3.5 shrink-0" />
+                      <span className="italic">No occupation listed</span>
                     </div>
                   )}
                 </div>
@@ -283,80 +303,107 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                 {/* ── Relationship Chips ── */}
                 {hasRelationships && (
                   <div>
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                       Family
                     </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {parents.map((r) => {
-                        const p = members.find((m) => m.id === r.fromId);
-                        return (
-                          p && (
-                            <button
-                              key={r.id}
-                              onClick={() => navigateToMember(p.id)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs font-medium border border-blue-200/50 dark:border-blue-800/30 hover:bg-blue-100 dark:hover:bg-blue-950/50 hover:scale-[1.03] transition-all cursor-pointer"
-                            >
-                              <Users className="w-3 h-3" />
-                              Parent: {p.firstName}
-                            </button>
-                          )
-                        );
-                      })}
-                      {spouses.map((r) => {
-                        const s = members.find((m) => m.id === r.toId);
-                        return (
-                          s && (
-                            <button
-                              key={r.id}
-                              onClick={() => navigateToMember(s.id)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 text-xs font-medium border border-rose-200/50 dark:border-rose-800/30 hover:bg-rose-100 dark:hover:bg-rose-950/50 hover:scale-[1.03] transition-all cursor-pointer"
-                            >
-                              <Heart className="w-3 h-3" />
-                              Spouse: {s.firstName}
-                            </button>
-                          )
-                        );
-                      })}
-                      {children.map((r) => {
-                        const c = members.find((m) => m.id === r.toId);
-                        return (
-                          c && (
-                            <button
-                              key={r.id}
-                              onClick={() => navigateToMember(c.id)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 text-xs font-medium border border-emerald-200/50 dark:border-emerald-800/30 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 hover:scale-[1.03] transition-all cursor-pointer"
-                            >
-                              <Users className="w-3 h-3" />
-                              Child: {c.firstName}
-                            </button>
-                          )
-                        );
-                      })}
-                      {siblings.map((r) => {
-                        const sibId =
-                          r.fromId === member.id ? r.toId : r.fromId;
-                        const sib = members.find((m) => m.id === sibId);
-                        return (
-                          sib && (
-                            <button
-                              key={r.id}
-                              onClick={() => navigateToMember(sib.id)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs font-medium border border-amber-200/50 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-950/50 hover:scale-[1.03] transition-all cursor-pointer"
-                            >
-                              <Users className="w-3 h-3" />
-                              Sibling: {sib.firstName}
-                            </button>
-                          )
-                        );
-                      })}
+                    <div className="space-y-2">
+                      {/* Parents */}
+                      {parents.length > 0 && (
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[10px] font-semibold text-muted-foreground uppercase w-14 shrink-0">Parents</span>
+                          {parents.map((r) => {
+                            const p = members.find((m) => m.id === r.fromId);
+                            return (
+                              p && (
+                                <button
+                                  key={r.id}
+                                  onClick={() => navigateToMember(p.id)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs font-medium border border-blue-200/50 dark:border-blue-800/30 hover:bg-blue-100 dark:hover:bg-blue-950/50 hover:scale-[1.03] transition-all cursor-pointer"
+                                >
+                                  <Users className="w-3 h-3" />
+                                  {p.firstName}
+                                </button>
+                              )
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Spouses */}
+                      {spouses.length > 0 && (
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[10px] font-semibold text-muted-foreground uppercase w-14 shrink-0">Spouse</span>
+                          {spouses.map((r) => {
+                            const s = members.find((m) => m.id === r.toId);
+                            return (
+                              s && (
+                                <button
+                                  key={r.id}
+                                  onClick={() => navigateToMember(s.id)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 text-xs font-medium border border-rose-200/50 dark:border-rose-800/30 hover:bg-rose-100 dark:hover:bg-rose-950/50 hover:scale-[1.03] transition-all cursor-pointer"
+                                >
+                                  <Heart className="w-3 h-3" />
+                                  {s.firstName}
+                                </button>
+                              )
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Children */}
+                      {children.length > 0 && (
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[10px] font-semibold text-muted-foreground uppercase w-14 shrink-0">Children</span>
+                          {children.map((r) => {
+                            const c = members.find((m) => m.id === r.toId);
+                            return (
+                              c && (
+                                <button
+                                  key={r.id}
+                                  onClick={() => navigateToMember(c.id)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 text-xs font-medium border border-emerald-200/50 dark:border-emerald-800/30 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 hover:scale-[1.03] transition-all cursor-pointer"
+                                >
+                                  <Users className="w-3 h-3" />
+                                  {c.firstName}
+                                </button>
+                              )
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Siblings */}
+                      {siblings.length > 0 && (
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[10px] font-semibold text-muted-foreground uppercase w-14 shrink-0">Siblings</span>
+                          {siblings.map((r) => {
+                            const sibId =
+                              r.fromId === member.id ? r.toId : r.fromId;
+                            const sib = members.find((m) => m.id === sibId);
+                            return (
+                              sib && (
+                                <button
+                                  key={r.id}
+                                  onClick={() => navigateToMember(sib.id)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs font-medium border border-amber-200/50 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-950/50 hover:scale-[1.03] transition-all cursor-pointer"
+                                >
+                                  <Users className="w-3 h-3" />
+                                  {sib.firstName}
+                                </button>
+                              )
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
 
                 {/* Empty Relationships State */}
                 {!hasRelationships && !readOnly && (
-                  <div className="text-center py-4">
-                    <Users className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                  <div className="text-center py-3">
+                    <Users className="w-6 h-6 text-muted-foreground/30 mx-auto mb-1.5" />
                     <p className="text-sm text-muted-foreground/60">
                       No family connections yet
                     </p>
@@ -370,12 +417,12 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                 )}
 
                 {/* ── Memories Section ── */}
-                <div className="pt-4 border-t border-border/50">
+                <div className="pt-3 border-t border-border/50">
                   {readOnly ? (
                     // Read-only memory preview
                     memories.length > 0 ? (
                       <div>
-                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
+                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                           Memories
                         </h4>
                         <div className="grid grid-cols-3 gap-2">
@@ -399,10 +446,10 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                         )}
                       </div>
                     ) : (
-                      <div className="text-center py-6">
-                        <Camera className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
+                      <div className="text-center py-4">
+                        <Camera className="w-6 h-6 text-muted-foreground/20 mx-auto mb-1.5" />
                         <p className="text-sm text-muted-foreground/50 italic">
-                          No memories captured yet
+                          No memories uploaded yet
                         </p>
                       </div>
                     )

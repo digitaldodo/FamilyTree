@@ -65,15 +65,20 @@ export function getErrorMessage(error: unknown): string {
 }
 
 /** Format a generation level to a descriptive label */
-export function generationLabel(generation: number): string {
-  const labels: Record<number, string> = {
-    0: 'Grandparents',
+export function generationLabel(generation: number, totalGenerations?: number): string {
+  // Dynamic labeling based on position in the family hierarchy
+  if (totalGenerations !== undefined && totalGenerations > 0) {
+    if (generation === 0) return 'Elders';
+    if (generation === totalGenerations - 1 && totalGenerations > 2) return 'Youngest';
+  }
+
+  const descriptors: Record<number, string> = {
+    0: 'Elders',
     1: 'Parents',
-    2: 'Current Generation',
-    3: 'Children',
-    4: 'Grandchildren',
+    2: 'Children',
+    3: 'Grandchildren',
   };
-  return labels[generation] ?? `Generation ${generation}`;
+  return descriptors[generation] ?? `Generation ${generation + 1}`;
 }
 
 /** Slugify a string for URL-safe usage */

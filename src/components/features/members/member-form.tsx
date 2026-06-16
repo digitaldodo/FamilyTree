@@ -113,12 +113,12 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium mb-1 block">First Name</label>
-          <Input {...register('firstName')} placeholder="Arthur" className={errors.firstName ? 'border-destructive' : ''} />
+          <Input {...register('firstName')} placeholder="First name" className={errors.firstName ? 'border-destructive' : ''} />
           {errors.firstName && <span className="text-xs text-destructive">{errors.firstName.message}</span>}
         </div>
         <div>
           <label className="text-sm font-medium mb-1 block">Last Name</label>
-          <Input {...register('lastName')} placeholder="Pendragon" className={errors.lastName ? 'border-destructive' : ''} />
+          <Input {...register('lastName')} placeholder="Last name" className={errors.lastName ? 'border-destructive' : ''} />
           {errors.lastName && <span className="text-xs text-destructive">{errors.lastName.message}</span>}
         </div>
       </div>

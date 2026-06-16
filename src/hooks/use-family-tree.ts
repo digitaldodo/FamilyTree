@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Node, Edge, MarkerType } from '@xyflow/react';
 import { useMembers } from './use-members';
 import { MemberWithRelations } from '@/types/member';
+import { calculateGenerations } from '@/utils/generation';
 
 const LEVEL_HEIGHT = 150;
 const NODE_WIDTH = 250;
@@ -15,16 +16,23 @@ export function useFamilyTree(treeId: string = 'default') {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
     
-    // Group members by generation for auto-layout
+    // Calculate dynamic generations via BFS
+    const generationMap = calculateGenerations(members);
+
+    // Group members by calculated generation for auto-layout
     const gens = new Map<number, MemberWithRelations[]>();
     members.forEach(m => {
-      const g = m.generation || 1;
+      const g = generationMap.get(m.id) ?? 0;
       if (!gens.has(g)) gens.set(g, []);
       gens.get(g)?.push(m);
     });
 
+    // Sort generation keys for consistent ordering
+    const sortedGens = Array.from(gens.keys()).sort((a, b) => a - b);
+
     // Create Nodes
-    gens.forEach((genMembers, genIndex) => {
+    sortedGens.forEach((genIndex) => {
+      const genMembers = gens.get(genIndex) || [];
       genMembers.forEach((member, i) => {
         // Simple horizontal layout calculation
         const xOffset = (i - genMembers.length / 2) * NODE_WIDTH * 1.5;
@@ -36,7 +44,8 @@ export function useFamilyTree(treeId: string = 'default') {
           position: { x: xOffset, y: yOffset },
           data: {
             member,
-            label: `${member.firstName} ${member.lastName}`
+            label: `${member.firstName} ${member.lastName}`,
+            calculatedGeneration: genIndex,
           }
         });
 
