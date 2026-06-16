@@ -1,32 +1,75 @@
-// Member Service
-// Handles all member-related API calls
-// TODO: Implement actual API calls
+// Member Service (Client-Side)
+// HTTP client for member CRUD operations
 
-import { Member, CreateMemberInput, UpdateMemberInput } from '@/types/member';
-import { ApiResponse, ApiListResponse } from '@/types/api';
+import type {
+  Member,
+  CreateMemberInput,
+  UpdateMemberInput,
+  MemberWithRelations,
+} from '@/types/member';
+import type { ApiResponse, ApiListResponse } from '@/types/api';
+import { API_ROUTES } from '@/utils/constants';
 
-const API_BASE = '/api/members';
-
-export async function getMembers(): Promise<ApiListResponse<Member>> {
-  // TODO: Implement fetch call
-  return { data: [], total: 0, page: 1, limit: 10 };
+/** Fetch all members with optional pagination */
+export async function getMembers(
+  page = 1,
+  limit = 10,
+): Promise<ApiListResponse<Member>> {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  const res = await fetch(`${API_ROUTES.MEMBERS}?${params}`);
+  if (!res.ok) throw new Error('Failed to fetch members');
+  return res.json();
 }
 
-export async function getMemberById(id: string): Promise<ApiResponse<Member | null>> {
-  // TODO: Implement fetch call
-  return { data: null };
+/** Fetch a single member by ID with relationships */
+export async function getMemberById(
+  id: string,
+): Promise<ApiResponse<MemberWithRelations>> {
+  const res = await fetch(`${API_ROUTES.MEMBERS}/${id}`);
+  if (!res.ok) throw new Error('Failed to fetch member');
+  return res.json();
 }
 
-export async function createMember(input: CreateMemberInput): Promise<ApiResponse<Member>> {
-  // TODO: Implement fetch call
-  return { data: {} as Member };
+/** Create a new member */
+export async function createMember(
+  input: CreateMemberInput,
+): Promise<ApiResponse<Member>> {
+  const res = await fetch(API_ROUTES.MEMBERS, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || 'Failed to create member');
+  }
+  return res.json();
 }
 
-export async function updateMember(id: string, input: UpdateMemberInput): Promise<ApiResponse<Member>> {
-  // TODO: Implement fetch call
-  return { data: {} as Member };
+/** Update an existing member */
+export async function updateMember(
+  id: string,
+  input: UpdateMemberInput,
+): Promise<ApiResponse<Member>> {
+  const res = await fetch(`${API_ROUTES.MEMBERS}/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || 'Failed to update member');
+  }
+  return res.json();
 }
 
+/** Delete a member */
 export async function deleteMember(id: string): Promise<void> {
-  // TODO: Implement fetch call
+  const res = await fetch(`${API_ROUTES.MEMBERS}/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Failed to delete member');
 }

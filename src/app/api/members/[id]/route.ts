@@ -1,25 +1,101 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import prisma from '@/lib/prisma';
+import { successResponse, errorResponse } from '@/lib/utils';
+import { updateMemberSchema } from '@/validations/member.schema';
+import { getErrorMessage } from '@/utils/helpers';
 
 type Params = { params: Promise<{ id: string }> };
 
-// GET /api/members/:id — Get a single member
-export async function GET(request: NextRequest, { params }: Params) {
-  const { id } = await params;
-  // TODO: Fetch member by ID from database
-  return NextResponse.json({ data: null, id, message: 'TODO: Implement' });
+/** GET /api/members/:id — Get a single member with relationships */
+export async function GET(_request: NextRequest, { params }: Params) {
+  try {
+    const { id } = await params;
+
+    const member = await prisma.member.findUnique({
+      where: { id },
+      include: {
+        relationsFrom: {
+          include: { to: true },
+        },
+        relationsTo: {
+          include: { from: true },
+        },
+        media: true,
+      },
+    });
+
+    if (!member) {
+      return errorResponse('NOT_FOUND', 'Member not found', 404);
+    }
+
+    return successResponse(member, 'Member retrieved successfully');
+  } catch (error) {
+    return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
+  }
 }
 
-// PUT /api/members/:id — Update a member
+/** PUT /api/members/:id — Update a member */
 export async function PUT(request: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const body = await request.json();
-  // TODO: Validate and update member in database
-  return NextResponse.json({ data: body, id, message: 'TODO: Implement' });
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    const validation = updateMemberSchema.safeParse(body);
+
+    if (!validation.success) {
+      const messages = validation.error.errors
+        .map((e) => e.message)
+        .join(', ');
+      return errorResponse('VALIDATION_ERROR', messages, 400);
+    }
+
+    // Verify member exists
+    const existing = await prisma.member.findUnique({ where: { id } });
+    if (!existing) {
+      return errorResponse('NOT_FOUND', 'Member not found', 404);
+    }
+
+    const { birthDate, deathDate, ...rest } = validation.data;
+
+    const member = await prisma.member.update({
+      where: { id },
+      data: {
+        ...rest,
+        ...(birthDate !== undefined && {
+          birthDate: birthDate ? new Date(birthDate) : null,
+        }),
+        ...(deathDate !== undefined && {
+          deathDate: deathDate ? new Date(deathDate) : null,
+        }),
+      },
+    });
+
+    return successResponse(member, 'Member updated successfully');
+  } catch (error) {
+    return errorResponse('UPDATE_ERROR', getErrorMessage(error), 500);
+  }
 }
 
-// DELETE /api/members/:id — Delete a member
-export async function DELETE(request: NextRequest, { params }: Params) {
-  const { id } = await params;
-  // TODO: Delete member from database
-  return NextResponse.json({ id, message: 'TODO: Implement' });
+/** DELETE /api/members/:id — Delete a member and its relationships */
+export async function DELETE(_request: NextRequest, { params }: Params) {
+  try {
+    const { id } = await params;
+
+    const existing = await prisma.member.findUnique({ where: { id } });
+    if (!existing) {
+      return errorResponse('NOT_FOUND', 'Member not found', 404);
+    }
+
+    // Transactional delete: relationships → media → member
+    await prisma.$transaction([
+      prisma.relationship.deleteMany({
+        where: { OR: [{ fromId: id }, { toId: id }] },
+      }),
+      prisma.media.deleteMany({ where: { memberId: id } }),
+      prisma.member.delete({ where: { id } }),
+    ]);
+
+    return successResponse({ id }, 'Member deleted successfully');
+  } catch (error) {
+    return errorResponse('DELETE_ERROR', getErrorMessage(error), 500);
+  }
 }

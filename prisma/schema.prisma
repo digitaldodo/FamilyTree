@@ -1,5 +1,5 @@
 // Prisma Schema — FamilyTree SaaS
-// TODO: Run `npx prisma migrate dev` after configuring DATABASE_URL
+// Production-ready database schema with full relationship support
 
 generator client {
   provider = "prisma-client-js"
@@ -7,62 +7,11 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
-// TODO: Implement User model
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  avatar    String?
-  role      Role     @default(USER)
-  trees     Tree[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-// TODO: Implement Tree model
-model Tree {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  owner       User     @relation(fields: [ownerId], references: [id])
-  ownerId     String
-  members     Member[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-// TODO: Implement Member model
-model Member {
-  id            String         @id @default(cuid())
-  firstName     String
-  lastName      String
-  birthDate     DateTime?
-  deathDate     DateTime?
-  gender        Gender?
-  bio           String?
-  avatar        String?
-  tree          Tree           @relation(fields: [treeId], references: [id])
-  treeId        String
-  relationsFrom Relationship[] @relation("from")
-  relationsTo   Relationship[] @relation("to")
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-}
-
-// TODO: Implement Relationship model
-model Relationship {
-  id     String           @id @default(cuid())
-  type   RelationshipType
-  from   Member           @relation("from", fields: [fromId], references: [id])
-  fromId String
-  to     Member           @relation("to", fields: [toId], references: [id])
-  toId   String
-
-  @@unique([fromId, toId, type])
-}
+// ─────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────
 
 enum Role {
   USER
@@ -79,4 +28,107 @@ enum RelationshipType {
   PARENT
   SPOUSE
   SIBLING
+}
+
+enum ActivityType {
+  CREATE
+  UPDATE
+  DELETE
+  VIEW
+}
+
+// ─────────────────────────────────────────────
+// Models
+// ─────────────────────────────────────────────
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String?
+  avatar       String?
+  role         Role          @default(USER)
+  trees        Tree[]
+  activityLogs ActivityLog[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Tree {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isPublic    Boolean  @default(false)
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId     String
+  members     Member[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ownerId])
+}
+
+model Member {
+  id            String         @id @default(cuid())
+  firstName     String
+  lastName      String
+  middleName    String?
+  birthDate     DateTime?
+  deathDate     DateTime?
+  gender        Gender?
+  bio           String?
+  avatar        String?
+  phone         String?
+  email         String?
+  address       String?
+  occupation    String?
+  generation    Int            @default(0)
+  tree          Tree           @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId        String
+  relationsFrom Relationship[] @relation("from")
+  relationsTo   Relationship[] @relation("to")
+  media         Media[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([treeId])
+  @@index([treeId, lastName])
+}
+
+model Relationship {
+  id        String           @id @default(cuid())
+  type      RelationshipType
+  from      Member           @relation("from", fields: [fromId], references: [id], onDelete: Cascade)
+  fromId    String
+  to        Member           @relation("to", fields: [toId], references: [id], onDelete: Cascade)
+  toId      String
+  createdAt DateTime         @default(now())
+
+  @@unique([fromId, toId, type])
+  @@index([fromId])
+  @@index([toId])
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  url       String
+  caption   String?
+  type      String   @default("image")
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  memberId  String
+  createdAt DateTime @default(now())
+
+  @@index([memberId])
+}
+
+model ActivityLog {
+  id         String       @id @default(cuid())
+  type       ActivityType
+  entityType String
+  entityId   String
+  metadata   Json?
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  createdAt  DateTime     @default(now())
+
+  @@index([userId, createdAt])
 }
