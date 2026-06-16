@@ -5,9 +5,9 @@ import { useAppStore } from '@/store/use-app-store';
 
 export function MemberFilter() {
   return (
-    <div className="flex gap-2 items-center">
+    <div className="flex flex-col md:flex-row gap-2 items-center w-full md:w-auto">
       <Select defaultValue="all">
-        <SelectTrigger className="w-[160px]">
+        <SelectTrigger className="w-full md:w-[160px]">
           <SelectValue placeholder="Filter by generation" />
         </SelectTrigger>
         <SelectContent>
@@ -18,7 +18,7 @@ export function MemberFilter() {
         </SelectContent>
       </Select>
       <Select defaultValue="name">
-        <SelectTrigger className="w-[140px]">
+        <SelectTrigger className="w-full md:w-[140px]">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>

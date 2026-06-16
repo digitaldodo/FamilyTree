@@ -59,23 +59,24 @@ export function Modal({ isOpen, onClose, children, title, className }: ModalProp
             aria-hidden="true"
           />
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+            className="fixed inset-0 z-50 flex flex-col items-center justify-end md:justify-center p-0 md:p-4 pointer-events-none"
             role="dialog"
             aria-modal="true"
             aria-label={title || 'Modal dialog'}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className={cn(
-                'pointer-events-auto relative w-full max-w-lg rounded-2xl bg-background p-6 shadow-xl border border-border glass',
+                'pointer-events-auto relative w-full max-w-lg rounded-t-3xl md:rounded-2xl bg-background p-6 shadow-xl border border-border glass mt-auto md:mt-0 flex flex-col',
                 className
               )}
             >
+              <div className="md:hidden w-12 h-1.5 bg-muted-foreground/20 rounded-full mx-auto mb-4 shrink-0" />
               {title && (
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4 shrink-0">
                   <h2 className="text-xl font-semibold">{title}</h2>
                   <button
                     onClick={onClose}

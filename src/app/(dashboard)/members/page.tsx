@@ -53,22 +53,35 @@ export default function MembersPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 h-full flex flex-col pb-6">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Family Members</h1>
           <p className="text-muted-foreground mt-1">Your family tree, organized by generation.</p>
         </div>
         {hasEditAccess && (
-          <Button className="shrink-0" onClick={() => handleAddMember()}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Member
-          </Button>
+          <>
+            <Button className="hidden md:flex shrink-0" onClick={() => handleAddMember()}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Member
+            </Button>
+            {/* Mobile FAB */}
+            <Button 
+              className="md:hidden fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg z-30 p-0 flex items-center justify-center bg-primary text-primary-foreground" 
+              onClick={() => handleAddMember()}
+            >
+              <Plus className="w-6 h-6" />
+            </Button>
+          </>
         )}
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <MemberSearch />
-        <MemberFilter />
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 w-full">
+        <div className="w-full md:w-auto flex-1">
+          <MemberSearch />
+        </div>
+        <div className="w-full md:w-auto">
+          <MemberFilter />
+        </div>
       </div>
 
       {isLoading ? (
@@ -144,8 +157,8 @@ export default function MembersPage() {
                 </div>
               </div>
 
-              {/* Generation Members — Horizontal scrolling row */}
-              <div className="flex gap-4 overflow-x-auto pb-4 px-1 -mx-1 scrollbar-thin min-h-[140px]">
+              {/* Generation Members */}
+              <div className="grid grid-cols-1 gap-4 sm:flex sm:overflow-x-auto sm:pb-4 px-1 -mx-1 sm:scrollbar-thin min-h-[140px]">
                 {genMembers.length === 0 ? (
                   <div className="w-full h-[120px] rounded-xl border border-dashed border-border bg-muted/20 flex flex-col items-center justify-center text-muted-foreground">
                     <p className="text-sm mb-2">No members in this generation</p>
@@ -158,7 +171,7 @@ export default function MembersPage() {
                   </div>
                 ) : (
                   genMembers.map((member) => (
-                    <div key={member.id} className="shrink-0">
+                    <div key={member.id} className="sm:shrink-0 w-full sm:w-auto">
                       <MemberCard member={member} calculatedGeneration={genNumber} />
                     </div>
                   ))

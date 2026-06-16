@@ -32,7 +32,7 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
 
   return (
     <Card
-      className={`cursor-pointer transition-all duration-200 group overflow-hidden hover:shadow-md border-border/60 hover:scale-[1.02] w-full max-w-[220px]`}
+      className={`cursor-pointer transition-all duration-200 group overflow-hidden hover:shadow-md border-border/60 hover:scale-[1.02] w-full max-w-none sm:max-w-[220px]`}
       onClick={handleClick}
     >
       <CardContent className="p-0">

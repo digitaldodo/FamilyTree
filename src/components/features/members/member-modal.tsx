@@ -199,7 +199,7 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
         </div>
 
         {/* ── Scrollable Content ── */}
-        <div className="px-5 py-4 max-h-[55vh] sm:max-h-[60vh] overflow-y-auto space-y-4 modal-scroll">
+        <div className="px-5 py-4 max-h-[70vh] sm:max-h-[60vh] overflow-y-auto space-y-4 modal-scroll">
           {isEditingMember ? (
             <div>
               <MemberForm
