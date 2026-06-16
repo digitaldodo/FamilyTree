@@ -2,7 +2,8 @@
 // Production-ready database schema with full relationship support
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {

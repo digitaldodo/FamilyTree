@@ -4,6 +4,8 @@ import { CloudinaryService } from '@/services/cloudinary.service';
 // import { getServerSession } from 'next-auth';
 // import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
+export const runtime = 'nodejs';
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();

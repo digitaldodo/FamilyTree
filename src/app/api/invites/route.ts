@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import crypto from "crypto";
 
+export const runtime = 'nodejs';
+
 export async function POST(req: Request) {
   try {
     const session = await auth();

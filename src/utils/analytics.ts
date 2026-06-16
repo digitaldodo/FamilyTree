@@ -1,4 +1,4 @@
-import { Member, Relationship } from '@prisma/client';
+import type { Member, Relationship } from '../generated/prisma/client';
 
 export function calculateTreeMetrics(members: Member[], relationships: Relationship[]) {
   const totalMembers = members.length;

@@ -5,7 +5,8 @@
  * Run with: npx tsx prisma/seed.ts
  */
 
-import { PrismaClient, Gender, RelationshipType, Role } from '@prisma/client';
+import { PrismaClient } from '../src/generated/prisma/client';
+import { Gender, RelationshipType, Role } from '../src/generated/prisma/enums';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 import 'dotenv/config';
