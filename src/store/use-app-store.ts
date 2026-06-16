@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { MemberWithRelations } from '@/types/member';
 import { TreeSummary, TreePermission } from '@/types/tree';
 
@@ -37,10 +38,12 @@ interface AppState {
   deleteMember: (id: string) => void;
 }
 
-export const useAppStore = create<AppState>((set) => ({
-  sidebarOpen: true,
-  setSidebarOpen: (open) => set({ sidebarOpen: open }),
-  toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
+      sidebarOpen: true,
+      setSidebarOpen: (open) => set({ sidebarOpen: open }),
+      toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   
   selectedMemberId: null,
   setSelectedMemberId: (id) => set({ selectedMemberId: id }),
@@ -77,4 +80,10 @@ export const useAppStore = create<AppState>((set) => ({
   deleteMember: (id) => set((state) => ({
     members: state.members.filter((m) => m.id !== id)
   })),
-}));
+    }),
+    {
+      name: 'family-tree-storage',
+      partialize: (state) => ({ activeTreeId: state.activeTreeId }), // only persist activeTreeId
+    }
+  )
+);
