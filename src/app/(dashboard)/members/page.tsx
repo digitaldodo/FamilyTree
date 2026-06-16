@@ -1,13 +1,25 @@
 'use client';
 
 import { useMembers } from '@/hooks/use-members';
+import { useSearchMembers } from '@/hooks/use-search-members';
 import { MemberCard } from '@/components/features/members/member-card';
 import { MemberModal } from '@/components/features/members/member-modal';
-import { Loader2, Plus, Search } from 'lucide-react';
+import { MemberSearch } from '@/components/features/members/member-search';
+import { MemberFilter } from '@/components/features/members/member-filter';
+import { Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAppStore } from '@/store/use-app-store';
 
 export default function MembersPage() {
-  const { members, isLoading } = useMembers();
+  const { isLoading } = useMembers();
+  const { filteredMembers } = useSearchMembers();
+  const { setIsMemberModalOpen, setSelectedMemberId, setIsEditingMember } = useAppStore();
+
+  const handleAddMember = () => {
+    setSelectedMemberId(null);
+    setIsEditingMember(true);
+    setIsMemberModalOpen(true);
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 h-full flex flex-col pb-6">
@@ -16,19 +28,15 @@ export default function MembersPage() {
           <h1 className="text-3xl font-bold tracking-tight">Family Members</h1>
           <p className="text-muted-foreground mt-1">Manage and view all members of your family tree.</p>
         </div>
-        <Button className="shrink-0">
+        <Button className="shrink-0" onClick={handleAddMember}>
           <Plus className="w-4 h-4 mr-2" />
           Add Member
         </Button>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <input
-          type="text"
-          placeholder="Filter members by name..."
-          className="w-full max-w-sm h-10 pl-9 pr-4 rounded-lg bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
-        />
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <MemberSearch />
+        <MemberFilter />
       </div>
 
       {isLoading ? (
@@ -37,9 +45,14 @@ export default function MembersPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {members.map((member) => (
+          {filteredMembers.map((member) => (
             <MemberCard key={member.id} member={member} />
           ))}
+          {filteredMembers.length === 0 && (
+            <div className="col-span-full py-12 text-center text-muted-foreground">
+              No members found matching your criteria.
+            </div>
+          )}
         </div>
       )}
 

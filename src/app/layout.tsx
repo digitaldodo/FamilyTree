@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/providers/theme-provider';
+import { Toaster } from '@/components/ui/toast';
 
 // TODO: Import QueryProvider
 
@@ -31,6 +32,7 @@ export default function RootLayout({
         >
           {/* TODO: Wrap with QueryProvider */}
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

@@ -1,17 +1,18 @@
-import { TreeMember } from '@/hooks/use-family-tree';
+import { MemberWithRelations } from '@/types/member';
 import { Card, CardContent } from '@/components/ui/card';
 import { User2, Calendar, MapPin } from 'lucide-react';
 import { useAppStore } from '@/store/use-app-store';
 
 interface MemberCardProps {
-  member: TreeMember;
+  member: MemberWithRelations;
 }
 
 export function MemberCard({ member }: MemberCardProps) {
-  const { setSelectedMemberId, setIsMemberModalOpen } = useAppStore();
+  const { setSelectedMemberId, setIsMemberModalOpen, setIsEditingMember } = useAppStore();
 
   const handleClick = () => {
     setSelectedMemberId(member.id);
+    setIsEditingMember(false);
     setIsMemberModalOpen(true);
   };
 
