@@ -60,7 +60,6 @@ NEXTAUTH_URL="http://localhost:3000"
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your-cloud-name"
 CLOUDINARY_API_KEY="your-api-key"
 CLOUDINARY_API_SECRET="your-api-secret"
-NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET="your-preset"
 ```
 
 ### Database Initialization

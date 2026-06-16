@@ -76,7 +76,7 @@ export function UploadMemoryModal({ isOpen, onClose, onUpload }: UploadMemoryMod
           </div>
 
           <CldUploadWidget
-            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "family_tree"}
+            uploadPreset="family_tree"
             onSuccess={handleUploadSuccess}
             options={{
               maxFiles: 1,

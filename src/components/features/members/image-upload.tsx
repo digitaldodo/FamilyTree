@@ -47,7 +47,7 @@ export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', i
       </div>
 
       <CldUploadWidget
-        uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "family_tree"}
+        uploadPreset="family_tree"
         onSuccess={handleUploadSuccess}
         options={{
           maxFiles: 1,
