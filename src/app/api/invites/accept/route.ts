@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
       'Invite accepted successfully',
     );
   } catch (error) {
+    console.error('[INVITE_ACCEPT_ERROR]', error);
     return errorResponse('ACCEPT_ERROR', getErrorMessage(error), 500);
   }
 }

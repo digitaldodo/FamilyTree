@@ -45,6 +45,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
 
     return successResponse(member, 'Member retrieved successfully');
   } catch (error) {
+    console.error('[MEMBER_GET_ERROR]', error);
     return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
   }
 }
@@ -97,6 +98,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
     return successResponse(member, 'Member updated successfully');
   } catch (error) {
+    console.error('[MEMBER_UPDATE_ERROR]', error);
     return errorResponse('UPDATE_ERROR', getErrorMessage(error), 500);
   }
 }
@@ -132,6 +134,7 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
 
     return successResponse({ id }, 'Member deleted successfully');
   } catch (error) {
+    console.error('[MEMBER_DELETE_ERROR]', error);
     return errorResponse('DELETE_ERROR', getErrorMessage(error), 500);
   }
 }

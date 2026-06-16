@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
 
     return successResponse(invite, 'Invite created successfully', 201);
   } catch (error) {
+    console.error('[INVITE_CREATE_ERROR]', error);
     return errorResponse('CREATE_ERROR', getErrorMessage(error), 500);
   }
 }

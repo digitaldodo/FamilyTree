@@ -13,7 +13,7 @@ export function TreeInitializer() {
 
     async function loadTrees() {
       try {
-        const res = await fetch('/api/trees');
+        const res = await fetch('/api/trees', { cache: 'no-store' });
         const data = await res.json();
         
         if (data.success && data.data) {

@@ -68,6 +68,7 @@ export async function GET(request: NextRequest) {
 
     return listResponse(allTrees, total, page, limit);
   } catch (error) {
+    console.error('[TREE_FETCH_ERROR]', error);
     return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
   }
 }
@@ -110,6 +111,7 @@ export async function POST(request: NextRequest) {
 
     return successResponse(tree, 'Tree created successfully', 201);
   } catch (error) {
+    console.error('[TREE_CREATE_ERROR]', error);
     return errorResponse('CREATE_ERROR', getErrorMessage(error), 500);
   }
 }

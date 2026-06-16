@@ -37,6 +37,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
 
     return listResponse(collaborators, collaborators.length, 1, collaborators.length);
   } catch (error) {
+    console.error('[COLLAB_FETCH_ERROR]', error);
     return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
   }
 }
@@ -78,6 +79,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
 
     return successResponse({ userId, treeId: id }, 'Collaborator removed successfully');
   } catch (error) {
+    console.error('[COLLAB_DELETE_ERROR]', error);
     return errorResponse('DELETE_ERROR', getErrorMessage(error), 500);
   }
 }

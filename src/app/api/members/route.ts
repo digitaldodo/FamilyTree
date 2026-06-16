@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
 
     return listResponse(members, total, page, limit);
   } catch (error) {
+    console.error('[MEMBER_FETCH_ERROR]', error);
     return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
   }
 }
@@ -86,17 +87,48 @@ export async function POST(request: NextRequest) {
       return errorResponse('NOT_FOUND', 'Tree not found', 404);
     }
 
-    const member = await prisma.member.create({
-      data: {
-        ...rest,
-        birthDate: birthDate ? new Date(birthDate) : null,
-        deathDate: deathDate ? new Date(deathDate) : null,
-        tree: { connect: { id: treeId } },
-      },
+    const relations = body.relations || [];
+
+    const member = await prisma.$transaction(async (tx) => {
+      const newMember = await tx.member.create({
+        data: {
+          ...rest,
+          birthDate: birthDate ? new Date(birthDate) : null,
+          deathDate: deathDate ? new Date(deathDate) : null,
+          tree: { connect: { id: treeId } },
+        },
+      });
+
+      if (relations && Array.isArray(relations) && relations.length > 0) {
+        for (const rel of relations) {
+          if (!rel.id || !rel.type) continue;
+          
+          if (rel.type === 'PARENT') {
+            await tx.relationship.create({
+              data: {
+                type: 'PARENT',
+                fromId: rel.id,
+                toId: newMember.id,
+              },
+            });
+          } else {
+            await tx.relationship.create({
+              data: {
+                type: rel.type,
+                fromId: newMember.id,
+                toId: rel.id,
+              },
+            });
+          }
+        }
+      }
+
+      return newMember;
     });
 
     return successResponse(member, 'Member created successfully', 201);
   } catch (error) {
+    console.error('[MEMBER_CREATE_ERROR]', error);
     return errorResponse('CREATE_ERROR', getErrorMessage(error), 500);
   }
 }
