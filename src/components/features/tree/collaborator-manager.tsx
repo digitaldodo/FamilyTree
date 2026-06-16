@@ -1,0 +1,147 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { X, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import type { TreeCollaborator, TreeRole } from '@/types/tree';
+
+interface CollaboratorManagerProps {
+  treeId: string;
+}
+
+const roleBadgeStyles: Record<TreeRole, string> = {
+  ADMIN: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  EDITOR: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  VIEWER: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+};
+
+export function CollaboratorManager({ treeId }: CollaboratorManagerProps) {
+  const [collaborators, setCollaborators] = useState<TreeCollaborator[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+
+  const fetchCollaborators = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/trees/${treeId}/collaborators`);
+      if (!res.ok) throw new Error('Failed to fetch collaborators');
+      const data = await res.json();
+      setCollaborators(data);
+    } catch {
+      toast.error('Failed to load collaborators');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [treeId]);
+
+  useEffect(() => {
+    fetchCollaborators();
+  }, [fetchCollaborators]);
+
+  const handleRemove = async (userId: string, userName: string | null) => {
+    setRemovingId(userId);
+    try {
+      const res = await fetch(`/api/trees/${treeId}/collaborators`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+      if (!res.ok) throw new Error('Failed to remove collaborator');
+      setCollaborators((prev) => prev.filter((c) => c.userId !== userId));
+      toast.success(`${userName || 'Collaborator'} has been removed`);
+    } catch {
+      toast.error('Failed to remove collaborator');
+    } finally {
+      setRemovingId(null);
+    }
+  };
+
+  const getInitials = (name: string | null, email: string) => {
+    if (name) {
+      return name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return email[0].toUpperCase();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/30">
+            <Skeleton className="w-10 h-10 rounded-full" />
+            <div className="flex-1 space-y-1.5">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-48" />
+            </div>
+            <Skeleton className="h-6 w-16 rounded-md" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (collaborators.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 text-center">
+        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
+          <Users className="w-6 h-6 text-muted-foreground" />
+        </div>
+        <p className="text-muted-foreground text-sm max-w-xs">
+          No collaborators yet. Invite family members to collaborate.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {collaborators.map((collab) => {
+        const initials = getInitials(collab.user.name, collab.user.email);
+        const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(initials)}`;
+        const roleStyle = roleBadgeStyles[collab.role];
+
+        return (
+          <div
+            key={collab.id}
+            className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors group"
+          >
+            <div className="w-10 h-10 rounded-full overflow-hidden bg-muted shrink-0">
+              <img src={avatarUrl} alt={collab.user.name || collab.user.email} className="w-full h-full object-cover" />
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium truncate">
+                {collab.user.name || 'Unnamed User'}
+              </div>
+              <div className="text-xs text-muted-foreground truncate">
+                {collab.user.email}
+              </div>
+            </div>
+
+            <span className={cn('inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium shrink-0', roleStyle)}>
+              {collab.role.charAt(0) + collab.role.slice(1).toLowerCase()}
+            </span>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+              onClick={() => handleRemove(collab.userId, collab.user.name)}
+              disabled={removingId === collab.userId}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      })}
+    </div>
+  );
+}

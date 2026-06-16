@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   Tree: 'Tree',
+  TreeCollaborator: 'TreeCollaborator',
   Member: 'Member',
   Relationship: 'Relationship',
   Media: 'Media',
@@ -107,6 +108,17 @@ export const TreeScalarFieldEnum = {
 } as const
 
 export type TreeScalarFieldEnum = (typeof TreeScalarFieldEnum)[keyof typeof TreeScalarFieldEnum]
+
+
+export const TreeCollaboratorScalarFieldEnum = {
+  id: 'id',
+  role: 'role',
+  userId: 'userId',
+  treeId: 'treeId',
+  createdAt: 'createdAt'
+} as const
+
+export type TreeCollaboratorScalarFieldEnum = (typeof TreeCollaboratorScalarFieldEnum)[keyof typeof TreeCollaboratorScalarFieldEnum]
 
 
 export const MemberScalarFieldEnum = {
@@ -226,6 +238,7 @@ export const InviteScalarFieldEnum = {
   role: 'role',
   token: 'token',
   treeId: 'treeId',
+  invitedBy: 'invitedBy',
   createdAt: 'createdAt',
   expiresAt: 'expiresAt'
 } as const

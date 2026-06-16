@@ -386,6 +386,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   User: 'User',
   Tree: 'Tree',
+  TreeCollaborator: 'TreeCollaborator',
   Member: 'Member',
   Relationship: 'Relationship',
   Media: 'Media',
@@ -410,7 +411,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "tree" | "member" | "relationship" | "media" | "activityLog" | "account" | "session" | "verificationToken" | "notification" | "invite"
+    modelProps: "user" | "tree" | "treeCollaborator" | "member" | "relationship" | "media" | "activityLog" | "account" | "session" | "verificationToken" | "notification" | "invite"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -559,6 +560,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TreeCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TreeCountAggregateOutputType> | number
+        }
+      }
+    }
+    TreeCollaborator: {
+      payload: Prisma.$TreeCollaboratorPayload<ExtArgs>
+      fields: Prisma.TreeCollaboratorFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TreeCollaboratorFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeCollaboratorPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TreeCollaboratorFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeCollaboratorPayload>
+        }
+        findFirst: {
+          args: Prisma.TreeCollaboratorFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeCollaboratorPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TreeCollaboratorFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeCollaboratorPayload>
+        }
+        findMany: {
+          args: Prisma.TreeCollaboratorFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeCollaboratorPayload>[]
+        }
+        create: {
+          args: Prisma.TreeCollaboratorCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeCollaboratorPayload>
+        }
+        createMany: {
+          args: Prisma.TreeCollaboratorCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TreeCollaboratorCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeCollaboratorPayload>[]
+        }
+        delete: {
+          args: Prisma.TreeCollaboratorDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeCollaboratorPayload>
+        }
+        update: {
+          args: Prisma.TreeCollaboratorUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeCollaboratorPayload>
+        }
+        deleteMany: {
+          args: Prisma.TreeCollaboratorDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TreeCollaboratorUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TreeCollaboratorUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeCollaboratorPayload>[]
+        }
+        upsert: {
+          args: Prisma.TreeCollaboratorUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeCollaboratorPayload>
+        }
+        aggregate: {
+          args: Prisma.TreeCollaboratorAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTreeCollaborator>
+        }
+        groupBy: {
+          args: Prisma.TreeCollaboratorGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TreeCollaboratorGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TreeCollaboratorCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TreeCollaboratorCountAggregateOutputType> | number
         }
       }
     }
@@ -1296,6 +1371,17 @@ export const TreeScalarFieldEnum = {
 export type TreeScalarFieldEnum = (typeof TreeScalarFieldEnum)[keyof typeof TreeScalarFieldEnum]
 
 
+export const TreeCollaboratorScalarFieldEnum = {
+  id: 'id',
+  role: 'role',
+  userId: 'userId',
+  treeId: 'treeId',
+  createdAt: 'createdAt'
+} as const
+
+export type TreeCollaboratorScalarFieldEnum = (typeof TreeCollaboratorScalarFieldEnum)[keyof typeof TreeCollaboratorScalarFieldEnum]
+
+
 export const MemberScalarFieldEnum = {
   id: 'id',
   firstName: 'firstName',
@@ -1413,6 +1499,7 @@ export const InviteScalarFieldEnum = {
   role: 'role',
   token: 'token',
   treeId: 'treeId',
+  invitedBy: 'invitedBy',
   createdAt: 'createdAt',
   expiresAt: 'expiresAt'
 } as const
@@ -1517,6 +1604,20 @@ export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
+ * Reference to a field of type 'TreeRole'
+ */
+export type EnumTreeRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TreeRole'>
+    
+
+
+/**
+ * Reference to a field of type 'TreeRole[]'
+ */
+export type ListEnumTreeRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TreeRole[]'>
+    
+
+
+/**
  * Reference to a field of type 'Gender'
  */
 export type EnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender'>
@@ -1583,20 +1684,6 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-    
-
-
-/**
- * Reference to a field of type 'TreeRole'
- */
-export type EnumTreeRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TreeRole'>
-    
-
-
-/**
- * Reference to a field of type 'TreeRole[]'
- */
-export type ListEnumTreeRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TreeRole[]'>
     
 
 
@@ -1725,6 +1812,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   tree?: Prisma.TreeOmit
+  treeCollaborator?: Prisma.TreeCollaboratorOmit
   member?: Prisma.MemberOmit
   relationship?: Prisma.RelationshipOmit
   media?: Prisma.MediaOmit

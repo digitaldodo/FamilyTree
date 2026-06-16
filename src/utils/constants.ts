@@ -1,7 +1,7 @@
 // Application Constants
 
 /** Application metadata */
-export const APP_NAME = 'FamilyTree';
+export const APP_NAME = 'Family Legacy';
 export const APP_DESCRIPTION =
   'Build, visualize, and share your family history';
 export const APP_VERSION = '0.1.0';
@@ -12,7 +12,8 @@ export const ROUTES = {
   DASHBOARD: '/dashboard',
   TREE: '/tree',
   MEMBERS: '/members',
-  ADMIN: '/admin',
+  SETTINGS: '/settings',
+  PROFILE: '/profile',
   LOGIN: '/login',
   REGISTER: '/register',
 } as const;
@@ -22,6 +23,8 @@ export const API_ROUTES = {
   HEALTH: '/api/health',
   MEMBERS: '/api/members',
   TREES: '/api/trees',
+  INVITES: '/api/invites',
+  INVITE_ACCEPT: '/api/invites/accept',
 } as const;
 
 /** Pagination defaults */

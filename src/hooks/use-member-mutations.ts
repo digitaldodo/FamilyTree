@@ -1,42 +1,39 @@
 import { useState } from 'react';
 import { useAppStore } from '@/store/use-app-store';
-import { createMember, updateMember, deleteMember } from '@/services/member.service';
-import { CreateMemberInput, UpdateMemberInput } from '@/types/member';
+import { CreateMemberInput, UpdateMemberInput, MemberWithRelations } from '@/types/member';
 import { toast } from 'sonner';
 
 export function useMemberMutations() {
-  const { addMember, updateMember: updateStoreMember, deleteMember: deleteStoreMember, setIsMemberModalOpen } = useAppStore();
+  const { addMember, updateMember: updateStoreMember, deleteMember: deleteStoreMember, setIsMemberModalOpen, activeTreeId } = useAppStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCreate = async (input: CreateMemberInput) => {
     setIsSubmitting(true);
     try {
-      // Mocking API call for Phase 4 since we are transitioning to full CRUD
-      // In a real scenario, we'd wait for `const result = await createMember(input);`
-      // For optimistic UI and ensuring it works without full backend setup:
-      const newId = `m-${Date.now()}`;
-      const newMember = {
-        id: newId,
-        ...input,
-        middleName: input.middleName || null,
-        birthDate: input.birthDate || null,
-        deathDate: input.deathDate || null,
-        gender: input.gender || null,
-        bio: input.bio || null,
-        avatar: input.avatar || null,
-        phone: input.phone || null,
-        email: input.email || null,
-        address: input.address || null,
-        occupation: input.occupation || null,
-        generation: input.generation || 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        relationsFrom: [],
-        relationsTo: []
+      const res = await fetch('/api/members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...input,
+          treeId: input.treeId || activeTreeId,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Failed to create member');
+      }
+
+      // Optimistic UI: add to store with empty relations (API returns the created member)
+      const newMember: MemberWithRelations = {
+        ...data.data,
+        relationsFrom: data.data.relationsFrom || [],
+        relationsTo: data.data.relationsTo || [],
       };
 
       addMember(newMember);
-      toast.success('Member created successfully');
+      toast.success('Member added successfully');
       setIsMemberModalOpen(false);
       return newMember;
     } catch (error: any) {
@@ -49,17 +46,29 @@ export function useMemberMutations() {
   const handleUpdate = async (id: string, input: UpdateMemberInput) => {
     setIsSubmitting(true);
     try {
+      const res = await fetch(`/api/members/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Failed to update member');
+      }
+
+      // Update store with full member data
       const { members } = useAppStore.getState();
       const existing = members.find(m => m.id === id);
-      if (!existing) throw new Error('Member not found');
-
-      const updated = {
+      const updated: MemberWithRelations = {
         ...existing,
-        ...input,
-        updatedAt: new Date().toISOString()
+        ...data.data,
+        relationsFrom: existing?.relationsFrom || [],
+        relationsTo: existing?.relationsTo || [],
       };
 
-      updateStoreMember(id, updated as any);
+      updateStoreMember(id, updated);
       toast.success('Member updated successfully');
       setIsMemberModalOpen(false);
       return updated;
@@ -72,8 +81,18 @@ export function useMemberMutations() {
 
   const handleDelete = async (id: string) => {
     try {
+      const res = await fetch(`/api/members/${id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Failed to delete member');
+      }
+
       deleteStoreMember(id);
-      toast.success('Member deleted successfully');
+      toast.success('Member removed successfully');
       setIsMemberModalOpen(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to delete member');

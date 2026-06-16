@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { MemberWithRelations } from '@/types/member';
+import { TreeSummary, TreePermission } from '@/types/tree';
 
 interface AppState {
   sidebarOpen: boolean;
@@ -17,6 +18,14 @@ interface AppState {
   // Read-only mode for public viewing
   isReadOnly: boolean;
   setIsReadOnly: (readOnly: boolean) => void;
+  
+  // Multi-tree support
+  activeTreeId: string | null;
+  setActiveTreeId: (id: string | null) => void;
+  userTrees: TreeSummary[];
+  setUserTrees: (trees: TreeSummary[]) => void;
+  userRole: TreePermission;
+  setUserRole: (role: TreePermission) => void;
   
   // Shared global member state for optimistic UI across list and tree
   members: MemberWithRelations[];
@@ -45,6 +54,14 @@ export const useAppStore = create<AppState>((set) => ({
 
   isReadOnly: false,
   setIsReadOnly: (readOnly) => set({ isReadOnly: readOnly }),
+
+  // Multi-tree support
+  activeTreeId: null,
+  setActiveTreeId: (id) => set({ activeTreeId: id, members: [] }),
+  userTrees: [],
+  setUserTrees: (trees) => set({ userTrees: trees }),
+  userRole: null,
+  setUserRole: (role) => set({ userRole: role }),
 
   members: [],
   setMembers: (members) => set({ members }),

@@ -1,24 +1,26 @@
 'use client';
 
+import { useAppStore } from '@/store/use-app-store';
 import { useMembers } from '@/hooks/use-members';
 import { useSearchMembers } from '@/hooks/use-search-members';
 import { MemberCard } from '@/components/features/members/member-card';
 import { MemberModal } from '@/components/features/members/member-modal';
 import { MemberSearch } from '@/components/features/members/member-search';
 import { MemberFilter } from '@/components/features/members/member-filter';
-import { Plus, UsersRound } from 'lucide-react';
+import { Plus, UsersRound, TreePine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageLoader } from '@/components/ui/page-loader';
-import { useAppStore } from '@/store/use-app-store';
 import { groupMembersByGeneration } from '@/utils/generation';
 import { generationLabel } from '@/utils/helpers';
 import { useMemo } from 'react';
-
 export default function MembersPage() {
+  const { activeTreeId, userRole } = useAppStore();
   const { isLoading } = useMembers();
   const { filteredMembers } = useSearchMembers();
   const { setIsMemberModalOpen, setSelectedMemberId, setIsEditingMember } = useAppStore();
+
+  const hasEditAccess = userRole === 'OWNER' || userRole === 'ADMIN' || userRole === 'EDITOR';
 
   const handleAddMember = () => {
     setSelectedMemberId(null);
@@ -34,6 +36,18 @@ export default function MembersPage() {
 
   const totalGenerations = generationGroups.length;
 
+  if (!activeTreeId) {
+    return (
+      <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh]">
+        <EmptyState
+          icon={TreePine}
+          title="Select a Family Tree"
+          description="Choose a family tree from the sidebar to view its members."
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto space-y-6 h-full flex flex-col pb-6">
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -41,10 +55,12 @@ export default function MembersPage() {
           <h1 className="text-3xl font-bold tracking-tight">Family Members</h1>
           <p className="text-muted-foreground mt-1">Your family tree, organized by generation.</p>
         </div>
-        <Button className="shrink-0" onClick={handleAddMember}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Member
-        </Button>
+        {hasEditAccess && (
+          <Button className="shrink-0" onClick={handleAddMember}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Member
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">

@@ -126,7 +126,7 @@ export function InviteModal({ isOpen, onClose, treeId, treeName }: InviteModalPr
             <div className="flex gap-2">
               <div className="flex-1 px-3 py-2 bg-muted rounded-md border border-border text-sm text-muted-foreground truncate flex items-center gap-2 cursor-not-allowed">
                 <LinkIcon className="w-4 h-4 flex-shrink-0" />
-                <span>familytree.com/invite/uuid...</span>
+                <span className="text-xs">Click 'Copy Link' to generate</span>
               </div>
               <Button 
                 type="button" 

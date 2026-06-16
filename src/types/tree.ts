@@ -3,6 +3,12 @@
 
 import type { Member, MemberWithRelations } from './member';
 
+/** Tree role for collaborators */
+export type TreeRole = 'VIEWER' | 'EDITOR' | 'ADMIN';
+
+/** Permission level (includes OWNER which is derived, not stored) */
+export type TreePermission = 'OWNER' | 'ADMIN' | 'EDITOR' | 'VIEWER' | null;
+
 /** Represents a family tree */
 export interface Tree {
   id: string;
@@ -18,9 +24,31 @@ export interface Tree {
 /** A tree with full member and relationship data loaded */
 export interface TreeWithMembers extends Tree {
   members: MemberWithRelations[];
+  owner?: { id: string; name: string | null; email: string };
   _count?: {
     members: number;
   };
+}
+
+/** Summary of a tree for the tree selector */
+export interface TreeSummary {
+  id: string;
+  name: string;
+  description?: string | null;
+  isPublic: boolean;
+  role: TreePermission;
+  _count: { members: number };
+  createdAt: string;
+}
+
+/** Tree collaborator record */
+export interface TreeCollaborator {
+  id: string;
+  role: TreeRole;
+  userId: string;
+  treeId: string;
+  user: { id: string; name: string | null; email: string };
+  createdAt: string;
 }
 
 /** Input for creating a new tree */
@@ -28,7 +56,6 @@ export interface CreateTreeInput {
   name: string;
   description?: string;
   isPublic?: boolean;
-  ownerId: string;
 }
 
 /** Input for updating a tree */

@@ -65,7 +65,7 @@ export default async function ProfilePage() {
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground">Total Activity</span>
-                <span className="font-medium">124 Actions</span> {/* Placeholder for actual count */}
+                <span className="font-medium">{user.activityLogs.length} Actions</span>
               </div>
             </div>
           </div>

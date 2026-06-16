@@ -23,18 +23,8 @@ interface NotificationState {
 }
 
 export const useNotificationStore = create<NotificationState>((set) => ({
-  notifications: [
-    // Mock initial notification for demonstration
-    {
-      id: '1',
-      title: 'Welcome to FamilyTree',
-      message: 'Start building your legacy by adding your first family member.',
-      type: 'INFO',
-      read: false,
-      createdAt: new Date(),
-    }
-  ],
-  unreadCount: 1,
+  notifications: [],
+  unreadCount: 0,
   
   addNotification: (notif) => set((state) => {
     const newNotif: Notification = {

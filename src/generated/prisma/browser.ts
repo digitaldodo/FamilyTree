@@ -28,6 +28,11 @@ export type User = Prisma.UserModel
  */
 export type Tree = Prisma.TreeModel
 /**
+ * Model TreeCollaborator
+ * 
+ */
+export type TreeCollaborator = Prisma.TreeCollaboratorModel
+/**
  * Model Member
  * 
  */

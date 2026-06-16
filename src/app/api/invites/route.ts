@@ -1,63 +1,64 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { auth } from "@/auth";
-import crypto from "crypto";
+import { NextRequest } from 'next/server';
+import { auth } from '@/auth';
+import prisma from '@/lib/prisma';
+import { getTreePermission, canInvite } from '@/lib/permissions';
+import { successResponse, errorResponse } from '@/lib/utils';
+import { getErrorMessage } from '@/utils/helpers';
+import crypto from 'crypto';
 
+export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-export async function POST(req: Request) {
+/** POST /api/invites — Create a new invite for a tree */
+export async function POST(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return errorResponse('UNAUTHORIZED', 'Authentication required', 401);
     }
 
-    const { treeId, role, email } = await req.json();
+    const { treeId, role, email } = await request.json();
 
     if (!treeId) {
-      return new NextResponse("Missing treeId", { status: 400 });
+      return errorResponse('VALIDATION_ERROR', 'treeId is required', 400);
     }
 
-    // Verify tree ownership
-    const tree = await prisma.tree.findUnique({
-      where: { id: treeId }
-    });
-
-    if (!tree || tree.ownerId !== session.user.id) {
-      return new NextResponse("Not authorized to invite to this tree", { status: 403 });
+    // Check invite permission using centralized permission system
+    const permission = await getTreePermission(session.user.id, treeId);
+    if (!canInvite(permission)) {
+      return errorResponse('FORBIDDEN', 'Not authorized to invite to this tree', 403);
     }
 
-    // Check if a persistent invite for this role/tree already exists
-    // If it's a general shareable link (no email)
+    // Check if a persistent invite for this role/tree already exists (general shareable link)
     if (!email) {
       const existingInvite = await prisma.invite.findFirst({
         where: {
           treeId,
-          role,
-          email: null
-        }
+          role: role || 'VIEWER',
+          email: null,
+        },
       });
 
       if (existingInvite) {
-        return NextResponse.json(existingInvite);
+        return successResponse(existingInvite, 'Existing invite found');
       }
     }
 
-    const token = crypto.randomBytes(32).toString("hex");
+    const token = crypto.randomBytes(32).toString('hex');
 
     const invite = await prisma.invite.create({
       data: {
         treeId,
-        role: role || "VIEWER",
+        role: role || 'VIEWER',
         token,
         email: email || null,
+        invitedBy: session.user.id,
         expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365 * 10), // 10 years expiration for persistent links
-      }
+      },
     });
 
-    return NextResponse.json(invite);
+    return successResponse(invite, 'Invite created successfully', 201);
   } catch (error) {
-    console.error("[INVITE_POST]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    return errorResponse('CREATE_ERROR', getErrorMessage(error), 500);
   }
 }

@@ -7,8 +7,8 @@ import { calculateGenerations } from '@/utils/generation';
 const LEVEL_HEIGHT = 150;
 const NODE_WIDTH = 250;
 
-export function useFamilyTree(treeId: string = 'default') {
-  const { members, isLoading } = useMembers();
+export function useFamilyTree(treeId?: string) {
+  const { members, isLoading, error: fetchError } = useMembers(treeId);
   const [error, setError] = useState<string | null>(null);
 
   // Transform members into React Flow Nodes and Edges
@@ -16,6 +16,10 @@ export function useFamilyTree(treeId: string = 'default') {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
     
+    if (members.length === 0) {
+      return { initialNodes: nodes, initialEdges: edges };
+    }
+
     // Calculate dynamic generations via BFS
     const generationMap = calculateGenerations(members);
 
@@ -88,6 +92,6 @@ export function useFamilyTree(treeId: string = 'default') {
     initialNodes,
     initialEdges,
     isLoading,
-    error,
+    error: fetchError || error,
   };
 }

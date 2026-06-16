@@ -23,10 +23,10 @@ export default function HomePage() {
           animate={{ opacity: 1, x: 0 }}
           className="flex gap-4"
         >
-          <Link href="/dashboard">
+          <Link href="/login">
             <Button variant="ghost">Log in</Button>
           </Link>
-          <Link href="/dashboard">
+          <Link href="/register">
             <Button>Get Started</Button>
           </Link>
         </motion.div>
@@ -65,14 +65,9 @@ export default function HomePage() {
             transition={{ delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Link href="/dashboard" className="w-full sm:w-auto">
+            <Link href="/register" className="w-full sm:w-auto">
               <Button size="lg" className="w-full text-base h-14 px-8">
                 Start Building Free
-              </Button>
-            </Link>
-            <Link href="#preview" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="w-full text-base h-14 px-8">
-                View Live Demo
               </Button>
             </Link>
           </motion.div>

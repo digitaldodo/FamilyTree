@@ -22,6 +22,7 @@ import { MemoryGallery, Memory } from '../memories/memory-gallery';
 import { generationLabel } from '@/utils/helpers';
 import { calculateGenerations, getMaxGeneration } from '@/utils/generation';
 import * as React from 'react';
+import { toast } from 'sonner';
 
 interface MemberModalProps {
   readOnly?: boolean;
@@ -459,10 +460,10 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                       memories={memories}
                       compact
                       onUpload={async (url, publicId, caption, eventTag) => {
-                        console.log('Upload memory', url, publicId);
+                        toast.info('Memory uploading is coming soon!', { icon: '📸' });
                       }}
                       onDelete={async (id) => {
-                        console.log('Delete memory', id);
+                        toast.info('Memory deletion is coming soon!', { icon: '🗑️' });
                       }}
                     />
                   )}

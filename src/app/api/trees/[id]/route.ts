@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server';
+import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
+import { getTreePermission, canEdit, canDelete, canView } from '@/lib/permissions';
 import { successResponse, errorResponse } from '@/lib/utils';
 import { updateTreeSchema } from '@/validations/tree.schema';
 import { getErrorMessage } from '@/utils/helpers';
@@ -12,7 +14,17 @@ export const runtime = 'nodejs';
 /** GET /api/trees/:id — Get a tree with all members and relationships */
 export async function GET(_request: NextRequest, { params }: Params) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return errorResponse('UNAUTHORIZED', 'Authentication required', 401);
+    }
+
     const { id } = await params;
+
+    const permission = await getTreePermission(session.user.id, id);
+    if (!canView(permission)) {
+      return errorResponse('FORBIDDEN', 'You do not have access to this tree', 403);
+    }
 
     const tree = await prisma.tree.findUnique({
       where: { id },
@@ -55,7 +67,18 @@ export async function GET(_request: NextRequest, { params }: Params) {
 /** PUT /api/trees/:id — Update a tree */
 export async function PUT(request: NextRequest, { params }: Params) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return errorResponse('UNAUTHORIZED', 'Authentication required', 401);
+    }
+
     const { id } = await params;
+
+    const permission = await getTreePermission(session.user.id, id);
+    if (!canEdit(permission)) {
+      return errorResponse('FORBIDDEN', 'You do not have permission to edit this tree', 403);
+    }
+
     const body = await request.json();
     const validation = updateTreeSchema.safeParse(body);
 
@@ -88,7 +111,17 @@ export async function PUT(request: NextRequest, { params }: Params) {
 /** DELETE /api/trees/:id — Delete a tree and all its members */
 export async function DELETE(_request: NextRequest, { params }: Params) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return errorResponse('UNAUTHORIZED', 'Authentication required', 401);
+    }
+
     const { id } = await params;
+
+    const permission = await getTreePermission(session.user.id, id);
+    if (!canDelete(permission)) {
+      return errorResponse('FORBIDDEN', 'Only the tree owner can delete this tree', 403);
+    }
 
     const existing = await prisma.tree.findUnique({ where: { id } });
     if (!existing) {
@@ -108,6 +141,8 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
       }),
       prisma.media.deleteMany({ where: { memberId: { in: ids } } }),
       prisma.member.deleteMany({ where: { treeId: id } }),
+      prisma.treeCollaborator.deleteMany({ where: { treeId: id } }),
+      prisma.invite.deleteMany({ where: { treeId: id } }),
       prisma.tree.delete({ where: { id } }),
     ]);
 
