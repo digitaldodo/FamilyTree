@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useAppStore } from '@/store/use-app-store';
 import { getValidRelationshipCandidates } from '@/utils/relationship';
-import { Select } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { MemberWithRelations } from '@/types/member';
 import { Plus, X } from 'lucide-react';
@@ -64,11 +64,15 @@ export function RelationshipSelector({
 
       {/* Add New */}
       <div className="flex gap-2 items-center">
-        <Select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
-          <option value="" disabled>Select {label.toLowerCase()}...</option>
-          {validCandidates.map(c => (
-            <option key={c.id} value={c.id}>{c.firstName} {c.lastName}</option>
-          ))}
+        <Select value={selectedId} onValueChange={setSelectedId}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={`Select ${label.toLowerCase()}...`} />
+          </SelectTrigger>
+          <SelectContent>
+            {validCandidates.map(c => (
+              <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
+            ))}
+          </SelectContent>
         </Select>
         <Button type="button" variant="outline" size="icon" onClick={handleAdd} disabled={!selectedId}>
           <Plus className="h-4 w-4" />

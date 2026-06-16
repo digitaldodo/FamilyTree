@@ -110,12 +110,12 @@
 
 /* React Flow Custom Overrides */
 .react-flow__controls-button {
-  @apply bg-background border-border fill-foreground hover:bg-muted transition-colors !important;
+  @apply bg-background border-border fill-foreground hover:bg-muted transition-colors;
 }
 .react-flow__minimap {
-  @apply bg-background border border-border rounded-xl shadow-sm !important;
+  @apply bg-background border border-border rounded-xl shadow-sm;
 }
 .react-flow__minimap-mask {
-  @apply fill-primary/10 !important;
+  @apply fill-primary/10;
 }
 

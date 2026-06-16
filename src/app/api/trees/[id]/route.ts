@@ -6,6 +6,9 @@ import { getErrorMessage } from '@/utils/helpers';
 
 type Params = { params: Promise<{ id: string }> };
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /** GET /api/trees/:id — Get a tree with all members and relationships */
 export async function GET(_request: NextRequest, { params }: Params) {
   try {
@@ -57,7 +60,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const validation = updateTreeSchema.safeParse(body);
 
     if (!validation.success) {
-      const messages = validation.error.errors
+      const messages = validation.error.issues
         .map((e) => e.message)
         .join(', ');
       return errorResponse('VALIDATION_ERROR', messages, 400);
@@ -97,7 +100,7 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
       where: { treeId: id },
       select: { id: true },
     });
-    const ids = memberIds.map((m) => m.id);
+    const ids = memberIds.map((m: any) => m.id);
 
     await prisma.$transaction([
       prisma.relationship.deleteMany({

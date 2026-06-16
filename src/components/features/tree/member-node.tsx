@@ -1,13 +1,13 @@
 import { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { TreeMember } from '@/hooks/use-family-tree';
+import { MemberWithRelations } from '@/types/member';
 import { useAppStore } from '@/store/use-app-store';
 import { cn } from '@/lib/utils';
 import { User2 } from 'lucide-react';
 
 interface MemberNodeProps {
   data: {
-    member: TreeMember;
+    member: MemberWithRelations;
     label: string;
   };
 }

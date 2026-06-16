@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { updateMemberSchema } from '@/validations/member.schema';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { getMemberDefaultValues } from '@/utils/form-helpers';
 import { MemberWithRelations, UpdateMemberInput, CreateMemberInput } from '@/types/member';
@@ -115,10 +115,15 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
           name="gender"
           control={control}
           render={({ field }) => (
-            <Select {...field} className={errors.gender ? 'border-destructive' : ''}>
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
-              <option value="OTHER">Other</option>
+            <Select value={field.value} onValueChange={field.onChange} disabled={field.disabled}>
+              <SelectTrigger className={errors.gender ? 'border-destructive' : ''}>
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="MALE">Male</SelectItem>
+                <SelectItem value="FEMALE">Female</SelectItem>
+                <SelectItem value="OTHER">Other</SelectItem>
+              </SelectContent>
             </Select>
           )}
         />

@@ -6,6 +6,9 @@ import { getErrorMessage } from '@/utils/helpers';
 
 type Params = { params: Promise<{ id: string }> };
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /** GET /api/members/:id — Get a single member with relationships */
 export async function GET(_request: NextRequest, { params }: Params) {
   try {
@@ -42,7 +45,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const validation = updateMemberSchema.safeParse(body);
 
     if (!validation.success) {
-      const messages = validation.error.errors
+      const messages = validation.error.issues
         .map((e) => e.message)
         .join(', ');
       return errorResponse('VALIDATION_ERROR', messages, 400);

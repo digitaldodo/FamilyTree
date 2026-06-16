@@ -9,6 +9,9 @@ import {
 import { createMemberSchema } from '@/validations/member.schema';
 import { getErrorMessage } from '@/utils/helpers';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /** GET /api/members — List all members with pagination */
 export async function GET(request: NextRequest) {
   try {
@@ -42,7 +45,7 @@ export async function POST(request: NextRequest) {
     const validation = createMemberSchema.safeParse(body);
 
     if (!validation.success) {
-      const messages = validation.error.errors
+      const messages = validation.error.issues
         .map((e) => e.message)
         .join(', ');
       return errorResponse('VALIDATION_ERROR', messages, 400);

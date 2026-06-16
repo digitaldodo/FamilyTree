@@ -3,6 +3,9 @@ import prisma from '@/lib/prisma';
 import { APP_VERSION } from '@/utils/constants';
 import type { HealthResponse } from '@/types/api';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /** GET /api/health — Health check with database connectivity */
 export async function GET() {
   let dbStatus: 'connected' | 'disconnected' = 'disconnected';

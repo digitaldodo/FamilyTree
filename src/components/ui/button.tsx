@@ -1,9 +1,11 @@
+"use client";
+
 import * as React from 'react';
 import { motion, HTMLMotionProps } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 interface ButtonProps extends HTMLMotionProps<'button'> {
-  variant?: 'default' | 'outline' | 'ghost' | 'icon';
+  variant?: 'default' | 'outline' | 'ghost' | 'icon' | 'destructive';
   size?: 'sm' | 'md' | 'lg' | 'icon';
 }
 
@@ -11,6 +13,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'default', size = 'md', ...props }, ref) => {
     const variants = {
       default: 'bg-primary text-primary-foreground hover:opacity-90 shadow-sm',
+      destructive: 'bg-red-500 text-white hover:bg-red-600 shadow-sm',
       outline:
         'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
       ghost: 'hover:bg-accent hover:text-accent-foreground',
