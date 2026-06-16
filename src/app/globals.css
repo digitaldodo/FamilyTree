@@ -1,0 +1,44 @@
+@import 'tailwindcss';
+
+/* TODO: Custom variant for dark mode */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* TODO: Design tokens — define in Phase 2 */
+/* @theme { } */
+
+/* ===== Base Styles ===== */
+
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  /* TODO: Define full color palette */
+  --color-primary: #6366f1;
+  --color-primary-dark: #4f46e5;
+  --color-background: #fafafa;
+  --color-foreground: #09090b;
+  --color-muted: #f4f4f5;
+  --color-border: #e4e4e7;
+}
+
+.dark {
+  --color-background: #09090b;
+  --color-foreground: #fafafa;
+  --color-muted: #18181b;
+  --color-border: #27272a;
+}
+
+/* TODO: Add glassmorphism utilities */
+/* TODO: Add animation keyframes */
+/* TODO: Add custom scrollbar styles */
+/* TODO: Add typography scale */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* TODO: Add component-level base styles */
