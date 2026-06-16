@@ -1,6 +1,17 @@
-# 🌳 FamilyTree — Interactive Family Tree Builder
+# 🌳 Family Legacy — Interactive Family Tree Builder
 
-A production-ready SaaS web application for creating, visualizing, and managing family trees.
+> "Preserve generations beautifully."
+
+A production-ready SaaS web application for creating, visualizing, and managing family trees. With a focus on emotional user experience, it features an interactive UI, rich member profiles, a memories timeline, multi-format exports (PDF/PNG/JSON), and PWA offline support.
+
+## Key Features
+
+- **Interactive Trees**: Drag, drop, pan, and zoom through generations seamlessly.
+- **Rich Profiles**: Store bios, photos, and life events for every member.
+- **Memories Timeline**: Chronological view of family milestones.
+- **Export & Backup**: Save your tree visually as PDF/PNG, or export raw data as JSON.
+- **PWA Ready**: Installable on mobile with offline shell caching.
+- **Private & Secure**: Your family data is encrypted and completely under your control.
 
 ## Tech Stack
 
@@ -9,52 +20,14 @@ A production-ready SaaS web application for creating, visualizing, and managing 
 | Framework          | Next.js 15 (App Router)            |
 | Language           | TypeScript                         |
 | Styling            | Tailwind CSS v4                    |
-| Animations         | Motion (Framer Motion)             |
+| Animations         | Framer Motion                      |
 | Tree Visualization | React Flow (@xyflow/react)         |
+| Authentication     | Auth.js (NextAuth)                 |
+| Media Storage      | Cloudinary                         |
 | ORM                | Prisma                             |
 | Database           | PostgreSQL                         |
 | Theme              | next-themes (dark/light mode)      |
-
-## Project Structure
-
-```
-├── prisma/                    # Database schema & seeds
-│   ├── schema.prisma          # Prisma schema (User, Tree, Member, Relationship)
-│   └── seed.ts                # Database seed script
-├── public/                    # Static assets
-├── src/
-│   ├── app/                   # Next.js App Router
-│   │   ├── (dashboard)/       # Dashboard route group
-│   │   │   ├── admin/         # Admin panel
-│   │   │   ├── dashboard/     # Dashboard home
-│   │   │   ├── members/       # Members list
-│   │   │   └── tree/          # Family tree viewer
-│   │   ├── api/               # API routes
-│   │   │   ├── health/        # Health check
-│   │   │   ├── members/       # Members CRUD
-│   │   │   └── trees/         # Trees CRUD
-│   │   ├── globals.css        # Tailwind config + design tokens
-│   │   ├── layout.tsx         # Root layout
-│   │   ├── page.tsx           # Landing page
-│   │   ├── loading.tsx        # Loading state
-│   │   ├── error.tsx          # Error boundary
-│   │   └── not-found.tsx      # 404 page
-│   ├── components/
-│   │   ├── ui/                # Base UI components (Button, Card, Modal)
-│   │   ├── layout/            # Layout components (Navbar, Sidebar)
-│   │   └── features/          # Feature components (FamilyTree, MemberCard)
-│   ├── hooks/                 # Custom React hooks
-│   ├── lib/                   # Core libraries (Prisma client, utils)
-│   ├── providers/             # React context providers
-│   ├── services/              # API service layer
-│   ├── store/                 # Global state management
-│   ├── types/                 # TypeScript type definitions
-│   ├── utils/                 # Utility functions & constants
-│   └── validations/           # Input validation schemas
-├── .env.example               # Environment variable template
-├── .prettierrc                # Prettier configuration
-└── next.config.ts             # Next.js configuration
-```
+| PWA                | next-pwa                           |
 
 ## Getting Started
 
@@ -62,9 +35,10 @@ A production-ready SaaS web application for creating, visualizing, and managing 
 
 - Node.js 18+
 - PostgreSQL database
+- Cloudinary Account
 - npm
 
-### Setup
+### Setup & Installation
 
 ```bash
 # 1. Install dependencies
@@ -72,43 +46,61 @@ npm install
 
 # 2. Configure environment
 cp .env.example .env.local
-# Edit .env.local with your DATABASE_URL
+```
 
-# 3. Generate Prisma client
+### Environment Variables
+
+Update `.env.local` with your configuration:
+
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/familytree"
+NEXTAUTH_SECRET="your-secret-key"
+NEXTAUTH_URL="http://localhost:3000"
+
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="your-cloud-name"
+CLOUDINARY_API_KEY="your-api-key"
+CLOUDINARY_API_SECRET="your-api-secret"
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET="your-preset"
+```
+
+### Database Initialization
+
+```bash
+# Generate Prisma client
 npx prisma generate
 
-# 4. Run database migrations
+# Run database migrations
 npx prisma migrate dev --name init
 
-# 5. (Optional) Seed the database
+# (Optional) Seed the database
 npx prisma db seed
+```
 
-# 6. Start development server
+### Start Development Server
+
+```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-## Scripts
+## Deployment (Vercel)
 
-| Command                | Description                  |
-| ---------------------- | ---------------------------- |
-| `npm run dev`          | Start development server     |
-| `npm run build`        | Build for production         |
-| `npm run start`        | Start production server      |
-| `npm run lint`         | Run ESLint                   |
-| `npx prisma studio`   | Open Prisma database GUI     |
-| `npx prisma generate`  | Regenerate Prisma client     |
-| `npx prisma migrate dev` | Run database migrations   |
+This project is optimized for deployment on Vercel.
+
+1. Push your code to a GitHub repository.
+2. Import the project in Vercel.
+3. Add the required Environment Variables in the Vercel dashboard.
+4. Deploy. Vercel will automatically detect Next.js and apply the `vercel.json` optimizations.
 
 ## Architecture
 
 - **App Router** — File-based routing with layouts, loading states, and error boundaries
 - **Route Groups** — `(dashboard)` group for authenticated pages with shared layout
-- **API Routes** — RESTful endpoints under `/api/` for members and trees
+- **API Routes** — RESTful endpoints under `/api/`
 - **Service Layer** — Centralized API call functions in `services/`
 - **Type Safety** — Shared TypeScript interfaces across frontend and API
-- **Validation Layer** — Schema-based input validation (Zod-ready)
+- **Responsive Design** — Glassmorphism, smooth animations, and mobile safe areas.
 
 ## License
 

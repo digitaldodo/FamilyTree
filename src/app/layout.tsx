@@ -12,8 +12,43 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'FamilyTree — Interactive Family Tree Builder',
-  description: 'Build, visualize, and share your family history with an interactive family tree.',
+  title: 'Family Legacy — Preserve generations beautifully.',
+  description: 'Create beautiful interactive family trees with memories, relationships, and generations connected forever.',
+  applicationName: 'Family Legacy',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Family Legacy',
+  },
+  openGraph: {
+    title: 'Family Legacy',
+    description: 'Preserve generations beautifully with interactive family trees.',
+    url: 'https://familytree-saas.com',
+    siteName: 'Family Legacy',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Family Legacy Preview',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Family Legacy',
+    description: 'Preserve generations beautifully.',
+    images: ['/og-image.jpg'],
+  },
+};
+
+export const viewport = {
+  themeColor: '#ffffff',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({

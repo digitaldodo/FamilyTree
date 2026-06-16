@@ -1,7 +1,7 @@
 'use client';
 
-// Root Error Boundary
-// TODO: Implement styled error UI with retry action
+import { useEffect } from 'react';
+import { ErrorState } from '@/components/ui/error-state';
 
 export default function Error({
   error,
@@ -10,12 +10,17 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    // Log the error to an error reporting service in production
+    console.error('Root error boundary caught:', error);
+  }, [error]);
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-      <h2>Something went wrong!</h2>
-      <p>{error.message}</p>
-      {/* TODO: Style the retry button */}
-      <button onClick={() => reset()}>Try again</button>
-    </div>
+    <ErrorState
+      title="Unexpected Error"
+      message={error.message || "We've encountered an issue loading this page. Our team has been notified."}
+      onRetry={reset}
+      fullScreen
+    />
   );
 }

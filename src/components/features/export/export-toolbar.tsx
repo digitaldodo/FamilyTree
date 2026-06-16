@@ -12,7 +12,9 @@ interface ExportToolbarProps {
   filename?: string;
 }
 
-export function ExportToolbar({ elementId, filename = "family-tree" }: ExportToolbarProps) {
+import { ExportJson } from "./export-json";
+
+export function ExportToolbar({ elementId, treeId, filename = "family-tree" }: ExportToolbarProps & { treeId?: string }) {
   const [isExporting, setIsExporting] = useState<ExportFormat | null>(null);
   const { resolvedTheme } = useTheme();
 
@@ -62,6 +64,13 @@ export function ExportToolbar({ elementId, filename = "family-tree" }: ExportToo
         )}
         Export PDF
       </Button>
+
+      {treeId && (
+        <>
+          <div className="w-px h-4 bg-border mx-1" />
+          <ExportJson treeId={treeId} filename={filename} />
+        </>
+      )}
     </div>
   );
 }
