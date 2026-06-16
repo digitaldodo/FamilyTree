@@ -75,15 +75,27 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
   };
 
   const handleFormSubmit = async (data: MemberFormData) => {
-    // Format dates back to ISO strings or undefined if empty
+    // Zod schema already transforms DD-MM-YYYY to ISO strings
     const formattedData = {
       ...data,
-      birthDate: data.birthDate ? new Date(data.birthDate).toISOString() : undefined,
-      deathDate: data.deathDate ? new Date(data.deathDate).toISOString() : undefined,
+      birthDate: data.birthDate || undefined,
+      deathDate: data.deathDate || undefined,
       treeId: 'default', // Default tree for now
       relations
     };
     await onSubmit(formattedData);
+  };
+
+  const applyDateMask = (val: string) => {
+    if (!val) return val;
+    const cleaned = val.replace(/\D/g, '');
+    const match = cleaned.match(/^(\d{0,2})(\d{0,2})(\d{0,4})$/);
+    if (!match) return val;
+    let formatted = '';
+    if (match[1]) formatted += match[1];
+    if (match[2]) formatted += '-' + match[2];
+    if (match[3]) formatted += '-' + match[3];
+    return formatted;
   };
 
   return (
@@ -147,12 +159,32 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium mb-1 block">Birth Date</label>
-          <Input type="date" {...register('birthDate')} className={errors.birthDate ? 'border-destructive' : ''} />
+          <Input 
+            type="text" 
+            placeholder="dd-mm-yyyy"
+            maxLength={10}
+            {...register('birthDate')} 
+            onChange={(e) => {
+              e.target.value = applyDateMask(e.target.value);
+              register('birthDate').onChange(e);
+            }}
+            className={errors.birthDate ? 'border-destructive' : ''} 
+          />
           {errors.birthDate && <span className="text-xs text-destructive">{errors.birthDate.message}</span>}
         </div>
         <div>
           <label className="text-sm font-medium mb-1 block">Death Date</label>
-          <Input type="date" {...register('deathDate')} className={errors.deathDate ? 'border-destructive' : ''} />
+          <Input 
+            type="text" 
+            placeholder="dd-mm-yyyy"
+            maxLength={10}
+            {...register('deathDate')} 
+            onChange={(e) => {
+              e.target.value = applyDateMask(e.target.value);
+              register('deathDate').onChange(e);
+            }}
+            className={errors.deathDate ? 'border-destructive' : ''} 
+          />
           {errors.deathDate && <span className="text-xs text-destructive">{errors.deathDate.message}</span>}
         </div>
       </div>

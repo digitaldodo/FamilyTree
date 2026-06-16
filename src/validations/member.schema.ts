@@ -9,6 +9,16 @@ const genderEnum = z.enum(['MALE', 'FEMALE', 'OTHER']);
 /** Relationship type enum values */
 const relationshipTypeEnum = z.enum(['PARENT', 'SPOUSE', 'SIBLING']);
 
+/** Date string schema for DD-MM-YYYY format, transforming to ISO */
+const dateStringSchema = z.string().trim().refine((val) => {
+  if (!val) return true;
+  return /^\d{2}-\d{2}-\d{4}$/.test(val);
+}, { message: 'Invalid date format. Use DD-MM-YYYY.' }).transform((val) => {
+  if (!val) return undefined;
+  const [d, m, y] = val.split('-');
+  return new Date(`${y}-${m}-${d}T00:00:00.000Z`).toISOString();
+});
+
 /** Schema for creating a new member */
 export const createMemberSchema = z.object({
   firstName: z
@@ -26,14 +36,8 @@ export const createMemberSchema = z.object({
     .max(100, 'Middle name must be at most 100 characters')
     .trim()
     .optional(),
-  birthDate: z
-    .string()
-    .datetime({ message: 'Birth date must be a valid ISO date' })
-    .optional(),
-  deathDate: z
-    .string()
-    .datetime({ message: 'Death date must be a valid ISO date' })
-    .optional(),
+  birthDate: dateStringSchema.optional(),
+  deathDate: dateStringSchema.optional(),
   gender: genderEnum.optional(),
   bio: z
     .string()
@@ -82,16 +86,8 @@ export const updateMemberSchema = z.object({
     .trim()
     .optional()
     .nullable(),
-  birthDate: z
-    .string()
-    .datetime({ message: 'Birth date must be a valid ISO date' })
-    .optional()
-    .nullable(),
-  deathDate: z
-    .string()
-    .datetime({ message: 'Death date must be a valid ISO date' })
-    .optional()
-    .nullable(),
+  birthDate: dateStringSchema.optional().nullable(),
+  deathDate: dateStringSchema.optional().nullable(),
   gender: genderEnum.optional().nullable(),
   bio: z
     .string()

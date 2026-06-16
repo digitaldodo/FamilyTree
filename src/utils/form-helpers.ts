@@ -3,6 +3,16 @@
 import { MemberWithRelations, CreateMemberInput, UpdateMemberInput } from "@/types/member";
 
 export function getMemberDefaultValues(member?: MemberWithRelations): UpdateMemberInput {
+  const formatDateToDDMMYYYY = (dateVal?: Date | string | null) => {
+    if (!dateVal) return "";
+    const date = new Date(dateVal);
+    if (isNaN(date.getTime())) return "";
+    const d = String(date.getUTCDate()).padStart(2, '0');
+    const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const y = date.getUTCFullYear();
+    return `${d}-${m}-${y}`;
+  };
+
   if (!member) {
     return {
       firstName: "",
@@ -24,8 +34,8 @@ export function getMemberDefaultValues(member?: MemberWithRelations): UpdateMemb
     firstName: member.firstName,
     lastName: member.lastName,
     middleName: member.middleName || "",
-    birthDate: member.birthDate ? new Date(member.birthDate).toISOString().split('T')[0] : "",
-    deathDate: member.deathDate ? new Date(member.deathDate).toISOString().split('T')[0] : "",
+    birthDate: formatDateToDDMMYYYY(member.birthDate),
+    deathDate: formatDateToDDMMYYYY(member.deathDate),
     gender: member.gender || "OTHER",
     bio: member.bio || "",
     avatar: member.avatar || "",
