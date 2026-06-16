@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { ArrowRight, Mail, Lock, User, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { registerUser } from "./action";
@@ -37,7 +38,7 @@ export default function RegisterPage() {
         <p className="text-muted-foreground">Start building your family tree today</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
           <label className="text-sm font-medium" htmlFor="name">Full Name</label>
           <div className="relative">
@@ -49,6 +50,7 @@ export default function RegisterPage() {
               placeholder="John Doe"
               className="pl-9 h-12 bg-background border-border/50"
               required
+              autoComplete="name"
             />
           </div>
         </div>
@@ -64,6 +66,7 @@ export default function RegisterPage() {
               placeholder="name@example.com"
               className="pl-9 h-12 bg-background border-border/50"
               required
+              autoComplete="email"
             />
           </div>
         </div>
@@ -71,15 +74,15 @@ export default function RegisterPage() {
         <div className="space-y-2">
           <label className="text-sm font-medium" htmlFor="password">Password</label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+            <PasswordInput
               id="password"
               name="password"
-              type="password"
               placeholder="••••••••"
               className="pl-9 h-12 bg-background border-border/50"
               required
               minLength={6}
+              autoComplete="new-password"
             />
           </div>
         </div>

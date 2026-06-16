@@ -14,6 +14,10 @@ interface AppState {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   
+  // Read-only mode for public viewing
+  isReadOnly: boolean;
+  setIsReadOnly: (readOnly: boolean) => void;
+  
   // Shared global member state for optimistic UI across list and tree
   members: MemberWithRelations[];
   setMembers: (members: MemberWithRelations[]) => void;
@@ -38,6 +42,9 @@ export const useAppStore = create<AppState>((set) => ({
   
   searchQuery: '',
   setSearchQuery: (query) => set({ searchQuery: query }),
+
+  isReadOnly: false,
+  setIsReadOnly: (readOnly) => set({ isReadOnly: readOnly }),
 
   members: [],
   setMembers: (members) => set({ members }),

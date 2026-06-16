@@ -18,7 +18,7 @@ export function MemberCard({ member }: MemberCardProps) {
 
   return (
     <Card 
-      className="cursor-pointer hover:border-primary/50 transition-colors group overflow-hidden"
+      className="cursor-pointer hover:border-primary/50 transition-all duration-200 group overflow-hidden hover:shadow-md"
       onClick={handleClick}
     >
       <CardContent className="p-0">
@@ -49,11 +49,12 @@ export function MemberCard({ member }: MemberCardProps) {
                   </span>
                 </div>
               )}
-              {/* Note: address would be in real schema, omitted in our mock type for brevity but represented here */}
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 shrink-0" />
-                <span>Camelot, Britain</span> 
-              </div>
+              {member.address && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{member.address}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
