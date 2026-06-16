@@ -26,21 +26,40 @@ export function InviteModal({ isOpen, onClose, treeId, treeName }: InviteModalPr
     if (!email) return;
 
     setIsLoading(true);
-    // Simulate API call to send invite
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsLoading(false);
-    
-    toast.success(`Invite sent to ${email} as ${role.toLowerCase()}`);
-    setEmail("");
+    try {
+      const res = await fetch('/api/invites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ treeId, role, email })
+      });
+      if (!res.ok) throw new Error("Failed to send invite");
+      toast.success(`Invite sent to ${email} as ${role.toLowerCase()}`);
+      setEmail("");
+    } catch (error) {
+      toast.error("Failed to send invite");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const copyLink = async () => {
-    // Simulate generating an invite link
-    const link = `${window.location.origin}/invite/${treeId}?role=${role.toLowerCase()}`;
-    await navigator.clipboard.writeText(link);
-    setIsCopied(true);
-    toast.success("Invite link copied to clipboard!");
-    setTimeout(() => setIsCopied(false), 2000);
+    try {
+      const res = await fetch('/api/invites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ treeId, role }) // No email = persistent link
+      });
+      if (!res.ok) throw new Error("Failed to generate link");
+      const data = await res.json();
+      
+      const link = `${window.location.origin}/invite/${data.token}`;
+      await navigator.clipboard.writeText(link);
+      setIsCopied(true);
+      toast.success("Invite link copied to clipboard!");
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (error) {
+      toast.error("Failed to generate link");
+    }
   };
 
   return (

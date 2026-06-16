@@ -3,14 +3,15 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, GitMerge, Settings, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Users, GitMerge, Settings, Shield, ChevronLeft, ChevronRight, History } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAppStore } from '@/store/use-app-store';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 
 const navItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
+  { name: 'Timeline', href: '/dashboard/timeline', icon: History },
   { name: 'Family Tree', href: '/tree', icon: GitMerge },
   { name: 'Members', href: '/members', icon: Users },
   { name: 'Admin', href: '/admin', icon: Shield },
@@ -49,7 +50,9 @@ export function Sidebar() {
 
       <div className="flex-1 py-6 flex flex-col gap-2 px-3 overflow-y-auto custom-scrollbar">
         {navItems.map((item) => {
-          const isActive = pathname.startsWith(item.href);
+          const isActive = item.exact 
+            ? pathname === item.href 
+            : pathname.startsWith(item.href);
           const Icon = item.icon;
 
           return (
