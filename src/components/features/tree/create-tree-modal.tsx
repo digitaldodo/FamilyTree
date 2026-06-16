@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2, TreePine } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/use-app-store';
+import { createTree } from '@/services/tree.service';
 
 interface CreateTreeModalProps {
   isOpen: boolean;
@@ -28,15 +29,13 @@ export function CreateTreeModal({ isOpen, onClose }: CreateTreeModalProps) {
 
     setIsLoading(true);
     try {
-      const res = await fetch('/api/trees', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), description: description.trim() || undefined, isPublic }),
+      const response = await createTree({
+        name: name.trim(),
+        description: description.trim() || undefined,
+        isPublic,
       });
 
-      if (!res.ok) throw new Error('Failed to create tree');
-
-      const newTree = await res.json();
+      const newTree = response.data;
 
       const treeSummary = {
         id: newTree.id,
@@ -58,8 +57,8 @@ export function CreateTreeModal({ isOpen, onClose }: CreateTreeModalProps) {
       setDescription('');
       setIsPublic(false);
       onClose();
-    } catch {
-      toast.error('Failed to create tree. Please try again.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to create tree. Please try again.');
     } finally {
       setIsLoading(false);
     }
