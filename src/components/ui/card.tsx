@@ -1,25 +1,52 @@
-// Reusable Card Component
-// TODO: Implement glassmorphism styles
-// TODO: Add hover animation with Framer Motion
-// TODO: Add gradient border variant
+import * as React from 'react';
+import { motion, HTMLMotionProps } from 'motion/react';
+import { cn } from '@/lib/utils';
 
-import { ReactNode } from 'react';
+export const Card = React.forwardRef<HTMLDivElement, HTMLMotionProps<'div'>>(
+  ({ className, ...props }, ref) => (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 10 }}
+      className={cn(
+        'rounded-2xl border bg-card text-card-foreground shadow-sm glass-card',
+        className
+      )}
+      {...props}
+    />
+  )
+);
+Card.displayName = 'Card';
 
-interface CardProps {
-  children: ReactNode;
-  className?: string;
-  variant?: 'default' | 'glass' | 'gradient';
-}
+export const CardHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn('flex flex-col space-y-1.5 p-6', className)}
+    {...props}
+  />
+));
+CardHeader.displayName = 'CardHeader';
 
-export default function Card({
-  children,
-  className = '',
-  variant = 'default',
-}: CardProps) {
-  // TODO: Apply glassmorphism and variant styles
-  return (
-    <div className={className}>
-      {children}
-    </div>
-  );
-}
+export const CardTitle = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+  <h3
+    ref={ref}
+    className={cn('font-semibold leading-none tracking-tight', className)}
+    {...props}
+  />
+));
+CardTitle.displayName = 'CardTitle';
+
+export const CardContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
+));
+CardContent.displayName = 'CardContent';

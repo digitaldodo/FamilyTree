@@ -1,29 +1,62 @@
-// Member Card Component
-// TODO: Add avatar, name, dates, role badge
-// TODO: Add hover animation with Framer Motion
-// TODO: Add click to view details
+import { TreeMember } from '@/hooks/use-family-tree';
+import { Card, CardContent } from '@/components/ui/card';
+import { User2, Calendar, MapPin } from 'lucide-react';
+import { useAppStore } from '@/store/use-app-store';
 
 interface MemberCardProps {
-  id: string;
-  firstName: string;
-  lastName: string;
-  avatar?: string;
-  birthDate?: string;
+  member: TreeMember;
 }
 
-export default function MemberCard({
-  id,
-  firstName,
-  lastName,
-  avatar,
-  birthDate,
-}: MemberCardProps) {
-  // TODO: Implement styled card with glassmorphism
+export function MemberCard({ member }: MemberCardProps) {
+  const { setSelectedMemberId, setIsMemberModalOpen } = useAppStore();
+
+  const handleClick = () => {
+    setSelectedMemberId(member.id);
+    setIsMemberModalOpen(true);
+  };
+
   return (
-    <div>
-      {/* TODO: Avatar */}
-      <h3>{firstName} {lastName}</h3>
-      {/* TODO: Birth date, role badge */}
-    </div>
+    <Card 
+      className="cursor-pointer hover:border-primary/50 transition-colors group overflow-hidden"
+      onClick={handleClick}
+    >
+      <CardContent className="p-0">
+        <div className="h-24 bg-gradient-to-r from-primary/10 to-purple-500/10" />
+        <div className="px-6 pb-6 relative">
+          <div className="absolute -top-12 left-6">
+            <div className="w-20 h-20 rounded-2xl bg-card border-4 border-card flex items-center justify-center overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
+              {member.avatar ? (
+                <img src={member.avatar} alt={`${member.firstName} ${member.lastName}`} className="w-full h-full object-cover" />
+              ) : (
+                <User2 className="w-10 h-10 text-muted-foreground" />
+              )}
+            </div>
+          </div>
+          
+          <div className="mt-10">
+            <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
+              {member.firstName} {member.lastName}
+            </h3>
+            
+            <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+              {member.birthDate && (
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 shrink-0" />
+                  <span>
+                    {new Date(member.birthDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                    {member.deathDate ? ` - ${new Date(member.deathDate).getFullYear()}` : ' (Present)'}
+                  </span>
+                </div>
+              )}
+              {/* Note: address would be in real schema, omitted in our mock type for brevity but represented here */}
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 shrink-0" />
+                <span>Camelot, Britain</span> 
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

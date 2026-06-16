@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { ThemeProvider } from '@/providers/theme-provider';
 
-// TODO: Import ThemeProvider
 // TODO: Import QueryProvider
 
 const inter = Inter({
@@ -23,9 +23,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased`}>
-        {/* TODO: Wrap with ThemeProvider */}
-        {/* TODO: Wrap with QueryProvider */}
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {/* TODO: Wrap with QueryProvider */}
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

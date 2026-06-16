@@ -1,18 +1,21 @@
-// Global App Store
-// TODO: Implement with Zustand when added as dependency
-// TODO: Manage sidebar collapse state, user preferences, etc.
+import { create } from 'zustand';
 
-// Placeholder store interface
-export interface AppState {
-  sidebarCollapsed: boolean;
-  // TODO: Add more global state
+interface AppState {
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+  toggleSidebar: () => void;
+  selectedMemberId: string | null;
+  setSelectedMemberId: (id: string | null) => void;
+  isMemberModalOpen: boolean;
+  setIsMemberModalOpen: (open: boolean) => void;
 }
 
-// TODO: Replace with Zustand store
-// export const useAppStore = create<AppState>((set) => ({ ... }));
-
-// Temporary placeholder
-export const useAppStore = () => ({
-  sidebarCollapsed: false,
-  toggleSidebar: () => {},
-});
+export const useAppStore = create<AppState>((set) => ({
+  sidebarOpen: true,
+  setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+  selectedMemberId: null,
+  setSelectedMemberId: (id) => set({ selectedMemberId: id }),
+  isMemberModalOpen: false,
+  setIsMemberModalOpen: (open) => set({ isMemberModalOpen: open }),
+}));
