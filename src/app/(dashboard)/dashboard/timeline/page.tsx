@@ -20,11 +20,14 @@ export default async function TimelinePage() {
       events.push({
         id: `birth-${member.id}`,
         title: `${member.firstName} ${member.lastName} was born`,
-        date: member.birthDate.toISOString(),
-        type: 'birth',
+        date: member.birthDate,
+        type: 'BIRTH',
         description: member.bio ? `Born in generation ${member.generation}. ${member.bio.substring(0, 50)}...` : `Added to generation ${member.generation}`,
-        memberId: member.id,
-        memberImage: member.avatar || undefined
+        members: [{
+          id: member.id,
+          name: `${member.firstName} ${member.lastName}`,
+          avatar: member.avatar
+        }]
       });
     }
 
@@ -32,11 +35,14 @@ export default async function TimelinePage() {
       events.push({
         id: `death-${member.id}`,
         title: `${member.firstName} ${member.lastName} passed away`,
-        date: member.deathDate.toISOString(),
-        type: 'death',
+        date: member.deathDate,
+        type: 'DEATH',
         description: `Generation ${member.generation}`,
-        memberId: member.id,
-        memberImage: member.avatar || undefined
+        members: [{
+          id: member.id,
+          name: `${member.firstName} ${member.lastName}`,
+          avatar: member.avatar
+        }]
       });
     }
   });

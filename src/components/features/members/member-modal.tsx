@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { MemberForm } from './member-form';
 import { MemberDeleteDialog } from './member-delete-dialog';
 import { useMemberMutations } from '@/hooks/use-member-mutations';
-import { MemoryGallery, Memory } from './memories/memory-gallery';
+import { MemoryGallery, Memory } from '../memories/memory-gallery';
 import * as React from 'react';
 
 export function MemberModal() {

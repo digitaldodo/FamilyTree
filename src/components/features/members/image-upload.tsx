@@ -1,7 +1,9 @@
 'use client';
+import * as React from 'react';
 
 import { CldUploadWidget } from 'next-cloudinary';
 import { Camera, X, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ImageUploadProps {
   value?: string | null;

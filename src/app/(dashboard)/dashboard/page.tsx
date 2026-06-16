@@ -30,16 +30,42 @@ export default async function DashboardPage() {
 
   const generationData = Array.from({ length: totalGenerations + 1 }).map((_, i) => ({
     generation: `Gen ${i}`,
-    count: members.filter(m => m.generation === i).length
+    members: members.filter(m => m.generation === i).length
   }));
+
+  const today = new Date();
+  const upcomingBirthdays = members
+    .filter(m => m.birthDate)
+    .map(m => {
+      const birthDate = new Date(m.birthDate!);
+      const nextBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+      if (nextBirthday < today) {
+        nextBirthday.setFullYear(today.getFullYear() + 1);
+      }
+      const diffTime = Math.abs(nextBirthday.getTime() - today.getTime());
+      const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const ageTurning = nextBirthday.getFullYear() - birthDate.getFullYear();
+
+      return {
+        id: m.id,
+        name: `${m.firstName} ${m.lastName}`,
+        date: birthDate,
+        ageTurning,
+        daysRemaining,
+        avatar: m.avatar,
+      };
+    })
+    .sort((a, b) => a.daysRemaining - b.daysRemaining)
+    .slice(0, 5);
 
   // Map activities to standard shape expected by ActivityFeed component
   const mappedActivities = activities.map(act => ({
     id: act.id,
-    type: act.type.toLowerCase(),
-    description: `Action on ${act.entityType}`,
-    user: { name: act.user.name || 'Unknown' },
-    timestamp: act.createdAt.toISOString()
+    type: act.type,
+    entityType: act.entityType,
+    entityName: (act.metadata as any)?.name || (act.metadata as any)?.action || 'Item',
+    userName: act.user.name || 'Unknown',
+    createdAt: act.createdAt
   }));
 
   return (
@@ -67,7 +93,7 @@ export default async function DashboardPage() {
           <ActivityFeed activities={mappedActivities} />
         </div>
         <div className="space-y-6">
-          <BirthdayWidget members={members as any} />
+          <BirthdayWidget birthdays={upcomingBirthdays} />
         </div>
       </div>
     </div>

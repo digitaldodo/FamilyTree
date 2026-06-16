@@ -12,6 +12,7 @@ export interface Member {
   gender?: 'MALE' | 'FEMALE' | 'OTHER' | null;
   bio?: string | null;
   avatar?: string | null;
+  coverImage?: string | null;
   phone?: string | null;
   email?: string | null;
   address?: string | null;
@@ -32,6 +33,7 @@ export interface CreateMemberInput {
   gender?: 'MALE' | 'FEMALE' | 'OTHER';
   bio?: string;
   avatar?: string;
+  coverImage?: string;
   phone?: string;
   email?: string;
   address?: string;
@@ -50,6 +52,7 @@ export interface UpdateMemberInput {
   gender?: 'MALE' | 'FEMALE' | 'OTHER';
   bio?: string;
   avatar?: string;
+  coverImage?: string;
   phone?: string;
   email?: string;
   address?: string;
