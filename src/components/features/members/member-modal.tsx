@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { MemberForm } from './member-form';
 import { MemberDeleteDialog } from './member-delete-dialog';
 import { useMemberMutations } from '@/hooks/use-member-mutations';
+import { MemoryGallery, Memory } from './memories/memory-gallery';
 import * as React from 'react';
 
 export function MemberModal() {
@@ -48,11 +49,15 @@ export function MemberModal() {
       <Modal 
         isOpen={isMemberModalOpen} 
         onClose={handleClose}
-        className="max-w-2xl w-full p-0 overflow-hidden"
+        className="max-w-3xl w-full p-0 overflow-hidden"
       >
-        <div className="h-32 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 relative" />
+        <div className="h-48 bg-gradient-to-r from-primary/20 via-purple-500/20 to-indigo-500/20 relative">
+          {member?.coverImage && (
+            <img src={member.coverImage} alt="Cover" className="w-full h-full object-cover" />
+          )}
+        </div>
         
-        <div className="px-6 pb-6 relative">
+        <div className="px-6 pb-6 relative h-[60vh] overflow-y-auto">
           <div className="flex justify-between items-end mb-4">
             <div className="relative -mt-16 rounded-full border-4 border-background overflow-hidden w-28 h-28 bg-muted flex items-center justify-center">
               {member?.avatar ? (
@@ -152,6 +157,22 @@ export function MemberModal() {
                     )}
                   </div>
                 </div>
+              </div>
+
+              {/* Memory Gallery Section */}
+              <div className="mt-8 pt-8 border-t border-border">
+                <MemoryGallery 
+                  memberId={member.id} 
+                  memories={(member as any).media?.filter((m: any) => m.type === 'image') || []} 
+                  onUpload={async (url, publicId, caption, eventTag) => {
+                    // Logic to save memory to database would go here in Phase 7 or via another mutation
+                    console.log('Upload memory', url, publicId);
+                  }}
+                  onDelete={async (id) => {
+                    // Logic to delete memory would go here
+                    console.log('Delete memory', id);
+                  }}
+                />
               </div>
             </>
           )}

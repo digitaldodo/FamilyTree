@@ -44,6 +44,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
   });
 
   const avatar = watch('avatar');
+  const coverImage = watch('coverImage');
 
   // Relationships state
   const [relations, setRelations] = React.useState<{type: 'PARENT' | 'SPOUSE' | 'SIBLING', id: string}[]>(() => {
@@ -88,11 +89,24 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       
+      {/* Cover Image Upload */}
+      <div className="mb-6">
+        <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">Cover Image</label>
+        <ImageUpload 
+          value={coverImage} 
+          onChange={(val) => setValue('coverImage', val || '')} 
+          folder="family-tree/covers"
+          isCover
+        />
+      </div>
+
       {/* Avatar Upload */}
-      <div className="flex justify-center mb-6">
+      <div className="flex flex-col items-center justify-center mb-6">
+        <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">Profile Photo</label>
         <ImageUpload 
           value={avatar} 
           onChange={(val) => setValue('avatar', val || '')} 
+          folder="family-tree/avatars"
         />
       </div>
 

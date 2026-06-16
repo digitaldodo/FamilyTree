@@ -1,75 +1,79 @@
 'use client';
 
-import * as React from 'react';
-import { useDropzone } from 'react-dropzone';
-import { convertFileToBase64 } from '@/services/upload.service';
-import { Avatar } from '@/components/ui/avatar';
-import { Camera, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { CldUploadWidget } from 'next-cloudinary';
+import { Camera, X, Loader2 } from 'lucide-react';
 
 interface ImageUploadProps {
   value?: string | null;
-  onChange: (base64String: string | null) => void;
+  onChange: (url: string | null) => void;
+  folder?: string;
+  isCover?: boolean;
 }
 
-export function ImageUpload({ value, onChange }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', isCover = false }: ImageUploadProps) {
   const [isProcessing, setIsProcessing] = React.useState(false);
 
-  const onDrop = React.useCallback(async (acceptedFiles: File[]) => {
-    if (acceptedFiles && acceptedFiles.length > 0) {
-      setIsProcessing(true);
-      try {
-        const base64 = await convertFileToBase64(acceptedFiles[0]);
-        onChange(base64);
-      } catch (err) {
-        console.error('Failed to parse image', err);
-      } finally {
-        setIsProcessing(false);
-      }
+  const handleUploadSuccess = (result: any) => {
+    setIsProcessing(true);
+    if (result.info && result.info.secure_url) {
+      onChange(result.info.secure_url);
     }
-  }, [onChange]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { 'image/*': [] },
-    maxFiles: 1
-  });
+    setIsProcessing(false);
+  };
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="relative group">
-        <Avatar src={value} size="xl" className="border-2 border-dashed border-primary" />
-        
-        {value && (
-          <Button
-            variant="destructive"
-            size="icon"
-            className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={() => onChange(null)}
-          >
-            <X className="h-3 w-3" />
-          </Button>
+    <div className={`flex flex-col items-center gap-4 ${isCover ? 'w-full' : ''}`}>
+      <div className="relative group w-full flex justify-center">
+        {value ? (
+          <div className={`relative ${isCover ? 'w-full h-32 md:h-48' : 'w-24 h-24'} rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800`}>
+            <img src={value} alt="Uploaded" className="w-full h-full object-cover" />
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => onChange(null)}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        ) : (
+          <div className={`${isCover ? 'w-full h-32 md:h-48 rounded-xl' : 'w-24 h-24 rounded-full'} border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-900`}>
+            <Camera className="w-8 h-8 text-slate-400" />
+          </div>
         )}
       </div>
 
-      <div
-        {...getRootProps()}
-        className={`w-full p-4 border-2 border-dashed rounded-xl text-center cursor-pointer transition-colors ${
-          isDragActive ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
-        }`}
+      <CldUploadWidget
+        signatureEndpoint="/api/upload"
+        onSuccess={handleUploadSuccess}
+        options={{
+          maxFiles: 1,
+          resourceType: "image",
+          folder: folder,
+          clientAllowedFormats: ["jpg", "jpeg", "png", "webp"],
+        }}
       >
-        <input {...getInputProps()} />
-        <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
-          <Camera className="h-6 w-6" />
-          {isProcessing ? (
-            <p>Processing...</p>
-          ) : isDragActive ? (
-            <p>Drop the image here...</p>
-          ) : (
-            <p>Drag & drop an image, or click to select</p>
-          )}
-        </div>
-      </div>
+        {({ open }) => (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            disabled={isProcessing}
+            onClick={(e) => {
+              e.preventDefault();
+              open();
+            }}
+          >
+            {isProcessing ? (
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+            ) : (
+              <><Camera className="w-4 h-4 mr-2" /> {value ? 'Change Image' : 'Upload Image'}</>
+            )}
+          </Button>
+        )}
+      </CldUploadWidget>
     </div>
   );
 }
+

@@ -41,6 +41,7 @@ export const createMemberSchema = z.object({
     .trim()
     .optional(),
   avatar: z.string().url('Avatar must be a valid URL').optional(),
+  coverImage: z.string().url('Cover Image must be a valid URL').optional(),
   phone: z
     .string()
     .max(20, 'Phone must be at most 20 characters')
@@ -99,6 +100,7 @@ export const updateMemberSchema = z.object({
     .optional()
     .nullable(),
   avatar: z.string().url('Avatar must be a valid URL').optional().nullable(),
+  coverImage: z.string().url('Cover Image must be a valid URL').optional().nullable(),
   phone: z
     .string()
     .max(20, 'Phone must be at most 20 characters')

@@ -6,8 +6,10 @@ import { MemberCard } from '@/components/features/members/member-card';
 import { MemberModal } from '@/components/features/members/member-modal';
 import { MemberSearch } from '@/components/features/members/member-search';
 import { MemberFilter } from '@/components/features/members/member-filter';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2, Plus, UsersRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { PageLoader } from '@/components/ui/page-loader';
 import { useAppStore } from '@/store/use-app-store';
 
 export default function MembersPage() {
@@ -40,17 +42,27 @@ export default function MembersPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
+        <PageLoader />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredMembers.map((member) => (
             <MemberCard key={member.id} member={member} />
           ))}
           {filteredMembers.length === 0 && (
-            <div className="col-span-full py-12 text-center text-muted-foreground">
-              No members found matching your criteria.
+            <div className="col-span-full py-12">
+              <EmptyState 
+                icon={UsersRound}
+                title="No members found"
+                description="We couldn't find any family members matching your search criteria."
+                actionLabel="Clear Search"
+                onAction={() => {
+                  const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+                  if (searchInput) {
+                    searchInput.value = '';
+                    searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                  }
+                }}
+              />
             </div>
           )}
         </div>

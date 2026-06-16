@@ -19,6 +19,9 @@ import { MemberNode } from './member-node';
 import { RelationshipEdgeMemo } from './relationship-edge';
 import { TreeToolbar } from './tree-toolbar';
 import { Loader2 } from 'lucide-react';
+import { TreeBackground } from './tree-background';
+import { GenerationLegend } from './generation-legend';
+import { FloatingFamilyStats } from './floating-family-stats';
 
 const nodeTypes = {
   member: MemberNode,
@@ -76,7 +79,7 @@ function FamilyTreeCanvas() {
         defaultEdgeOptions={{ zIndex: 0 }}
         proOptions={{ hideAttribution: true }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={24} size={2} color="currentColor" className="text-muted-foreground/20" />
+        <TreeBackground />
         <MiniMap 
           zoomable 
           pannable 
@@ -86,9 +89,11 @@ function FamilyTreeCanvas() {
             if (data?.member?.gender === 'FEMALE') return '#f472b6';
             return '#6366f1';
           }}
-          className="!bottom-6 !left-6 !m-0 rounded-2xl shadow-xl border-border"
+          className="!bottom-6 !left-6 !m-0 rounded-2xl shadow-xl border-border bg-white/50 dark:bg-slate-900/50 backdrop-blur-md"
         />
         <TreeToolbar />
+        <GenerationLegend />
+        <FloatingFamilyStats totalMembers={nodes.length} generations={Math.max(...nodes.map(n => (n.data as any)?.member?.generation || 0)) + 1} />
       </ReactFlow>
     </div>
   );

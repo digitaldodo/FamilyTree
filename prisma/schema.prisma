@@ -90,6 +90,7 @@ model Member {
   gender        Gender?
   bio           String?
   avatar        String?
+  coverImage    String?
   phone         String?
   email         String?
   address       String?
@@ -124,7 +125,9 @@ model Relationship {
 model Media {
   id        String   @id @default(cuid())
   url       String
+  publicId  String?
   caption   String?
+  eventTag  String?
   type      String   @default("image")
   member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   memberId  String
