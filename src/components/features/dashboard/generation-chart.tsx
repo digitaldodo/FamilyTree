@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useTheme } from "next-themes";
@@ -19,7 +19,24 @@ export function GenerationChart({ data }: GenerationChartProps) {
   const fillColor = isDark ? "#8b5cf6" : "#6d28d9";
 
   const [mounted, setMounted] = useState(false);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setDimensions({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        });
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <motion.div
@@ -33,9 +50,9 @@ export function GenerationChart({ data }: GenerationChartProps) {
         <p className="text-sm text-muted-foreground">Number of members across generations</p>
       </div>
       
-      <div className="flex-1 w-full min-h-0">
-        {mounted && (
-          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+      <div ref={containerRef} className="flex-1 w-full min-h-[300px]">
+        {mounted && dimensions.width > 0 && dimensions.height > 0 && (
+          <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorMembers" x1="0" y1="0" x2="0" y2="1">

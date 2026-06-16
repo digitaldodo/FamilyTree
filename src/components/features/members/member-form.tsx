@@ -14,6 +14,7 @@ import { MemberWithRelations, UpdateMemberInput, CreateMemberInput } from '@/typ
 import { Loader2 } from 'lucide-react';
 import { ImageUpload } from './image-upload';
 import { RelationshipSelector } from './relationship-selector';
+import { useAppStore } from '@/store/use-app-store';
 
 const formSchema = updateMemberSchema.extend({
   firstName: z.string().min(1, 'First name is required'),
@@ -37,11 +38,15 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
     control,
     setValue,
     watch,
+    setError,
     formState: { errors }
   } = useForm<MemberFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: getMemberDefaultValues(member) as any,
   });
+
+  const { activeTreeId, defaultGenerationForNewMember } = useAppStore();
+  const [status, setStatus] = React.useState<'Alive' | 'Deceased'>(member?.deathDate ? 'Deceased' : 'Alive');
 
   const avatar = watch('avatar');
   const coverImage = watch('coverImage');
@@ -75,12 +80,18 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
   };
 
   const handleFormSubmit = async (data: MemberFormData) => {
+    if (status === 'Deceased' && !data.deathDate) {
+      setError('deathDate', { type: 'manual', message: 'Death date is required' });
+      return;
+    }
+
     // Zod schema already transforms DD-MM-YYYY to ISO strings
     const formattedData = {
       ...data,
       birthDate: data.birthDate || undefined,
-      deathDate: data.deathDate || undefined,
-      treeId: 'default', // Default tree for now
+      deathDate: status === 'Alive' ? undefined : (data.deathDate || undefined),
+      treeId: activeTreeId || undefined,
+      generation: member?.generation ?? (defaultGenerationForNewMember ?? 0),
       relations
     };
     await onSubmit(formattedData);
@@ -158,6 +169,21 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
 
       <div className="grid grid-cols-2 gap-4">
         <div>
+          <label className="text-sm font-medium mb-1 block">Status</label>
+          <Select value={status} onValueChange={(val: 'Alive' | 'Deceased') => setStatus(val)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Alive">Alive</SelectItem>
+              <SelectItem value="Deceased">Deceased</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
           <label className="text-sm font-medium mb-1 block">Birth Date</label>
           <Input 
             type="text" 
@@ -172,21 +198,23 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
           />
           {errors.birthDate && <span className="text-xs text-destructive">{errors.birthDate.message}</span>}
         </div>
-        <div>
-          <label className="text-sm font-medium mb-1 block">Death Date</label>
-          <Input 
-            type="text" 
-            placeholder="dd-mm-yyyy"
-            maxLength={10}
-            {...register('deathDate')} 
-            onChange={(e) => {
-              e.target.value = applyDateMask(e.target.value);
-              register('deathDate').onChange(e);
-            }}
-            className={errors.deathDate ? 'border-destructive' : ''} 
-          />
-          {errors.deathDate && <span className="text-xs text-destructive">{errors.deathDate.message}</span>}
-        </div>
+        {status === 'Deceased' && (
+          <div>
+            <label className="text-sm font-medium mb-1 block">Death Date</label>
+            <Input 
+              type="text" 
+              placeholder="dd-mm-yyyy"
+              maxLength={10}
+              {...register('deathDate')} 
+              onChange={(e) => {
+                e.target.value = applyDateMask(e.target.value);
+                register('deathDate').onChange(e);
+              }}
+              className={errors.deathDate ? 'border-destructive' : ''} 
+            />
+            {errors.deathDate && <span className="text-xs text-destructive">{errors.deathDate.message}</span>}
+          </div>
+        )}
       </div>
 
       <div>

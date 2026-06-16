@@ -14,6 +14,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
+import { useAppStore } from '@/store/use-app-store';
 import { useFamilyTree } from '@/hooks/use-family-tree';
 import { MemberNode } from './member-node';
 import { RelationshipEdgeMemo } from './relationship-edge';
@@ -32,7 +33,8 @@ const edgeTypes = {
 };
 
 function FamilyTreeCanvas() {
-  const { initialNodes, initialEdges, isLoading, error } = useFamilyTree('default');
+  const { activeTreeId } = useAppStore();
+  const { initialNodes, initialEdges, isLoading, error } = useFamilyTree(activeTreeId || undefined);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 

@@ -10,7 +10,6 @@ import { SessionProvider } from '@/providers/session-provider';
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
-  preload: false,
 });
 
 export const metadata: Metadata = {

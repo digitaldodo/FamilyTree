@@ -10,9 +10,10 @@ interface TreeToolbarProps {
   isPublic?: boolean;
 }
 
-export function TreeToolbar({ readOnly = false, treeId = 'default', isPublic = false }: TreeToolbarProps) {
+export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: TreeToolbarProps) {
   const { zoomIn, zoomOut, fitView, setCenter } = useReactFlow();
-  const { setIsMemberModalOpen, setSelectedMemberId, setIsEditingMember } = useAppStore();
+  const { setIsMemberModalOpen, setSelectedMemberId, setIsEditingMember, activeTreeId } = useAppStore();
+  const resolvedTreeId = treeId || activeTreeId || '';
 
   const handleAdd = () => {
     setSelectedMemberId(null);
@@ -27,7 +28,7 @@ export function TreeToolbar({ readOnly = false, treeId = 'default', isPublic = f
           <Button variant="default" size="icon" className="mb-1 rounded-xl" onClick={handleAdd}>
             <Plus className="h-5 w-5" />
           </Button>
-          <ShareTreeButton treeId={treeId} isPublic={isPublic} />
+          <ShareTreeButton treeId={resolvedTreeId} isPublic={isPublic} />
           <div className="w-8 h-px bg-border mx-auto my-1" />
         </>
       )}

@@ -12,6 +12,8 @@ interface AppState {
   setIsMemberModalOpen: (open: boolean) => void;
   isEditingMember: boolean;
   setIsEditingMember: (isEditing: boolean) => void;
+  defaultGenerationForNewMember: number | null;
+  setDefaultGenerationForNewMember: (gen: number | null) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   
@@ -48,6 +50,9 @@ export const useAppStore = create<AppState>((set) => ({
   
   isEditingMember: false,
   setIsEditingMember: (isEditing) => set({ isEditingMember: isEditing }),
+  
+  defaultGenerationForNewMember: null,
+  setDefaultGenerationForNewMember: (gen) => set({ defaultGenerationForNewMember: gen }),
   
   searchQuery: '',
   setSearchQuery: (query) => set({ searchQuery: query }),

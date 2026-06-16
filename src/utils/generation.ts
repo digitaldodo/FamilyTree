@@ -96,7 +96,7 @@ export function calculateGenerations(
   const startRoots = primaryRoots.length > 0 ? primaryRoots : roots;
   for (const root of startRoots) {
     if (!visited.has(root.id)) {
-      queue.push({ id: root.id, depth: 0 });
+      queue.push({ id: root.id, depth: root.generation ?? 0 });
       visited.add(root.id);
     }
   }
@@ -131,13 +131,14 @@ export function calculateGenerations(
   // Handle any disconnected members (no relationships at all)
   for (const member of members) {
     if (!generations.has(member.id)) {
-      generations.set(member.id, 0);
+      generations.set(member.id, member.generation ?? 0);
     }
   }
 
-  // Normalize: ensure minimum generation is always 0
+  // Normalize: ensure minimum generation is always 0 ONLY IF negative.
+  // If positive, we keep it so empty top generations are preserved.
   const minGen = Math.min(...generations.values());
-  if (minGen !== 0) {
+  if (minGen < 0) {
     for (const [id, gen] of generations) {
       generations.set(id, gen - minGen);
     }
@@ -156,10 +157,17 @@ export function groupMembersByGeneration(
   const generations = calculateGenerations(members);
 
   const groups = new Map<number, MemberWithRelations[]>();
+  let maxGen = 0;
   for (const member of members) {
     const gen = generations.get(member.id) ?? 0;
+    maxGen = Math.max(maxGen, gen);
     if (!groups.has(gen)) groups.set(gen, []);
     groups.get(gen)!.push(member);
+  }
+
+  // Ensure all generations from 0 to maxGen exist
+  for (let i = 0; i <= maxGen; i++) {
+    if (!groups.has(i)) groups.set(i, []);
   }
 
   // Sort by generation number ascending
