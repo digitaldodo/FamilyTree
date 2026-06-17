@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
 import { getTreePermission, canEdit, canView } from '@/lib/permissions';
@@ -72,13 +72,33 @@ export async function PUT(request: NextRequest, { params }: Params) {
     }
 
     const body = await request.json();
+    console.log(
+      '[MEMBER_UPDATE_REQUEST]',
+      JSON.stringify(body, null, 2)
+    );
+
     const validation = updateMemberSchema.safeParse(body);
 
     if (!validation.success) {
-      const messages = validation.error.issues
-        .map((e) => e.message)
-        .join(', ');
-      return errorResponse('VALIDATION_ERROR', messages, 400);
+      console.error(
+        '[MEMBER_VALIDATION_ERROR]',
+        validation.error.flatten()
+      );
+
+      console.error(
+        '[MEMBER_PAYLOAD]',
+        JSON.stringify(body, null, 2)
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Validation failed',
+          errors: validation.error.flatten(),
+          payload: body,
+        },
+        { status: 400 }
+      );
     }
 
     const { birthDate, deathDate, generationId, ...rest } = validation.data;

@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
 import { getTreePermission, canEdit, canView } from '@/lib/permissions';
@@ -70,18 +70,33 @@ export async function POST(request: NextRequest) {
       hasRelations: Array.isArray(body.relations) ? body.relations.length : 0,
     });
 
+    console.log(
+      '[MEMBER_CREATE_REQUEST]',
+      JSON.stringify(body, null, 2)
+    );
+
     const validation = createMemberSchema.safeParse(body);
 
     if (!validation.success) {
-      const messages = validation.error.issues
-        .map((e) => e.message)
-        .join(', ');
-      console.error('[MEMBER_CREATE_VALIDATION_ERROR]', {
-        userId: session.user.id,
-        treeId: body.treeId,
-        errors: validation.error.issues,
-      });
-      return errorResponse('VALIDATION_ERROR', messages, 400);
+      console.error(
+        '[MEMBER_VALIDATION_ERROR]',
+        validation.error.flatten()
+      );
+
+      console.error(
+        '[MEMBER_PAYLOAD]',
+        JSON.stringify(body, null, 2)
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Validation failed',
+          errors: validation.error.flatten(),
+          payload: body,
+        },
+        { status: 400 }
+      );
     }
 
     const { treeId, birthDate, deathDate, generationId, ...rest } = validation.data;
