@@ -21,7 +21,7 @@ const formSchema = updateMemberSchema.extend({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']),
-  generationId: z.string({ required_error: 'Generation is required', invalid_type_error: 'Generation is required' }).min(1, 'Generation is required'),
+  generationId: z.string().trim().min(1, 'Generation is required'),
 });
 
 export type MemberFormData = z.infer<typeof formSchema>;
@@ -34,6 +34,10 @@ interface MemberFormProps {
 }
 
 export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberFormProps) {
+  const { activeTreeId, defaultGenerationForNewMember } = useAppStore();
+  const { generations, createGeneration } = useGenerations();
+  const [status, setStatus] = React.useState<'Alive' | 'Deceased'>(member?.deathDate ? 'Deceased' : 'Alive');
+
   const {
     register,
     handleSubmit,
@@ -44,12 +48,11 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
     formState: { errors }
   } = useForm<MemberFormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: getMemberDefaultValues(member) as any,
+    defaultValues: {
+      ...(getMemberDefaultValues(member) as any),
+      generationId: member?.generationId || defaultGenerationForNewMember || "",
+    },
   });
-
-  const { activeTreeId, defaultGenerationForNewMember } = useAppStore();
-  const { generations, createGeneration } = useGenerations();
-  const [status, setStatus] = React.useState<'Alive' | 'Deceased'>(member?.deathDate ? 'Deceased' : 'Alive');
 
   const avatar = watch('avatar');
   const coverImage = watch('coverImage');
@@ -167,7 +170,6 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
               <Controller
                 name="generationId"
                 control={control}
-                defaultValue={member?.generationId || defaultGenerationForNewMember || undefined}
                 render={({ field }) => (
                   <Select value={field.value || ""} onValueChange={field.onChange} disabled={field.disabled}>
                     <SelectTrigger className={errors.generationId ? 'border-destructive' : ''}>

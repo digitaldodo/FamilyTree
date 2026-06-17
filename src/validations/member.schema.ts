@@ -77,7 +77,7 @@ export const createMemberSchema = z.object({
   email: optionalEmail,
   address: optionalString(500),
   occupation: optionalString(200),
-  generationId: z.string({ required_error: 'Generation is required', invalid_type_error: 'Generation is required' }).min(1, 'Generation is required'),
+  generationId: z.string().trim().min(1, 'Generation is required'),
   treeId: z.string().min(1, 'Tree ID is required'),
 });
 
