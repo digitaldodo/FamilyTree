@@ -81,12 +81,15 @@ export async function PUT(request: NextRequest, { params }: Params) {
       return errorResponse('VALIDATION_ERROR', messages, 400);
     }
 
-    const { birthDate, deathDate, ...rest } = validation.data;
+    const { birthDate, deathDate, generationId, ...rest } = validation.data;
 
     const member = await prisma.member.update({
       where: { id },
       data: {
         ...rest,
+        ...(generationId !== undefined && {
+          generation: { connect: { id: generationId } },
+        }),
         ...(birthDate !== undefined && {
           birthDate: birthDate ? new Date(birthDate) : null,
         }),

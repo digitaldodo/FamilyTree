@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       return errorResponse('VALIDATION_ERROR', messages, 400);
     }
 
-    const { treeId, birthDate, deathDate, ...rest } = validation.data;
+    const { treeId, birthDate, deathDate, generationId, ...rest } = validation.data;
 
     if (!treeId) {
       return errorResponse('VALIDATION_ERROR', 'treeId is required', 400);
@@ -122,6 +122,7 @@ export async function POST(request: NextRequest) {
     console.log('[MEMBER_CREATE] Creating member with data:', {
       userId: session.user.id,
       treeId,
+      generationId,
       cleanedFields: Object.keys(rest),
       hasBirthDate: !!birthDate,
       hasDeathDate: !!deathDate,
@@ -137,6 +138,7 @@ export async function POST(request: NextRequest) {
         birthDate: birthDate ? new Date(birthDate) : null,
         deathDate: deathDate ? new Date(deathDate) : null,
         tree: { connect: { id: treeId } },
+        generation: { connect: { id: generationId } },
       } as any,
     });
 

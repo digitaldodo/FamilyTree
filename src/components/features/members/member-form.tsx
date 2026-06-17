@@ -156,7 +156,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
             control={control}
             defaultValue={member?.generationId || defaultGenerationForNewMember || undefined}
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange} disabled={field.disabled}>
+              <Select value={field.value || ""} onValueChange={field.onChange} disabled={field.disabled}>
                 <SelectTrigger className={errors.generationId ? 'border-destructive' : ''}>
                   <SelectValue placeholder="Select generation" />
                 </SelectTrigger>
@@ -178,7 +178,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
             name="gender"
             control={control}
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange} disabled={field.disabled}>
+              <Select value={field.value || ""} onValueChange={field.onChange} disabled={field.disabled}>
                 <SelectTrigger className={errors.gender ? 'border-destructive' : ''}>
                   <SelectValue placeholder="Select gender" />
                 </SelectTrigger>
