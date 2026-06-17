@@ -124,7 +124,6 @@ export async function POST(request: NextRequest) {
     const relations = body.relations || [];
 
     // Clean the data: convert empty strings to null for optional fields
-    // so Prisma stores NULL instead of empty strings
     const cleanData = (obj: Record<string, unknown>) => {
       const cleaned: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(obj)) {
@@ -134,10 +133,77 @@ export async function POST(request: NextRequest) {
       return cleaned;
     };
 
+    let finalGenerationId = generationId;
+
+    // Phase: Relationship & Generation logic
+    // Automatically calculate the target generation based on provided relationships.
+    if (relations && Array.isArray(relations) && relations.length > 0) {
+      const relativeIds = relations.map((r: any) => r.id).filter(Boolean);
+      if (relativeIds.length > 0) {
+        const relatives = await prisma.member.findMany({
+          where: { id: { in: relativeIds } },
+          include: { generation: true }
+        });
+
+        let targetOrderIndex: number | null = null;
+
+        for (const rel of relations) {
+          if (!rel.id || !rel.type) continue;
+          const relative = relatives.find(r => r.id === rel.id);
+          if (!relative) continue;
+
+          // If relative is PARENT, child (new member) belongs to generation below (+1)
+          // If relative is SPOUSE/SIBLING, new member belongs to SAME generation
+          const expectedIndex = rel.type === 'PARENT' 
+            ? relative.generation.orderIndex + 1 
+            : relative.generation.orderIndex;
+
+          if (targetOrderIndex === null) {
+            targetOrderIndex = expectedIndex;
+          } else if (targetOrderIndex !== expectedIndex) {
+            return errorResponse('VALIDATION_ERROR', 'Impossible structure: Selected relationships dictate conflicting generations.', 400);
+          }
+        }
+
+        if (targetOrderIndex !== null) {
+          // Find if generation exists at targetOrderIndex
+          let targetGen = await prisma.generation.findFirst({
+            where: { treeId, orderIndex: targetOrderIndex }
+          });
+
+          if (!targetGen) {
+            // Need to create it. We must transactionally shift if targetOrderIndex < 0? 
+            // In standard usage, generations only grow downwards (max + 1) or upwards.
+            // Let's use the same logic as POST /api/generations
+            targetGen = await prisma.$transaction(async (tx) => {
+              // If we are inserting before 0 or anywhere, shift everything >= targetOrderIndex down
+              await tx.generation.updateMany({
+                where: { treeId, orderIndex: { gte: targetOrderIndex! } },
+                data: { orderIndex: { increment: 1 } }
+              });
+              
+              return await tx.generation.create({
+                data: {
+                  treeId,
+                  name: `Generation ${targetOrderIndex! + 1}`,
+                  orderIndex: targetOrderIndex!,
+                }
+              });
+            });
+          }
+          finalGenerationId = targetGen.id;
+        }
+      }
+    }
+
+    if (!finalGenerationId) {
+       return errorResponse('VALIDATION_ERROR', 'Generation could not be determined and was not provided.', 400);
+    }
+
     console.log('[MEMBER_CREATE] Creating member with data:', {
       userId: session.user.id,
       treeId,
-      generationId,
+      generationId: finalGenerationId,
       cleanedFields: Object.keys(rest),
       hasBirthDate: !!birthDate,
       hasDeathDate: !!deathDate,
@@ -153,7 +219,7 @@ export async function POST(request: NextRequest) {
         birthDate: birthDate ? new Date(birthDate) : null,
         deathDate: deathDate ? new Date(deathDate) : null,
         tree: { connect: { id: treeId } },
-        generation: { connect: { id: generationId } },
+        generation: { connect: { id: finalGenerationId } },
       } as any,
     });
 

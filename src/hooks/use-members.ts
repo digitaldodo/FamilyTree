@@ -58,5 +58,30 @@ export function useMembers(treeId?: string) {
     };
   }, [resolvedTreeId, setMembers]);
 
-  return { members, isLoading, error };
+  const fetchMembersManual = async () => {
+    if (!resolvedTreeId) return;
+    try {
+      setIsLoading(true);
+      const res = await fetch(`/api/trees/${resolvedTreeId}`);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const treeMembers: MemberWithRelations[] = (data.data.members || []).map((m: any) => ({
+          ...m,
+          relationsFrom: m.relationsFrom || [],
+          relationsTo: m.relationsTo || [],
+        }));
+        setMembers(treeMembers);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleRefresh = () => fetchMembersManual();
+    window.addEventListener('refresh-members', handleRefresh);
+    return () => window.removeEventListener('refresh-members', handleRefresh);
+  }, [resolvedTreeId]);
+
+  return { members, isLoading, error, fetchMembers: fetchMembersManual };
 }

@@ -13,14 +13,17 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageLoader } from '@/components/ui/page-loader';
 import { Dropdown } from '@/components/ui/dropdown';
-import { useState } from 'react';
+import { GenerationDeleteModal } from '@/components/features/generations/generation-delete-modal';
+import { useState, useEffect } from 'react';
 
 export default function MembersPage() {
   const { activeTreeId, userRole } = useAppStore();
-  const { isLoading: membersLoading } = useMembers();
+  const { isLoading: membersLoading, fetchMembers } = useMembers();
   const { generations, isLoading: gensLoading, createGeneration, renameGeneration, deleteGeneration } = useGenerations();
   const { filteredMembers } = useSearchMembers();
   const { setIsMemberModalOpen, setSelectedMemberId, setIsEditingMember, setDefaultGenerationForNewMember } = useAppStore();
+
+  const [deleteModalGenId, setDeleteModalGenId] = useState<string | null>(null);
 
   const hasEditAccess = userRole === 'OWNER' || userRole === 'ADMIN' || userRole === 'EDITOR';
 
@@ -52,10 +55,15 @@ export default function MembersPage() {
     }
   };
 
-  const handleDeleteGeneration = async (id: string) => {
-    if (confirm('Are you sure you want to delete this generation?')) {
-      await deleteGeneration(id);
-    }
+  const handleDeleteGenerationClick = (id: string) => {
+    setDeleteModalGenId(id);
+  };
+
+  const handleConfirmDelete = async (action?: 'moveMembers' | 'deleteMembers', targetId?: string) => {
+    if (!deleteModalGenId) return;
+    await deleteGeneration(deleteModalGenId, action, targetId);
+    setDeleteModalGenId(null);
+    fetchMembers(); // refresh members because some might have been moved or deleted
   };
 
   if (!activeTreeId) {
@@ -210,11 +218,9 @@ export default function MembersPage() {
                             <button className="flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={() => handleRenameGeneration(gen.id, gen.name)}>
                               <Pencil className="w-4 h-4 mr-2" /> Rename
                             </button>
-                            {genMembers.length === 0 && (
-                              <button className="flex items-center w-full px-4 py-2 text-left text-destructive hover:bg-muted" onClick={() => handleDeleteGeneration(gen.id)}>
-                                <Trash2 className="w-4 h-4 mr-2" /> Delete
-                              </button>
-                            )}
+                            <button className="flex items-center w-full px-4 py-2 text-left text-destructive hover:bg-muted" onClick={() => handleDeleteGenerationClick(gen.id)}>
+                              <Trash2 className="w-4 h-4 mr-2" /> Delete
+                            </button>
                           </div>
                         </Dropdown>
                       </div>
@@ -250,6 +256,14 @@ export default function MembersPage() {
       )}
 
       <MemberModal />
+      <GenerationDeleteModal
+        isOpen={!!deleteModalGenId}
+        onClose={() => setDeleteModalGenId(null)}
+        onConfirm={handleConfirmDelete}
+        generation={generations.find(g => g.id === deleteModalGenId) || null}
+        memberCount={filteredMembers.filter(m => m.generationId === deleteModalGenId).length}
+        availableGenerations={sortedGenerations}
+      />
     </div>
   );
 }

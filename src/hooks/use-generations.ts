@@ -75,10 +75,16 @@ export function useGenerations() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, action?: 'moveMembers' | 'deleteMembers', targetId?: string) => {
     setIsSubmitting(true);
     try {
-      const res = await fetch(`/api/generations/${id}`, {
+      const queryParams = new URLSearchParams();
+      if (action) queryParams.append('action', action);
+      if (targetId) queryParams.append('targetId', targetId);
+      
+      const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
+
+      const res = await fetch(`/api/generations/${id}${queryString}`, {
         method: 'DELETE',
       });
 
@@ -88,6 +94,14 @@ export function useGenerations() {
       deleteStoreGen(id);
       toast.success('Generation deleted successfully');
       await fetchGenerations(); // Refetch to ensure order indexes are in sync
+      
+      // We also need to refetch members if members were moved or deleted!
+      // But this hook doesn't have useMembers. 
+      // We can rely on the caller to refresh members or trigger a window reload or global event.
+      // Easiest is to dispatch a custom event or let the caller handle it.
+      if (action) {
+        window.dispatchEvent(new Event('refresh-members'));
+      }
     } catch (error: any) {
       toast.error(error.message || 'Failed to delete generation');
       throw error;

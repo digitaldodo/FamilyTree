@@ -102,21 +102,133 @@ export async function PUT(request: NextRequest, { params }: Params) {
     }
 
     const { birthDate, deathDate, generationId, ...rest } = validation.data;
+    const relations = body.relations;
 
-    const member = await prisma.member.update({
-      where: { id },
-      data: {
-        ...rest,
-        ...(generationId !== undefined && {
-          generation: { connect: { id: generationId } },
-        }),
-        ...(birthDate !== undefined && {
-          birthDate: birthDate ? new Date(birthDate) : null,
-        }),
-        ...(deathDate !== undefined && {
-          deathDate: deathDate ? new Date(deathDate) : null,
-        }),
-      },
+    // Validate Chronology if generation is changing or relations are being updated
+    let finalGenerationId = generationId || existing.generationId;
+
+    if (generationId !== undefined && generationId !== existing.generationId) {
+      const newGeneration = await prisma.generation.findUnique({ where: { id: generationId } });
+      if (!newGeneration) return errorResponse('NOT_FOUND', 'Generation not found', 404);
+
+      // We only validate against existing relations if we aren't completely replacing them.
+      // But actually, if we are replacing them, we should validate against the NEW ones.
+      const relationsToValidate = relations !== undefined ? relations : await prisma.relationship.findMany({
+        where: { OR: [{ fromId: id }, { toId: id }] },
+      }).then(rels => rels.map(r => ({
+        id: r.fromId === id ? r.toId : r.fromId,
+        type: r.type,
+        isParentWhereMemberIsChild: r.type === 'PARENT' && r.toId === id,
+        isParentWhereMemberIsParent: r.type === 'PARENT' && r.fromId === id
+      })));
+
+      // If we are given relations from body, we need to fetch their generations to validate
+      if (relations !== undefined && Array.isArray(relations)) {
+        const relativeIds = relations.map((r: any) => r.id).filter(Boolean);
+        const relatives = await prisma.member.findMany({
+          where: { id: { in: relativeIds } },
+          include: { generation: true }
+        });
+
+        for (const rel of relations) {
+          if (!rel.id || !rel.type) continue;
+          const relative = relatives.find(r => r.id === rel.id);
+          if (!relative) continue;
+
+          if (rel.type === 'SPOUSE' || rel.type === 'SIBLING') {
+            if (relative.generation.orderIndex !== newGeneration.orderIndex) {
+               return errorResponse('VALIDATION_ERROR', `Cannot move member. Spouses and siblings must belong to the same generation. Conflicts with relative's generation.`, 400);
+            }
+          } else if (rel.type === 'PARENT') {
+             // Form says "Parents" - meaning the relative is the Parent, member is the Child.
+             if (newGeneration.orderIndex <= relative.generation.orderIndex) {
+               return errorResponse('VALIDATION_ERROR', `Cannot move member. Children must belong to a younger generation (higher order) than parents.`, 400);
+             }
+          }
+        }
+      } else {
+        // Validate against existing relations
+        const existingRelations = await prisma.relationship.findMany({
+          where: { OR: [{ fromId: id }, { toId: id }] },
+          include: { from: { include: { generation: true } }, to: { include: { generation: true } } }
+        });
+
+        for (const rel of existingRelations) {
+          if (rel.type === 'SPOUSE' || rel.type === 'SIBLING') {
+            const relative = rel.fromId === id ? rel.to : rel.from;
+            if (relative.generation.orderIndex !== newGeneration.orderIndex) {
+               return errorResponse('VALIDATION_ERROR', `Cannot move member. Spouses and siblings must belong to the same generation. Conflicts with ${relative.firstName}.`, 400);
+            }
+          } else if (rel.type === 'PARENT') {
+             const parentOrder = rel.fromId === id ? newGeneration.orderIndex : rel.from.generation.orderIndex;
+             const childOrder = rel.toId === id ? newGeneration.orderIndex : rel.to.generation.orderIndex;
+
+             if (childOrder <= parentOrder) {
+               return errorResponse('VALIDATION_ERROR', `Cannot move member. Parents must belong to an older generation than children.`, 400);
+             }
+          }
+        }
+      }
+    }
+
+    // Use transaction to update member and replace relationships if provided
+    const member = await prisma.$transaction(async (tx) => {
+      const updatedMember = await tx.member.update({
+        where: { id },
+        data: {
+          ...rest,
+          ...(generationId !== undefined && {
+            generation: { connect: { id: generationId } },
+          }),
+          ...(birthDate !== undefined && {
+            birthDate: birthDate ? new Date(birthDate) : null,
+          }),
+          ...(deathDate !== undefined && {
+            deathDate: deathDate ? new Date(deathDate) : null,
+          }),
+        },
+      });
+
+      if (relations !== undefined && Array.isArray(relations)) {
+        // Delete existing relationships where member is involved, but wait,
+        // The form only submits relationships where member is child, spouse, or sibling.
+        // It does NOT submit relationships where member is the PARENT (i.e., we don't pick children from the member form, we pick parents).
+        // So we should only delete relations that the form manages!
+        // Form manages:
+        // PARENT: where member is child (toId = id)
+        // SPOUSE: all
+        // SIBLING: all
+        await tx.relationship.deleteMany({
+          where: {
+            OR: [
+              { type: 'PARENT', toId: id },
+              { type: 'SPOUSE', fromId: id },
+              { type: 'SPOUSE', toId: id },
+              { type: 'SIBLING', fromId: id },
+              { type: 'SIBLING', toId: id },
+            ]
+          }
+        });
+
+        for (const rel of relations) {
+          if (!rel.id || !rel.type) continue;
+          try {
+            if (rel.type === 'PARENT') {
+              await tx.relationship.create({
+                data: { type: 'PARENT', fromId: rel.id, toId: id },
+              });
+            } else {
+              await tx.relationship.create({
+                data: { type: rel.type, fromId: id, toId: rel.id },
+              });
+            }
+          } catch (e) {
+            console.error('Relationship create error', e);
+          }
+        }
+      }
+
+      return updatedMember;
     });
 
     return successResponse(member, 'Member updated successfully');

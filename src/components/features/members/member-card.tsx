@@ -1,16 +1,20 @@
 import { MemberWithRelations } from '@/types/member';
 import { Card, CardContent } from '@/components/ui/card';
-import { User2, Calendar, Users } from 'lucide-react';
+import { User2, Calendar, Users, MoreVertical, Eye, Pencil, ArrowRightLeft, Trash2 } from 'lucide-react';
 import { useAppStore } from '@/store/use-app-store';
 import { getGenerationLabel } from '@/utils/date';
 import { format } from 'date-fns';
+import { Dropdown } from '@/components/ui/dropdown';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+
 interface MemberCardProps {
   member: MemberWithRelations;
   calculatedGeneration?: number;
 }
 
 export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
-  const { generations, setSelectedMemberId, setIsMemberModalOpen, setIsEditingMember } = useAppStore();
+  const { generations, setSelectedMemberId, setIsMemberModalOpen, setIsEditingMember, deleteMember: deleteStoreMember } = useAppStore();
 
   const handleClick = () => {
     setSelectedMemberId(member.id);
@@ -18,8 +22,37 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
     setIsMemberModalOpen(true);
   };
 
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedMemberId(member.id);
+    setIsEditingMember(true);
+    setIsMemberModalOpen(true);
+  };
+
   const relationCount =
     member.relationsFrom.length + member.relationsTo.length;
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    let warning = `Are you sure you want to delete ${member.firstName} ${member.lastName}?`;
+    if (relationCount > 0) {
+      warning = `Deleting ${member.firstName} ${member.lastName} will remove spouse, sibling and parent-child links. Are you sure?`;
+    }
+    if (confirm(warning)) {
+      try {
+        const res = await fetch(`/api/members/${member.id}`, { method: 'DELETE' });
+        if (res.ok) {
+          deleteStoreMember(member.id);
+          toast.success('Member deleted successfully');
+          window.dispatchEvent(new Event('refresh-members'));
+        } else {
+          toast.error('Failed to delete member');
+        }
+      } catch (e) {
+        toast.error('An error occurred');
+      }
+    }
+  };
 
   const genName = generations.find(g => g.id === member.generationId)?.name || (calculatedGeneration !== undefined ? `Gen ${calculatedGeneration + 1}` : 'Unknown Gen');
 
@@ -32,9 +65,33 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
 
   return (
     <Card
-      className={`cursor-pointer transition-all duration-200 group overflow-hidden hover:shadow-md border-border/60 hover:scale-[1.02] w-full max-w-none sm:max-w-[220px]`}
+      className={`cursor-pointer transition-all duration-200 group overflow-hidden hover:shadow-md border-border/60 hover:scale-[1.02] w-full max-w-none sm:max-w-[220px] relative`}
       onClick={handleClick}
     >
+      <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+        <Dropdown 
+          trigger={
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 bg-background/50 hover:bg-background/80 backdrop-blur-sm rounded-full">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          }
+        >
+          <div className="flex flex-col text-sm w-40">
+            <button className="flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={(e) => { e.stopPropagation(); handleClick(); }}>
+              <Eye className="w-4 h-4 mr-2" /> View
+            </button>
+            <button className="flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={handleEdit}>
+              <Pencil className="w-4 h-4 mr-2" /> Edit
+            </button>
+            <button className="flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={handleEdit}>
+              <ArrowRightLeft className="w-4 h-4 mr-2" /> Move Gen
+            </button>
+            <button className="flex items-center w-full px-4 py-2 text-left text-destructive hover:bg-muted" onClick={handleDelete}>
+              <Trash2 className="w-4 h-4 mr-2" /> Delete
+            </button>
+          </div>
+        </Dropdown>
+      </div>
       <CardContent className="p-0">
         <div className={`h-14 bg-gradient-to-r ${genderAccent}`} />
         <div className="px-4 pb-4 flex flex-col">
@@ -54,7 +111,7 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
             </div>
 
             <div className="flex-1 min-w-0 flex flex-col pt-2">
-              <h3 className="font-semibold text-sm leading-tight group-hover:text-primary transition-colors line-clamp-2 break-words">
+              <h3 className="font-semibold text-sm leading-tight group-hover:text-primary transition-colors line-clamp-2 break-words pr-5">
                 {member.firstName} {member.lastName}
               </h3>
             </div>

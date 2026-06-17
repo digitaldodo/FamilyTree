@@ -82,16 +82,45 @@ export async function DELETE(
     const access = await verifyGenerationAccess(id, session.user.id);
     if (access.error) return access.error;
 
+    const action = request.nextUrl.searchParams.get('action');
+    const targetId = request.nextUrl.searchParams.get('targetId');
+
     // Check if generation is empty
     const membersCount = await prisma.member.count({
       where: { generationId: id }
     });
 
-    if (membersCount > 0) {
-      return errorResponse('CONFLICT', 'Cannot delete a generation that contains members', 409);
-    }
-
     const generation = access.generation!;
+
+    if (membersCount > 0) {
+      if (!action) {
+        return errorResponse('CONFLICT', 'Cannot delete a generation that contains members without specifying an action', 409);
+      }
+
+      if (action === 'moveMembers') {
+        if (!targetId) return errorResponse('VALIDATION_ERROR', 'Target generation ID required to move members', 400);
+        const targetGen = await prisma.generation.findUnique({ where: { id: targetId } });
+        if (!targetGen) return errorResponse('NOT_FOUND', 'Target generation not found', 404);
+
+        await prisma.member.updateMany({
+          where: { generationId: id },
+          data: { generationId: targetId }
+        });
+      } else if (action === 'deleteMembers') {
+        const members = await prisma.member.findMany({ where: { generationId: id }, select: { id: true } });
+        const memberIds = members.map(m => m.id);
+
+        await prisma.$transaction(async (tx) => {
+          await tx.relationship.deleteMany({
+            where: { OR: [{ fromId: { in: memberIds } }, { toId: { in: memberIds } }] }
+          });
+          await tx.media.deleteMany({ where: { memberId: { in: memberIds } } });
+          await tx.member.deleteMany({ where: { generationId: id } });
+        });
+      } else {
+        return errorResponse('VALIDATION_ERROR', 'Invalid action', 400);
+      }
+    }
     
     // Delete and shift subsequent generations orderIndex down by 1
     await prisma.$transaction(async (tx) => {
