@@ -68,8 +68,15 @@ export async function GET(request: NextRequest) {
 
     return listResponse(allTrees, total, page, limit);
   } catch (error) {
-    console.error('[TREE_FETCH_ERROR]', error);
-    return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
+    const session = await auth().catch(() => null);
+    console.error('[API_TREES_ERROR]', error);
+    console.error('User ID:', session?.user?.id);
+    console.error('Query Params:', Object.fromEntries(request.nextUrl.searchParams));
+    
+    return Response.json(
+      { success: false, error: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
   }
 }
 
