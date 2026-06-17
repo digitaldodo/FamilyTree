@@ -33,3 +33,26 @@ export function getNextBirthday(birthDate: Date | string): { date: Date; ageTurn
   
   return { date: nextBirthday, ageTurning, daysRemaining };
 }
+
+export function getGenerationLabel(birthYear: number | string | null | undefined): string | null {
+  if (!birthYear) return null;
+  
+  let year: number;
+  if (typeof birthYear === 'string') {
+    const d = new Date(birthYear);
+    year = isNaN(d.getTime()) ? parseInt(birthYear, 10) : d.getFullYear();
+  } else {
+    year = birthYear;
+  }
+  
+  if (isNaN(year)) return null;
+
+  if (year >= 1928 && year <= 1945) return 'Silent Generation';
+  if (year >= 1946 && year <= 1964) return 'Baby Boomer';
+  if (year >= 1965 && year <= 1980) return 'Gen X';
+  if (year >= 1981 && year <= 1996) return 'Millennial';
+  if (year >= 1997 && year <= 2012) return 'Gen Z';
+  if (year >= 2013) return 'Gen Alpha';
+  
+  return null;
+}

@@ -17,7 +17,7 @@ export interface Member {
   email?: string | null;
   address?: string | null;
   occupation?: string | null;
-  generation: number;
+  generationId: string;
   treeId: string;
   createdAt: string;
   updatedAt: string;
@@ -38,7 +38,7 @@ export interface CreateMemberInput {
   email?: string;
   address?: string;
   occupation?: string;
-  generation?: number;
+  generationId: string;
   treeId: string;
 }
 
@@ -57,7 +57,7 @@ export interface UpdateMemberInput {
   email?: string;
   address?: string;
   occupation?: string;
-  generation?: number;
+  generationId?: string;
 }
 
 /** Relationship between two members */
@@ -80,4 +80,13 @@ export interface CreateRelationshipInput {
   type: 'PARENT' | 'SPOUSE' | 'SIBLING';
   fromId: string;
   toId: string;
+}
+
+/** Represents a generation within a tree */
+export interface Generation {
+  id: string;
+  treeId: string;
+  name: string;
+  orderIndex: number;
+  createdAt: string;
 }

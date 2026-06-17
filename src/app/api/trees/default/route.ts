@@ -22,8 +22,9 @@ export async function GET(_request: NextRequest) {
       where: { ownerId: userId },
       include: {
         owner: { select: { id: true, name: true, email: true } },
+        generations: { orderBy: { orderIndex: 'asc' } },
         members: {
-          orderBy: [{ generation: 'asc' }, { firstName: 'asc' }],
+          orderBy: [{ firstName: 'asc' }],
           include: {
             relationsFrom: {
               include: {

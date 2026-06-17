@@ -19,8 +19,8 @@ import { MemberForm } from './member-form';
 import { MemberDeleteDialog } from './member-delete-dialog';
 import { useMemberMutations } from '@/hooks/use-member-mutations';
 import { MemoryGallery, Memory } from '../memories/memory-gallery';
-import { generationLabel } from '@/utils/helpers';
-import { calculateGenerations, getMaxGeneration } from '@/utils/generation';
+import { getGenerationLabel } from '@/utils/date';
+
 import * as React from 'react';
 import { toast } from 'sonner';
 
@@ -38,6 +38,7 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
     setIsEditingMember,
   } = useAppStore();
   const { members } = useMembers();
+  const { generations } = useAppStore();
   const { createMember, updateMember, deleteMember, isSubmitting } =
     useMemberMutations();
 
@@ -47,18 +48,12 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
     ? members.find((m) => m.id === selectedMemberId)
     : undefined;
 
-  // Calculate dynamic generation for this member
-  const generationMap = React.useMemo(
-    () => calculateGenerations(members),
-    [members]
-  );
-  const totalGenerations = React.useMemo(
-    () => getMaxGeneration(members),
-    [members]
-  );
   const memberGeneration = member
-    ? generationMap.get(member.id) ?? 0
-    : 0;
+    ? generations.find(g => g.id === member.generationId)
+    : undefined;
+  
+  const memberGenIndex = memberGeneration ? generations.findIndex(g => g.id === memberGeneration.id) : 0;
+  const totalGenerations = generations.length;
 
   if (!member && !isEditingMember) return null;
 
@@ -157,7 +152,7 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                   </h2>
                   <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-xs font-medium text-white/90">
-                      Gen {memberGeneration + 1} · {generationLabel(memberGeneration, totalGenerations)}
+                      Gen {memberGenIndex + 1} · {getGenerationLabel(member.birthDate) || memberGeneration?.name || 'Unknown'}
                     </span>
                     {age !== null && (
                       <span className="text-xs text-white/70">
@@ -249,6 +244,15 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                             day: 'numeric',
                           }
                         )}
+                      </span>
+                    </div>
+                  )}
+                  {getGenerationLabel(member?.birthDate) && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      <span className="text-muted-foreground">Generation:</span>
+                      <span className="font-medium">
+                        {getGenerationLabel(member?.birthDate)}
                       </span>
                     </div>
                   )}

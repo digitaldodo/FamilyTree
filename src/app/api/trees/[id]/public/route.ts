@@ -17,8 +17,9 @@ export async function GET(_request: NextRequest, { params }: Params) {
       where: { id, isPublic: true },
       include: {
         owner: { select: { id: true, name: true } },
+        generations: { orderBy: { orderIndex: 'asc' } },
         members: {
-          orderBy: [{ generation: 'asc' }, { firstName: 'asc' }],
+          orderBy: [{ firstName: 'asc' }],
           include: {
             relationsFrom: {
               include: {

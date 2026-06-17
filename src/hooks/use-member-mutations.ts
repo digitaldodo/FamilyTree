@@ -99,43 +99,10 @@ export function useMemberMutations() {
     }
   };
 
-  const handleShiftGenerations = async (insertAt: number) => {
-    if (!activeTreeId) return;
-    setIsSubmitting(true);
-    try {
-      const res = await fetch(`/api/trees/${activeTreeId}/generations/shift`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ insertAt }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || 'Failed to shift generations');
-      }
-      
-      // Update store members optimistic UI
-      const { members, setMembers } = useAppStore.getState();
-      const updatedMembers = members.map(m => {
-        if ((m.generation ?? 0) >= insertAt) {
-          return { ...m, generation: (m.generation ?? 0) + 1 };
-        }
-        return m;
-      });
-      setMembers(updatedMembers);
-      
-      toast.success('Generations shifted successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to shift generations');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return {
     createMember: handleCreate,
     updateMember: handleUpdate,
     deleteMember: handleDelete,
-    shiftGenerations: handleShiftGenerations,
     isSubmitting
   };
 }

@@ -33,6 +33,11 @@ export type Tree = Prisma.TreeModel
  */
 export type TreeCollaborator = Prisma.TreeCollaboratorModel
 /**
+ * Model Generation
+ * 
+ */
+export type Generation = Prisma.GenerationModel
+/**
  * Model Member
  * 
  */

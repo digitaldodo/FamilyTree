@@ -77,6 +77,7 @@ model Tree {
   members       Member[]
   invites       Invite[]
   collaborators TreeCollaborator[]
+  generations   Generation[]
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 
@@ -97,6 +98,18 @@ model TreeCollaborator {
   @@index([userId])
 }
 
+model Generation {
+  id         String   @id @default(cuid())
+  name       String
+  orderIndex Int
+  tree       Tree     @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId     String
+  members    Member[]
+  createdAt  DateTime @default(now())
+
+  @@index([treeId])
+}
+
 model Member {
   id            String         @id @default(cuid())
   firstName     String
@@ -112,7 +125,8 @@ model Member {
   email         String?
   address       String?
   occupation    String?
-  generation    Int            @default(0)
+  generationId  String
+  generation    Generation     @relation(fields: [generationId], references: [id], onDelete: Restrict)
   tree          Tree           @relation(fields: [treeId], references: [id], onDelete: Cascade)
   treeId        String
   relationsFrom Relationship[] @relation("from")

@@ -71,6 +71,18 @@ async function main() {
   // ─────────────────────────────────────────────
   console.log('👨‍👩‍👧‍👦 Creating family members...');
 
+  const gen0 = await prisma.generation.create({
+    data: { name: 'Grandparents', orderIndex: 0, treeId: guptaTree.id }
+  });
+
+  const gen1 = await prisma.generation.create({
+    data: { name: 'Parents', orderIndex: 1, treeId: guptaTree.id }
+  });
+
+  const gen2 = await prisma.generation.create({
+    data: { name: 'Children', orderIndex: 2, treeId: guptaTree.id }
+  });
+
   // ── Generation 0: Grandparents ──
   const vinod = await prisma.member.create({
     data: {
@@ -82,7 +94,7 @@ async function main() {
       avatar: avatar('Vinod Gupta'),
       address: 'Civil Lines, Kanpur, Uttar Pradesh',
       occupation: 'Retired Government Officer',
-      generation: 0,
+      generationId: gen0.id,
       treeId: guptaTree.id,
     },
   });
@@ -97,7 +109,7 @@ async function main() {
       avatar: avatar('RP Gupta'),
       address: 'Civil Lines, Kanpur, Uttar Pradesh',
       occupation: 'Homemaker',
-      generation: 0,
+      generationId: gen0.id,
       treeId: guptaTree.id,
     },
   });
@@ -115,7 +127,7 @@ async function main() {
       avatar: avatar('Harsh Gupta'),
       address: 'Swaroop Nagar, Kanpur, Uttar Pradesh',
       occupation: 'Businessman',
-      generation: 1,
+      generationId: gen1.id,
       treeId: guptaTree.id,
     },
   });
@@ -130,7 +142,7 @@ async function main() {
       avatar: avatar('Shashi Gupta'),
       address: 'Swaroop Nagar, Kanpur, Uttar Pradesh',
       occupation: 'Artist & Homemaker',
-      generation: 1,
+      generationId: gen1.id,
       treeId: guptaTree.id,
     },
   });
@@ -146,7 +158,7 @@ async function main() {
       avatar: avatar('Rajesh Gupta'),
       address: 'Nehru Nagar, Ghaziabad, Uttar Pradesh',
       occupation: 'Automobile Engineer',
-      generation: 1,
+      generationId: gen1.id,
       treeId: guptaTree.id,
     },
   });
@@ -161,7 +173,7 @@ async function main() {
       avatar: avatar('Bhavna Gupta'),
       address: 'Nehru Nagar, Ghaziabad, Uttar Pradesh',
       occupation: 'School Teacher',
-      generation: 1,
+      generationId: gen1.id,
       treeId: guptaTree.id,
     },
   });
@@ -177,7 +189,7 @@ async function main() {
       avatar: avatar('Parag Gupta'),
       address: 'Gomti Nagar, Lucknow, Uttar Pradesh',
       occupation: 'Cardiologist',
-      generation: 1,
+      generationId: gen1.id,
       treeId: guptaTree.id,
     },
   });
@@ -192,7 +204,7 @@ async function main() {
       avatar: avatar('Savita Gupta'),
       address: 'Gomti Nagar, Lucknow, Uttar Pradesh',
       occupation: 'Pharmacist',
-      generation: 1,
+      generationId: gen1.id,
       treeId: guptaTree.id,
     },
   });
@@ -208,7 +220,7 @@ async function main() {
       avatar: avatar('Vikash Gupta'),
       address: 'Sector 62, Noida, Uttar Pradesh',
       occupation: 'Chartered Accountant',
-      generation: 1,
+      generationId: gen1.id,
       treeId: guptaTree.id,
     },
   });
@@ -223,7 +235,7 @@ async function main() {
       avatar: avatar('Amita Gupta'),
       address: 'Sector 62, Noida, Uttar Pradesh',
       occupation: 'EdTech Entrepreneur',
-      generation: 1,
+      generationId: gen1.id,
       treeId: guptaTree.id,
     },
   });
@@ -239,7 +251,7 @@ async function main() {
       avatar: avatar('Vishal Gupta'),
       address: 'Defence Colony, New Delhi',
       occupation: 'Travel Photographer & Filmmaker',
-      generation: 1,
+      generationId: gen1.id,
       treeId: guptaTree.id,
     },
   });
@@ -257,7 +269,7 @@ async function main() {
       avatar: avatar('Garima Gupta'),
       address: 'Koramangala, Bangalore, Karnataka',
       occupation: 'Data Scientist',
-      generation: 2,
+      generationId: gen2.id,
       treeId: guptaTree.id,
     },
   });
@@ -272,7 +284,7 @@ async function main() {
       avatar: avatar('Ankur Gupta'),
       address: 'IIM Campus, Ahmedabad, Gujarat',
       occupation: 'MBA Student',
-      generation: 2,
+      generationId: gen2.id,
       treeId: guptaTree.id,
     },
   });
@@ -288,7 +300,7 @@ async function main() {
       avatar: avatar('Swaza Gupta'),
       address: 'Mukherjee Nagar, New Delhi',
       occupation: 'Civil Services Aspirant',
-      generation: 2,
+      generationId: gen2.id,
       treeId: guptaTree.id,
     },
   });
@@ -303,7 +315,7 @@ async function main() {
       avatar: avatar('Tanay Gupta'),
       address: 'IIT Kanpur Campus, Kanpur, Uttar Pradesh',
       occupation: 'Engineering Student',
-      generation: 2,
+      generationId: gen2.id,
       treeId: guptaTree.id,
     },
   });
@@ -319,7 +331,7 @@ async function main() {
       avatar: avatar('Sparsh Gupta'),
       address: 'AIIMS Campus, New Delhi',
       occupation: 'Medical Student',
-      generation: 2,
+      generationId: gen2.id,
       treeId: guptaTree.id,
     },
   });
@@ -334,7 +346,7 @@ async function main() {
       avatar: avatar('Tanishq Gupta'),
       address: 'Gomti Nagar, Lucknow, Uttar Pradesh',
       occupation: 'Cricketer & Student',
-      generation: 2,
+      generationId: gen2.id,
       treeId: guptaTree.id,
     },
   });
@@ -350,7 +362,7 @@ async function main() {
       avatar: avatar('Ansh Gupta'),
       address: 'Sector 62, Noida, Uttar Pradesh',
       occupation: 'Full-Stack Developer',
-      generation: 2,
+      generationId: gen2.id,
       treeId: guptaTree.id,
     },
   });
@@ -365,7 +377,7 @@ async function main() {
       avatar: avatar('Avni Gupta'),
       address: 'Sector 62, Noida, Uttar Pradesh',
       occupation: 'Student',
-      generation: 2,
+      generationId: gen2.id,
       treeId: guptaTree.id,
     },
   });

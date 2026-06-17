@@ -20,18 +20,8 @@ export type MemberModel = runtime.Types.Result.DefaultSelection<Prisma.$MemberPa
 
 export type AggregateMember = {
   _count: MemberCountAggregateOutputType | null
-  _avg: MemberAvgAggregateOutputType | null
-  _sum: MemberSumAggregateOutputType | null
   _min: MemberMinAggregateOutputType | null
   _max: MemberMaxAggregateOutputType | null
-}
-
-export type MemberAvgAggregateOutputType = {
-  generation: number | null
-}
-
-export type MemberSumAggregateOutputType = {
-  generation: number | null
 }
 
 export type MemberMinAggregateOutputType = {
@@ -49,7 +39,7 @@ export type MemberMinAggregateOutputType = {
   email: string | null
   address: string | null
   occupation: string | null
-  generation: number | null
+  generationId: string | null
   treeId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -70,7 +60,7 @@ export type MemberMaxAggregateOutputType = {
   email: string | null
   address: string | null
   occupation: string | null
-  generation: number | null
+  generationId: string | null
   treeId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -91,21 +81,13 @@ export type MemberCountAggregateOutputType = {
   email: number
   address: number
   occupation: number
-  generation: number
+  generationId: number
   treeId: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
-
-export type MemberAvgAggregateInputType = {
-  generation?: true
-}
-
-export type MemberSumAggregateInputType = {
-  generation?: true
-}
 
 export type MemberMinAggregateInputType = {
   id?: true
@@ -122,7 +104,7 @@ export type MemberMinAggregateInputType = {
   email?: true
   address?: true
   occupation?: true
-  generation?: true
+  generationId?: true
   treeId?: true
   createdAt?: true
   updatedAt?: true
@@ -143,7 +125,7 @@ export type MemberMaxAggregateInputType = {
   email?: true
   address?: true
   occupation?: true
-  generation?: true
+  generationId?: true
   treeId?: true
   createdAt?: true
   updatedAt?: true
@@ -164,7 +146,7 @@ export type MemberCountAggregateInputType = {
   email?: true
   address?: true
   occupation?: true
-  generation?: true
+  generationId?: true
   treeId?: true
   createdAt?: true
   updatedAt?: true
@@ -209,18 +191,6 @@ export type MemberAggregateArgs<ExtArgs extends runtime.Types.Extensions.Interna
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
-   * Select which fields to average
-  **/
-  _avg?: MemberAvgAggregateInputType
-  /**
-   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   * 
-   * Select which fields to sum
-  **/
-  _sum?: MemberSumAggregateInputType
-  /**
-   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   * 
    * Select which fields to find the minimum value
   **/
   _min?: MemberMinAggregateInputType
@@ -251,8 +221,6 @@ export type MemberGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   _count?: MemberCountAggregateInputType | true
-  _avg?: MemberAvgAggregateInputType
-  _sum?: MemberSumAggregateInputType
   _min?: MemberMinAggregateInputType
   _max?: MemberMaxAggregateInputType
 }
@@ -272,13 +240,11 @@ export type MemberGroupByOutputType = {
   email: string | null
   address: string | null
   occupation: string | null
-  generation: number
+  generationId: string
   treeId: string
   createdAt: Date
   updatedAt: Date
   _count: MemberCountAggregateOutputType | null
-  _avg: MemberAvgAggregateOutputType | null
-  _sum: MemberSumAggregateOutputType | null
   _min: MemberMinAggregateOutputType | null
   _max: MemberMaxAggregateOutputType | null
 }
@@ -316,10 +282,11 @@ export type MemberWhereInput = {
   email?: Prisma.StringNullableFilter<"Member"> | string | null
   address?: Prisma.StringNullableFilter<"Member"> | string | null
   occupation?: Prisma.StringNullableFilter<"Member"> | string | null
-  generation?: Prisma.IntFilter<"Member"> | number
+  generationId?: Prisma.StringFilter<"Member"> | string
   treeId?: Prisma.StringFilter<"Member"> | string
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
+  generation?: Prisma.XOR<Prisma.GenerationScalarRelationFilter, Prisma.GenerationWhereInput>
   tree?: Prisma.XOR<Prisma.TreeScalarRelationFilter, Prisma.TreeWhereInput>
   relationsFrom?: Prisma.RelationshipListRelationFilter
   relationsTo?: Prisma.RelationshipListRelationFilter
@@ -341,10 +308,11 @@ export type MemberOrderByWithRelationInput = {
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   occupation?: Prisma.SortOrderInput | Prisma.SortOrder
-  generation?: Prisma.SortOrder
+  generationId?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  generation?: Prisma.GenerationOrderByWithRelationInput
   tree?: Prisma.TreeOrderByWithRelationInput
   relationsFrom?: Prisma.RelationshipOrderByRelationAggregateInput
   relationsTo?: Prisma.RelationshipOrderByRelationAggregateInput
@@ -369,10 +337,11 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   email?: Prisma.StringNullableFilter<"Member"> | string | null
   address?: Prisma.StringNullableFilter<"Member"> | string | null
   occupation?: Prisma.StringNullableFilter<"Member"> | string | null
-  generation?: Prisma.IntFilter<"Member"> | number
+  generationId?: Prisma.StringFilter<"Member"> | string
   treeId?: Prisma.StringFilter<"Member"> | string
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
+  generation?: Prisma.XOR<Prisma.GenerationScalarRelationFilter, Prisma.GenerationWhereInput>
   tree?: Prisma.XOR<Prisma.TreeScalarRelationFilter, Prisma.TreeWhereInput>
   relationsFrom?: Prisma.RelationshipListRelationFilter
   relationsTo?: Prisma.RelationshipListRelationFilter
@@ -394,15 +363,13 @@ export type MemberOrderByWithAggregationInput = {
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   occupation?: Prisma.SortOrderInput | Prisma.SortOrder
-  generation?: Prisma.SortOrder
+  generationId?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.MemberCountOrderByAggregateInput
-  _avg?: Prisma.MemberAvgOrderByAggregateInput
   _max?: Prisma.MemberMaxOrderByAggregateInput
   _min?: Prisma.MemberMinOrderByAggregateInput
-  _sum?: Prisma.MemberSumOrderByAggregateInput
 }
 
 export type MemberScalarWhereWithAggregatesInput = {
@@ -423,7 +390,7 @@ export type MemberScalarWhereWithAggregatesInput = {
   email?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   address?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   occupation?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
-  generation?: Prisma.IntWithAggregatesFilter<"Member"> | number
+  generationId?: Prisma.StringWithAggregatesFilter<"Member"> | string
   treeId?: Prisma.StringWithAggregatesFilter<"Member"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Member"> | Date | string
@@ -444,9 +411,9 @@ export type MemberCreateInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
-  generation?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  generation: Prisma.GenerationCreateNestedOneWithoutMembersInput
   tree: Prisma.TreeCreateNestedOneWithoutMembersInput
   relationsFrom?: Prisma.RelationshipCreateNestedManyWithoutFromInput
   relationsTo?: Prisma.RelationshipCreateNestedManyWithoutToInput
@@ -468,7 +435,7 @@ export type MemberUncheckedCreateInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
-  generation?: number
+  generationId: string
   treeId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -492,9 +459,9 @@ export type MemberUpdateInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  generation?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  generation?: Prisma.GenerationUpdateOneRequiredWithoutMembersNestedInput
   tree?: Prisma.TreeUpdateOneRequiredWithoutMembersNestedInput
   relationsFrom?: Prisma.RelationshipUpdateManyWithoutFromNestedInput
   relationsTo?: Prisma.RelationshipUpdateManyWithoutToNestedInput
@@ -516,7 +483,7 @@ export type MemberUncheckedUpdateInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  generation?: Prisma.IntFieldUpdateOperationsInput | number
+  generationId?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -540,7 +507,7 @@ export type MemberCreateManyInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
-  generation?: number
+  generationId: string
   treeId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -561,7 +528,6 @@ export type MemberUpdateManyMutationInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  generation?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -581,7 +547,7 @@ export type MemberUncheckedUpdateManyInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  generation?: Prisma.IntFieldUpdateOperationsInput | number
+  generationId?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -612,14 +578,10 @@ export type MemberCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   address?: Prisma.SortOrder
   occupation?: Prisma.SortOrder
-  generation?: Prisma.SortOrder
+  generationId?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-}
-
-export type MemberAvgOrderByAggregateInput = {
-  generation?: Prisma.SortOrder
 }
 
 export type MemberMaxOrderByAggregateInput = {
@@ -637,7 +599,7 @@ export type MemberMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   address?: Prisma.SortOrder
   occupation?: Prisma.SortOrder
-  generation?: Prisma.SortOrder
+  generationId?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -658,14 +620,10 @@ export type MemberMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   address?: Prisma.SortOrder
   occupation?: Prisma.SortOrder
-  generation?: Prisma.SortOrder
+  generationId?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-}
-
-export type MemberSumOrderByAggregateInput = {
-  generation?: Prisma.SortOrder
 }
 
 export type MemberScalarRelationFilter = {
@@ -715,16 +673,50 @@ export type MemberUncheckedUpdateManyWithoutTreeNestedInput = {
   deleteMany?: Prisma.MemberScalarWhereInput | Prisma.MemberScalarWhereInput[]
 }
 
-export type NullableEnumGenderFieldUpdateOperationsInput = {
-  set?: $Enums.Gender | null
+export type MemberCreateNestedManyWithoutGenerationInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutGenerationInput, Prisma.MemberUncheckedCreateWithoutGenerationInput> | Prisma.MemberCreateWithoutGenerationInput[] | Prisma.MemberUncheckedCreateWithoutGenerationInput[]
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutGenerationInput | Prisma.MemberCreateOrConnectWithoutGenerationInput[]
+  createMany?: Prisma.MemberCreateManyGenerationInputEnvelope
+  connect?: Prisma.MemberWhereUniqueInput | Prisma.MemberWhereUniqueInput[]
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
+export type MemberUncheckedCreateNestedManyWithoutGenerationInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutGenerationInput, Prisma.MemberUncheckedCreateWithoutGenerationInput> | Prisma.MemberCreateWithoutGenerationInput[] | Prisma.MemberUncheckedCreateWithoutGenerationInput[]
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutGenerationInput | Prisma.MemberCreateOrConnectWithoutGenerationInput[]
+  createMany?: Prisma.MemberCreateManyGenerationInputEnvelope
+  connect?: Prisma.MemberWhereUniqueInput | Prisma.MemberWhereUniqueInput[]
+}
+
+export type MemberUpdateManyWithoutGenerationNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutGenerationInput, Prisma.MemberUncheckedCreateWithoutGenerationInput> | Prisma.MemberCreateWithoutGenerationInput[] | Prisma.MemberUncheckedCreateWithoutGenerationInput[]
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutGenerationInput | Prisma.MemberCreateOrConnectWithoutGenerationInput[]
+  upsert?: Prisma.MemberUpsertWithWhereUniqueWithoutGenerationInput | Prisma.MemberUpsertWithWhereUniqueWithoutGenerationInput[]
+  createMany?: Prisma.MemberCreateManyGenerationInputEnvelope
+  set?: Prisma.MemberWhereUniqueInput | Prisma.MemberWhereUniqueInput[]
+  disconnect?: Prisma.MemberWhereUniqueInput | Prisma.MemberWhereUniqueInput[]
+  delete?: Prisma.MemberWhereUniqueInput | Prisma.MemberWhereUniqueInput[]
+  connect?: Prisma.MemberWhereUniqueInput | Prisma.MemberWhereUniqueInput[]
+  update?: Prisma.MemberUpdateWithWhereUniqueWithoutGenerationInput | Prisma.MemberUpdateWithWhereUniqueWithoutGenerationInput[]
+  updateMany?: Prisma.MemberUpdateManyWithWhereWithoutGenerationInput | Prisma.MemberUpdateManyWithWhereWithoutGenerationInput[]
+  deleteMany?: Prisma.MemberScalarWhereInput | Prisma.MemberScalarWhereInput[]
+}
+
+export type MemberUncheckedUpdateManyWithoutGenerationNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutGenerationInput, Prisma.MemberUncheckedCreateWithoutGenerationInput> | Prisma.MemberCreateWithoutGenerationInput[] | Prisma.MemberUncheckedCreateWithoutGenerationInput[]
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutGenerationInput | Prisma.MemberCreateOrConnectWithoutGenerationInput[]
+  upsert?: Prisma.MemberUpsertWithWhereUniqueWithoutGenerationInput | Prisma.MemberUpsertWithWhereUniqueWithoutGenerationInput[]
+  createMany?: Prisma.MemberCreateManyGenerationInputEnvelope
+  set?: Prisma.MemberWhereUniqueInput | Prisma.MemberWhereUniqueInput[]
+  disconnect?: Prisma.MemberWhereUniqueInput | Prisma.MemberWhereUniqueInput[]
+  delete?: Prisma.MemberWhereUniqueInput | Prisma.MemberWhereUniqueInput[]
+  connect?: Prisma.MemberWhereUniqueInput | Prisma.MemberWhereUniqueInput[]
+  update?: Prisma.MemberUpdateWithWhereUniqueWithoutGenerationInput | Prisma.MemberUpdateWithWhereUniqueWithoutGenerationInput[]
+  updateMany?: Prisma.MemberUpdateManyWithWhereWithoutGenerationInput | Prisma.MemberUpdateManyWithWhereWithoutGenerationInput[]
+  deleteMany?: Prisma.MemberScalarWhereInput | Prisma.MemberScalarWhereInput[]
+}
+
+export type NullableEnumGenderFieldUpdateOperationsInput = {
+  set?: $Enums.Gender | null
 }
 
 export type MemberCreateNestedOneWithoutRelationsFromInput = {
@@ -784,9 +776,9 @@ export type MemberCreateWithoutTreeInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
-  generation?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  generation: Prisma.GenerationCreateNestedOneWithoutMembersInput
   relationsFrom?: Prisma.RelationshipCreateNestedManyWithoutFromInput
   relationsTo?: Prisma.RelationshipCreateNestedManyWithoutToInput
   media?: Prisma.MediaCreateNestedManyWithoutMemberInput
@@ -807,7 +799,7 @@ export type MemberUncheckedCreateWithoutTreeInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
-  generation?: number
+  generationId: string
   createdAt?: Date | string
   updatedAt?: Date | string
   relationsFrom?: Prisma.RelationshipUncheckedCreateNestedManyWithoutFromInput
@@ -859,10 +851,82 @@ export type MemberScalarWhereInput = {
   email?: Prisma.StringNullableFilter<"Member"> | string | null
   address?: Prisma.StringNullableFilter<"Member"> | string | null
   occupation?: Prisma.StringNullableFilter<"Member"> | string | null
-  generation?: Prisma.IntFilter<"Member"> | number
+  generationId?: Prisma.StringFilter<"Member"> | string
   treeId?: Prisma.StringFilter<"Member"> | string
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
+}
+
+export type MemberCreateWithoutGenerationInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  middleName?: string | null
+  birthDate?: Date | string | null
+  deathDate?: Date | string | null
+  gender?: $Enums.Gender | null
+  bio?: string | null
+  avatar?: string | null
+  coverImage?: string | null
+  phone?: string | null
+  email?: string | null
+  address?: string | null
+  occupation?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tree: Prisma.TreeCreateNestedOneWithoutMembersInput
+  relationsFrom?: Prisma.RelationshipCreateNestedManyWithoutFromInput
+  relationsTo?: Prisma.RelationshipCreateNestedManyWithoutToInput
+  media?: Prisma.MediaCreateNestedManyWithoutMemberInput
+}
+
+export type MemberUncheckedCreateWithoutGenerationInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  middleName?: string | null
+  birthDate?: Date | string | null
+  deathDate?: Date | string | null
+  gender?: $Enums.Gender | null
+  bio?: string | null
+  avatar?: string | null
+  coverImage?: string | null
+  phone?: string | null
+  email?: string | null
+  address?: string | null
+  occupation?: string | null
+  treeId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  relationsFrom?: Prisma.RelationshipUncheckedCreateNestedManyWithoutFromInput
+  relationsTo?: Prisma.RelationshipUncheckedCreateNestedManyWithoutToInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutMemberInput
+}
+
+export type MemberCreateOrConnectWithoutGenerationInput = {
+  where: Prisma.MemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.MemberCreateWithoutGenerationInput, Prisma.MemberUncheckedCreateWithoutGenerationInput>
+}
+
+export type MemberCreateManyGenerationInputEnvelope = {
+  data: Prisma.MemberCreateManyGenerationInput | Prisma.MemberCreateManyGenerationInput[]
+  skipDuplicates?: boolean
+}
+
+export type MemberUpsertWithWhereUniqueWithoutGenerationInput = {
+  where: Prisma.MemberWhereUniqueInput
+  update: Prisma.XOR<Prisma.MemberUpdateWithoutGenerationInput, Prisma.MemberUncheckedUpdateWithoutGenerationInput>
+  create: Prisma.XOR<Prisma.MemberCreateWithoutGenerationInput, Prisma.MemberUncheckedCreateWithoutGenerationInput>
+}
+
+export type MemberUpdateWithWhereUniqueWithoutGenerationInput = {
+  where: Prisma.MemberWhereUniqueInput
+  data: Prisma.XOR<Prisma.MemberUpdateWithoutGenerationInput, Prisma.MemberUncheckedUpdateWithoutGenerationInput>
+}
+
+export type MemberUpdateManyWithWhereWithoutGenerationInput = {
+  where: Prisma.MemberScalarWhereInput
+  data: Prisma.XOR<Prisma.MemberUpdateManyMutationInput, Prisma.MemberUncheckedUpdateManyWithoutGenerationInput>
 }
 
 export type MemberCreateWithoutRelationsFromInput = {
@@ -880,9 +944,9 @@ export type MemberCreateWithoutRelationsFromInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
-  generation?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  generation: Prisma.GenerationCreateNestedOneWithoutMembersInput
   tree: Prisma.TreeCreateNestedOneWithoutMembersInput
   relationsTo?: Prisma.RelationshipCreateNestedManyWithoutToInput
   media?: Prisma.MediaCreateNestedManyWithoutMemberInput
@@ -903,7 +967,7 @@ export type MemberUncheckedCreateWithoutRelationsFromInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
-  generation?: number
+  generationId: string
   treeId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -931,9 +995,9 @@ export type MemberCreateWithoutRelationsToInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
-  generation?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  generation: Prisma.GenerationCreateNestedOneWithoutMembersInput
   tree: Prisma.TreeCreateNestedOneWithoutMembersInput
   relationsFrom?: Prisma.RelationshipCreateNestedManyWithoutFromInput
   media?: Prisma.MediaCreateNestedManyWithoutMemberInput
@@ -954,7 +1018,7 @@ export type MemberUncheckedCreateWithoutRelationsToInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
-  generation?: number
+  generationId: string
   treeId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -993,9 +1057,9 @@ export type MemberUpdateWithoutRelationsFromInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  generation?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  generation?: Prisma.GenerationUpdateOneRequiredWithoutMembersNestedInput
   tree?: Prisma.TreeUpdateOneRequiredWithoutMembersNestedInput
   relationsTo?: Prisma.RelationshipUpdateManyWithoutToNestedInput
   media?: Prisma.MediaUpdateManyWithoutMemberNestedInput
@@ -1016,7 +1080,7 @@ export type MemberUncheckedUpdateWithoutRelationsFromInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  generation?: Prisma.IntFieldUpdateOperationsInput | number
+  generationId?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1050,9 +1114,9 @@ export type MemberUpdateWithoutRelationsToInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  generation?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  generation?: Prisma.GenerationUpdateOneRequiredWithoutMembersNestedInput
   tree?: Prisma.TreeUpdateOneRequiredWithoutMembersNestedInput
   relationsFrom?: Prisma.RelationshipUpdateManyWithoutFromNestedInput
   media?: Prisma.MediaUpdateManyWithoutMemberNestedInput
@@ -1073,7 +1137,7 @@ export type MemberUncheckedUpdateWithoutRelationsToInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  generation?: Prisma.IntFieldUpdateOperationsInput | number
+  generationId?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1096,9 +1160,9 @@ export type MemberCreateWithoutMediaInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
-  generation?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  generation: Prisma.GenerationCreateNestedOneWithoutMembersInput
   tree: Prisma.TreeCreateNestedOneWithoutMembersInput
   relationsFrom?: Prisma.RelationshipCreateNestedManyWithoutFromInput
   relationsTo?: Prisma.RelationshipCreateNestedManyWithoutToInput
@@ -1119,7 +1183,7 @@ export type MemberUncheckedCreateWithoutMediaInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
-  generation?: number
+  generationId: string
   treeId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1158,9 +1222,9 @@ export type MemberUpdateWithoutMediaInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  generation?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  generation?: Prisma.GenerationUpdateOneRequiredWithoutMembersNestedInput
   tree?: Prisma.TreeUpdateOneRequiredWithoutMembersNestedInput
   relationsFrom?: Prisma.RelationshipUpdateManyWithoutFromNestedInput
   relationsTo?: Prisma.RelationshipUpdateManyWithoutToNestedInput
@@ -1181,7 +1245,7 @@ export type MemberUncheckedUpdateWithoutMediaInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  generation?: Prisma.IntFieldUpdateOperationsInput | number
+  generationId?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1204,7 +1268,7 @@ export type MemberCreateManyTreeInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
-  generation?: number
+  generationId: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1224,9 +1288,9 @@ export type MemberUpdateWithoutTreeInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  generation?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  generation?: Prisma.GenerationUpdateOneRequiredWithoutMembersNestedInput
   relationsFrom?: Prisma.RelationshipUpdateManyWithoutFromNestedInput
   relationsTo?: Prisma.RelationshipUpdateManyWithoutToNestedInput
   media?: Prisma.MediaUpdateManyWithoutMemberNestedInput
@@ -1247,7 +1311,7 @@ export type MemberUncheckedUpdateWithoutTreeInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  generation?: Prisma.IntFieldUpdateOperationsInput | number
+  generationId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   relationsFrom?: Prisma.RelationshipUncheckedUpdateManyWithoutFromNestedInput
@@ -1270,7 +1334,93 @@ export type MemberUncheckedUpdateManyWithoutTreeInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  generation?: Prisma.IntFieldUpdateOperationsInput | number
+  generationId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MemberCreateManyGenerationInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  middleName?: string | null
+  birthDate?: Date | string | null
+  deathDate?: Date | string | null
+  gender?: $Enums.Gender | null
+  bio?: string | null
+  avatar?: string | null
+  coverImage?: string | null
+  phone?: string | null
+  email?: string | null
+  address?: string | null
+  occupation?: string | null
+  treeId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type MemberUpdateWithoutGenerationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tree?: Prisma.TreeUpdateOneRequiredWithoutMembersNestedInput
+  relationsFrom?: Prisma.RelationshipUpdateManyWithoutFromNestedInput
+  relationsTo?: Prisma.RelationshipUpdateManyWithoutToNestedInput
+  media?: Prisma.MediaUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberUncheckedUpdateWithoutGenerationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  treeId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  relationsFrom?: Prisma.RelationshipUncheckedUpdateManyWithoutFromNestedInput
+  relationsTo?: Prisma.RelationshipUncheckedUpdateManyWithoutToNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberUncheckedUpdateManyWithoutGenerationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1339,10 +1489,11 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   email?: boolean
   address?: boolean
   occupation?: boolean
-  generation?: boolean
+  generationId?: boolean
   treeId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  generation?: boolean | Prisma.GenerationDefaultArgs<ExtArgs>
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
   relationsFrom?: boolean | Prisma.Member$relationsFromArgs<ExtArgs>
   relationsTo?: boolean | Prisma.Member$relationsToArgs<ExtArgs>
@@ -1365,10 +1516,11 @@ export type MemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   email?: boolean
   address?: boolean
   occupation?: boolean
-  generation?: boolean
+  generationId?: boolean
   treeId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  generation?: boolean | Prisma.GenerationDefaultArgs<ExtArgs>
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["member"]>
 
@@ -1387,10 +1539,11 @@ export type MemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   email?: boolean
   address?: boolean
   occupation?: boolean
-  generation?: boolean
+  generationId?: boolean
   treeId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  generation?: boolean | Prisma.GenerationDefaultArgs<ExtArgs>
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["member"]>
 
@@ -1409,14 +1562,15 @@ export type MemberSelectScalar = {
   email?: boolean
   address?: boolean
   occupation?: boolean
-  generation?: boolean
+  generationId?: boolean
   treeId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "middleName" | "birthDate" | "deathDate" | "gender" | "bio" | "avatar" | "coverImage" | "phone" | "email" | "address" | "occupation" | "generation" | "treeId" | "createdAt" | "updatedAt", ExtArgs["result"]["member"]>
+export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "middleName" | "birthDate" | "deathDate" | "gender" | "bio" | "avatar" | "coverImage" | "phone" | "email" | "address" | "occupation" | "generationId" | "treeId" | "createdAt" | "updatedAt", ExtArgs["result"]["member"]>
 export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  generation?: boolean | Prisma.GenerationDefaultArgs<ExtArgs>
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
   relationsFrom?: boolean | Prisma.Member$relationsFromArgs<ExtArgs>
   relationsTo?: boolean | Prisma.Member$relationsToArgs<ExtArgs>
@@ -1424,15 +1578,18 @@ export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   _count?: boolean | Prisma.MemberCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MemberIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  generation?: boolean | Prisma.GenerationDefaultArgs<ExtArgs>
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
 }
 export type MemberIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  generation?: boolean | Prisma.GenerationDefaultArgs<ExtArgs>
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
 }
 
 export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Member"
   objects: {
+    generation: Prisma.$GenerationPayload<ExtArgs>
     tree: Prisma.$TreePayload<ExtArgs>
     relationsFrom: Prisma.$RelationshipPayload<ExtArgs>[]
     relationsTo: Prisma.$RelationshipPayload<ExtArgs>[]
@@ -1453,7 +1610,7 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     email: string | null
     address: string | null
     occupation: string | null
-    generation: number
+    generationId: string
     treeId: string
     createdAt: Date
     updatedAt: Date
@@ -1851,6 +2008,7 @@ readonly fields: MemberFieldRefs;
  */
 export interface Prisma__MemberClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  generation<T extends Prisma.GenerationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GenerationDefaultArgs<ExtArgs>>): Prisma.Prisma__GenerationClient<runtime.Types.Result.GetResult<Prisma.$GenerationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   tree<T extends Prisma.TreeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TreeDefaultArgs<ExtArgs>>): Prisma.Prisma__TreeClient<runtime.Types.Result.GetResult<Prisma.$TreePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   relationsFrom<T extends Prisma.Member$relationsFromArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$relationsFromArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RelationshipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   relationsTo<T extends Prisma.Member$relationsToArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$relationsToArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RelationshipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1898,7 +2056,7 @@ export interface MemberFieldRefs {
   readonly email: Prisma.FieldRef<"Member", 'String'>
   readonly address: Prisma.FieldRef<"Member", 'String'>
   readonly occupation: Prisma.FieldRef<"Member", 'String'>
-  readonly generation: Prisma.FieldRef<"Member", 'Int'>
+  readonly generationId: Prisma.FieldRef<"Member", 'String'>
   readonly treeId: Prisma.FieldRef<"Member", 'String'>
   readonly createdAt: Prisma.FieldRef<"Member", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Member", 'DateTime'>

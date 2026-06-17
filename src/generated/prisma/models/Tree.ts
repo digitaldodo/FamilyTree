@@ -202,6 +202,7 @@ export type TreeWhereInput = {
   members?: Prisma.MemberListRelationFilter
   invites?: Prisma.InviteListRelationFilter
   collaborators?: Prisma.TreeCollaboratorListRelationFilter
+  generations?: Prisma.GenerationListRelationFilter
 }
 
 export type TreeOrderByWithRelationInput = {
@@ -216,6 +217,7 @@ export type TreeOrderByWithRelationInput = {
   members?: Prisma.MemberOrderByRelationAggregateInput
   invites?: Prisma.InviteOrderByRelationAggregateInput
   collaborators?: Prisma.TreeCollaboratorOrderByRelationAggregateInput
+  generations?: Prisma.GenerationOrderByRelationAggregateInput
 }
 
 export type TreeWhereUniqueInput = Prisma.AtLeast<{
@@ -233,6 +235,7 @@ export type TreeWhereUniqueInput = Prisma.AtLeast<{
   members?: Prisma.MemberListRelationFilter
   invites?: Prisma.InviteListRelationFilter
   collaborators?: Prisma.TreeCollaboratorListRelationFilter
+  generations?: Prisma.GenerationListRelationFilter
 }, "id">
 
 export type TreeOrderByWithAggregationInput = {
@@ -272,6 +275,7 @@ export type TreeCreateInput = {
   members?: Prisma.MemberCreateNestedManyWithoutTreeInput
   invites?: Prisma.InviteCreateNestedManyWithoutTreeInput
   collaborators?: Prisma.TreeCollaboratorCreateNestedManyWithoutTreeInput
+  generations?: Prisma.GenerationCreateNestedManyWithoutTreeInput
 }
 
 export type TreeUncheckedCreateInput = {
@@ -285,6 +289,7 @@ export type TreeUncheckedCreateInput = {
   members?: Prisma.MemberUncheckedCreateNestedManyWithoutTreeInput
   invites?: Prisma.InviteUncheckedCreateNestedManyWithoutTreeInput
   collaborators?: Prisma.TreeCollaboratorUncheckedCreateNestedManyWithoutTreeInput
+  generations?: Prisma.GenerationUncheckedCreateNestedManyWithoutTreeInput
 }
 
 export type TreeUpdateInput = {
@@ -298,6 +303,7 @@ export type TreeUpdateInput = {
   members?: Prisma.MemberUpdateManyWithoutTreeNestedInput
   invites?: Prisma.InviteUpdateManyWithoutTreeNestedInput
   collaborators?: Prisma.TreeCollaboratorUpdateManyWithoutTreeNestedInput
+  generations?: Prisma.GenerationUpdateManyWithoutTreeNestedInput
 }
 
 export type TreeUncheckedUpdateInput = {
@@ -311,6 +317,7 @@ export type TreeUncheckedUpdateInput = {
   members?: Prisma.MemberUncheckedUpdateManyWithoutTreeNestedInput
   invites?: Prisma.InviteUncheckedUpdateManyWithoutTreeNestedInput
   collaborators?: Prisma.TreeCollaboratorUncheckedUpdateManyWithoutTreeNestedInput
+  generations?: Prisma.GenerationUncheckedUpdateManyWithoutTreeNestedInput
 }
 
 export type TreeCreateManyInput = {
@@ -447,6 +454,20 @@ export type TreeUpdateOneRequiredWithoutCollaboratorsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TreeUpdateToOneWithWhereWithoutCollaboratorsInput, Prisma.TreeUpdateWithoutCollaboratorsInput>, Prisma.TreeUncheckedUpdateWithoutCollaboratorsInput>
 }
 
+export type TreeCreateNestedOneWithoutGenerationsInput = {
+  create?: Prisma.XOR<Prisma.TreeCreateWithoutGenerationsInput, Prisma.TreeUncheckedCreateWithoutGenerationsInput>
+  connectOrCreate?: Prisma.TreeCreateOrConnectWithoutGenerationsInput
+  connect?: Prisma.TreeWhereUniqueInput
+}
+
+export type TreeUpdateOneRequiredWithoutGenerationsNestedInput = {
+  create?: Prisma.XOR<Prisma.TreeCreateWithoutGenerationsInput, Prisma.TreeUncheckedCreateWithoutGenerationsInput>
+  connectOrCreate?: Prisma.TreeCreateOrConnectWithoutGenerationsInput
+  upsert?: Prisma.TreeUpsertWithoutGenerationsInput
+  connect?: Prisma.TreeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TreeUpdateToOneWithWhereWithoutGenerationsInput, Prisma.TreeUpdateWithoutGenerationsInput>, Prisma.TreeUncheckedUpdateWithoutGenerationsInput>
+}
+
 export type TreeCreateNestedOneWithoutMembersInput = {
   create?: Prisma.XOR<Prisma.TreeCreateWithoutMembersInput, Prisma.TreeUncheckedCreateWithoutMembersInput>
   connectOrCreate?: Prisma.TreeCreateOrConnectWithoutMembersInput
@@ -485,6 +506,7 @@ export type TreeCreateWithoutOwnerInput = {
   members?: Prisma.MemberCreateNestedManyWithoutTreeInput
   invites?: Prisma.InviteCreateNestedManyWithoutTreeInput
   collaborators?: Prisma.TreeCollaboratorCreateNestedManyWithoutTreeInput
+  generations?: Prisma.GenerationCreateNestedManyWithoutTreeInput
 }
 
 export type TreeUncheckedCreateWithoutOwnerInput = {
@@ -497,6 +519,7 @@ export type TreeUncheckedCreateWithoutOwnerInput = {
   members?: Prisma.MemberUncheckedCreateNestedManyWithoutTreeInput
   invites?: Prisma.InviteUncheckedCreateNestedManyWithoutTreeInput
   collaborators?: Prisma.TreeCollaboratorUncheckedCreateNestedManyWithoutTreeInput
+  generations?: Prisma.GenerationUncheckedCreateNestedManyWithoutTreeInput
 }
 
 export type TreeCreateOrConnectWithoutOwnerInput = {
@@ -548,6 +571,7 @@ export type TreeCreateWithoutCollaboratorsInput = {
   owner: Prisma.UserCreateNestedOneWithoutTreesInput
   members?: Prisma.MemberCreateNestedManyWithoutTreeInput
   invites?: Prisma.InviteCreateNestedManyWithoutTreeInput
+  generations?: Prisma.GenerationCreateNestedManyWithoutTreeInput
 }
 
 export type TreeUncheckedCreateWithoutCollaboratorsInput = {
@@ -560,6 +584,7 @@ export type TreeUncheckedCreateWithoutCollaboratorsInput = {
   updatedAt?: Date | string
   members?: Prisma.MemberUncheckedCreateNestedManyWithoutTreeInput
   invites?: Prisma.InviteUncheckedCreateNestedManyWithoutTreeInput
+  generations?: Prisma.GenerationUncheckedCreateNestedManyWithoutTreeInput
 }
 
 export type TreeCreateOrConnectWithoutCollaboratorsInput = {
@@ -588,6 +613,7 @@ export type TreeUpdateWithoutCollaboratorsInput = {
   owner?: Prisma.UserUpdateOneRequiredWithoutTreesNestedInput
   members?: Prisma.MemberUpdateManyWithoutTreeNestedInput
   invites?: Prisma.InviteUpdateManyWithoutTreeNestedInput
+  generations?: Prisma.GenerationUpdateManyWithoutTreeNestedInput
 }
 
 export type TreeUncheckedUpdateWithoutCollaboratorsInput = {
@@ -600,6 +626,75 @@ export type TreeUncheckedUpdateWithoutCollaboratorsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.MemberUncheckedUpdateManyWithoutTreeNestedInput
   invites?: Prisma.InviteUncheckedUpdateManyWithoutTreeNestedInput
+  generations?: Prisma.GenerationUncheckedUpdateManyWithoutTreeNestedInput
+}
+
+export type TreeCreateWithoutGenerationsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  isPublic?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  owner: Prisma.UserCreateNestedOneWithoutTreesInput
+  members?: Prisma.MemberCreateNestedManyWithoutTreeInput
+  invites?: Prisma.InviteCreateNestedManyWithoutTreeInput
+  collaborators?: Prisma.TreeCollaboratorCreateNestedManyWithoutTreeInput
+}
+
+export type TreeUncheckedCreateWithoutGenerationsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  isPublic?: boolean
+  ownerId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.MemberUncheckedCreateNestedManyWithoutTreeInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutTreeInput
+  collaborators?: Prisma.TreeCollaboratorUncheckedCreateNestedManyWithoutTreeInput
+}
+
+export type TreeCreateOrConnectWithoutGenerationsInput = {
+  where: Prisma.TreeWhereUniqueInput
+  create: Prisma.XOR<Prisma.TreeCreateWithoutGenerationsInput, Prisma.TreeUncheckedCreateWithoutGenerationsInput>
+}
+
+export type TreeUpsertWithoutGenerationsInput = {
+  update: Prisma.XOR<Prisma.TreeUpdateWithoutGenerationsInput, Prisma.TreeUncheckedUpdateWithoutGenerationsInput>
+  create: Prisma.XOR<Prisma.TreeCreateWithoutGenerationsInput, Prisma.TreeUncheckedCreateWithoutGenerationsInput>
+  where?: Prisma.TreeWhereInput
+}
+
+export type TreeUpdateToOneWithWhereWithoutGenerationsInput = {
+  where?: Prisma.TreeWhereInput
+  data: Prisma.XOR<Prisma.TreeUpdateWithoutGenerationsInput, Prisma.TreeUncheckedUpdateWithoutGenerationsInput>
+}
+
+export type TreeUpdateWithoutGenerationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  owner?: Prisma.UserUpdateOneRequiredWithoutTreesNestedInput
+  members?: Prisma.MemberUpdateManyWithoutTreeNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutTreeNestedInput
+  collaborators?: Prisma.TreeCollaboratorUpdateManyWithoutTreeNestedInput
+}
+
+export type TreeUncheckedUpdateWithoutGenerationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.MemberUncheckedUpdateManyWithoutTreeNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutTreeNestedInput
+  collaborators?: Prisma.TreeCollaboratorUncheckedUpdateManyWithoutTreeNestedInput
 }
 
 export type TreeCreateWithoutMembersInput = {
@@ -612,6 +707,7 @@ export type TreeCreateWithoutMembersInput = {
   owner: Prisma.UserCreateNestedOneWithoutTreesInput
   invites?: Prisma.InviteCreateNestedManyWithoutTreeInput
   collaborators?: Prisma.TreeCollaboratorCreateNestedManyWithoutTreeInput
+  generations?: Prisma.GenerationCreateNestedManyWithoutTreeInput
 }
 
 export type TreeUncheckedCreateWithoutMembersInput = {
@@ -624,6 +720,7 @@ export type TreeUncheckedCreateWithoutMembersInput = {
   updatedAt?: Date | string
   invites?: Prisma.InviteUncheckedCreateNestedManyWithoutTreeInput
   collaborators?: Prisma.TreeCollaboratorUncheckedCreateNestedManyWithoutTreeInput
+  generations?: Prisma.GenerationUncheckedCreateNestedManyWithoutTreeInput
 }
 
 export type TreeCreateOrConnectWithoutMembersInput = {
@@ -652,6 +749,7 @@ export type TreeUpdateWithoutMembersInput = {
   owner?: Prisma.UserUpdateOneRequiredWithoutTreesNestedInput
   invites?: Prisma.InviteUpdateManyWithoutTreeNestedInput
   collaborators?: Prisma.TreeCollaboratorUpdateManyWithoutTreeNestedInput
+  generations?: Prisma.GenerationUpdateManyWithoutTreeNestedInput
 }
 
 export type TreeUncheckedUpdateWithoutMembersInput = {
@@ -664,6 +762,7 @@ export type TreeUncheckedUpdateWithoutMembersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invites?: Prisma.InviteUncheckedUpdateManyWithoutTreeNestedInput
   collaborators?: Prisma.TreeCollaboratorUncheckedUpdateManyWithoutTreeNestedInput
+  generations?: Prisma.GenerationUncheckedUpdateManyWithoutTreeNestedInput
 }
 
 export type TreeCreateWithoutInvitesInput = {
@@ -676,6 +775,7 @@ export type TreeCreateWithoutInvitesInput = {
   owner: Prisma.UserCreateNestedOneWithoutTreesInput
   members?: Prisma.MemberCreateNestedManyWithoutTreeInput
   collaborators?: Prisma.TreeCollaboratorCreateNestedManyWithoutTreeInput
+  generations?: Prisma.GenerationCreateNestedManyWithoutTreeInput
 }
 
 export type TreeUncheckedCreateWithoutInvitesInput = {
@@ -688,6 +788,7 @@ export type TreeUncheckedCreateWithoutInvitesInput = {
   updatedAt?: Date | string
   members?: Prisma.MemberUncheckedCreateNestedManyWithoutTreeInput
   collaborators?: Prisma.TreeCollaboratorUncheckedCreateNestedManyWithoutTreeInput
+  generations?: Prisma.GenerationUncheckedCreateNestedManyWithoutTreeInput
 }
 
 export type TreeCreateOrConnectWithoutInvitesInput = {
@@ -716,6 +817,7 @@ export type TreeUpdateWithoutInvitesInput = {
   owner?: Prisma.UserUpdateOneRequiredWithoutTreesNestedInput
   members?: Prisma.MemberUpdateManyWithoutTreeNestedInput
   collaborators?: Prisma.TreeCollaboratorUpdateManyWithoutTreeNestedInput
+  generations?: Prisma.GenerationUpdateManyWithoutTreeNestedInput
 }
 
 export type TreeUncheckedUpdateWithoutInvitesInput = {
@@ -728,6 +830,7 @@ export type TreeUncheckedUpdateWithoutInvitesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.MemberUncheckedUpdateManyWithoutTreeNestedInput
   collaborators?: Prisma.TreeCollaboratorUncheckedUpdateManyWithoutTreeNestedInput
+  generations?: Prisma.GenerationUncheckedUpdateManyWithoutTreeNestedInput
 }
 
 export type TreeCreateManyOwnerInput = {
@@ -749,6 +852,7 @@ export type TreeUpdateWithoutOwnerInput = {
   members?: Prisma.MemberUpdateManyWithoutTreeNestedInput
   invites?: Prisma.InviteUpdateManyWithoutTreeNestedInput
   collaborators?: Prisma.TreeCollaboratorUpdateManyWithoutTreeNestedInput
+  generations?: Prisma.GenerationUpdateManyWithoutTreeNestedInput
 }
 
 export type TreeUncheckedUpdateWithoutOwnerInput = {
@@ -761,6 +865,7 @@ export type TreeUncheckedUpdateWithoutOwnerInput = {
   members?: Prisma.MemberUncheckedUpdateManyWithoutTreeNestedInput
   invites?: Prisma.InviteUncheckedUpdateManyWithoutTreeNestedInput
   collaborators?: Prisma.TreeCollaboratorUncheckedUpdateManyWithoutTreeNestedInput
+  generations?: Prisma.GenerationUncheckedUpdateManyWithoutTreeNestedInput
 }
 
 export type TreeUncheckedUpdateManyWithoutOwnerInput = {
@@ -781,12 +886,14 @@ export type TreeCountOutputType = {
   members: number
   invites: number
   collaborators: number
+  generations: number
 }
 
 export type TreeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | TreeCountOutputTypeCountMembersArgs
   invites?: boolean | TreeCountOutputTypeCountInvitesArgs
   collaborators?: boolean | TreeCountOutputTypeCountCollaboratorsArgs
+  generations?: boolean | TreeCountOutputTypeCountGenerationsArgs
 }
 
 /**
@@ -820,6 +927,13 @@ export type TreeCountOutputTypeCountCollaboratorsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.TreeCollaboratorWhereInput
 }
 
+/**
+ * TreeCountOutputType without action
+ */
+export type TreeCountOutputTypeCountGenerationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.GenerationWhereInput
+}
+
 
 export type TreeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -833,6 +947,7 @@ export type TreeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   members?: boolean | Prisma.Tree$membersArgs<ExtArgs>
   invites?: boolean | Prisma.Tree$invitesArgs<ExtArgs>
   collaborators?: boolean | Prisma.Tree$collaboratorsArgs<ExtArgs>
+  generations?: boolean | Prisma.Tree$generationsArgs<ExtArgs>
   _count?: boolean | Prisma.TreeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tree"]>
 
@@ -874,6 +989,7 @@ export type TreeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   members?: boolean | Prisma.Tree$membersArgs<ExtArgs>
   invites?: boolean | Prisma.Tree$invitesArgs<ExtArgs>
   collaborators?: boolean | Prisma.Tree$collaboratorsArgs<ExtArgs>
+  generations?: boolean | Prisma.Tree$generationsArgs<ExtArgs>
   _count?: boolean | Prisma.TreeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TreeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -890,6 +1006,7 @@ export type $TreePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     members: Prisma.$MemberPayload<ExtArgs>[]
     invites: Prisma.$InvitePayload<ExtArgs>[]
     collaborators: Prisma.$TreeCollaboratorPayload<ExtArgs>[]
+    generations: Prisma.$GenerationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1297,6 +1414,7 @@ export interface Prisma__TreeClient<T, Null = never, ExtArgs extends runtime.Typ
   members<T extends Prisma.Tree$membersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tree$membersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   invites<T extends Prisma.Tree$invitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tree$invitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   collaborators<T extends Prisma.Tree$collaboratorsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tree$collaboratorsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TreeCollaboratorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  generations<T extends Prisma.Tree$generationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tree$generationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GenerationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1803,6 +1921,30 @@ export type Tree$collaboratorsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.TreeCollaboratorScalarFieldEnum | Prisma.TreeCollaboratorScalarFieldEnum[]
+}
+
+/**
+ * Tree.generations
+ */
+export type Tree$generationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Generation
+   */
+  select?: Prisma.GenerationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Generation
+   */
+  omit?: Prisma.GenerationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GenerationInclude<ExtArgs> | null
+  where?: Prisma.GenerationWhereInput
+  orderBy?: Prisma.GenerationOrderByWithRelationInput | Prisma.GenerationOrderByWithRelationInput[]
+  cursor?: Prisma.GenerationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.GenerationScalarFieldEnum | Prisma.GenerationScalarFieldEnum[]
 }
 
 /**

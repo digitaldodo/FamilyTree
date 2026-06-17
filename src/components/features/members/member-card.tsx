@@ -2,15 +2,15 @@ import { MemberWithRelations } from '@/types/member';
 import { Card, CardContent } from '@/components/ui/card';
 import { User2, Calendar, Users } from 'lucide-react';
 import { useAppStore } from '@/store/use-app-store';
-import { generationLabel } from '@/utils/helpers';
-
+import { getGenerationLabel } from '@/utils/date';
+import { format } from 'date-fns';
 interface MemberCardProps {
   member: MemberWithRelations;
   calculatedGeneration?: number;
 }
 
 export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
-  const { setSelectedMemberId, setIsMemberModalOpen, setIsEditingMember } = useAppStore();
+  const { generations, setSelectedMemberId, setIsMemberModalOpen, setIsEditingMember } = useAppStore();
 
   const handleClick = () => {
     setSelectedMemberId(member.id);
@@ -21,7 +21,7 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
   const relationCount =
     member.relationsFrom.length + member.relationsTo.length;
 
-  const gen = calculatedGeneration ?? member.generation ?? 0;
+  const genName = generations.find(g => g.id === member.generationId)?.name || (calculatedGeneration !== undefined ? `Gen ${calculatedGeneration + 1}` : 'Unknown Gen');
 
   const genderAccent =
     member.gender === 'MALE'
@@ -59,7 +59,7 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
 
             <div className="flex items-center gap-1.5 mt-2 flex-wrap">
               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-[10px] font-medium text-primary">
-                Gen {gen + 1}
+                {genName}
               </span>
               {relationCount > 0 && (
                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-muted text-[10px] font-medium text-muted-foreground">
@@ -70,14 +70,18 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
             </div>
 
             {member.birthDate && (
-              <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
-                <Calendar className="w-3 h-3 shrink-0" />
-                <span>
-                  {new Date(member.birthDate).getFullYear()}
-                  {member.deathDate
-                    ? ` – ${new Date(member.deathDate).getFullYear()}`
-                    : ''}
-                </span>
+              <div className="flex flex-col gap-1 mt-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-3 h-3 shrink-0" />
+                  <span>
+                    Born: {format(new Date(member.birthDate), 'dd-MM-yyyy')}
+                  </span>
+                </div>
+                {getGenerationLabel(member.birthDate) && (
+                  <div className="text-[11px] font-medium text-foreground/70 pl-4.5">
+                    {getGenerationLabel(member.birthDate)}
+                  </div>
+                )}
               </div>
             )}
           </div>

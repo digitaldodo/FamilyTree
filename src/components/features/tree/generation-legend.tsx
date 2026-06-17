@@ -2,9 +2,7 @@
 
 import { Panel } from '@xyflow/react';
 import { useMembers } from '@/hooks/use-members';
-import { groupMembersByGeneration } from '@/utils/generation';
-import { generationLabel } from '@/utils/helpers';
-import { useMemo } from 'react';
+import { useAppStore } from '@/store/use-app-store';
 
 const GENERATION_COLORS = [
   'bg-amber-500',
@@ -18,15 +16,11 @@ const GENERATION_COLORS = [
 
 export function GenerationLegend() {
   const { members } = useMembers();
+  const { generations } = useAppStore();
 
-  const generationGroups = useMemo(
-    () => groupMembersByGeneration(members),
-    [members]
-  );
+  const sortedGens = [...generations].sort((a, b) => a.orderIndex - b.orderIndex);
 
-  if (generationGroups.length === 0) return null;
-
-  const totalGenerations = generationGroups.length;
+  if (sortedGens.length === 0) return null;
 
   return (
     <Panel position="bottom-right">
@@ -35,19 +29,22 @@ export function GenerationLegend() {
           Generations
         </h4>
         <div className="space-y-2">
-          {generationGroups.map(([genNumber, genMembers], idx) => (
-            <div key={genNumber} className="flex items-center gap-2">
-              <div
-                className={`w-3 h-3 rounded-full ${GENERATION_COLORS[idx % GENERATION_COLORS.length]} shadow-sm`}
-              />
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                Gen {genNumber + 1} · {generationLabel(genNumber, totalGenerations)}
-              </span>
-              <span className="text-xs text-slate-400 dark:text-slate-500 ml-auto">
-                {genMembers.length}
-              </span>
-            </div>
-          ))}
+          {sortedGens.map((gen, idx) => {
+            const count = members.filter(m => m.generationId === gen.id).length;
+            return (
+              <div key={gen.id} className="flex items-center gap-2">
+                <div
+                  className={`w-3 h-3 rounded-full ${GENERATION_COLORS[idx % GENERATION_COLORS.length]} shadow-sm`}
+                />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Gen {idx + 1} · {gen.name}
+                </span>
+                <span className="text-xs text-slate-400 dark:text-slate-500 ml-auto">
+                  {count}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </Panel>

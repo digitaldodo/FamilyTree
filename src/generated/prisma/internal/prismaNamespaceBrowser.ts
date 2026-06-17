@@ -54,6 +54,7 @@ export const ModelName = {
   User: 'User',
   Tree: 'Tree',
   TreeCollaborator: 'TreeCollaborator',
+  Generation: 'Generation',
   Member: 'Member',
   Relationship: 'Relationship',
   Media: 'Media',
@@ -121,6 +122,17 @@ export const TreeCollaboratorScalarFieldEnum = {
 export type TreeCollaboratorScalarFieldEnum = (typeof TreeCollaboratorScalarFieldEnum)[keyof typeof TreeCollaboratorScalarFieldEnum]
 
 
+export const GenerationScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  orderIndex: 'orderIndex',
+  treeId: 'treeId',
+  createdAt: 'createdAt'
+} as const
+
+export type GenerationScalarFieldEnum = (typeof GenerationScalarFieldEnum)[keyof typeof GenerationScalarFieldEnum]
+
+
 export const MemberScalarFieldEnum = {
   id: 'id',
   firstName: 'firstName',
@@ -136,7 +148,7 @@ export const MemberScalarFieldEnum = {
   email: 'email',
   address: 'address',
   occupation: 'occupation',
-  generation: 'generation',
+  generationId: 'generationId',
   treeId: 'treeId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

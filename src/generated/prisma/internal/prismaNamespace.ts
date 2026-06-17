@@ -387,6 +387,7 @@ export const ModelName = {
   User: 'User',
   Tree: 'Tree',
   TreeCollaborator: 'TreeCollaborator',
+  Generation: 'Generation',
   Member: 'Member',
   Relationship: 'Relationship',
   Media: 'Media',
@@ -411,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "tree" | "treeCollaborator" | "member" | "relationship" | "media" | "activityLog" | "account" | "session" | "verificationToken" | "notification" | "invite"
+    modelProps: "user" | "tree" | "treeCollaborator" | "generation" | "member" | "relationship" | "media" | "activityLog" | "account" | "session" | "verificationToken" | "notification" | "invite"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -634,6 +635,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TreeCollaboratorCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TreeCollaboratorCountAggregateOutputType> | number
+        }
+      }
+    }
+    Generation: {
+      payload: Prisma.$GenerationPayload<ExtArgs>
+      fields: Prisma.GenerationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GenerationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GenerationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GenerationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GenerationPayload>
+        }
+        findFirst: {
+          args: Prisma.GenerationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GenerationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GenerationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GenerationPayload>
+        }
+        findMany: {
+          args: Prisma.GenerationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GenerationPayload>[]
+        }
+        create: {
+          args: Prisma.GenerationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GenerationPayload>
+        }
+        createMany: {
+          args: Prisma.GenerationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GenerationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GenerationPayload>[]
+        }
+        delete: {
+          args: Prisma.GenerationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GenerationPayload>
+        }
+        update: {
+          args: Prisma.GenerationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GenerationPayload>
+        }
+        deleteMany: {
+          args: Prisma.GenerationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GenerationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GenerationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GenerationPayload>[]
+        }
+        upsert: {
+          args: Prisma.GenerationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GenerationPayload>
+        }
+        aggregate: {
+          args: Prisma.GenerationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGeneration>
+        }
+        groupBy: {
+          args: Prisma.GenerationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GenerationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GenerationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GenerationCountAggregateOutputType> | number
         }
       }
     }
@@ -1382,6 +1457,17 @@ export const TreeCollaboratorScalarFieldEnum = {
 export type TreeCollaboratorScalarFieldEnum = (typeof TreeCollaboratorScalarFieldEnum)[keyof typeof TreeCollaboratorScalarFieldEnum]
 
 
+export const GenerationScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  orderIndex: 'orderIndex',
+  treeId: 'treeId',
+  createdAt: 'createdAt'
+} as const
+
+export type GenerationScalarFieldEnum = (typeof GenerationScalarFieldEnum)[keyof typeof GenerationScalarFieldEnum]
+
+
 export const MemberScalarFieldEnum = {
   id: 'id',
   firstName: 'firstName',
@@ -1397,7 +1483,7 @@ export const MemberScalarFieldEnum = {
   email: 'email',
   address: 'address',
   occupation: 'occupation',
-  generation: 'generation',
+  generationId: 'generationId',
   treeId: 'treeId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1618,20 +1704,6 @@ export type ListEnumTreeRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
 
 
 /**
- * Reference to a field of type 'Gender'
- */
-export type EnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender'>
-    
-
-
-/**
- * Reference to a field of type 'Gender[]'
- */
-export type ListEnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender[]'>
-    
-
-
-/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -1642,6 +1714,20 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Gender'
+ */
+export type EnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender'>
+    
+
+
+/**
+ * Reference to a field of type 'Gender[]'
+ */
+export type ListEnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender[]'>
     
 
 
@@ -1813,6 +1899,7 @@ export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   tree?: Prisma.TreeOmit
   treeCollaborator?: Prisma.TreeCollaboratorOmit
+  generation?: Prisma.GenerationOmit
   member?: Prisma.MemberOmit
   relationship?: Prisma.RelationshipOmit
   media?: Prisma.MediaOmit

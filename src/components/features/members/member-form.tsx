@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { getMemberDefaultValues } from '@/utils/form-helpers';
 import { MemberWithRelations, UpdateMemberInput, CreateMemberInput } from '@/types/member';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { ImageUpload } from './image-upload';
 import { RelationshipSelector } from './relationship-selector';
 import { useAppStore } from '@/store/use-app-store';
@@ -91,7 +91,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       birthDate: data.birthDate || undefined,
       deathDate: status === 'Alive' ? undefined : (data.deathDate || undefined),
       treeId: activeTreeId || undefined,
-      generation: member?.generation ?? (defaultGenerationForNewMember ?? 0),
+      generationId: member?.generationId ?? defaultGenerationForNewMember ?? undefined,
       relations
     };
     await onSubmit(formattedData);
@@ -185,33 +185,65 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium mb-1 block">Birth Date</label>
-          <Input 
-            type="text" 
-            placeholder="dd-mm-yyyy"
-            maxLength={10}
-            {...register('birthDate')} 
-            onChange={(e) => {
-              e.target.value = applyDateMask(e.target.value);
-              register('birthDate').onChange(e);
-            }}
-            className={errors.birthDate ? 'border-destructive' : ''} 
-          />
+          <div className="relative">
+            <Input 
+              type="text" 
+              placeholder="dd-mm-yyyy"
+              maxLength={10}
+              {...register('birthDate')} 
+              onChange={(e) => {
+                e.target.value = applyDateMask(e.target.value);
+                register('birthDate').onChange(e);
+              }}
+              className={errors.birthDate ? 'border-destructive pr-10' : 'pr-10'} 
+            />
+            <div className="absolute right-0 top-0 h-full w-10 flex items-center justify-center">
+              <CalendarIcon className="w-4 h-4 text-muted-foreground pointer-events-none" />
+              <input 
+                type="date" 
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                onChange={(e) => {
+                  if (e.target.value) {
+                    const [y, m, d] = e.target.value.split('-');
+                    const formatted = `${d}-${m}-${y}`;
+                    setValue('birthDate', formatted, { shouldValidate: true, shouldDirty: true });
+                  }
+                }}
+              />
+            </div>
+          </div>
           {errors.birthDate && <span className="text-xs text-destructive">{errors.birthDate.message}</span>}
         </div>
         {status === 'Deceased' && (
           <div>
             <label className="text-sm font-medium mb-1 block">Death Date</label>
-            <Input 
-              type="text" 
-              placeholder="dd-mm-yyyy"
-              maxLength={10}
-              {...register('deathDate')} 
-              onChange={(e) => {
-                e.target.value = applyDateMask(e.target.value);
-                register('deathDate').onChange(e);
-              }}
-              className={errors.deathDate ? 'border-destructive' : ''} 
-            />
+            <div className="relative">
+              <Input 
+                type="text" 
+                placeholder="dd-mm-yyyy"
+                maxLength={10}
+                {...register('deathDate')} 
+                onChange={(e) => {
+                  e.target.value = applyDateMask(e.target.value);
+                  register('deathDate').onChange(e);
+                }}
+                className={errors.deathDate ? 'border-destructive pr-10' : 'pr-10'} 
+              />
+              <div className="absolute right-0 top-0 h-full w-10 flex items-center justify-center">
+                <CalendarIcon className="w-4 h-4 text-muted-foreground pointer-events-none" />
+                <input 
+                  type="date" 
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      const [y, m, d] = e.target.value.split('-');
+                      const formatted = `${d}-${m}-${y}`;
+                      setValue('deathDate', formatted, { shouldValidate: true, shouldDirty: true });
+                    }
+                  }}
+                />
+              </div>
+            </div>
             {errors.deathDate && <span className="text-xs text-destructive">{errors.deathDate.message}</span>}
           </div>
         )}

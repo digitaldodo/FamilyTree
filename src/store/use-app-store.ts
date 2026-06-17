@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { MemberWithRelations } from '@/types/member';
+import { MemberWithRelations, Generation } from '@/types/member';
 import { TreeSummary, TreePermission } from '@/types/tree';
 
 interface AppState {
@@ -13,8 +13,8 @@ interface AppState {
   setIsMemberModalOpen: (open: boolean) => void;
   isEditingMember: boolean;
   setIsEditingMember: (isEditing: boolean) => void;
-  defaultGenerationForNewMember: number | null;
-  setDefaultGenerationForNewMember: (gen: number | null) => void;
+  defaultGenerationForNewMember: string | null;
+  setDefaultGenerationForNewMember: (genId: string | null) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   
@@ -31,6 +31,12 @@ interface AppState {
   setUserRole: (role: TreePermission) => void;
   
   // Shared global member state for optimistic UI across list and tree
+  generations: Generation[];
+  setGenerations: (generations: Generation[]) => void;
+  addGeneration: (generation: Generation) => void;
+  updateGeneration: (id: string, generation: Generation) => void;
+  deleteGeneration: (id: string) => void;
+  
   members: MemberWithRelations[];
   setMembers: (members: MemberWithRelations[]) => void;
   addMember: (member: MemberWithRelations) => void;
@@ -55,7 +61,7 @@ export const useAppStore = create<AppState>()(
   setIsEditingMember: (isEditing) => set({ isEditingMember: isEditing }),
   
   defaultGenerationForNewMember: null,
-  setDefaultGenerationForNewMember: (gen) => set({ defaultGenerationForNewMember: gen }),
+  setDefaultGenerationForNewMember: (genId) => set({ defaultGenerationForNewMember: genId }),
   
   searchQuery: '',
   setSearchQuery: (query) => set({ searchQuery: query }),
@@ -65,11 +71,21 @@ export const useAppStore = create<AppState>()(
 
   // Multi-tree support
   activeTreeId: null,
-  setActiveTreeId: (id) => set({ activeTreeId: id, members: [] }),
+  setActiveTreeId: (id) => set({ activeTreeId: id, members: [], generations: [] }),
   userTrees: [],
   setUserTrees: (trees) => set({ userTrees: trees }),
   userRole: null,
   setUserRole: (role) => set({ userRole: role }),
+
+  generations: [],
+  setGenerations: (generations) => set({ generations }),
+  addGeneration: (generation) => set((state) => ({ generations: [...state.generations, generation] })),
+  updateGeneration: (id, updatedGeneration) => set((state) => ({
+    generations: state.generations.map((g) => (g.id === id ? updatedGeneration : g))
+  })),
+  deleteGeneration: (id) => set((state) => ({
+    generations: state.generations.filter((g) => g.id !== id)
+  })),
 
   members: [],
   setMembers: (members) => set({ members }),

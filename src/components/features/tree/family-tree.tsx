@@ -95,7 +95,7 @@ function FamilyTreeCanvas() {
         />
         <TreeToolbar />
         <GenerationLegend />
-        <FloatingFamilyStats totalMembers={nodes.length} generations={Math.max(...nodes.map(n => (n.data as any)?.member?.generation || 0)) + 1} />
+        <FloatingFamilyStats totalMembers={nodes.length} generations={useAppStore.getState().generations.length} />
       </ReactFlow>
     </div>
   );

@@ -48,7 +48,8 @@ export default function DashboardPage() {
 
         const tree = json.data;
         const members = tree.members || [];
-        const totalGenerations = members.length > 0 ? Math.max(...members.map((m: any) => m.generation)) : 0;
+        const generations = tree.generations || [];
+        const totalGenerations = generations.length;
         
         // Calculate metrics
         const currentMonth = new Date().getMonth();
@@ -56,9 +57,9 @@ export default function DashboardPage() {
         
         const relationshipsCount = members.reduce((acc: number, m: any) => acc + (m.relationsFrom?.length || 0), 0);
         
-        const generationData = Array.from({ length: totalGenerations + 1 }).map((_, i) => ({
-          generation: `Gen ${i + 1}`,
-          members: members.filter((m: any) => m.generation === i).length
+        const generationData = generations.map((gen: any) => ({
+          generation: gen.name,
+          members: members.filter((m: any) => m.generationId === gen.id).length
         }));
 
         // Birthday calculations

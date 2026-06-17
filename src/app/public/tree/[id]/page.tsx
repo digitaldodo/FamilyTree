@@ -28,18 +28,21 @@ const edgeTypes = { relationship: RelationshipEdgeMemo };
 const LEVEL_HEIGHT = 150;
 const NODE_WIDTH = 250;
 
-function buildNodesAndEdges(members: any[]) {
+function buildNodesAndEdges(members: any[], generations: any[]) {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 
-  const gens = new Map<number, any[]>();
+  const gens = new Map<string, any[]>();
+  generations.forEach(g => gens.set(g.id, []));
+
   members.forEach(m => {
-    const g = m.generation || 1;
-    if (!gens.has(g)) gens.set(g, []);
-    gens.get(g)?.push(m);
+    if (m.generationId) {
+      if (!gens.has(m.generationId)) gens.set(m.generationId, []);
+      gens.get(m.generationId)?.push(m);
+    }
   });
 
-  gens.forEach((genMembers, genIndex) => {
+  Array.from(gens.entries()).forEach(([genId, genMembers], genIndex) => {
     genMembers.forEach((member: any, i: number) => {
       const xOffset = (i - genMembers.length / 2) * NODE_WIDTH * 1.5;
       const yOffset = genIndex * LEVEL_HEIGHT * 2;
@@ -80,7 +83,7 @@ function buildNodesAndEdges(members: any[]) {
   return { nodes, edges };
 }
 
-function PublicMemberModal({ member, members, isOpen, onClose }: { member: any; members: any[]; isOpen: boolean; onClose: () => void }) {
+function PublicMemberModal({ member, members, generations, isOpen, onClose }: { member: any; members: any[]; generations: any[]; isOpen: boolean; onClose: () => void }) {
   if (!member) return null;
 
   const getAge = () => {
@@ -121,7 +124,7 @@ function PublicMemberModal({ member, members, isOpen, onClose }: { member: any; 
             </h2>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-xs font-medium text-white/90">
-                Gen {member.generation}
+                {generations.find(g => g.id === member.generationId)?.name || 'Unknown Generation'}
               </span>
               {member.occupation && (
                 <span className="text-xs text-white/70 truncate">{member.occupation}</span>
@@ -243,7 +246,7 @@ function PublicMemberModal({ member, members, isOpen, onClose }: { member: any; 
 
 function PublicTreeCanvas({ treeData }: { treeData: any }) {
   const { nodes: initialNodes, edges: initialEdges } = React.useMemo(
-    () => buildNodesAndEdges(treeData.members || []),
+    () => buildNodesAndEdges(treeData.members || [], treeData.generations || []),
     [treeData]
   );
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -298,6 +301,7 @@ function PublicTreeCanvas({ treeData }: { treeData: any }) {
       <PublicMemberModal
         member={selectedMember}
         members={treeData.members || []}
+        generations={treeData.generations || []}
         isOpen={!!selectedMember}
         onClose={() => setSelectedMember(null)}
       />

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Node, Edge, MarkerType } from '@xyflow/react';
 import { useMembers } from './use-members';
 import { MemberWithRelations } from '@/types/member';
-import { calculateGenerations } from '@/utils/generation';
+import { useAppStore } from '@/store/use-app-store';
 
 const LEVEL_HEIGHT = 150;
 const NODE_WIDTH = 250;
@@ -20,23 +20,24 @@ export function useFamilyTree(treeId?: string) {
       return { initialNodes: nodes, initialEdges: edges };
     }
 
-    // Calculate dynamic generations via BFS
-    const generationMap = calculateGenerations(members);
+    // Use generation from store
+    const { generations } = useAppStore.getState();
+    const sortedGens = [...generations].sort((a, b) => a.orderIndex - b.orderIndex);
 
-    // Group members by calculated generation for auto-layout
-    const gens = new Map<number, MemberWithRelations[]>();
+    // Group members by their generationId
+    const gens = new Map<string, MemberWithRelations[]>();
+    sortedGens.forEach(g => gens.set(g.id, []));
+
     members.forEach(m => {
-      const g = generationMap.get(m.id) ?? 0;
-      if (!gens.has(g)) gens.set(g, []);
-      gens.get(g)?.push(m);
+      if (m.generationId) {
+        if (!gens.has(m.generationId)) gens.set(m.generationId, []);
+        gens.get(m.generationId)?.push(m);
+      }
     });
 
-    // Sort generation keys for consistent ordering
-    const sortedGens = Array.from(gens.keys()).sort((a, b) => a - b);
-
     // Create Nodes
-    sortedGens.forEach((genIndex) => {
-      const genMembers = gens.get(genIndex) || [];
+    sortedGens.forEach((gen, genIndex) => {
+      const genMembers = gens.get(gen.id) || [];
       genMembers.forEach((member, i) => {
         // Simple horizontal layout calculation
         const xOffset = (i - genMembers.length / 2) * NODE_WIDTH * 1.5;

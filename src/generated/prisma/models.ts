@@ -11,6 +11,7 @@
 export type * from './models/User'
 export type * from './models/Tree'
 export type * from './models/TreeCollaborator'
+export type * from './models/Generation'
 export type * from './models/Member'
 export type * from './models/Relationship'
 export type * from './models/Media'
