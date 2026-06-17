@@ -1,5 +1,5 @@
 import { useReactFlow } from '@xyflow/react';
-import { ZoomIn, ZoomOut, Maximize, Crosshair, Plus } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/store/use-app-store';
 import { ShareTreeButton } from './share-tree-button';
@@ -11,7 +11,7 @@ interface TreeToolbarProps {
 }
 
 export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: TreeToolbarProps) {
-  const { zoomIn, zoomOut, fitView, setCenter } = useReactFlow();
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
   const { setIsMemberModalOpen, setSelectedMemberId, setIsEditingMember, activeTreeId } = useAppStore();
   const resolvedTreeId = treeId || activeTreeId || '';
 
@@ -22,28 +22,25 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
   };
 
   return (
-    <div className="absolute bottom-6 right-6 z-10 flex flex-col gap-2 p-2 glass rounded-2xl shadow-lg">
+    <div className="absolute top-6 right-6 z-10 flex flex-row items-center gap-1.5 p-1.5 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-800/50 rounded-2xl shadow-xl">
       {!readOnly && (
         <>
-          <Button variant="default" size="icon" className="mb-1 rounded-xl" onClick={handleAdd}>
-            <Plus className="h-5 w-5" />
+          <Button variant="ghost" size="icon" className="rounded-xl hover:bg-primary/10 hover:text-primary" onClick={handleAdd}>
+            <Plus className="h-4 w-4" />
           </Button>
           <ShareTreeButton treeId={resolvedTreeId} isPublic={isPublic} />
-          <div className="w-8 h-px bg-border mx-auto my-1" />
+          <div className="h-6 w-px bg-border/50 mx-1" />
         </>
       )}
-      <Button variant="ghost" size="icon" onClick={() => zoomIn({ duration: 300 })}>
-        <ZoomIn className="h-5 w-5" />
+      <Button variant="ghost" size="icon" className="rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => zoomIn({ duration: 300 })}>
+        <ZoomIn className="h-4 w-4 text-slate-600 dark:text-slate-300" />
       </Button>
-      <Button variant="ghost" size="icon" onClick={() => zoomOut({ duration: 300 })}>
-        <ZoomOut className="h-5 w-5" />
+      <Button variant="ghost" size="icon" className="rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => zoomOut({ duration: 300 })}>
+        <ZoomOut className="h-4 w-4 text-slate-600 dark:text-slate-300" />
       </Button>
-      <div className="w-8 h-px bg-border mx-auto my-1" />
-      <Button variant="ghost" size="icon" onClick={() => fitView({ duration: 500, padding: 0.2 })}>
-        <Maximize className="h-5 w-5" />
-      </Button>
-      <Button variant="ghost" size="icon" onClick={() => setCenter(0, 0, { duration: 500, zoom: 1 })}>
-        <Crosshair className="h-5 w-5" />
+      <div className="h-6 w-px bg-border/50 mx-1" />
+      <Button variant="ghost" size="icon" className="rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => fitView({ duration: 500, padding: 0.2, maxZoom: 1 })}>
+        <Maximize className="h-4 w-4 text-slate-600 dark:text-slate-300" />
       </Button>
     </div>
   );

@@ -35,12 +35,39 @@ export function useFamilyTree(treeId?: string) {
       }
     });
 
+    // Calculate max width needed for lanes
+    let maxGenNodes = 0;
+    gens.forEach(members => {
+      if (members.length > maxGenNodes) maxGenNodes = members.length;
+    });
+    
+    // Adaptive spacing based on tree size
+    const adaptiveSpacing = maxGenNodes < 4 ? NODE_WIDTH * 1.2 : NODE_WIDTH * 1.5;
+    const laneWidth = Math.max(maxGenNodes * adaptiveSpacing * 2, window.innerWidth * 2, 3000);
+
     // Create Nodes
     sortedGens.forEach((gen, genIndex) => {
+      // Add visual lane background node
+      nodes.push({
+        id: `lane-${gen.id}`,
+        type: 'generationLane',
+        position: { x: -laneWidth / 2, y: genIndex * LEVEL_HEIGHT * 2 - 50 },
+        data: {
+          label: gen.name,
+          width: laneWidth,
+          height: LEVEL_HEIGHT * 2,
+          isEven: genIndex % 2 === 0,
+        },
+        zIndex: -1,
+        selectable: false,
+        draggable: false,
+        focusable: false,
+      });
+
       const genMembers = gens.get(gen.id) || [];
       genMembers.forEach((member, i) => {
-        // Simple horizontal layout calculation
-        const xOffset = (i - genMembers.length / 2) * NODE_WIDTH * 1.5;
+        // Adaptive horizontal layout centering
+        const xOffset = (i - (genMembers.length - 1) / 2) * adaptiveSpacing;
         const yOffset = genIndex * LEVEL_HEIGHT * 2;
 
         nodes.push({

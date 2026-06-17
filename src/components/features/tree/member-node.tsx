@@ -14,9 +14,10 @@ interface MemberNodeProps {
 
 function MemberNodeComponent({ data }: MemberNodeProps) {
   const { member } = data;
-  const { selectedMemberId, setSelectedMemberId, setIsMemberModalOpen } = useAppStore();
+  const { selectedMemberId, setSelectedMemberId, setIsMemberModalOpen, generations } = useAppStore();
   
   const isSelected = selectedMemberId === member.id;
+  const generation = generations.find(g => g.id === member.generationId);
 
   const handleClick = () => {
     setSelectedMemberId(member.id);
@@ -26,9 +27,9 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
   return (
     <div
       className={cn(
-        'relative flex items-center gap-4 w-64 p-3 rounded-2xl bg-card border-2 shadow-sm transition-all duration-200 cursor-pointer hover:shadow-md hover:scale-[1.02]',
-        isSelected ? 'border-primary shadow-primary/20' : 'border-border',
-        member.gender === 'MALE' ? 'hover:border-blue-400' : member.gender === 'FEMALE' ? 'hover:border-pink-400' : 'hover:border-primary'
+        'group relative flex items-center gap-4 w-[280px] p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-border/50 shadow-sm transition-all duration-300 cursor-pointer hover:shadow-xl hover:-translate-y-1',
+        isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : '',
+        member.gender === 'MALE' ? 'hover:border-blue-400/50' : member.gender === 'FEMALE' ? 'hover:border-pink-400/50' : 'hover:border-primary/50'
       )}
       onClick={handleClick}
     >
@@ -36,21 +37,41 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
       <Handle type="target" position={Position.Top} className="w-3 h-3 bg-primary border-background" />
 
       {/* Avatar */}
-      <div className="w-14 h-14 shrink-0 rounded-full bg-muted flex items-center justify-center overflow-hidden border border-border">
+      <div className={cn(
+        "w-16 h-16 shrink-0 rounded-full flex items-center justify-center overflow-hidden border-2 shadow-inner transition-transform group-hover:scale-105",
+        member.gender === 'MALE' ? 'bg-blue-50 border-blue-100 dark:bg-blue-950/30 dark:border-blue-900' : 
+        member.gender === 'FEMALE' ? 'bg-pink-50 border-pink-100 dark:bg-pink-950/30 dark:border-pink-900' : 
+        'bg-slate-50 border-slate-100 dark:bg-slate-900 dark:border-slate-800'
+      )}>
         {member.avatar ? (
           <img src={member.avatar} alt={data.label} className="w-full h-full object-cover" />
         ) : (
-          <User2 className="w-6 h-6 text-muted-foreground" />
+          <User2 className={cn(
+            "w-7 h-7",
+            member.gender === 'MALE' ? 'text-blue-400' : 
+            member.gender === 'FEMALE' ? 'text-pink-400' : 
+            'text-slate-400'
+          )} />
         )}
       </div>
 
       {/* Info */}
-      <div className="flex flex-col flex-1 min-w-0">
-        <span className="font-semibold text-sm truncate">{member.firstName}</span>
-        <span className="font-bold text-base truncate">{member.lastName}</span>
+      <div className="flex flex-col flex-1 min-w-0 py-0.5">
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <div className="flex flex-col min-w-0">
+            <span className="font-medium text-[13px] text-muted-foreground truncate leading-tight">{member.firstName}</span>
+            <span className="font-bold text-base text-foreground truncate leading-tight">{member.lastName}</span>
+          </div>
+          {generation && (
+            <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-primary/10 text-primary uppercase tracking-wider">
+              {generation.name}
+            </span>
+          )}
+        </div>
+        
         {member.birthDate && (
-          <span className="text-xs text-muted-foreground mt-1">
-            {new Date(member.birthDate).getFullYear()} - {member.deathDate ? new Date(member.deathDate).getFullYear() : 'Present'}
+          <span className="text-[11px] font-medium text-muted-foreground mt-0.5">
+            {new Date(member.birthDate).getFullYear()} &ndash; {member.deathDate ? new Date(member.deathDate).getFullYear() : 'Present'}
           </span>
         )}
       </div>
