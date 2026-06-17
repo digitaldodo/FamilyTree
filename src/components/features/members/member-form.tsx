@@ -174,23 +174,24 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
         </div>
         <div>
           <label className="text-sm font-medium mb-1 block">Gender</label>
-        <Controller
-          name="gender"
-          control={control}
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange} disabled={field.disabled}>
-              <SelectTrigger className={errors.gender ? 'border-destructive' : ''}>
-                <SelectValue placeholder="Select gender" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="MALE">Male</SelectItem>
-                <SelectItem value="FEMALE">Female</SelectItem>
-                <SelectItem value="OTHER">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-        />
-        {errors.gender && <span className="text-xs text-destructive">{errors.gender.message}</span>}
+          <Controller
+            name="gender"
+            control={control}
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange} disabled={field.disabled}>
+                <SelectTrigger className={errors.gender ? 'border-destructive' : ''}>
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="MALE">Male</SelectItem>
+                  <SelectItem value="FEMALE">Female</SelectItem>
+                  <SelectItem value="OTHER">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.gender && <span className="text-xs text-destructive">{errors.gender.message}</span>}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
