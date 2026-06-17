@@ -21,6 +21,7 @@ const formSchema = updateMemberSchema.extend({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']),
+  generationId: z.string({ required_error: 'Generation is required', invalid_type_error: 'Generation is required' }).min(1, 'Generation is required'),
 });
 
 export type MemberFormData = z.infer<typeof formSchema>;
@@ -47,7 +48,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
   });
 
   const { activeTreeId, defaultGenerationForNewMember } = useAppStore();
-  const { generations } = useGenerations();
+  const { generations, createGeneration } = useGenerations();
   const [status, setStatus] = React.useState<'Alive' | 'Deceased'>(member?.deathDate ? 'Deceased' : 'Alive');
 
   const avatar = watch('avatar');
@@ -151,25 +152,42 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium mb-1 block">Generation</label>
-          <Controller
-            name="generationId"
-            control={control}
-            defaultValue={member?.generationId || defaultGenerationForNewMember || undefined}
-            render={({ field }) => (
-              <Select value={field.value || ""} onValueChange={field.onChange} disabled={field.disabled}>
-                <SelectTrigger className={errors.generationId ? 'border-destructive' : ''}>
-                  <SelectValue placeholder="Select generation" />
-                </SelectTrigger>
-                <SelectContent>
-                  {generations.map((gen) => (
-                    <SelectItem key={gen.id} value={gen.id}>
-                      {gen.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
+          {generations.length === 0 ? (
+            <div className="flex flex-col items-start gap-2 pt-1">
+              <span className="text-sm text-muted-foreground">No generations exist yet.</span>
+              <Button type="button" variant="outline" size="sm" onClick={() => {
+                const name = prompt('Enter first generation name (e.g. Founders):');
+                if (name) createGeneration(name);
+              }}>
+                Create First Generation
+              </Button>
+            </div>
+          ) : (
+            <>
+              <Controller
+                name="generationId"
+                control={control}
+                defaultValue={member?.generationId || defaultGenerationForNewMember || undefined}
+                render={({ field }) => (
+                  <Select value={field.value || ""} onValueChange={field.onChange} disabled={field.disabled}>
+                    <SelectTrigger className={errors.generationId ? 'border-destructive' : ''}>
+                      <SelectValue placeholder="Select generation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {generations.map((gen) => (
+                        <SelectItem key={gen.id} value={gen.id}>
+                          {gen.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {!watch('generationId') && !errors.generationId && (
+                <span className="text-xs text-muted-foreground mt-1 block">Please select a generation.</span>
+              )}
+            </>
+          )}
           {errors.generationId && <span className="text-xs text-destructive">{errors.generationId?.message as string}</span>}
         </div>
         <div>
@@ -316,7 +334,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
         <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
           Cancel
         </Button>
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting || !watch('generationId')}>
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {member ? 'Save Changes' : 'Create Member'}
         </Button>
