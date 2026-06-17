@@ -22,9 +22,9 @@ export function getMemberDefaultValues(member?: MemberWithRelations): UpdateMemb
       deathDate: "",
       gender: "OTHER",
       bio: "",
-      avatar: "",
+      avatar: undefined,  // Don't default to "" — it fails .url() validation
       phone: "",
-      email: "",
+      email: undefined,   // Don't default to "" — it fails .email() validation
       address: "",
       occupation: "",
     };
@@ -38,9 +38,9 @@ export function getMemberDefaultValues(member?: MemberWithRelations): UpdateMemb
     deathDate: formatDateToDDMMYYYY(member.deathDate),
     gender: member.gender || "OTHER",
     bio: member.bio || "",
-    avatar: member.avatar || "",
+    avatar: member.avatar || undefined,
     phone: member.phone || "",
-    email: member.email || "",
+    email: member.email || undefined,
     address: member.address || "",
     occupation: member.occupation || "",
   };

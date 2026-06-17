@@ -9,14 +9,49 @@ const genderEnum = z.enum(['MALE', 'FEMALE', 'OTHER']);
 /** Relationship type enum values */
 const relationshipTypeEnum = z.enum(['PARENT', 'SPOUSE', 'SIBLING']);
 
-/** Date string schema for DD-MM-YYYY format, transforming to ISO */
-const dateStringSchema = z.string().trim().refine((val) => {
-  if (!val) return true;
-  return /^\d{2}-\d{2}-\d{4}$/.test(val);
-}, { message: 'Invalid date format. Use DD-MM-YYYY.' }).transform((val) => {
+/**
+ * Coerce empty strings to undefined so optional validators work correctly.
+ * This prevents empty form fields from failing .url() or .email() checks.
+ */
+const emptyToUndefined = z.literal('').transform(() => undefined);
+
+/** Optional URL: accepts a valid URL, empty string (→ undefined), or undefined */
+const optionalUrl = z.string().url('Must be a valid URL').optional().or(emptyToUndefined);
+
+/** Optional email: accepts a valid email, empty string (→ undefined), or undefined */
+const optionalEmail = z.string().email('Invalid email address').optional().or(emptyToUndefined);
+
+/** Optional trimmed string: accepts a non-empty string, empty string (→ undefined), or undefined */
+const optionalString = (maxLen: number) =>
+  z.string().max(maxLen).trim().optional().or(emptyToUndefined);
+
+/**
+ * Date string schema — accepts DD-MM-YYYY or ISO 8601 format.
+ * Transforms to ISO string for consistent storage.
+ *
+ * Supports both formats because:
+ * - DD-MM-YYYY comes from form inputs
+ * - ISO strings can come from client-side pre-processing
+ */
+const dateStringSchema = z.string().trim().transform((val) => {
   if (!val) return undefined;
-  const [d, m, y] = val.split('-');
-  return new Date(`${y}-${m}-${d}T00:00:00.000Z`).toISOString();
+
+  // Already an ISO date string (e.g., from form-level Zod transform)
+  if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return undefined;
+    return d.toISOString();
+  }
+
+  // DD-MM-YYYY format from form input
+  if (/^\d{2}-\d{2}-\d{4}$/.test(val)) {
+    const [d, m, y] = val.split('-');
+    const date = new Date(`${y}-${m}-${d}T00:00:00.000Z`);
+    if (isNaN(date.getTime())) return undefined;
+    return date.toISOString();
+  }
+
+  return undefined;
 });
 
 /** Schema for creating a new member */
@@ -31,37 +66,17 @@ export const createMemberSchema = z.object({
     .min(1, 'Last name is required')
     .max(100, 'Last name must be at most 100 characters')
     .trim(),
-  middleName: z
-    .string()
-    .max(100, 'Middle name must be at most 100 characters')
-    .trim()
-    .optional(),
-  birthDate: dateStringSchema.optional(),
-  deathDate: dateStringSchema.optional(),
+  middleName: optionalString(100),
+  birthDate: dateStringSchema.optional().or(emptyToUndefined),
+  deathDate: dateStringSchema.optional().or(emptyToUndefined),
   gender: genderEnum.optional(),
-  bio: z
-    .string()
-    .max(2000, 'Bio must be at most 2000 characters')
-    .trim()
-    .optional(),
-  avatar: z.string().url('Avatar must be a valid URL').optional(),
-  coverImage: z.string().url('Cover Image must be a valid URL').optional(),
-  phone: z
-    .string()
-    .max(20, 'Phone must be at most 20 characters')
-    .trim()
-    .optional(),
-  email: z.string().email('Invalid email address').optional(),
-  address: z
-    .string()
-    .max(500, 'Address must be at most 500 characters')
-    .trim()
-    .optional(),
-  occupation: z
-    .string()
-    .max(200, 'Occupation must be at most 200 characters')
-    .trim()
-    .optional(),
+  bio: optionalString(2000),
+  avatar: optionalUrl,
+  coverImage: optionalUrl,
+  phone: optionalString(20),
+  email: optionalEmail,
+  address: optionalString(500),
+  occupation: optionalString(200),
   generation: z.number().int().min(0).max(20).optional(),
   treeId: z.string().min(1, 'Tree ID is required'),
 });
@@ -80,42 +95,17 @@ export const updateMemberSchema = z.object({
     .max(100, 'Last name must be at most 100 characters')
     .trim()
     .optional(),
-  middleName: z
-    .string()
-    .max(100, 'Middle name must be at most 100 characters')
-    .trim()
-    .optional()
-    .nullable(),
-  birthDate: dateStringSchema.optional().nullable(),
-  deathDate: dateStringSchema.optional().nullable(),
+  middleName: optionalString(100).nullable(),
+  birthDate: dateStringSchema.optional().nullable().or(emptyToUndefined),
+  deathDate: dateStringSchema.optional().nullable().or(emptyToUndefined),
   gender: genderEnum.optional().nullable(),
-  bio: z
-    .string()
-    .max(2000, 'Bio must be at most 2000 characters')
-    .trim()
-    .optional()
-    .nullable(),
-  avatar: z.string().url('Avatar must be a valid URL').optional().nullable(),
-  coverImage: z.string().url('Cover Image must be a valid URL').optional().nullable(),
-  phone: z
-    .string()
-    .max(20, 'Phone must be at most 20 characters')
-    .trim()
-    .optional()
-    .nullable(),
-  email: z.string().email('Invalid email address').optional().nullable(),
-  address: z
-    .string()
-    .max(500, 'Address must be at most 500 characters')
-    .trim()
-    .optional()
-    .nullable(),
-  occupation: z
-    .string()
-    .max(200, 'Occupation must be at most 200 characters')
-    .trim()
-    .optional()
-    .nullable(),
+  bio: optionalString(2000).nullable(),
+  avatar: optionalUrl.nullable(),
+  coverImage: optionalUrl.nullable(),
+  phone: optionalString(20).nullable(),
+  email: optionalEmail.nullable(),
+  address: optionalString(500).nullable(),
+  occupation: optionalString(200).nullable(),
   generation: z.number().int().min(0).max(20).optional(),
 });
 

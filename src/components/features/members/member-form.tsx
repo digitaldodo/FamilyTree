@@ -117,7 +117,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
         <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">Cover Image</label>
         <ImageUpload 
           value={coverImage} 
-          onChange={(val) => setValue('coverImage', val || '')} 
+          onChange={(val) => setValue('coverImage', val || undefined)} 
           folder="family-tree/covers"
           isCover
         />
@@ -128,7 +128,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
         <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">Profile Photo</label>
         <ImageUpload 
           value={avatar} 
-          onChange={(val) => setValue('avatar', val || '')} 
+          onChange={(val) => setValue('avatar', val || undefined)} 
           folder="family-tree/avatars"
         />
       </div>

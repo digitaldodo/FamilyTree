@@ -61,12 +61,26 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+
+    console.log('[MEMBER_CREATE] Payload received:', {
+      userId: session.user.id,
+      treeId: body.treeId,
+      firstName: body.firstName,
+      lastName: body.lastName,
+      hasRelations: Array.isArray(body.relations) ? body.relations.length : 0,
+    });
+
     const validation = createMemberSchema.safeParse(body);
 
     if (!validation.success) {
       const messages = validation.error.issues
         .map((e) => e.message)
         .join(', ');
+      console.error('[MEMBER_CREATE_VALIDATION_ERROR]', {
+        userId: session.user.id,
+        treeId: body.treeId,
+        errors: validation.error.issues,
+      });
       return errorResponse('VALIDATION_ERROR', messages, 400);
     }
 
@@ -78,6 +92,11 @@ export async function POST(request: NextRequest) {
 
     const permission = await getTreePermission(session.user.id, treeId);
     if (!canEdit(permission)) {
+      console.error('[MEMBER_CREATE_PERMISSION_ERROR]', {
+        userId: session.user.id,
+        treeId,
+        permission,
+      });
       return errorResponse('FORBIDDEN', 'You do not have permission to edit this tree', 403);
     }
 
@@ -89,22 +108,46 @@ export async function POST(request: NextRequest) {
 
     const relations = body.relations || [];
 
-    const member = await prisma.$transaction(async (tx) => {
-      const newMember = await tx.member.create({
-        data: {
-          ...rest,
-          birthDate: birthDate ? new Date(birthDate) : null,
-          deathDate: deathDate ? new Date(deathDate) : null,
-          tree: { connect: { id: treeId } },
-        },
-      });
+    // Clean the data: convert empty strings to null for optional fields
+    // so Prisma stores NULL instead of empty strings
+    const cleanData = (obj: Record<string, unknown>) => {
+      const cleaned: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(obj)) {
+        if (value === undefined) continue;
+        cleaned[key] = value === '' ? null : value;
+      }
+      return cleaned;
+    };
 
-      if (relations && Array.isArray(relations) && relations.length > 0) {
-        for (const rel of relations) {
-          if (!rel.id || !rel.type) continue;
-          
+    console.log('[MEMBER_CREATE] Creating member with data:', {
+      userId: session.user.id,
+      treeId,
+      cleanedFields: Object.keys(rest),
+      hasBirthDate: !!birthDate,
+      hasDeathDate: !!deathDate,
+      relationCount: relations.length,
+    });
+
+    // Create the member first, then add relationships
+    const newMember = await prisma.member.create({
+      data: {
+        firstName: rest.firstName,
+        lastName: rest.lastName,
+        ...cleanData(rest),
+        birthDate: birthDate ? new Date(birthDate) : null,
+        deathDate: deathDate ? new Date(deathDate) : null,
+        tree: { connect: { id: treeId } },
+      } as any,
+    });
+
+    // Create relationships if any
+    if (relations && Array.isArray(relations) && relations.length > 0) {
+      for (const rel of relations) {
+        if (!rel.id || !rel.type) continue;
+
+        try {
           if (rel.type === 'PARENT') {
-            await tx.relationship.create({
+            await prisma.relationship.create({
               data: {
                 type: 'PARENT',
                 fromId: rel.id,
@@ -112,7 +155,7 @@ export async function POST(request: NextRequest) {
               },
             });
           } else {
-            await tx.relationship.create({
+            await prisma.relationship.create({
               data: {
                 type: rel.type,
                 fromId: newMember.id,
@@ -120,15 +163,29 @@ export async function POST(request: NextRequest) {
               },
             });
           }
+        } catch (relError) {
+          console.error('[MEMBER_CREATE_RELATIONSHIP_ERROR]', {
+            memberId: newMember.id,
+            relation: rel,
+            error: getErrorMessage(relError),
+          });
+          // Continue creating other relationships even if one fails
         }
       }
+    }
 
-      return newMember;
+    console.log('[MEMBER_CREATE_SUCCESS]', {
+      memberId: newMember.id,
+      treeId,
+      userId: session.user.id,
     });
 
-    return successResponse(member, 'Member created successfully', 201);
+    return successResponse(newMember, 'Member created successfully', 201);
   } catch (error) {
-    console.error('[MEMBER_CREATE_ERROR]', error);
+    console.error('[MEMBER_CREATE_ERROR]', {
+      error: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return errorResponse('CREATE_ERROR', getErrorMessage(error), 500);
   }
 }
