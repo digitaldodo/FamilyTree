@@ -15,6 +15,7 @@ import { Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { ImageUpload } from './image-upload';
 import { RelationshipSelector } from './relationship-selector';
 import { useAppStore } from '@/store/use-app-store';
+import { useGenerations } from '@/hooks/use-generations';
 
 const formSchema = updateMemberSchema.extend({
   firstName: z.string().min(1, 'First name is required'),
@@ -46,6 +47,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
   });
 
   const { activeTreeId, defaultGenerationForNewMember } = useAppStore();
+  const { generations } = useGenerations();
   const [status, setStatus] = React.useState<'Alive' | 'Deceased'>(member?.deathDate ? 'Deceased' : 'Alive');
 
   const avatar = watch('avatar');
@@ -91,7 +93,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       birthDate: data.birthDate || undefined,
       deathDate: status === 'Alive' ? undefined : (data.deathDate || undefined),
       treeId: activeTreeId || undefined,
-      generationId: member?.generationId ?? defaultGenerationForNewMember ?? undefined,
+      generationId: data.generationId || member?.generationId || defaultGenerationForNewMember || undefined,
       relations
     };
     await onSubmit(formattedData);
@@ -146,8 +148,32 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
         </div>
       </div>
 
-      <div>
-        <label className="text-sm font-medium mb-1 block">Gender</label>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-sm font-medium mb-1 block">Generation</label>
+          <Controller
+            name="generationId"
+            control={control}
+            defaultValue={member?.generationId || defaultGenerationForNewMember || undefined}
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange} disabled={field.disabled}>
+                <SelectTrigger className={errors.generationId ? 'border-destructive' : ''}>
+                  <SelectValue placeholder="Select generation" />
+                </SelectTrigger>
+                <SelectContent>
+                  {generations.map((gen) => (
+                    <SelectItem key={gen.id} value={gen.id}>
+                      {gen.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.generationId && <span className="text-xs text-destructive">{errors.generationId?.message as string}</span>}
+        </div>
+        <div>
+          <label className="text-sm font-medium mb-1 block">Gender</label>
         <Controller
           name="gender"
           control={control}

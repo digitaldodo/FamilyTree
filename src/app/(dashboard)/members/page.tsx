@@ -85,13 +85,13 @@ export default function MembersPage() {
             <Button className="hidden md:flex shrink-0" onClick={() => {
               if (sortedGenerations.length === 0) {
                 const name = prompt('Enter first generation name (e.g. Founders):');
-                if (name) createGeneration(name).then((gen) => handleAddMember(gen?.id));
+                if (name) createGeneration(name);
               } else {
                 handleAddMember();
               }
             }}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Member
+              {sortedGenerations.length === 0 ? <TreePine className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+              {sortedGenerations.length === 0 ? 'Create First Generation' : 'Add Member'}
             </Button>
             {/* Mobile FAB */}
             <Button 
@@ -99,13 +99,13 @@ export default function MembersPage() {
               onClick={() => {
                 if (sortedGenerations.length === 0) {
                   const name = prompt('Enter first generation name (e.g. Founders):');
-                  if (name) createGeneration(name).then((gen) => handleAddMember(gen?.id));
+                  if (name) createGeneration(name);
                 } else {
                   handleAddMember();
                 }
               }}
             >
-              <Plus className="w-6 h-6" />
+              {sortedGenerations.length === 0 ? <TreePine className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
             </Button>
           </>
         )}
@@ -128,7 +128,7 @@ export default function MembersPage() {
             icon={UsersRound}
             title="No generations added yet"
             description="Start building your family tree by creating the first generation."
-            actionLabel={hasEditAccess ? "Add First Generation" : undefined}
+            actionLabel={hasEditAccess ? "Create First Generation" : undefined}
             onAction={hasEditAccess ? () => {
               const name = prompt('Enter first generation name (e.g. Founders):');
               if (name) createGeneration(name);
@@ -182,7 +182,16 @@ export default function MembersPage() {
                       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
                         <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => handleAddMember(gen.id)}>
                           <UserPlus className="w-3.5 h-3.5 mr-1" />
-                          Add Member
+                          <span className="hidden sm:inline">Add Member</span>
+                          <span className="sm:hidden">Add</span>
+                        </Button>
+                        <Button variant="outline" size="sm" className="hidden sm:flex h-7 text-xs" onClick={() => handleAddGenerationAbove(gen.orderIndex)}>
+                          <ArrowUpToLine className="w-3.5 h-3.5 mr-1" />
+                          Add Generation Above
+                        </Button>
+                        <Button variant="outline" size="sm" className="hidden sm:flex h-7 text-xs" onClick={() => handleAddGenerationBelow(gen.orderIndex)}>
+                          <ArrowDownToLine className="w-3.5 h-3.5 mr-1" />
+                          Add Generation Below
                         </Button>
                         <Dropdown 
                           trigger={
@@ -192,10 +201,10 @@ export default function MembersPage() {
                           }
                         >
                           <div className="flex flex-col text-sm">
-                            <button className="flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={() => handleAddGenerationAbove(gen.orderIndex)}>
+                            <button className="sm:hidden flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={() => handleAddGenerationAbove(gen.orderIndex)}>
                               <ArrowUpToLine className="w-4 h-4 mr-2" /> Add Above
                             </button>
-                            <button className="flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={() => handleAddGenerationBelow(gen.orderIndex)}>
+                            <button className="sm:hidden flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={() => handleAddGenerationBelow(gen.orderIndex)}>
                               <ArrowDownToLine className="w-4 h-4 mr-2" /> Add Below
                             </button>
                             <button className="flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={() => handleRenameGeneration(gen.id, gen.name)}>
