@@ -104,6 +104,14 @@ export async function POST(request: NextRequest) {
       return errorResponse('VALIDATION_ERROR', messages, 400);
     }
 
+    const userExists = await prisma.user.findUnique({
+      where: { id: session.user.id }
+    });
+
+    if (!userExists) {
+      return errorResponse('UNAUTHORIZED', 'Authenticated user record not found in database.', 401);
+    }
+
     const { ownerId: _unused, ...rest } = validation.data;
 
     const tree = await prisma.tree.create({

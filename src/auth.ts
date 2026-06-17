@@ -52,6 +52,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }: { session: any; token: any }) {
       if (session.user && token.id) {
         session.user.id = token.id as string;
+        
+        // Auto-create user record if it doesn't exist in the database
+        // This handles cases where the DB is reset but the NextAuth session cookie persists
+        if (session.user.email) {
+          const existingUser = await prisma.user.findUnique({
+            where: { email: session.user.email }
+          });
+          
+          if (!existingUser) {
+            try {
+              await prisma.user.create({
+                data: {
+                  id: token.id as string,
+                  email: session.user.email,
+                  name: session.user.name || "Restored User",
+                  image: session.user.image || null,
+                }
+              });
+            } catch (error) {
+              console.error("Failed to auto-create missing user in session callback", error);
+            }
+          } else if (existingUser.id !== token.id) {
+            session.user.id = existingUser.id;
+          }
+        }
       }
       return session;
     }
