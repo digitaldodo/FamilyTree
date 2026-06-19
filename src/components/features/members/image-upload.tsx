@@ -14,6 +14,8 @@ interface ImageUploadProps {
 
 export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', isCover = false }: ImageUploadProps) {
   const [isProcessing, setIsProcessing] = React.useState(false);
+  
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "family-tree";
 
   const handleUploadSuccess = (result: any) => {
     setIsProcessing(true);
@@ -47,8 +49,12 @@ export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', i
       </div>
 
       <CldUploadWidget
-        uploadPreset="family_tree"
+        uploadPreset={uploadPreset}
         onSuccess={handleUploadSuccess}
+        onError={(error) => {
+          console.error("Cloudinary upload failed", error);
+          setIsProcessing(false);
+        }}
         options={{
           maxFiles: 1,
           resourceType: "image",

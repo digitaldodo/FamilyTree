@@ -17,6 +17,8 @@ export function UploadMemoryModal({ isOpen, onClose, onUpload }: UploadMemoryMod
   const [eventTag, setEventTag] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "family-tree";
+
   const handleUploadSuccess = async (result: any) => {
     setIsProcessing(true);
     try {
@@ -76,8 +78,12 @@ export function UploadMemoryModal({ isOpen, onClose, onUpload }: UploadMemoryMod
           </div>
 
           <CldUploadWidget
-            uploadPreset="family_tree"
+            uploadPreset={uploadPreset}
             onSuccess={handleUploadSuccess}
+            onError={(error) => {
+              console.error("Cloudinary upload failed", error);
+              setIsProcessing(false);
+            }}
             options={{
               maxFiles: 1,
               resourceType: "image",
