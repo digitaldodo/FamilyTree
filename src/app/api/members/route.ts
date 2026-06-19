@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
               return await tx.generation.create({
                 data: {
                   treeId,
-                  name: `Generation ${targetOrderIndex! + 1}`,
+                  name: 'Unnamed Generation',
                   orderIndex: targetOrderIndex!,
                 }
               });

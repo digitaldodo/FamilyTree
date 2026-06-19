@@ -121,7 +121,7 @@ export function GenerationActionMenu({
         <BottomSheet
           isOpen={isSheetOpen}
           onClose={() => setIsSheetOpen(false)}
-          title={`Generation ${index + 1}: ${generation.name}`}
+          title={generation.name || 'Unnamed Generation'}
         >
           {renderActions(true)}
         </BottomSheet>

@@ -23,7 +23,7 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
   };
 
   return (
-    <div className="absolute top-6 right-6 z-10 flex flex-row items-center gap-1.5 p-1.5 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-800/50 rounded-2xl shadow-xl">
+    <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-800/50 rounded-2xl shadow-xl w-full md:w-auto">
       <div className="mr-1">
         <GenerationFilter />
       </div>

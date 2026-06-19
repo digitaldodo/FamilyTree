@@ -150,8 +150,14 @@ function FamilyTreeCanvas() {
                 className="!bottom-6 !left-6 !m-0 rounded-2xl shadow-xl border-border bg-white/50 dark:bg-slate-900/50 backdrop-blur-md"
               />
             )}
-            <TreeToolbar />
-            <FloatingFamilyStats totalMembers={memberNodes.length} generations={useAppStore.getState().generations.length} />
+            <div className="absolute top-4 inset-x-4 z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pointer-events-none">
+              <div className="pointer-events-auto w-full md:w-auto">
+                <FloatingFamilyStats totalMembers={memberNodes.length} generations={useAppStore.getState().generations.length} />
+              </div>
+              <div className="pointer-events-auto w-full md:w-auto flex justify-start md:justify-end overflow-x-hidden">
+                <TreeToolbar />
+              </div>
+            </div>
           </>
         )}
 

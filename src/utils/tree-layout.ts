@@ -275,15 +275,15 @@ export function generateTreeLayout(
     const firstMemberId = firstFamilyRoot ? familyUnits.get(firstFamilyRoot)?.[0] : undefined;
     const firstMember = firstMemberId ? members.find(m => m.id === firstMemberId) : undefined;
 
-    let label = `Generation ${level + 1}`;
+    let label = 'Unnamed Generation';
     if (firstMember && firstMember.generationId) {
       const gen = generations.find(g => g.id === firstMember.generationId);
-      if (gen) {
+      if (gen && gen.name) {
         label = gen.name;
       }
     } else {
       const gen = generations.find(g => g.orderIndex === level);
-      if (gen) {
+      if (gen && gen.name) {
         label = gen.name;
       }
     }

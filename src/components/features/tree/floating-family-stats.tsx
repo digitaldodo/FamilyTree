@@ -15,7 +15,7 @@ export function FloatingFamilyStats({ totalMembers, generations }: FloatingFamil
       variants={scaleIn}
       initial="initial"
       animate="animate"
-      className="absolute top-6 left-6 z-10 flex gap-4"
+      className="flex flex-wrap gap-3 w-full md:w-auto"
     >
       <div className="flex items-center gap-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-full shadow-lg border border-white/20 dark:border-slate-800/50">
         <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/50 rounded-full text-indigo-600 dark:text-indigo-400">

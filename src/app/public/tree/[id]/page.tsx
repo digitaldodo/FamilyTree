@@ -74,7 +74,7 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
             </h2>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-xs font-medium text-white/90">
-                {generations.find(g => g.id === member.generationId)?.name || 'Unknown Generation'}
+                {generations.find(g => g.id === member.generationId)?.name || 'Unnamed Generation'}
               </span>
               {member.occupation && (
                 <span className="text-xs text-white/70 truncate">{member.occupation}</span>
