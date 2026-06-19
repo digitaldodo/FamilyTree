@@ -55,8 +55,6 @@ export function GenerationActionMenu({
         if (isMobile) {
           e.preventDefault();
           e.stopPropagation();
-          // Add debug logging temporarily to verify handler fires on mobile
-          console.log("Generation menu opened", generation.id);
           setIsSheetOpen(true);
         }
       }}
