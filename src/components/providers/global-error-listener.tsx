@@ -41,7 +41,7 @@ export function GlobalErrorListener() {
       }
 
       // Log genuine application errors cleanly
-      // eslint-disable-next-line no-console
+       
       console.log(`[${category}]`, error);
     };
 

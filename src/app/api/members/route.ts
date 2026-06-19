@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     return listResponse(members, total, page, limit);
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.log('[API Debug] GET /api/members', {
       method: 'GET',
       url: request.url,
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // eslint-disable-next-line no-console
+     
     console.log('[API Debug] POST /api/members request', {
       method: 'POST',
       url: request.url,
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     const validation = createMemberSchema.safeParse(body);
 
     if (!validation.success) {
-      // eslint-disable-next-line no-console
+       
       console.log('[API Debug] POST /api/members validation error', {
         method: 'POST',
         url: request.url,
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
 
     const permission = await getTreePermission(session.user.id, treeId);
     if (!canEdit(permission)) {
-      // eslint-disable-next-line no-console
+       
       console.log('[API Debug] POST /api/members permission error', {
         method: 'POST',
         url: request.url,
@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
        return errorResponse('VALIDATION_ERROR', 'Generation could not be determined and was not provided.', 400);
     }
 
-    // eslint-disable-next-line no-console
+     
     console.log('[API Debug] POST /api/members creating', {
       userId: session.user.id,
       treeId,
@@ -264,7 +264,7 @@ export async function POST(request: NextRequest) {
             });
           }
         } catch (relError) {
-          // eslint-disable-next-line no-console
+           
           console.log('[API Debug] POST /api/members relationship error', {
             method: 'POST',
             url: request.url,
@@ -277,7 +277,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // eslint-disable-next-line no-console
+     
     console.log('[API Debug] POST /api/members success', {
       method: 'POST',
       url: request.url,
@@ -289,7 +289,7 @@ export async function POST(request: NextRequest) {
 
     return successResponse(newMember, 'Member created successfully', 201);
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.log('[API Debug] POST /api/members error', {
       method: 'POST',
       url: request.url,

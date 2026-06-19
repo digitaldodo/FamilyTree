@@ -61,7 +61,7 @@ export default function AdminPage() {
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Tree Settings</h1>
-        <p className="text-muted-foreground mt-2">Manage settings and collaborators for "{activeTree?.name}".</p>
+        <p className="text-muted-foreground mt-2">Manage settings and collaborators for &quot;{activeTree?.name}&quot;.</p>
       </div>
 
       <section className="bg-card border border-border rounded-2xl p-6 shadow-sm">

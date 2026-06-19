@@ -53,7 +53,7 @@ export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', i
         uploadPreset={uploadPreset}
         onSuccess={handleUploadSuccess}
         onError={(error) => {
-          // eslint-disable-next-line no-console
+           
           console.log('[API Debug] Cloudinary upload failed', error);
           toast.error('Image upload failed');
           setIsProcessing(false);

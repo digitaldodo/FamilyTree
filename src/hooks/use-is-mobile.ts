@@ -12,7 +12,7 @@ export function useIsMobile() {
     };
     
     // Set initial state
-    // eslint-disable-next-line
+     
     setIsMobile(mql.matches);
 
     mql.addEventListener('change', onChange);

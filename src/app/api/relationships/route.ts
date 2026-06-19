@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     } else if (type === 'PARENT') {
       // fromId is Parent, toId is Child
       if (fromMember.generation.orderIndex >= toMember.generation.orderIndex) {
-        return errorResponse('VALIDATION_ERROR', 'Parents must belong to an older generation (lower order) than children', 400);
+        return errorResponse('VALIDATION_ERROR', 'Parent must belong to an older generation.', 400);
       }
     }
 
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     return successResponse(newRel, 'Relationship created successfully', 201);
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.log('[API Debug] POST /api/relationships', {
       method: 'POST',
       url: request.url,

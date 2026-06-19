@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { Metadata } from 'next';
 
 /**
  * Utility to merge tailwind classes safely
@@ -10,6 +11,32 @@ export function cn(...inputs: ClassValue[]) {
 
 export function successResponse(data: any, message = 'Success', status = 200) {
   return Response.json({ success: true, message, data }, { status });
+}
+
+export function constructMetadata({
+  title = "FamilyTree - Uncover Your Ancestry",
+  description = "A modern, beautiful SaaS platform to build, visualize, and share your family history with ease.",
+  image = "/globe.svg",
+  icons = "/favicon.ico",
+}: {
+  title?: string;
+  description?: string;
+  image?: string;
+  icons?: string;
+} = {}): Metadata {
+  const meta: Metadata = {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: image }],
+    },
+    icons,
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  };
+
+  return meta;
 }
 
 export function errorResponse(messageOrCode: string = 'An error occurred', detailsOrMessage?: any, statusOrStatus?: any) {
@@ -31,7 +58,7 @@ export function errorResponse(messageOrCode: string = 'An error occurred', detai
 }
 
 export function listResponse(data: any[], totalOrMeta?: number | any, page?: number, limit?: number) {
-  let meta = typeof totalOrMeta === 'number' ? { total: totalOrMeta, page, limit } : totalOrMeta;
+  const meta = typeof totalOrMeta === 'number' ? { total: totalOrMeta, page, limit } : totalOrMeta;
   return Response.json({ success: true, data, meta }, { status: 200 });
 }
 

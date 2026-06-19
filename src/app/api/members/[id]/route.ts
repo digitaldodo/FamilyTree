@@ -105,7 +105,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const relations = body.relations;
 
     // Validate Chronology if generation is changing or relations are being updated
-    let finalGenerationId = generationId || existing.generationId;
+    const finalGenerationId = generationId || existing.generationId;
 
     if (generationId !== undefined && generationId !== existing.generationId) {
       const newGeneration = await prisma.generation.findUnique({ where: { id: generationId } });

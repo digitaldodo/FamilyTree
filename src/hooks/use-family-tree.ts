@@ -144,12 +144,26 @@ export function useFamilyTree(treeId?: string) {
         
         let edgeColor = '#94a3b8'; // Default slate
         let animated = false;
+        let sourceHandle: string | undefined = undefined;
+        let targetHandle: string | undefined = undefined;
+        let zIndex = 0;
 
         if (rel.type === 'SPOUSE') {
           edgeColor = '#f43f5e'; // Rose for spouse
+          sourceHandle = 'spouse';
+          targetHandle = 'spouse-target';
+          zIndex = 1;
         } else if (rel.type === 'PARENT') {
           edgeColor = '#6366f1'; // Indigo for child
           animated = true;
+          sourceHandle = 'parent-source';
+          targetHandle = 'child-target';
+          zIndex = 0;
+        } else if (rel.type === 'SIBLING') {
+          edgeColor = '#10b981'; // Emerald for sibling
+          sourceHandle = 'spouse'; // Reuse lateral handles for siblings for now
+          targetHandle = 'spouse-target';
+          zIndex = 1;
         }
 
         edges.push({
@@ -157,9 +171,10 @@ export function useFamilyTree(treeId?: string) {
           source: member.id,
           target: rel.toId,
           type: 'relationship',
-          sourceHandle: rel.type === 'SPOUSE' ? 'spouse' : undefined,
-          targetHandle: rel.type === 'SPOUSE' ? 'spouse-target' : undefined,
+          sourceHandle,
+          targetHandle,
           animated,
+          zIndex,
           data: { type: rel.type },
           style: { stroke: edgeColor, strokeWidth: 2 },
           markerEnd: rel.type === 'PARENT' ? {
@@ -169,6 +184,8 @@ export function useFamilyTree(treeId?: string) {
         });
       });
     });
+
+    console.log('[Tree Diagnostics] Nodes:', nodes.length, 'Edges:', edges.length, 'Generations:', sortedGens.map(g => g.name));
 
     return { initialNodes: nodes, initialEdges: edges };
   }, [members]);

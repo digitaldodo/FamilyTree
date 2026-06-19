@@ -355,7 +355,7 @@ export default function PublicTreePage() {
           </div>
           <h2 className="text-xl font-semibold mb-2">Tree not found</h2>
           <p className="text-muted-foreground mb-6">
-            This family tree doesn't exist or isn't shared publicly.
+            This family tree doesn&apos;t exist or isn&apos;t shared publicly.
           </p>
           <Link href="/login" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity">
             <LogIn className="w-4 h-4" />
@@ -373,7 +373,7 @@ export default function PublicTreePage() {
         <div className="flex items-center gap-2 text-sm">
           <Eye className="w-4 h-4 text-primary" />
           <span className="text-muted-foreground">
-            You're viewing <span className="font-semibold text-foreground">{treeData.name}</span> — a shared family tree
+            You&apos;re viewing <span className="font-semibold text-foreground">{treeData.name}</span> — a shared family tree
           </span>
         </div>
         <Link

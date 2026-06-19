@@ -41,7 +41,7 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
       onClick={handleClick}
     >
       {/* Target handle for incoming parent connections */}
-      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-purple-500 border-background" />
+      <Handle type="target" position={Position.Top} id="child-target" className="w-3 h-3 bg-purple-500 border-background" />
 
       {/* Photo Area (70-80% height) */}
       <div className="flex-1 relative bg-muted flex items-center justify-center overflow-hidden">
@@ -77,7 +77,7 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
       </div>
 
       {/* Source handles for outgoing connections */}
-      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-purple-500 border-background" />
+      <Handle type="source" position={Position.Bottom} id="parent-source" className="w-3 h-3 bg-purple-500 border-background" />
       <Handle type="source" position={Position.Right} id="spouse" className="w-3 h-3 top-1/2 bg-rose-500 border-background" />
       <Handle type="target" position={Position.Left} id="spouse-target" className="w-3 h-3 top-1/2 bg-rose-500 border-background" />
     </div>

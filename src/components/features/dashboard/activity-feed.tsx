@@ -74,7 +74,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                       : "viewed"}
                     {" "}
                     {activity.entityType.toLowerCase()}{" "}
-                    <span className="font-medium text-foreground">"{activity.entityName}"</span>
+                    <span className="font-medium text-foreground">&quot;{activity.entityName}&quot;</span>
                   </p>
                   <p className="text-xs text-muted-foreground font-medium">
                     {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}

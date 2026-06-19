@@ -42,7 +42,7 @@ export async function GET(
 
     return successResponse(generations, 'Generations fetched successfully');
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.log('[API Debug] GET /api/trees/[id]/generations', {
       method: 'GET',
       url: request.url,
@@ -140,7 +140,7 @@ export async function POST(
 
     return successResponse(result, 'Generation created successfully', 201);
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.log('[API Debug] POST /api/trees/[id]/generations', {
       method: 'POST',
       url: request.url,

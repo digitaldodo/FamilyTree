@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
     return listResponse(allTrees, total, page, limit);
   } catch (error) {
     const session = await auth().catch(() => null);
-    // eslint-disable-next-line no-console
+     
     console.log('[API Debug] GET /api/trees', {
       method: 'GET',
       url: request.url,
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
 
     return successResponse(tree, 'Tree created successfully', 201);
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.log('[API Debug] POST /api/trees', {
       method: 'POST',
       url: request.url,

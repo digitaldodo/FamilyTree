@@ -101,7 +101,7 @@ function DashboardContent() {
           activities: [], // Activity feed from separate endpoint if needed
         });
       } catch (error) {
-        // eslint-disable-next-line no-console
+         
         console.log('[App Error] Failed to load dashboard data:', error);
       } finally {
         setIsLoading(false);

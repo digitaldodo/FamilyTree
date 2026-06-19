@@ -91,7 +91,7 @@ export function NotificationDropdown() {
                 ) : (
                   <div className="p-8 text-center text-muted-foreground flex flex-col items-center">
                     <Bell className="w-8 h-8 mb-2 opacity-20" />
-                    <p className="text-sm">You're all caught up!</p>
+                    <p className="text-sm">You&apos;re all caught up!</p>
                   </div>
                 )}
               </div>

@@ -34,6 +34,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
         members: {
           orderBy: [{ firstName: 'asc' }],
           include: {
+            generation: true,
             relationsFrom: {
               include: {
                 to: {
