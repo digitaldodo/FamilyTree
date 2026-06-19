@@ -269,9 +269,24 @@ export function generateTreeLayout(
   const laneWidth = Math.max(3000, maxGlobalX - minGlobalX + 1200);
   const laneX = minGlobalX === Infinity ? -1000 : minGlobalX - 600;
 
-  familiesByLevel.forEach((_, level) => {
-    // Generate an automatic label
-    const label = `Generation ${level + 1}`;
+  familiesByLevel.forEach((families, level) => {
+    // Try to find the generation name based on members at this level
+    const firstFamilyRoot = families[0]?.root;
+    const firstMemberId = firstFamilyRoot ? familyUnits.get(firstFamilyRoot)?.[0] : undefined;
+    const firstMember = firstMemberId ? members.find(m => m.id === firstMemberId) : undefined;
+
+    let label = `Generation ${level + 1}`;
+    if (firstMember && firstMember.generationId) {
+      const gen = generations.find(g => g.id === firstMember.generationId);
+      if (gen) {
+        label = gen.name;
+      }
+    } else {
+      const gen = generations.find(g => g.orderIndex === level);
+      if (gen) {
+        label = gen.name;
+      }
+    }
 
     nodes.push({
       id: `lane-level-${level}`,
