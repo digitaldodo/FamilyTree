@@ -152,11 +152,14 @@ export async function POST(request: NextRequest) {
           const relative = relatives.find(r => r.id === rel.id);
           if (!relative) continue;
 
-          // If relative is PARENT, child (new member) belongs to generation below (+1)
-          // If relative is SPOUSE/SIBLING, new member belongs to SAME generation
-          const expectedIndex = rel.type === 'PARENT' 
-            ? relative.generation.orderIndex + 1 
-            : relative.generation.orderIndex;
+          let expectedIndex: number;
+          if (rel.type === 'PARENT') {
+            expectedIndex = relative.generation.orderIndex + 1;
+          } else if (rel.type === 'CHILD') {
+            expectedIndex = relative.generation.orderIndex - 1;
+          } else {
+            expectedIndex = relative.generation.orderIndex;
+          }
 
           if (targetOrderIndex === null) {
             targetOrderIndex = expectedIndex;
@@ -235,6 +238,14 @@ export async function POST(request: NextRequest) {
                 type: 'PARENT',
                 fromId: rel.id,
                 toId: newMember.id,
+              },
+            });
+          } else if (rel.type === 'CHILD') {
+            await prisma.relationship.create({
+              data: {
+                type: 'PARENT',
+                fromId: newMember.id,
+                toId: rel.id,
               },
             });
           } else {

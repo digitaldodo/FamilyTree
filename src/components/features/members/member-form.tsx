@@ -58,30 +58,59 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
   const coverImage = watch('coverImage');
 
   // Relationships state
-  const [relations, setRelations] = React.useState<{type: 'PARENT' | 'SPOUSE' | 'SIBLING', id: string}[]>(() => {
+  const [relations, setRelations] = React.useState<{type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING', id: string}[]>(() => {
     if (!member) return [];
     // Initialize with existing relationships
-    const existing: {type: 'PARENT' | 'SPOUSE' | 'SIBLING', id: string}[] = [];
-    member.relationsFrom.forEach(r => existing.push({ type: r.type, id: r.toId }));
-    member.relationsTo.forEach(r => {
-      // If someone is related to this member as PARENT, then this member is a child.
-      // We store it simply as the original relation structure or manage it conceptually.
-      // For simplicity in Phase 4 form, we just map out the direct relationships they have initiated or are part of.
-      if (r.type === 'SPOUSE' || r.type === 'SIBLING') {
-        existing.push({ type: r.type, id: r.fromId });
-      } else if (r.type === 'PARENT') {
-        existing.push({ type: 'PARENT', id: r.fromId });
+    const existing: {type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING', id: string}[] = [];
+    
+    // member.relationsFrom means member is the 'from' in the relationship.
+    // If PARENT, member is Parent -> toId is Child.
+    member.relationsFrom.forEach(r => {
+      if (r.type === 'PARENT') {
+        existing.push({ type: 'CHILD', id: r.toId });
+      } else if (r.type === 'SPOUSE' || r.type === 'SIBLING') {
+        existing.push({ type: r.type, id: r.toId });
       }
     });
+
+    // member.relationsTo means member is the 'to' in the relationship.
+    // If PARENT, member is Child -> fromId is Parent.
+    member.relationsTo.forEach(r => {
+      if (r.type === 'PARENT') {
+        existing.push({ type: 'PARENT', id: r.fromId });
+      } else if (r.type === 'SPOUSE' || r.type === 'SIBLING') {
+        existing.push({ type: r.type, id: r.fromId });
+      }
+    });
+    
     // Remove duplicates
     return existing.filter((v, i, a) => a.findIndex(t => t.id === v.id && t.type === v.type) === i);
   });
 
-  const handleAddRelation = (id: string, type: 'PARENT' | 'SPOUSE' | 'SIBLING') => {
+  const handleAddRelation = (id: string, type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING') => {
+    if (type === 'SIBLING') {
+      const parentIds = relations.filter(r => r.type === 'PARENT').map(r => r.id);
+      if (parentIds.length > 0) {
+        if (window.confirm("Copy existing parents to sibling?")) {
+          // This will be handled in the frontend logic. 
+          // For now, we will add the sibling.
+          // Wait, the API creates relations for the CURRENT member.
+          // If we want to add parents to the sibling, we need to call an API.
+          // Let's defer this logic to an effect or handle it by triggering an API call directly.
+          Promise.all(parentIds.map(parentId => 
+             fetch('/api/relationships', {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({ type: 'PARENT', fromId: parentId, toId: id })
+             })
+          )).catch(console.error);
+        }
+      }
+    }
     setRelations(prev => [...prev, { id, type }]);
   };
 
-  const handleRemoveRelation = (id: string, type: 'PARENT' | 'SPOUSE' | 'SIBLING') => {
+  const handleRemoveRelation = (id: string, type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING') => {
     setRelations(prev => prev.filter(r => !(r.id === id && r.type === type)));
   };
 
@@ -310,6 +339,14 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
             type="PARENT"
             label="Parents"
             existingRelations={relations.filter(r => r.type === 'PARENT').map(r => r.id)}
+            onAddRelation={handleAddRelation}
+            onRemoveRelation={handleRemoveRelation}
+          />
+          <RelationshipSelector
+            currentMemberId={member?.id}
+            type="CHILD"
+            label="Children"
+            existingRelations={relations.filter(r => r.type === 'CHILD').map(r => r.id)}
             onAddRelation={handleAddRelation}
             onRemoveRelation={handleRemoveRelation}
           />

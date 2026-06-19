@@ -144,6 +144,11 @@ export async function PUT(request: NextRequest, { params }: Params) {
              if (newGeneration.orderIndex <= relative.generation.orderIndex) {
                return errorResponse('VALIDATION_ERROR', `Cannot move member. Children must belong to a younger generation (higher order) than parents.`, 400);
              }
+          } else if (rel.type === 'CHILD') {
+             // Form says "Children" - meaning the relative is the Child, member is the Parent.
+             if (newGeneration.orderIndex >= relative.generation.orderIndex) {
+               return errorResponse('VALIDATION_ERROR', `Cannot move member. Parents must belong to an older generation (lower order) than children.`, 400);
+             }
           }
         }
       } else {
@@ -196,12 +201,14 @@ export async function PUT(request: NextRequest, { params }: Params) {
         // So we should only delete relations that the form manages!
         // Form manages:
         // PARENT: where member is child (toId = id)
+        // CHILD (form logic): where member is parent (fromId = id)
         // SPOUSE: all
         // SIBLING: all
         await tx.relationship.deleteMany({
           where: {
             OR: [
               { type: 'PARENT', toId: id },
+              { type: 'PARENT', fromId: id },
               { type: 'SPOUSE', fromId: id },
               { type: 'SPOUSE', toId: id },
               { type: 'SIBLING', fromId: id },
@@ -216,6 +223,10 @@ export async function PUT(request: NextRequest, { params }: Params) {
             if (rel.type === 'PARENT') {
               await tx.relationship.create({
                 data: { type: 'PARENT', fromId: rel.id, toId: id },
+              });
+            } else if (rel.type === 'CHILD') {
+              await tx.relationship.create({
+                data: { type: 'PARENT', fromId: id, toId: rel.id },
               });
             } else {
               await tx.relationship.create({

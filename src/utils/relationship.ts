@@ -8,7 +8,7 @@ import { MemberWithRelations } from "@/types/member";
 export function getValidRelationshipCandidates(
   members: MemberWithRelations[],
   currentMemberId: string | undefined,
-  relationType: 'PARENT' | 'SPOUSE' | 'SIBLING'
+  relationType: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING'
 ): MemberWithRelations[] {
   if (!currentMemberId) return members;
 
@@ -20,15 +20,25 @@ export function getValidRelationshipCandidates(
     if (member.id === currentMemberId) return false;
 
     // Check if relationship already exists
-    const hasRelationFrom = currentMember.relationsFrom.some(r => r.toId === member.id && r.type === relationType);
-    const hasRelationTo = currentMember.relationsTo.some(r => r.fromId === member.id && r.type === relationType);
+    let hasRelation = false;
+    if (relationType === 'PARENT') {
+       hasRelation = currentMember.relationsTo.some(r => r.fromId === member.id && r.type === 'PARENT');
+    } else if (relationType === 'CHILD') {
+       hasRelation = currentMember.relationsFrom.some(r => r.toId === member.id && r.type === 'PARENT');
+    } else {
+       hasRelation = currentMember.relationsFrom.some(r => r.toId === member.id && r.type === relationType) ||
+                     currentMember.relationsTo.some(r => r.fromId === member.id && r.type === relationType);
+    }
     
-    if (hasRelationFrom || hasRelationTo) return false;
+    if (hasRelation) return false;
 
     // Advanced: Prevent circular dependencies (e.g. parent cannot be child)
     if (relationType === 'PARENT') {
       const isAlreadyChild = currentMember.relationsFrom.some(r => r.toId === member.id && r.type === 'PARENT');
       if (isAlreadyChild) return false;
+    } else if (relationType === 'CHILD') {
+      const isAlreadyParent = currentMember.relationsTo.some(r => r.fromId === member.id && r.type === 'PARENT');
+      if (isAlreadyParent) return false;
     }
 
     return true;

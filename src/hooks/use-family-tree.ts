@@ -157,6 +157,8 @@ export function useFamilyTree(treeId?: string) {
           source: member.id,
           target: rel.toId,
           type: 'relationship',
+          sourceHandle: rel.type === 'SPOUSE' ? 'spouse' : undefined,
+          targetHandle: rel.type === 'SPOUSE' ? 'spouse-target' : undefined,
           animated,
           data: { type: rel.type },
           style: { stroke: edgeColor, strokeWidth: 2 },

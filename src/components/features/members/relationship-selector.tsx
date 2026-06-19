@@ -10,10 +10,10 @@ import { Plus, X } from 'lucide-react';
 
 interface RelationshipSelectorProps {
   currentMemberId?: string;
-  type: 'PARENT' | 'SPOUSE' | 'SIBLING';
+  type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING';
   label: string;
-  onAddRelation: (memberId: string, type: 'PARENT' | 'SPOUSE' | 'SIBLING') => void;
-  onRemoveRelation: (memberId: string, type: 'PARENT' | 'SPOUSE' | 'SIBLING') => void;
+  onAddRelation: (memberId: string, type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING') => void;
+  onRemoveRelation: (memberId: string, type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING') => void;
   existingRelations: string[]; // array of member IDs already related in this type
 }
 
