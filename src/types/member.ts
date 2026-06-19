@@ -1,6 +1,8 @@
 // Member Types
 // Synchronized with Prisma schema
 
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
+
 /** Represents a family tree member */
 export interface Member {
   id: string;
@@ -9,7 +11,7 @@ export interface Member {
   middleName?: string | null;
   birthDate?: string | null;
   deathDate?: string | null;
-  gender?: 'MALE' | 'FEMALE' | 'OTHER' | null;
+  gender?: Gender | null;
   bio?: string | null;
   imageUrl?: string | null;
   coverImage?: string | null;
@@ -30,7 +32,7 @@ export interface CreateMemberInput {
   middleName?: string;
   birthDate?: string;
   deathDate?: string;
-  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  gender?: Gender;
   bio?: string;
   imageUrl?: string;
   coverImage?: string;
@@ -49,7 +51,7 @@ export interface UpdateMemberInput {
   middleName?: string;
   birthDate?: string;
   deathDate?: string;
-  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  gender?: Gender;
   bio?: string;
   imageUrl?: string;
   coverImage?: string;

@@ -1,7 +1,7 @@
 import { User2 } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { Gender } from '@prisma/client';
+import { Gender } from '@/types/member';
 
 interface MemberAvatarProps {
   imageUrl?: string | null;
