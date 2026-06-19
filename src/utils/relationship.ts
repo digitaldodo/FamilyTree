@@ -2,92 +2,102 @@
 
 import { MemberWithRelations, Generation } from "@/types/member";
 
-/**
- * Get available members for a new relationship, preventing circular dependencies or duplicate identical relations.
- */
-export function getValidRelationshipCandidates(
+export function alreadyRelated(memberA: MemberWithRelations, memberB: MemberWithRelations): boolean {
+  if (memberA.id === memberB.id) return true;
+
+  const isParent = memberA.relationsTo.some(r => r.fromId === memberB.id && r.type === 'PARENT') ||
+                   memberB.relationsTo.some(r => r.fromId === memberA.id && r.type === 'PARENT');
+  
+  const isChild = memberA.relationsFrom.some(r => r.toId === memberB.id && r.type === 'PARENT') ||
+                  memberB.relationsFrom.some(r => r.toId === memberA.id && r.type === 'PARENT');
+                  
+  const isSpouse = memberA.relationsFrom.some(r => r.toId === memberB.id && r.type === 'SPOUSE') ||
+                   memberA.relationsTo.some(r => r.fromId === memberB.id && r.type === 'SPOUSE');
+                   
+  const isDirectSibling = memberA.relationsFrom.some(r => r.toId === memberB.id && r.type === 'SIBLING') ||
+                          memberA.relationsTo.some(r => r.fromId === memberB.id && r.type === 'SIBLING');
+                          
+  const memberAParents = memberA.relationsTo.filter(r => r.type === 'PARENT').map(r => r.fromId);
+  const memberBParents = memberB.relationsTo.filter(r => r.type === 'PARENT').map(r => r.fromId);
+  const isDerivedSibling = memberAParents.length > 0 && memberAParents.some(p => memberBParents.includes(p));
+  
+  const isSibling = isDirectSibling || isDerivedSibling;
+
+  return isParent || isChild || isSpouse || isSibling;
+}
+
+export function wouldCreateConflict(
+  memberAId: string, 
+  memberBId: string, 
+  relationType: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING',
+  members: MemberWithRelations[],
+  generations: Generation[],
+  memberAGenerationId?: string
+): boolean {
+  const getGenerationOrder = (genId: string) => {
+    const gen = generations.find(g => g.id === genId);
+    return gen ? gen.orderIndex : 0;
+  };
+
+  const memberA = members.find(m => m.id === memberAId);
+  const memberB = members.find(m => m.id === memberBId);
+  if (!memberB) return true;
+
+  const effectiveGenIdA = memberAGenerationId || memberA?.generationId;
+  if (!effectiveGenIdA) return true;
+
+  const genOrderA = getGenerationOrder(effectiveGenIdA);
+  const genOrderB = getGenerationOrder(memberB.generationId);
+
+  if (relationType === 'PARENT') {
+    if (genOrderB !== genOrderA - 1) return true;
+  } else if (relationType === 'CHILD') {
+    if (genOrderB !== genOrderA + 1) return true;
+  } else if (relationType === 'SIBLING' || relationType === 'SPOUSE') {
+    if (genOrderB !== genOrderA) return true;
+  }
+
+  return false;
+}
+
+function getEligibleMembersBase(
   members: MemberWithRelations[],
   generations: Generation[],
   currentMemberId: string | undefined,
   relationType: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING',
   currentGenerationId?: string
 ): MemberWithRelations[] {
-  const getGenerationOrder = (genId: string) => {
-    const gen = generations.find(g => g.id === genId);
-    return gen ? gen.orderIndex : 0;
-  };
-
   const currentMember = currentMemberId ? members.find(m => m.id === currentMemberId) : undefined;
   
-  // Use explicitly passed generationId or fallback to current member's generationId
-  const effectiveGenId = currentGenerationId || currentMember?.generationId;
-  if (!effectiveGenId) return []; // If we don't know the generation, we can't safely filter.
-
-  const currentMemberGenOrder = getGenerationOrder(effectiveGenId);
-  const currentMemberBirthYear = currentMember?.birthDate ? new Date(currentMember.birthDate).getFullYear() : null;
-
   return members.filter(member => {
-    // Cannot relate to self
     if (currentMemberId && member.id === currentMemberId) return false;
-
-    if (currentMember) {
-      // Check if relationship already exists
-      let hasRelation = false;
-      if (relationType === 'PARENT') {
-         hasRelation = currentMember.relationsTo.some(r => r.fromId === member.id && r.type === 'PARENT');
-      } else if (relationType === 'CHILD') {
-         hasRelation = currentMember.relationsFrom.some(r => r.toId === member.id && r.type === 'PARENT');
-      } else {
-         hasRelation = currentMember.relationsFrom.some(r => r.toId === member.id && r.type === relationType) ||
-                       currentMember.relationsTo.some(r => r.fromId === member.id && r.type === relationType);
-      }
-      
-      if (hasRelation) return false;
-
-      // Prevent overlapping relations between two members
-      const isParentChild = currentMember.relationsFrom.some(r => r.toId === member.id && r.type === 'PARENT') ||
-                            currentMember.relationsTo.some(r => r.fromId === member.id && r.type === 'PARENT');
-      const isSpouse = currentMember.relationsFrom.some(r => r.toId === member.id && r.type === 'SPOUSE') ||
-                       currentMember.relationsTo.some(r => r.fromId === member.id && r.type === 'SPOUSE');
-      const isSibling = currentMember.relationsFrom.some(r => r.toId === member.id && r.type === 'SIBLING') ||
-                        currentMember.relationsTo.some(r => r.fromId === member.id && r.type === 'SIBLING');
-
-      if (relationType === 'PARENT' || relationType === 'CHILD') {
-        if (isSpouse || isSibling) return false;
-      }
-      if (relationType === 'SPOUSE') {
-        if (isParentChild || isSibling) return false;
-      }
-      if (relationType === 'SIBLING') {
-        if (isParentChild || isSpouse) return false;
-      }
-
-      // Advanced: Prevent circular dependencies (e.g. parent cannot be child)
-      if (relationType === 'PARENT') {
-        const isAlreadyChild = currentMember.relationsFrom.some(r => r.toId === member.id && r.type === 'PARENT');
-        if (isAlreadyChild) return false;
-      } else if (relationType === 'CHILD') {
-        const isAlreadyParent = currentMember.relationsTo.some(r => r.fromId === member.id && r.type === 'PARENT');
-        if (isAlreadyParent) return false;
-      }
+    
+    if (currentMember && alreadyRelated(currentMember, member)) {
+      return false;
     }
-
-    // Chronology Enforcement (Strict Generation Distance Rule)
-    const memberGenOrder = getGenerationOrder(member.generationId);
-
-    if (relationType === 'PARENT') {
-      // Parent must be exactly one generation above
-      if (memberGenOrder !== currentMemberGenOrder - 1) return false;
-    } else if (relationType === 'CHILD') {
-      // Child must be exactly one generation below
-      if (memberGenOrder !== currentMemberGenOrder + 1) return false;
-    } else if (relationType === 'SIBLING' || relationType === 'SPOUSE') {
-      // Siblings and spouses must be in the same generation
-      if (memberGenOrder !== currentMemberGenOrder) return false;
+    
+    if (wouldCreateConflict(currentMemberId || 'NEW', member.id, relationType, members, generations, currentGenerationId)) {
+      return false;
     }
 
     return true;
   });
+}
+
+export function getEligibleParents(members: MemberWithRelations[], generations: Generation[], currentMemberId: string | undefined, currentGenerationId?: string) {
+  return getEligibleMembersBase(members, generations, currentMemberId, 'PARENT', currentGenerationId);
+}
+
+export function getEligibleSpouses(members: MemberWithRelations[], generations: Generation[], currentMemberId: string | undefined, currentGenerationId?: string) {
+  return getEligibleMembersBase(members, generations, currentMemberId, 'SPOUSE', currentGenerationId);
+}
+
+export function getEligibleChildren(members: MemberWithRelations[], generations: Generation[], currentMemberId: string | undefined, currentGenerationId?: string) {
+  return getEligibleMembersBase(members, generations, currentMemberId, 'CHILD', currentGenerationId);
+}
+
+export function getEligibleSiblings(members: MemberWithRelations[], generations: Generation[], currentMemberId: string | undefined, currentGenerationId?: string) {
+  return getEligibleMembersBase(members, generations, currentMemberId, 'SIBLING', currentGenerationId);
 }
 
 /**

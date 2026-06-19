@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useAppStore } from '@/store/use-app-store';
-import { getValidRelationshipCandidates } from '@/utils/relationship';
+import { getEligibleParents, getEligibleSpouses, getEligibleChildren, getEligibleSiblings } from '@/utils/relationship';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { MemberWithRelations } from '@/types/member';
@@ -36,7 +36,12 @@ export function RelationshipSelector({
 
   const validCandidates = React.useMemo(
     () => {
-      const candidates = getValidRelationshipCandidates(members, generations, currentMemberId, type, currentGenerationId);
+      let candidates: MemberWithRelations[] = [];
+      if (type === 'PARENT') candidates = getEligibleParents(members, generations, currentMemberId, currentGenerationId);
+      else if (type === 'CHILD') candidates = getEligibleChildren(members, generations, currentMemberId, currentGenerationId);
+      else if (type === 'SPOUSE') candidates = getEligibleSpouses(members, generations, currentMemberId, currentGenerationId);
+      else if (type === 'SIBLING') candidates = getEligibleSiblings(members, generations, currentMemberId, currentGenerationId);
+      
       // Filter out anyone already selected in the form for ANY relationship
       return candidates.filter(c => !allSelectedIds.includes(c.id));
     },
