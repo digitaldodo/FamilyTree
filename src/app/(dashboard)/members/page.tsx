@@ -56,9 +56,14 @@ export default function MembersPage() {
     }
   };
 
-  const handleDeleteGenerationClick = (id: string) => {
-    console.log("Delete clicked", id);
-    setDeleteModalGenId(id);
+  const handleDeleteGenerationClick = async (id: string) => {
+    const genMembers = filteredMembers.filter(m => m.generationId === id);
+    if (genMembers.length === 0) {
+      await deleteGeneration(id);
+      fetchMembers();
+    } else {
+      setDeleteModalGenId(id);
+    }
   };
 
   const handleMoveGeneration = async (id: string, direction: 'up' | 'down') => {
@@ -152,25 +157,8 @@ export default function MembersPage() {
             } : undefined}
           />
         </div>
-      ) : filteredMembers.length === 0 && sortedGenerations.length > 0 && !sortedGenerations.some(g => filteredMembers.some(m => m.generationId === g.id)) ? (
-        // If there are generations but no members match the filter
-        <div className="py-12">
-          <EmptyState 
-            icon={UsersRound}
-            title="No members found"
-            description="We couldn't find any family members matching your search criteria."
-            actionLabel="Clear Search"
-            onAction={() => {
-              const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement;
-              if (searchInput) {
-                searchInput.value = '';
-                searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-              }
-            }}
-          />
-        </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-4">
           {sortedGenerations.map((gen, idx) => {
             const genMembers = filteredMembers.filter(m => m.generationId === gen.id);
             
@@ -202,13 +190,21 @@ export default function MembersPage() {
                           <span className="hidden sm:inline">Add Member</span>
                           <span className="sm:hidden">Add</span>
                         </Button>
-                        <Button variant="outline" size="sm" className="hidden sm:flex h-7 text-xs" onClick={() => handleAddGenerationAbove(gen.orderIndex)}>
+                        <Button variant="outline" size="sm" className="hidden lg:flex h-7 text-xs" onClick={() => handleAddGenerationAbove(gen.orderIndex)}>
                           <ArrowUpToLine className="w-3.5 h-3.5 mr-1" />
-                          Add Generation Above
+                          Add Above
                         </Button>
-                        <Button variant="outline" size="sm" className="hidden sm:flex h-7 text-xs" onClick={() => handleAddGenerationBelow(gen.orderIndex)}>
+                        <Button variant="outline" size="sm" className="hidden lg:flex h-7 text-xs" onClick={() => handleAddGenerationBelow(gen.orderIndex)}>
                           <ArrowDownToLine className="w-3.5 h-3.5 mr-1" />
-                          Add Generation Below
+                          Add Below
+                        </Button>
+                        <Button variant="outline" size="sm" className="hidden sm:flex h-7 text-xs" onClick={() => handleRenameGeneration(gen.id, gen.name)}>
+                          <Pencil className="w-3.5 h-3.5 mr-1" />
+                          Rename
+                        </Button>
+                        <Button variant="outline" size="sm" className="hidden sm:flex h-7 text-xs text-destructive hover:bg-destructive/10 border-destructive/20" onClick={() => handleDeleteGenerationClick(gen.id)}>
+                          <Trash2 className="w-3.5 h-3.5 mr-1" />
+                          Delete
                         </Button>
                         <Dropdown 
                           trigger={
@@ -252,21 +248,22 @@ export default function MembersPage() {
                 </div>
 
                 {/* Generation Members */}
-                <div className="grid grid-cols-1 gap-4 sm:flex sm:overflow-x-auto sm:pb-4 px-1 -mx-1 sm:scrollbar-thin min-h-[140px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4 min-h-[140px]">
                   {genMembers.length === 0 ? (
-                    <div className="w-full h-[120px] rounded-xl border border-dashed border-border bg-muted/20 flex flex-col items-center justify-center text-muted-foreground">
-                      <p className="text-sm mb-2">No members in this generation</p>
+                    <div className="col-span-full w-full rounded-xl border border-dashed border-border bg-muted/20 flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
+                      <UsersRound className="w-8 h-8 text-muted-foreground/50 mb-3" />
+                      <p className="text-base font-medium text-foreground mb-1">No members yet</p>
+                      <p className="text-sm mb-4">Add the first member to this generation</p>
                       {hasEditAccess && (
-                        <Button variant="outline" size="sm" onClick={() => handleAddMember(gen.id)}>
-                          <UserPlus className="w-3.5 h-3.5 mr-2" />
-                          Add First Member Here
+                        <Button variant="outline" onClick={() => handleAddMember(gen.id)}>
+                          <UserPlus className="w-4 h-4 mr-2" />
+                          Add First Member
                         </Button>
                       )}
                     </div>
                   ) : (
                     genMembers.map((member) => (
-                      <div key={member.id} className="sm:shrink-0 w-full sm:w-auto">
-                        {/* Notice we don't calculate generation numeric index anymore, just pass it for visual if needed */}
+                      <div key={member.id} className="w-full">
                         <MemberCard member={member} calculatedGeneration={idx} />
                       </div>
                     ))
