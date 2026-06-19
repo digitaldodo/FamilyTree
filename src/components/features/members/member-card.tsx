@@ -95,7 +95,7 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
         </Dropdown>
       </div>
       <CardContent className="p-0 flex flex-col h-full">
-        <div className="relative w-full h-[70%] shrink-0 bg-muted overflow-hidden">
+        <div className="relative w-full flex-grow shrink bg-muted overflow-hidden">
           <MemberAvatar 
             imageUrl={member.imageUrl} 
             firstName={member.firstName} 
@@ -106,8 +106,8 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
             className="transition-transform duration-500 group-hover:scale-105"
           />
         </div>
-        <div className="p-3 flex flex-col justify-center items-center h-[30%] bg-card text-center border-t border-border/50">
-          <h3 className="font-semibold text-[15px] leading-tight group-hover:text-primary transition-colors line-clamp-1 break-words">
+        <div className="p-3 flex flex-col justify-center items-center min-h-[100px] shrink-0 bg-card text-center border-t border-border/50">
+          <h3 className="font-semibold text-[15px] leading-tight group-hover:text-primary transition-colors line-clamp-2 break-words">
             {member.firstName} {member.lastName}
           </h3>
           <div className="text-xs text-muted-foreground mt-0.5">

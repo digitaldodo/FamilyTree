@@ -2,9 +2,9 @@
 import * as React from 'react';
 import { toast } from 'sonner';
 
-import { CldUploadWidget } from 'next-cloudinary';
 import { Camera, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ImageCropper } from '@/components/ui/image-cropper';
 
 interface ImageUploadProps {
   value?: string | null;
@@ -15,15 +15,59 @@ interface ImageUploadProps {
 
 export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', isCover = false }: ImageUploadProps) {
   const [isProcessing, setIsProcessing] = React.useState(false);
+  const [selectedImageSrc, setSelectedImageSrc] = React.useState<string | null>(null);
   
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "family-tree";
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
-  const handleUploadSuccess = (result: any) => {
-    setIsProcessing(true);
-    if (result.info && result.info.secure_url) {
-      onChange(result.info.secure_url);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        setSelectedImageSrc(reader.result?.toString() || null);
+      });
+      reader.readAsDataURL(file);
+      // Reset input
+      e.target.value = '';
     }
-    setIsProcessing(false);
+  };
+
+  const uploadToCloudinary = async (blob: Blob) => {
+    if (!cloudName) {
+      toast.error('Cloudinary configuration is missing.');
+      return;
+    }
+    
+    setIsProcessing(true);
+    setSelectedImageSrc(null); // Close modal
+
+    try {
+      const formData = new FormData();
+      formData.append('file', blob);
+      formData.append('upload_preset', uploadPreset);
+      formData.append('folder', folder);
+
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      
+      if (data.secure_url) {
+        onChange(data.secure_url);
+      } else {
+        throw new Error('Upload failed');
+      }
+    } catch (err) {
+      console.error('[API Debug] Cloudinary upload failed', err);
+      toast.error('Image upload failed');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -49,41 +93,41 @@ export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', i
         )}
       </div>
 
-      <CldUploadWidget
-        uploadPreset={uploadPreset}
-        onSuccess={handleUploadSuccess}
-        onError={(error) => {
-           
-          console.log('[API Debug] Cloudinary upload failed', error);
-          toast.error('Image upload failed');
-          setIsProcessing(false);
-        }}
-        options={{
-          maxFiles: 1,
-          resourceType: "image",
-          folder: folder,
-          clientAllowedFormats: ["jpg", "jpeg", "png", "webp"],
+      <input
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+      />
+
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        disabled={isProcessing}
+        onClick={(e) => {
+          e.preventDefault();
+          fileInputRef.current?.click();
         }}
       >
-        {({ open }) => (
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            disabled={isProcessing}
-            onClick={(e) => {
-              e.preventDefault();
-              open();
-            }}
-          >
-            {isProcessing ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
-            ) : (
-              <><Camera className="w-4 h-4 mr-2" /> {value ? 'Change Image' : 'Upload Image'}</>
-            )}
-          </Button>
+        {isProcessing ? (
+          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+        ) : (
+          <><Camera className="w-4 h-4 mr-2" /> {value ? 'Change Image' : 'Upload Image'}</>
         )}
-      </CldUploadWidget>
+      </Button>
+
+      {selectedImageSrc && (
+        <ImageCropper
+          isOpen={!!selectedImageSrc}
+          onClose={() => setSelectedImageSrc(null)}
+          imageSrc={selectedImageSrc}
+          onCropComplete={uploadToCloudinary}
+          cropShape={isCover ? 'rect' : 'round'}
+          aspectRatio={isCover ? 16 / 9 : 1}
+        />
+      )}
     </div>
   );
 }
