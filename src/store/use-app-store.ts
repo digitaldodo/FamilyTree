@@ -17,8 +17,8 @@ interface AppState {
   setDefaultGenerationForNewMember: (genId: string | null) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  generationFilter: string | 'all';
-  setGenerationFilter: (filter: string | 'all') => void;
+  generationFilters: string[];
+  setGenerationFilters: (filters: string[]) => void;
   
   // Read-only mode for public viewing
   isReadOnly: boolean;
@@ -69,8 +69,8 @@ export const useAppStore = create<AppState>()(
   
   searchQuery: '',
   setSearchQuery: (query) => set({ searchQuery: query }),
-  generationFilter: 'all',
-  setGenerationFilter: (filter) => set({ generationFilter: filter }),
+  generationFilters: [],
+  setGenerationFilters: (filters) => set({ generationFilters: filters }),
 
   isReadOnly: false,
   setIsReadOnly: (readOnly) => set({ isReadOnly: readOnly }),

@@ -3,6 +3,7 @@ import { ZoomIn, ZoomOut, Maximize, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/store/use-app-store';
 import { ShareTreeButton } from './share-tree-button';
+import { GenerationFilter } from '@/components/features/generations/generation-filter';
 
 interface TreeToolbarProps {
   readOnly?: boolean;
@@ -23,6 +24,10 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
 
   return (
     <div className="absolute top-6 right-6 z-10 flex flex-row items-center gap-1.5 p-1.5 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-800/50 rounded-2xl shadow-xl">
+      <div className="mr-1">
+        <GenerationFilter />
+      </div>
+      <div className="h-6 w-px bg-border/50 mx-1" />
       {!readOnly && (
         <>
           <Button variant="ghost" size="icon" className="rounded-xl hover:bg-primary/10 hover:text-primary" onClick={handleAdd}>

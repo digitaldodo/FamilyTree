@@ -20,7 +20,7 @@ import { useState, useEffect } from 'react';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 function MembersContent() {
-  const { activeTreeId, userRole } = useAppStore();
+  const { activeTreeId, userRole, generationFilters } = useAppStore();
   const { isLoading: membersLoading, fetchMembers } = useMembers();
   const { generations, isLoading: gensLoading, createGeneration, renameGeneration, deleteGeneration, moveGeneration } = useGenerations();
   const { filteredMembers } = useSearchMembers();
@@ -94,7 +94,10 @@ function MembersContent() {
   }
 
   const isLoading = membersLoading || gensLoading;
-  const sortedGenerations = [...generations].sort((a, b) => a.orderIndex - b.orderIndex);
+  const allGenerations = [...generations].sort((a, b) => a.orderIndex - b.orderIndex);
+  const sortedGenerations = allGenerations.filter(gen => 
+    generationFilters.length === 0 || generationFilters.includes(gen.id)
+  );
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 h-full flex flex-col pb-6">
@@ -106,28 +109,28 @@ function MembersContent() {
         {hasEditAccess && (
           <>
             <Button className="hidden md:flex shrink-0" onClick={() => {
-              if (sortedGenerations.length === 0) {
+              if (allGenerations.length === 0) {
                 const name = prompt('Enter first generation name (e.g. Founders):');
                 if (name) createGeneration(name);
               } else {
                 handleAddMember();
               }
             }}>
-              {sortedGenerations.length === 0 ? <TreePine className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-              {sortedGenerations.length === 0 ? 'Create First Generation' : 'Add Member'}
+              {allGenerations.length === 0 ? <TreePine className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+              {allGenerations.length === 0 ? 'Create First Generation' : 'Add Member'}
             </Button>
             {/* Mobile FAB */}
             <Button 
               className="md:hidden fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg z-30 p-0 flex items-center justify-center bg-primary text-primary-foreground" 
               onClick={() => {
-                if (sortedGenerations.length === 0) {
+                if (allGenerations.length === 0) {
                   openFormModal('createFirst');
                 } else {
                   handleAddMember();
                 }
               }}
             >
-              {sortedGenerations.length === 0 ? <TreePine className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
+              {allGenerations.length === 0 ? <TreePine className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
             </Button>
           </>
         )}
@@ -144,7 +147,7 @@ function MembersContent() {
 
       {isLoading ? (
         <PageLoader />
-      ) : sortedGenerations.length === 0 ? (
+      ) : allGenerations.length === 0 ? (
         <div className="py-12">
           <EmptyState 
             icon={UsersRound}
