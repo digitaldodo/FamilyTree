@@ -48,12 +48,44 @@ export async function POST(request: NextRequest) {
     // Chronological validation
     if (type === 'SPOUSE' || type === 'SIBLING') {
       if (fromMember.generation.orderIndex !== toMember.generation.orderIndex) {
-        return errorResponse('VALIDATION_ERROR', `${type} relationships must be between members of the same generation`, 400);
+        const errorMsg = type === 'SPOUSE' 
+          ? 'Spouses must belong to the same generation.' 
+          : 'Siblings must belong to the same generation.';
+        return errorResponse('VALIDATION_ERROR', errorMsg, 400);
       }
     } else if (type === 'PARENT') {
       // fromId is Parent, toId is Child
       if (fromMember.generation.orderIndex >= toMember.generation.orderIndex) {
         return errorResponse('VALIDATION_ERROR', 'Parent must belong to an older generation.', 400);
+      }
+    }
+
+    // Constraint validations
+    if (type === 'SPOUSE') {
+      const existingFromSpouses = await prisma.relationship.count({
+        where: {
+          type: 'SPOUSE',
+          OR: [{ fromId }, { toId: fromId }]
+        }
+      });
+      const existingToSpouses = await prisma.relationship.count({
+        where: {
+          type: 'SPOUSE',
+          OR: [{ fromId: toId }, { toId }]
+        }
+      });
+      if (existingFromSpouses >= 1 || existingToSpouses >= 1) {
+        return errorResponse('VALIDATION_ERROR', 'Maximum 1 spouse allowed.', 400);
+      }
+    } else if (type === 'PARENT') {
+      const existingParents = await prisma.relationship.count({
+        where: {
+          type: 'PARENT',
+          toId: toId
+        }
+      });
+      if (existingParents >= 2) {
+        return errorResponse('VALIDATION_ERROR', 'A member can have at most two parents.', 400);
       }
     }
 

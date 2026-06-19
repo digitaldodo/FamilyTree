@@ -169,12 +169,12 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
               className="fixed inset-x-0 bottom-0 md:inset-x-auto md:right-0 md:top-0 z-50 w-full md:w-[600px] h-[90vh] md:h-screen bg-background md:border-l border-border shadow-2xl flex flex-col rounded-t-3xl md:rounded-none overflow-hidden"
             >
               {/* ── Premium Cover & Header ── */}
-              <div className="relative h-48 md:h-64 shrink-0 bg-gradient-to-br from-primary/30 via-purple-500/20 to-rose-500/10">
-                {member?.coverImage && (
+              <div className="relative h-48 md:h-64 shrink-0 bg-gradient-to-br from-primary/30 via-purple-500/20 to-rose-500/10 overflow-hidden">
+                {member?.imageUrl && (
                   <img
-                    src={member.coverImage}
+                    src={member.imageUrl}
                     alt=""
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover opacity-60 blur-md scale-110"
                   />
                 )}
                 {/* Dark gradient overlay for text contrast */}

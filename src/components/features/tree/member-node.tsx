@@ -38,6 +38,15 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
   const spouseCount = member.relationsFrom.filter(r => r.type === 'SPOUSE').length + member.relationsTo.filter(r => r.type === 'SPOUSE').length;
   const siblingCount = member.relationsFrom.filter(r => r.type === 'SIBLING').length + member.relationsTo.filter(r => r.type === 'SIBLING').length;
 
+  console.log({
+    memberId: member.id,
+    imageUrl: member.imageUrl,
+    generationId: member.generationId,
+    parents: member.relationsTo.filter(r => r.type === 'PARENT'),
+    children: member.relationsFrom.filter(r => r.type === 'PARENT'),
+    spouse: [...member.relationsFrom.filter(r => r.type === 'SPOUSE'), ...member.relationsTo.filter(r => r.type === 'SPOUSE')]
+  });
+
   return (
     <div
       className={cn(

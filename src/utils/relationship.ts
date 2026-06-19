@@ -55,24 +55,21 @@ export function getValidRelationshipCandidates(
     const memberBirthYear = member.birthDate ? new Date(member.birthDate).getFullYear() : null;
 
     if (relationType === 'PARENT') {
-      // Parent must belong to an older generation (lower orderIndex) or earlier birth year
-      if (memberGenOrder > currentMemberGenOrder) return false;
-      if (memberGenOrder === currentMemberGenOrder) {
+      // Parent must belong to an older generation (lower orderIndex)
+      if (memberGenOrder >= currentMemberGenOrder) return false;
+      if (memberGenOrder === currentMemberGenOrder - 1) {
          if (memberBirthYear !== null && currentMemberBirthYear !== null && memberBirthYear >= currentMemberBirthYear) return false;
-         if (memberBirthYear === null || currentMemberBirthYear === null) return false; // Force parents to be in older generation if no dates
       }
     } else if (relationType === 'CHILD') {
-      // Child must belong to a younger generation (higher orderIndex) or later birth year
-      if (memberGenOrder < currentMemberGenOrder) return false;
-      if (memberGenOrder === currentMemberGenOrder) {
+      // Child must belong to a younger generation (higher orderIndex)
+      if (memberGenOrder <= currentMemberGenOrder) return false;
+      if (memberGenOrder === currentMemberGenOrder + 1) {
          if (memberBirthYear !== null && currentMemberBirthYear !== null && memberBirthYear <= currentMemberBirthYear) return false;
-         if (memberBirthYear === null || currentMemberBirthYear === null) return false; // Force children to be in younger generation if no dates
       }
-    } else if (relationType === 'SIBLING') {
-      // Siblings must be in the same generation
+    } else if (relationType === 'SIBLING' || relationType === 'SPOUSE') {
+      // Siblings and spouses must be in the same generation
       if (memberGenOrder !== currentMemberGenOrder) return false;
     }
-    // SPOUSE default generation warning will be handled in the UI
 
     return true;
   });

@@ -67,7 +67,7 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
 
   return (
     <Card
-      className={`cursor-pointer transition-all duration-200 group overflow-hidden hover:shadow-md border-border/60 hover:scale-[1.02] w-full max-w-none sm:max-w-[220px] relative`}
+      className={`cursor-pointer transition-all duration-200 group overflow-hidden hover:shadow-md border-border/60 hover:scale-[1.02] w-full max-w-none sm:max-w-[220px] h-[280px] relative flex flex-col`}
       onClick={handleClick}
     >
       <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
@@ -95,7 +95,7 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
         </Dropdown>
       </div>
       <CardContent className="p-0 flex flex-col h-full">
-        <div className="relative w-full h-[180px] shrink-0 bg-muted overflow-hidden">
+        <div className="relative w-full h-[70%] shrink-0 bg-muted overflow-hidden">
           <MemberAvatar 
             imageUrl={member.imageUrl} 
             firstName={member.firstName} 
@@ -106,38 +106,18 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
             className="transition-transform duration-500 group-hover:scale-105"
           />
         </div>
-        <div className="p-4 flex flex-col flex-1 bg-card">
-          <h3 className="font-semibold text-base leading-tight group-hover:text-primary transition-colors line-clamp-2 break-words pr-5">
+        <div className="p-3 flex flex-col justify-center items-center h-[30%] bg-card text-center border-t border-border/50">
+          <h3 className="font-semibold text-[15px] leading-tight group-hover:text-primary transition-colors line-clamp-1 break-words">
             {member.firstName} {member.lastName}
           </h3>
-
-          <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+          <div className="text-xs text-muted-foreground mt-0.5">
+            {member.birthDate ? format(new Date(member.birthDate), 'yyyy') : 'Unknown'}
+          </div>
+          <div className="mt-1">
             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-[10px] font-medium text-primary">
               {genName}
             </span>
-            {relationCount > 0 && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-muted text-[10px] font-medium text-muted-foreground">
-                <Users className="w-2.5 h-2.5" />
-                {relationCount}
-              </span>
-            )}
           </div>
-
-          {member.birthDate && (
-            <div className="flex flex-col gap-1 mt-2 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <Calendar className="w-3 h-3 shrink-0" />
-                <span>
-                  Born: {format(new Date(member.birthDate), 'yyyy')}
-                </span>
-              </div>
-              {getGenerationLabel(member.birthDate) && (
-                <div className="text-[11px] font-medium text-foreground/70 pl-4.5">
-                  {getGenerationLabel(member.birthDate)}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>

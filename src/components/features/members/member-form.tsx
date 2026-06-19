@@ -88,15 +88,22 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
   });
 
   const handleAddRelation = (id: string, type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING') => {
+    if (type === 'SPOUSE') {
+      // Replace existing spouse to enforce single spouse rule
+      setRelations(prev => [...prev.filter(r => r.type !== 'SPOUSE'), { id, type }]);
+      return;
+    }
+    if (type === 'PARENT') {
+      const parentCount = relations.filter(r => r.type === 'PARENT').length;
+      if (parentCount >= 2) {
+        alert("A member can have at most two parents.");
+        return;
+      }
+    }
     if (type === 'SIBLING') {
       const parentIds = relations.filter(r => r.type === 'PARENT').map(r => r.id);
       if (parentIds.length > 0) {
         if (window.confirm("Copy existing parents to sibling?")) {
-          // This will be handled in the frontend logic. 
-          // For now, we will add the sibling.
-          // Wait, the API creates relations for the CURRENT member.
-          // If we want to add parents to the sibling, we need to call an API.
-          // Let's defer this logic to an effect or handle it by triggering an API call directly.
           Promise.all(parentIds.map(parentId => 
              fetch('/api/relationships', {
                method: 'POST',
@@ -147,17 +154,6 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       
-      {/* Cover Image Upload */}
-      <div className="mb-6">
-        <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">Cover Image</label>
-        <ImageUpload 
-          value={coverImage} 
-          onChange={(val) => setValue('coverImage', val || undefined)} 
-          folder="family-tree/covers"
-          isCover
-        />
-      </div>
-
       {/* Avatar Upload */}
       <div className="flex flex-col items-center justify-center mb-6">
         <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">Profile Photo</label>

@@ -240,6 +240,26 @@ export async function POST(request: NextRequest) {
         if (!rel.id || !rel.type) continue;
 
         try {
+          // Constraints check
+          if (rel.type === 'SPOUSE') {
+            const existingSpouses = await prisma.relationship.count({
+              where: { type: 'SPOUSE', OR: [{ fromId: rel.id }, { toId: rel.id }] }
+            });
+            if (existingSpouses >= 1) throw new Error('Maximum 1 spouse allowed.');
+          }
+          if (rel.type === 'CHILD') {
+            const existingParents = await prisma.relationship.count({
+              where: { type: 'PARENT', toId: rel.id }
+            });
+            if (existingParents >= 2) throw new Error('A member can have at most two parents.');
+          }
+          if (rel.type === 'PARENT') {
+            const existingParents = await prisma.relationship.count({
+              where: { type: 'PARENT', toId: newMember.id }
+            });
+            if (existingParents >= 2) throw new Error('A member can have at most two parents.');
+          }
+
           if (rel.type === 'PARENT') {
             await prisma.relationship.create({
               data: {
