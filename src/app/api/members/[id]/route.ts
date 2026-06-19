@@ -104,6 +104,17 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const { birthDate, deathDate, generationId, ...rest } = validation.data;
     const relations = body.relations;
 
+    if (relations && Array.isArray(relations)) {
+      const relationIds = relations.map((r: any) => r.id).filter(Boolean);
+      const uniqueIds = new Set(relationIds);
+      if (uniqueIds.size !== relationIds.length) {
+        return errorResponse('VALIDATION_ERROR', 'Duplicate relationships are not allowed.', 400);
+      }
+      if (uniqueIds.has(id)) {
+        return errorResponse('VALIDATION_ERROR', 'A member cannot be related to themselves.', 400);
+      }
+    }
+
     // Validate Chronology if generation is changing or relations are being updated
     const finalGenerationId = generationId || existing.generationId;
 
@@ -229,8 +240,9 @@ export async function PUT(request: NextRequest, { params }: Params) {
                 data: { type: 'PARENT', fromId: id, toId: rel.id },
               });
             } else {
+              const [id1, id2] = [id, rel.id].sort();
               await tx.relationship.create({
-                data: { type: rel.type, fromId: id, toId: rel.id },
+                data: { type: rel.type, fromId: id1, toId: id2 },
               });
             }
           } catch (e) {

@@ -153,6 +153,11 @@ export async function POST(request: NextRequest) {
     // Strictly validate the provided relationships against the selected generation.
     if (relations && Array.isArray(relations) && relations.length > 0) {
       const relativeIds = relations.map((r: any) => r.id).filter(Boolean);
+      const uniqueIds = new Set(relativeIds);
+      if (uniqueIds.size !== relativeIds.length) {
+        return errorResponse('VALIDATION_ERROR', 'Duplicate relationships are not allowed.', 400);
+      }
+
       if (relativeIds.length > 0) {
         const relatives = await prisma.member.findMany({
           where: { id: { in: relativeIds } },
@@ -256,11 +261,12 @@ export async function POST(request: NextRequest) {
               },
             });
           } else {
+            const [id1, id2] = [newMember.id, rel.id].sort();
             await prisma.relationship.create({
               data: {
                 type: rel.type,
-                fromId: newMember.id,
-                toId: rel.id,
+                fromId: id1,
+                toId: id2,
               },
             });
           }

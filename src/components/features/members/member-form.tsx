@@ -83,9 +83,11 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       }
     });
     
-    // Remove duplicates
-    return existing.filter((v, i, a) => a.findIndex(t => t.id === v.id && t.type === v.type) === i);
+    // Remove duplicates strictly by member ID to ensure a member only has ONE relationship with the current member.
+    return existing.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
   });
+
+  const allSelectedIds = relations.map(r => r.id);
 
   const handleAddRelation = (id: string, type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING') => {
     if (type === 'SPOUSE') {
@@ -336,6 +338,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
             type="PARENT"
             label="Parents"
             existingRelations={relations.filter(r => r.type === 'PARENT').map(r => r.id)}
+            allSelectedIds={allSelectedIds}
             onAddRelation={handleAddRelation}
             onRemoveRelation={handleRemoveRelation}
           />
@@ -345,6 +348,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
             type="CHILD"
             label="Children"
             existingRelations={relations.filter(r => r.type === 'CHILD').map(r => r.id)}
+            allSelectedIds={allSelectedIds}
             onAddRelation={handleAddRelation}
             onRemoveRelation={handleRemoveRelation}
           />
@@ -354,6 +358,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
             type="SPOUSE"
             label="Spouse(s)"
             existingRelations={relations.filter(r => r.type === 'SPOUSE').map(r => r.id)}
+            allSelectedIds={allSelectedIds}
             onAddRelation={handleAddRelation}
             onRemoveRelation={handleRemoveRelation}
           />
@@ -363,6 +368,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
             type="SIBLING"
             label="Siblings"
             existingRelations={relations.filter(r => r.type === 'SIBLING').map(r => r.id)}
+            allSelectedIds={allSelectedIds}
             onAddRelation={handleAddRelation}
             onRemoveRelation={handleRemoveRelation}
           />
