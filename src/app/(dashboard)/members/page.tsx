@@ -8,7 +8,7 @@ import { MemberCard } from '@/components/features/members/member-card';
 import { MemberModal } from '@/components/features/members/member-modal';
 import { MemberSearch } from '@/components/features/members/member-search';
 import { MemberFilter } from '@/components/features/members/member-filter';
-import { ArrowUpToLine, ArrowDownToLine, UserPlus, Plus, UsersRound, TreePine, Pencil, Trash2, MoreVertical } from 'lucide-react';
+import { ArrowUpToLine, ArrowDownToLine, ArrowUp, ArrowDown, UserPlus, Plus, UsersRound, TreePine, Pencil, Trash2, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageLoader } from '@/components/ui/page-loader';
@@ -19,7 +19,7 @@ import { useState, useEffect } from 'react';
 export default function MembersPage() {
   const { activeTreeId, userRole } = useAppStore();
   const { isLoading: membersLoading, fetchMembers } = useMembers();
-  const { generations, isLoading: gensLoading, createGeneration, renameGeneration, deleteGeneration } = useGenerations();
+  const { generations, isLoading: gensLoading, createGeneration, renameGeneration, deleteGeneration, moveGeneration } = useGenerations();
   const { filteredMembers } = useSearchMembers();
   const { setIsMemberModalOpen, setSelectedMemberId, setIsEditingMember, setDefaultGenerationForNewMember } = useAppStore();
 
@@ -57,6 +57,10 @@ export default function MembersPage() {
 
   const handleDeleteGenerationClick = (id: string) => {
     setDeleteModalGenId(id);
+  };
+
+  const handleMoveGeneration = async (id: string, direction: 'up' | 'down') => {
+    await moveGeneration(id, direction);
   };
 
   const handleConfirmDelete = async (action?: 'moveMembers' | 'deleteMembers', targetId?: string) => {
@@ -217,6 +221,20 @@ export default function MembersPage() {
                             </button>
                             <button className="flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={() => handleRenameGeneration(gen.id, gen.name)}>
                               <Pencil className="w-4 h-4 mr-2" /> Rename
+                            </button>
+                            <button 
+                              className="flex items-center w-full px-4 py-2 text-left hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed" 
+                              onClick={() => handleMoveGeneration(gen.id, 'up')}
+                              disabled={idx === 0}
+                            >
+                              <ArrowUp className="w-4 h-4 mr-2" /> Move Up
+                            </button>
+                            <button 
+                              className="flex items-center w-full px-4 py-2 text-left hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed" 
+                              onClick={() => handleMoveGeneration(gen.id, 'down')}
+                              disabled={idx === sortedGenerations.length - 1}
+                            >
+                              <ArrowDown className="w-4 h-4 mr-2" /> Move Down
                             </button>
                             <button className="flex items-center w-full px-4 py-2 text-left text-destructive hover:bg-muted" onClick={() => handleDeleteGenerationClick(gen.id)}>
                               <Trash2 className="w-4 h-4 mr-2" /> Delete

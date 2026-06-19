@@ -84,6 +84,18 @@ export async function POST(
 
     const { name, insertAt } = validation.data;
 
+    // Check for duplicate generation name
+    const existing = await prisma.generation.findFirst({
+      where: {
+        treeId,
+        name: { equals: name, mode: 'insensitive' }
+      }
+    });
+    
+    if (existing) {
+      return errorResponse('CONFLICT', 'Generation name already exists', 400);
+    }
+
     let targetIndex = insertAt;
 
     // Run within a transaction to maintain order index consistency

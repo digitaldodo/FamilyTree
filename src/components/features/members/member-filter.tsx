@@ -4,17 +4,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAppStore } from '@/store/use-app-store';
 
 export function MemberFilter() {
+  const { generations, generationFilter, setGenerationFilter } = useAppStore();
+  const sortedGenerations = [...generations].sort((a, b) => a.orderIndex - b.orderIndex);
+
   return (
     <div className="flex flex-col md:flex-row gap-2 items-center w-full md:w-auto">
-      <Select defaultValue="all">
+      <Select value={generationFilter} onValueChange={setGenerationFilter}>
         <SelectTrigger className="w-full md:w-[160px]">
           <SelectValue placeholder="Filter by generation" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Generations</SelectItem>
-          <SelectItem value="1">Generation 1</SelectItem>
-          <SelectItem value="2">Generation 2</SelectItem>
-          <SelectItem value="3">Generation 3</SelectItem>
+          {sortedGenerations.map(gen => (
+            <SelectItem key={gen.id} value={gen.id}>{gen.name}</SelectItem>
+          ))}
         </SelectContent>
       </Select>
       <Select defaultValue="name">

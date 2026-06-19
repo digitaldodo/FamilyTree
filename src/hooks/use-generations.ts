@@ -110,6 +110,28 @@ export function useGenerations() {
     }
   };
 
+  const handleMove = async (id: string, direction: 'up' | 'down') => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/generations/${id}/move`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ direction }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || 'Failed to move generation');
+
+      toast.success('Generation moved successfully');
+      await fetchGenerations(); // Refetch to get the updated order indexes
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to move generation');
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return {
     generations,
     isLoading,
@@ -118,5 +140,6 @@ export function useGenerations() {
     createGeneration: handleCreate,
     renameGeneration: handleRename,
     deleteGeneration: handleDelete,
+    moveGeneration: handleMove,
   };
 }

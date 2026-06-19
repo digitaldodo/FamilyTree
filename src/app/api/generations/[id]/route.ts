@@ -55,9 +55,24 @@ export async function PUT(
       return errorResponse('VALIDATION_ERROR', validation.error.issues.map(e => e.message).join(', '), 400);
     }
 
+    const newName = validation.data.name;
+
+    // Check for duplicate generation name
+    const existing = await prisma.generation.findFirst({
+      where: {
+        treeId: access.generation.treeId,
+        name: { equals: newName, mode: 'insensitive' },
+        id: { not: id }
+      }
+    });
+
+    if (existing) {
+      return errorResponse('CONFLICT', 'Generation name already exists', 400);
+    }
+
     const updatedGen = await prisma.generation.update({
       where: { id },
-      data: { name: validation.data.name },
+      data: { name: newName },
     });
 
     return successResponse(updatedGen, 'Generation renamed successfully');
