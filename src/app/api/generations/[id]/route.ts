@@ -33,8 +33,8 @@ async function verifyGenerationAccess(generationId: string, userId: string) {
   return { generation, role };
 }
 
-/** PUT /api/generations/[id] — Rename a generation */
-export async function PUT(
+/** PATCH /api/generations/[id] — Rename a generation */
+export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {

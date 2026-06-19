@@ -49,6 +49,7 @@ export default function MembersPage() {
   };
 
   const handleRenameGeneration = async (id: string, currentName: string) => {
+    console.log("Rename clicked", id);
     const newName = prompt('Enter new generation name:', currentName);
     if (newName && newName !== currentName) {
       await renameGeneration(id, newName);
@@ -56,15 +57,19 @@ export default function MembersPage() {
   };
 
   const handleDeleteGenerationClick = (id: string) => {
+    console.log("Delete clicked", id);
     setDeleteModalGenId(id);
   };
 
   const handleMoveGeneration = async (id: string, direction: 'up' | 'down') => {
+    if (direction === 'up') console.log("Move Up clicked", id);
+    if (direction === 'down') console.log("Move Down clicked", id);
     await moveGeneration(id, direction);
   };
 
   const handleConfirmDelete = async (action?: 'moveMembers' | 'deleteMembers', targetId?: string) => {
     if (!deleteModalGenId) return;
+    console.log("Deleting generation", deleteModalGenId);
     await deleteGeneration(deleteModalGenId, action, targetId);
     setDeleteModalGenId(null);
     fetchMembers(); // refresh members because some might have been moved or deleted
@@ -213,30 +218,30 @@ export default function MembersPage() {
                           }
                         >
                           <div className="flex flex-col text-sm">
-                            <button className="sm:hidden flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={() => handleAddGenerationAbove(gen.orderIndex)}>
+                            <button className="sm:hidden flex items-center w-full px-4 py-2 text-left hover:bg-muted" onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleAddGenerationAbove(gen.orderIndex); }}>
                               <ArrowUpToLine className="w-4 h-4 mr-2" /> Add Above
                             </button>
-                            <button className="sm:hidden flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={() => handleAddGenerationBelow(gen.orderIndex)}>
+                            <button className="sm:hidden flex items-center w-full px-4 py-2 text-left hover:bg-muted" onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleAddGenerationBelow(gen.orderIndex); }}>
                               <ArrowDownToLine className="w-4 h-4 mr-2" /> Add Below
                             </button>
-                            <button className="flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={() => handleRenameGeneration(gen.id, gen.name)}>
+                            <button className="flex items-center w-full px-4 py-2 text-left hover:bg-muted" onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleRenameGeneration(gen.id, gen.name); }}>
                               <Pencil className="w-4 h-4 mr-2" /> Rename
                             </button>
                             <button 
                               className="flex items-center w-full px-4 py-2 text-left hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed" 
-                              onClick={() => handleMoveGeneration(gen.id, 'up')}
+                              onPointerDown={(e) => { if (idx === 0) return; e.preventDefault(); e.stopPropagation(); handleMoveGeneration(gen.id, 'up'); }}
                               disabled={idx === 0}
                             >
                               <ArrowUp className="w-4 h-4 mr-2" /> Move Up
                             </button>
                             <button 
                               className="flex items-center w-full px-4 py-2 text-left hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed" 
-                              onClick={() => handleMoveGeneration(gen.id, 'down')}
+                              onPointerDown={(e) => { if (idx === sortedGenerations.length - 1) return; e.preventDefault(); e.stopPropagation(); handleMoveGeneration(gen.id, 'down'); }}
                               disabled={idx === sortedGenerations.length - 1}
                             >
                               <ArrowDown className="w-4 h-4 mr-2" /> Move Down
                             </button>
-                            <button className="flex items-center w-full px-4 py-2 text-left text-destructive hover:bg-muted" onClick={() => handleDeleteGenerationClick(gen.id)}>
+                            <button className="flex items-center w-full px-4 py-2 text-left text-destructive hover:bg-muted" onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteGenerationClick(gen.id); }}>
                               <Trash2 className="w-4 h-4 mr-2" /> Delete
                             </button>
                           </div>
