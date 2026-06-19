@@ -58,10 +58,8 @@ export async function POST(request: NextRequest) {
       }
     } else if (type === 'PARENT') {
       // fromId is Parent, toId is Child
-      if (fromGenOrder >= toGenOrder) {
-        // Technically this could be a Parent violating older generation or Child violating younger generation.
-        // But since type is PARENT, we say Parent must belong to an older generation.
-        return errorResponse('VALIDATION_ERROR', 'Parent must belong to an older generation.', 400);
+      if (fromGenOrder !== toGenOrder - 1) {
+        return errorResponse('VALIDATION_ERROR', 'Parent must belong exactly to the generation immediately above the child.', 400);
       }
     }
 
@@ -121,7 +119,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existing) {
-      return successResponse(existing, 'Relationship already exists', 200);
+      return errorResponse('VALIDATION_ERROR', 'Relationship already exists', 400);
     }
 
     const newRel = await prisma.relationship.create({

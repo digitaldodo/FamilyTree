@@ -45,9 +45,6 @@ export function getValidRelationshipCandidates(
       if (hasRelation) return false;
 
       // Prevent overlapping relations between two members
-      // If A is already SPOUSE of B, A cannot be PARENT or CHILD or SIBLING of B
-      // If A is already SIBLING of B, A cannot be PARENT or CHILD or SPOUSE of B
-      // If A is already PARENT/CHILD of B, A cannot be SIBLING or SPOUSE of B
       const isParentChild = currentMember.relationsFrom.some(r => r.toId === member.id && r.type === 'PARENT') ||
                             currentMember.relationsTo.some(r => r.fromId === member.id && r.type === 'PARENT');
       const isSpouse = currentMember.relationsFrom.some(r => r.toId === member.id && r.type === 'SPOUSE') ||
@@ -75,22 +72,15 @@ export function getValidRelationshipCandidates(
       }
     }
 
-    // Chronology Enforcement
+    // Chronology Enforcement (Strict Generation Distance Rule)
     const memberGenOrder = getGenerationOrder(member.generationId);
-    const memberBirthYear = member.birthDate ? new Date(member.birthDate).getFullYear() : null;
 
     if (relationType === 'PARENT') {
-      // Parent must belong to an older generation (lower orderIndex)
-      if (memberGenOrder >= currentMemberGenOrder) return false;
-      if (memberGenOrder === currentMemberGenOrder - 1) {
-         if (memberBirthYear !== null && currentMemberBirthYear !== null && memberBirthYear >= currentMemberBirthYear) return false;
-      }
+      // Parent must be exactly one generation above
+      if (memberGenOrder !== currentMemberGenOrder - 1) return false;
     } else if (relationType === 'CHILD') {
-      // Child must belong to a younger generation (higher orderIndex)
-      if (memberGenOrder <= currentMemberGenOrder) return false;
-      if (memberGenOrder === currentMemberGenOrder + 1) {
-         if (memberBirthYear !== null && currentMemberBirthYear !== null && memberBirthYear <= currentMemberBirthYear) return false;
-      }
+      // Child must be exactly one generation below
+      if (memberGenOrder !== currentMemberGenOrder + 1) return false;
     } else if (relationType === 'SIBLING' || relationType === 'SPOUSE') {
       // Siblings and spouses must be in the same generation
       if (memberGenOrder !== currentMemberGenOrder) return false;
