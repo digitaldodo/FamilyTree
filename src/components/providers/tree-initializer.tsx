@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useAppStore } from '@/store/use-app-store';
 
 export function TreeInitializer() {
-  const { userTrees, setUserTrees, activeTreeId, setActiveTreeId, setUserRole } = useAppStore();
+  const { userTrees, setUserTrees, activeTreeId, setActiveTreeId, setUserRole, setIsInitializingTrees } = useAppStore();
   const hasFetched = useRef(false);
 
   useEffect(() => {
@@ -43,11 +43,13 @@ export function TreeInitializer() {
         }
       } catch (error) {
         console.error('Failed to load trees:', error);
+      } finally {
+        setIsInitializingTrees(false);
       }
     }
 
     loadTrees();
-  }, [activeTreeId, setActiveTreeId, setUserRole, setUserTrees]);
+  }, [activeTreeId, setActiveTreeId, setUserRole, setUserTrees, setIsInitializingTrees]);
 
   return null; // This is a logic-only component
 }

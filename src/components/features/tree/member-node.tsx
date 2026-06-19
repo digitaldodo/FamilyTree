@@ -17,7 +17,10 @@ interface MemberNodeProps {
 
 function MemberNodeComponent({ data }: MemberNodeProps) {
   const { member } = data;
-  const { selectedMemberId, setSelectedMemberId, setIsMemberModalOpen, generations } = useAppStore();
+  const selectedMemberId = useAppStore(s => s.selectedMemberId);
+  const setSelectedMemberId = useAppStore(s => s.setSelectedMemberId);
+  const setIsMemberModalOpen = useAppStore(s => s.setIsMemberModalOpen);
+  const generations = useAppStore(s => s.generations);
   
   const isSelected = selectedMemberId === member.id;
   const generation = generations.find(g => g.id === member.generationId);

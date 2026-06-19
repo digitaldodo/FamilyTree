@@ -117,6 +117,32 @@ export async function DELETE(
         const targetGen = await prisma.generation.findUnique({ where: { id: targetId } });
         if (!targetGen) return errorResponse('NOT_FOUND', 'Target generation not found', 404);
 
+        const membersToMove = await prisma.member.findMany({ where: { generationId: id }, select: { id: true } });
+        const memberIdsToMove = membersToMove.map(m => m.id);
+
+        const relationships = await prisma.relationship.findMany({
+          where: { OR: [{ fromId: { in: memberIdsToMove } }, { toId: { in: memberIdsToMove } }] },
+          include: { from: { include: { generation: true } }, to: { include: { generation: true } } }
+        });
+
+        for (const rel of relationships) {
+          if (rel.type === 'PARENT') {
+             const parentGenIndex = memberIdsToMove.includes(rel.fromId) ? targetGen.orderIndex : rel.from.generation.orderIndex;
+             const childGenIndex = memberIdsToMove.includes(rel.toId) ? targetGen.orderIndex : rel.to.generation.orderIndex;
+
+             if (childGenIndex <= parentGenIndex) {
+               return errorResponse('VALIDATION_ERROR', `Cannot move members: this would violate chronological order. Parents must be older than children. Conflict between ${rel.from.firstName} and ${rel.to.firstName}.`, 400);
+             }
+          } else if (rel.type === 'SPOUSE' || rel.type === 'SIBLING') {
+             const gen1Index = memberIdsToMove.includes(rel.fromId) ? targetGen.orderIndex : rel.from.generation.orderIndex;
+             const gen2Index = memberIdsToMove.includes(rel.toId) ? targetGen.orderIndex : rel.to.generation.orderIndex;
+
+             if (gen1Index !== gen2Index) {
+               return errorResponse('VALIDATION_ERROR', `Cannot move members: spouses and siblings must be in the same generation. Conflict between ${rel.from.firstName} and ${rel.to.firstName}.`, 400);
+             }
+          }
+        }
+
         await prisma.member.updateMany({
           where: { generationId: id },
           data: { generationId: targetId }

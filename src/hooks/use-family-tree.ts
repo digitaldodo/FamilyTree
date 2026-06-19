@@ -12,6 +12,8 @@ export function useFamilyTree(treeId?: string) {
   const { members, isLoading, error: fetchError } = useMembers(treeId);
   const [error, setError] = useState<string | null>(null);
 
+  const generations = useAppStore(s => s.generations);
+
   // Transform members into React Flow Nodes and Edges
   const { initialNodes, initialEdges } = useMemo(() => {
     const nodes: Node[] = [];
@@ -21,8 +23,6 @@ export function useFamilyTree(treeId?: string) {
       return { initialNodes: nodes, initialEdges: edges };
     }
 
-    // Use generation from store
-    const { generations } = useAppStore.getState();
     const sortedGens = [...generations].sort((a, b) => a.orderIndex - b.orderIndex);
 
     // Group spouses into "Family Units" using Union-Find
@@ -138,9 +138,16 @@ export function useFamilyTree(treeId?: string) {
     });
 
     // Create React Flow Edges
+    const addedEdgeKeys = new Set<string>();
+
     members.forEach(member => {
+      // Process relationships where member is the 'from' node
       member.relationsFrom.forEach(rel => {
-        const edgeId = `e-${member.id}-${rel.toId}-${rel.type}`;
+        const edgeKey = `${member.id}-${rel.toId}-${rel.type}`;
+        if (addedEdgeKeys.has(edgeKey)) return;
+        addedEdgeKeys.add(edgeKey);
+
+        const edgeId = `e-${edgeKey}`;
         
         let edgeColor = '#94a3b8'; // Default slate
         let animated = false;
@@ -183,12 +190,62 @@ export function useFamilyTree(treeId?: string) {
           } : undefined,
         });
       });
+
+      // Process relationships where member is the 'to' node
+      member.relationsTo.forEach(rel => {
+        const edgeKey = `${rel.fromId}-${member.id}-${rel.type}`;
+        if (addedEdgeKeys.has(edgeKey)) return;
+        addedEdgeKeys.add(edgeKey);
+
+        const edgeId = `e-${edgeKey}`;
+        
+        let edgeColor = '#94a3b8'; // Default slate
+        let animated = false;
+        let sourceHandle: string | undefined = undefined;
+        let targetHandle: string | undefined = undefined;
+        let zIndex = 0;
+
+        if (rel.type === 'SPOUSE') {
+          edgeColor = '#f43f5e'; // Rose for spouse
+          sourceHandle = 'spouse';
+          targetHandle = 'spouse-target';
+          zIndex = 1;
+        } else if (rel.type === 'PARENT') {
+          edgeColor = '#6366f1'; // Indigo for child
+          animated = true;
+          sourceHandle = 'parent-source';
+          targetHandle = 'child-target';
+          zIndex = 0;
+        } else if (rel.type === 'SIBLING') {
+          edgeColor = '#10b981'; // Emerald for sibling
+          sourceHandle = 'spouse'; // Reuse lateral handles for siblings for now
+          targetHandle = 'spouse-target';
+          zIndex = 1;
+        }
+
+        edges.push({
+          id: edgeId,
+          source: rel.fromId,
+          target: member.id,
+          type: 'relationship',
+          sourceHandle,
+          targetHandle,
+          animated,
+          zIndex,
+          data: { type: rel.type },
+          style: { stroke: edgeColor, strokeWidth: 2 },
+          markerEnd: rel.type === 'PARENT' ? {
+            type: MarkerType.ArrowClosed,
+            color: edgeColor,
+          } : undefined,
+        });
+      });
     });
 
     console.log('[Tree Diagnostics] Nodes:', nodes.length, 'Edges:', edges.length, 'Generations:', sortedGens.map(g => g.name));
 
     return { initialNodes: nodes, initialEdges: edges };
-  }, [members]);
+  }, [members, generations]);
 
   return {
     members,

@@ -24,10 +24,12 @@ export function MemberAvatar({
 }: MemberAvatarProps) {
   if (imageUrl) {
     return (
-      <img
+      <Image
         src={imageUrl}
         alt={firstName && lastName ? `${firstName} ${lastName}` : 'Member'}
-        className={cn("w-full h-full object-cover absolute inset-0", className)}
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        className={cn("object-cover absolute inset-0", className)}
       />
     );
   }

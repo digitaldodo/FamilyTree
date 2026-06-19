@@ -27,6 +27,8 @@ interface AppState {
   // Multi-tree support
   activeTreeId: string | null;
   setActiveTreeId: (id: string | null) => void;
+  isInitializingTrees: boolean;
+  setIsInitializingTrees: (isInit: boolean) => void;
   userTrees: TreeSummary[];
   setUserTrees: (trees: TreeSummary[]) => void;
   userRole: TreePermission;
@@ -76,6 +78,8 @@ export const useAppStore = create<AppState>()(
   // Multi-tree support
   activeTreeId: null,
   setActiveTreeId: (id) => set({ activeTreeId: id, members: [], generations: [] }),
+  isInitializingTrees: true,
+  setIsInitializingTrees: (isInit) => set({ isInitializingTrees: isInit }),
   userTrees: [],
   setUserTrees: (trees) => set({ userTrees: trees }),
   userRole: null,
@@ -103,7 +107,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'family-tree-storage',
-      partialize: (state) => ({ activeTreeId: state.activeTreeId }), // only persist activeTreeId
+      partialize: (state) => ({ activeTreeId: state.activeTreeId, sidebarOpen: state.sidebarOpen }),
     }
   )
 );

@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-// @ts-expect-error
+// @ts-expect-error - Next.js config types issue
 import withPWA from "next-pwa";
 
 const withPWAConfig = withPWA({

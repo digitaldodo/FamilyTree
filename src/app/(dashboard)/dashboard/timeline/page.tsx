@@ -41,8 +41,8 @@ export default function TimelinePage() {
               date: member.birthDate,
               type: 'BIRTH',
               description: member.occupation
-                ? `${member.generation?.name || 'Unknown Generation'} · ${member.occupation}`
-                : `Added to generation ${member.generation?.name || 'Unknown'}`,
+                ? `${member.generation?.name?.includes('NaN') ? 'Unknown Generation' : (member.generation?.name || 'Unknown Generation')} · ${member.occupation}`
+                : `Added to generation ${member.generation?.name?.includes('NaN') ? 'Unknown' : (member.generation?.name || 'Unknown')}`,
               members: [{
                 id: member.id,
                 name: `${member.firstName} ${member.lastName}`,
@@ -57,7 +57,7 @@ export default function TimelinePage() {
               title: `${member.firstName} ${member.lastName} passed away`,
               date: member.deathDate,
               type: 'DEATH',
-              description: member.generation?.name || 'Unknown Generation',
+              description: member.generation?.name?.includes('NaN') ? 'Unknown Generation' : (member.generation?.name || 'Unknown Generation'),
               members: [{
                 id: member.id,
                 name: `${member.firstName} ${member.lastName}`,

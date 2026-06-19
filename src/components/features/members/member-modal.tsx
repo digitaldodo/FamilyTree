@@ -22,6 +22,8 @@ import { useMemberMutations } from '@/hooks/use-member-mutations';
 import { MemoryGallery, Memory } from '../memories/memory-gallery';
 import { getGenerationLabel } from '@/utils/date';
 import { RelationshipSelector } from './relationship-selector';
+import { MemberDetails } from './member-details';
+import { MemberRelationships } from './member-relationships';
 import Image from 'next/image';
 import { MemberAvatar } from './member-avatar';
 import { toast } from 'sonner';
@@ -286,156 +288,16 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                       )}
 
                       {/* ── Details Grid ── */}
-                      <div className="grid grid-cols-2 gap-4">
-                        {member.birthDate && (
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
-                              <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Born</span>
-                              <span className="text-sm font-semibold">
-                                {new Date(member.birthDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                        {member.deathDate && (
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-slate-500/10 flex items-center justify-center shrink-0">
-                              <Calendar className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Passed</span>
-                              <span className="text-sm font-semibold">
-                                {new Date(member.deathDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                        {member.address && (
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-                              <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Location</span>
-                              <span className="text-sm font-semibold truncate">{member.address}</span>
-                            </div>
-                          </div>
-                        )}
-                        {member.occupation && (
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
-                              <Briefcase className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Occupation</span>
-                              <span className="text-sm font-semibold truncate">{member.occupation}</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                      <MemberDetails member={member} />
 
                       {/* ── Relationships ── */}
-                      <div>
-                        <h3 className="text-lg font-bold mb-4">Family Connections</h3>
-                        
-                        {hasRelationships ? (
-                          <div className="space-y-4">
-                            {parents.length > 0 && (
-                              <div>
-                                <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Parents</h4>
-                                <div className="flex flex-wrap gap-2">
-                                  {parents.map((r) => {
-                                    const p = members.find((m) => m.id === r.fromId);
-                                    if (!p) return null;
-                                    return (
-                                      <div key={r.id} onClick={() => navigateToMember(p.id)} className="flex items-center gap-2 p-1.5 pr-4 rounded-full bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors border border-border">
-                                        <div className="w-8 h-8 rounded-full bg-muted overflow-hidden relative">
-                                          <MemberAvatar imageUrl={p.imageUrl} firstName={p.firstName} lastName={p.lastName} gender={p.gender} fallbackSize={16} />
-                                        </div>
-                                        <span className="text-sm font-medium">{p.firstName} {p.lastName}</span>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            )}
-
-                            {spouses.length > 0 && (
-                              <div>
-                                <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Spouses</h4>
-                                <div className="flex flex-wrap gap-2">
-                                  {spouses.map((r) => {
-                                    const s = members.find((m) => m.id === r.toId);
-                                    if (!s) return null;
-                                    return (
-                                      <div key={r.id} onClick={() => navigateToMember(s.id)} className="flex items-center gap-2 p-1.5 pr-4 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100 hover:bg-rose-100 dark:hover:bg-rose-900/50 cursor-pointer transition-colors border border-rose-200/50 dark:border-rose-800/30">
-                                        <div className="w-8 h-8 rounded-full bg-rose-200/50 dark:bg-rose-900/50 overflow-hidden relative flex items-center justify-center">
-                                          <MemberAvatar imageUrl={s.imageUrl} firstName={s.firstName} lastName={s.lastName} gender={s.gender} fallbackSize={16} iconClassName="text-rose-500" />
-                                        </div>
-                                        <span className="text-sm font-medium">{s.firstName} {s.lastName}</span>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            )}
-
-                            {children.length > 0 && (
-                              <div>
-                                <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Children</h4>
-                                <div className="flex flex-wrap gap-2">
-                                  {children.map((r) => {
-                                    const c = members.find((m) => m.id === r.toId);
-                                    if (!c) return null;
-                                    return (
-                                      <div key={r.id} onClick={() => navigateToMember(c.id)} className="flex items-center gap-2 p-1.5 pr-4 rounded-full bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors border border-border">
-                                        <div className="w-8 h-8 rounded-full bg-muted overflow-hidden relative">
-                                          <MemberAvatar imageUrl={c.imageUrl} firstName={c.firstName} lastName={c.lastName} gender={c.gender} fallbackSize={16} />
-                                        </div>
-                                        <span className="text-sm font-medium">{c.firstName} {c.lastName}</span>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            )}
-
-                            {siblings.length > 0 && (
-                              <div>
-                                <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Siblings</h4>
-                                <div className="flex flex-wrap gap-2">
-                                  {siblings.map((r) => {
-                                    const sibId = r.fromId === member.id ? r.toId : r.fromId;
-                                    const sib = members.find((m) => m.id === sibId);
-                                    if (!sib) return null;
-                                    return (
-                                      <div key={r.id} onClick={() => navigateToMember(sib.id)} className="flex items-center gap-2 p-1.5 pr-4 rounded-full bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors border border-border">
-                                        <div className="w-8 h-8 rounded-full bg-muted overflow-hidden relative">
-                                          <MemberAvatar imageUrl={sib.imageUrl} firstName={sib.firstName} lastName={sib.lastName} gender={sib.gender} fallbackSize={16} />
-                                        </div>
-                                        <span className="text-sm font-medium">{sib.firstName} {sib.lastName}</span>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          !readOnly && (
-                            <div className="text-center py-8 bg-muted/30 rounded-2xl border border-dashed border-border">
-                              <Users className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-                              <p className="text-sm font-medium text-muted-foreground">No family connections yet</p>
-                              <button onClick={() => setIsEditingMember(true)} className="text-sm text-purple-500 hover:underline mt-1">
-                                Add relationships
-                              </button>
-                            </div>
-                          )
-                        )}
-                      </div>
+                      <MemberRelationships 
+                        member={member} 
+                        members={members} 
+                        onNavigateToMember={navigateToMember} 
+                        readOnly={readOnly} 
+                        onAddRelationshipsClick={() => setIsEditingMember(true)} 
+                      />
 
                       {/* ── Memories Section ── */}
                       <div>

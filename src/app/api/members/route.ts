@@ -158,13 +158,15 @@ export async function POST(request: NextRequest) {
           const relative = relatives.find(r => r.id === rel.id);
           if (!relative) continue;
 
+          const baseOrderIndex = typeof relative.generation?.orderIndex === 'number' ? relative.generation.orderIndex : 0;
+          
           let expectedIndex: number;
           if (rel.type === 'PARENT') {
-            expectedIndex = relative.generation.orderIndex + 1;
+            expectedIndex = baseOrderIndex + 1;
           } else if (rel.type === 'CHILD') {
-            expectedIndex = relative.generation.orderIndex - 1;
+            expectedIndex = baseOrderIndex - 1;
           } else {
-            expectedIndex = relative.generation.orderIndex;
+            expectedIndex = baseOrderIndex;
           }
 
           if (targetOrderIndex === null) {
