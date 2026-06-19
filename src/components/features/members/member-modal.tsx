@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { useAppStore } from '@/store/use-app-store';
 import { useMembers } from '@/hooks/use-members';
 import {
@@ -139,7 +139,7 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
       y: isMobile ? '100%' : 0,
       transition: { type: 'tween', duration: 0.2 }
     }
-  };
+  } satisfies Variants;
 
   return (
     <>
