@@ -46,16 +46,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Chronological validation
+    const fromGenOrder = fromMember.generation.orderIndex;
+    const toGenOrder = toMember.generation.orderIndex;
+
     if (type === 'SPOUSE' || type === 'SIBLING') {
-      if (fromMember.generation.orderIndex !== toMember.generation.orderIndex) {
+      if (fromGenOrder !== toGenOrder) {
         const errorMsg = type === 'SPOUSE' 
-          ? 'Spouses must belong to the same generation.' 
-          : 'Siblings must belong to the same generation.';
+          ? 'Spouse must belong to the same generation.' 
+          : 'Sibling must belong to the same generation.';
         return errorResponse('VALIDATION_ERROR', errorMsg, 400);
       }
     } else if (type === 'PARENT') {
       // fromId is Parent, toId is Child
-      if (fromMember.generation.orderIndex >= toMember.generation.orderIndex) {
+      if (fromGenOrder >= toGenOrder) {
+        // Technically this could be a Parent violating older generation or Child violating younger generation.
+        // But since type is PARENT, we say Parent must belong to an older generation.
         return errorResponse('VALIDATION_ERROR', 'Parent must belong to an older generation.', 400);
       }
     }
@@ -87,6 +92,21 @@ export async function POST(request: NextRequest) {
       if (existingParents >= 2) {
         return errorResponse('VALIDATION_ERROR', 'A member can have at most two parents.', 400);
       }
+    }
+
+    // Cross-relationship constraint validations (Smart Rules)
+    const existingOverlaps = await prisma.relationship.findFirst({
+      where: {
+        OR: [
+          { fromId, toId },
+          { fromId: toId, toId: fromId }
+        ],
+        NOT: { type } // we only care if they have a *different* type of relationship
+      }
+    });
+
+    if (existingOverlaps) {
+      return errorResponse('VALIDATION_ERROR', 'Members already have an incompatible relationship.', 400);
     }
 
     // Check if relationship already exists

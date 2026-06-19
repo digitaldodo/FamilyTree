@@ -139,10 +139,18 @@ export async function POST(request: NextRequest) {
       return cleaned;
     };
 
-    let finalGenerationId = generationId;
+    const finalGenerationId = generationId;
+    if (!finalGenerationId) {
+       return errorResponse('VALIDATION_ERROR', 'Generation could not be determined and was not provided.', 400);
+    }
+
+    const targetGen = await prisma.generation.findUnique({ where: { id: finalGenerationId } });
+    if (!targetGen) {
+      return errorResponse('NOT_FOUND', 'Selected generation not found', 404);
+    }
 
     // Phase: Relationship & Generation logic
-    // Automatically calculate the target generation based on provided relationships.
+    // Strictly validate the provided relationships against the selected generation.
     if (relations && Array.isArray(relations) && relations.length > 0) {
       const relativeIds = relations.map((r: any) => r.id).filter(Boolean);
       if (relativeIds.length > 0) {
@@ -151,64 +159,35 @@ export async function POST(request: NextRequest) {
           include: { generation: true }
         });
 
-        let targetOrderIndex: number | null = null;
-
         for (const rel of relations) {
           if (!rel.id || !rel.type) continue;
           const relative = relatives.find(r => r.id === rel.id);
           if (!relative) continue;
 
-          const baseOrderIndex = typeof relative.generation?.orderIndex === 'number' ? relative.generation.orderIndex : 0;
-          
-          let expectedIndex: number;
+          const relGenOrder = relative.generation.orderIndex;
+          const targetGenOrder = targetGen.orderIndex;
+
           if (rel.type === 'PARENT') {
-            expectedIndex = baseOrderIndex + 1;
+            // Target member is child, relative is parent. Parent must be older (lower orderIndex).
+            if (relGenOrder >= targetGenOrder) {
+              return errorResponse('VALIDATION_ERROR', 'Parent must belong to an older generation.', 400);
+            }
           } else if (rel.type === 'CHILD') {
-            expectedIndex = baseOrderIndex - 1;
-          } else {
-            expectedIndex = baseOrderIndex;
+            // Target member is parent, relative is child. Child must be younger (higher orderIndex).
+            if (relGenOrder <= targetGenOrder) {
+              return errorResponse('VALIDATION_ERROR', 'Child must belong to a younger generation.', 400);
+            }
+          } else if (rel.type === 'SPOUSE') {
+            if (relGenOrder !== targetGenOrder) {
+              return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation.', 400);
+            }
+          } else if (rel.type === 'SIBLING') {
+            if (relGenOrder !== targetGenOrder) {
+              return errorResponse('VALIDATION_ERROR', 'Sibling must belong to the same generation.', 400);
+            }
           }
-
-          if (targetOrderIndex === null) {
-            targetOrderIndex = expectedIndex;
-          } else if (targetOrderIndex !== expectedIndex) {
-            return errorResponse('VALIDATION_ERROR', 'Impossible structure: Selected relationships dictate conflicting generations.', 400);
-          }
-        }
-
-        if (targetOrderIndex !== null) {
-          // Find if generation exists at targetOrderIndex
-          let targetGen = await prisma.generation.findFirst({
-            where: { treeId, orderIndex: targetOrderIndex }
-          });
-
-          if (!targetGen) {
-            // Need to create it. We must transactionally shift if targetOrderIndex < 0? 
-            // In standard usage, generations only grow downwards (max + 1) or upwards.
-            // Let's use the same logic as POST /api/generations
-            targetGen = await prisma.$transaction(async (tx) => {
-              // If we are inserting before 0 or anywhere, shift everything >= targetOrderIndex down
-              await tx.generation.updateMany({
-                where: { treeId, orderIndex: { gte: targetOrderIndex! } },
-                data: { orderIndex: { increment: 1 } }
-              });
-              
-              return await tx.generation.create({
-                data: {
-                  treeId,
-                  name: 'Unnamed Generation',
-                  orderIndex: targetOrderIndex!,
-                }
-              });
-            });
-          }
-          finalGenerationId = targetGen.id;
         }
       }
-    }
-
-    if (!finalGenerationId) {
-       return errorResponse('VALIDATION_ERROR', 'Generation could not be determined and was not provided.', 400);
     }
 
      

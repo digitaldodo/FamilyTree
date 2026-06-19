@@ -10,6 +10,7 @@ import { Plus, X } from 'lucide-react';
 
 interface RelationshipSelectorProps {
   currentMemberId?: string;
+  currentGenerationId?: string;
   type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING';
   label: string;
   onAddRelation: (memberId: string, type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING') => void;
@@ -21,6 +22,7 @@ import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 export function RelationshipSelector({
   currentMemberId,
+  currentGenerationId,
   type,
   label,
   onAddRelation,
@@ -31,8 +33,8 @@ export function RelationshipSelector({
   const [selectedId, setSelectedId] = React.useState<string>('');
 
   const validCandidates = React.useMemo(
-    () => getValidRelationshipCandidates(members, generations, currentMemberId, type),
-    [members, generations, currentMemberId, type]
+    () => getValidRelationshipCandidates(members, generations, currentMemberId, type, currentGenerationId),
+    [members, generations, currentMemberId, type, currentGenerationId]
   );
 
   const handleAdd = () => {
@@ -67,9 +69,9 @@ export function RelationshipSelector({
 
         {/* Add New */}
         <div className="flex gap-2 items-center">
-          <Select value={selectedId} onValueChange={setSelectedId}>
+          <Select value={selectedId} onValueChange={setSelectedId} disabled={validCandidates.length === 0}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder={`Select ${label.toLowerCase()}...`} />
+              <SelectValue placeholder={validCandidates.length === 0 ? `No eligible ${label.toLowerCase()} found` : `Select ${label.toLowerCase()}...`} />
             </SelectTrigger>
             <SelectContent>
               {validCandidates.map(c => (
@@ -77,7 +79,7 @@ export function RelationshipSelector({
               ))}
             </SelectContent>
           </Select>
-          <Button type="button" variant="outline" size="icon" onClick={handleAdd} disabled={!selectedId}>
+          <Button type="button" variant="outline" size="icon" onClick={handleAdd} disabled={!selectedId || validCandidates.length === 0}>
             <Plus className="h-4 w-4" />
           </Button>
         </div>

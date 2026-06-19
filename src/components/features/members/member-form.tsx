@@ -332,6 +332,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
         <div className="grid grid-cols-1 gap-4">
           <RelationshipSelector
             currentMemberId={member?.id}
+            currentGenerationId={watch('generationId')}
             type="PARENT"
             label="Parents"
             existingRelations={relations.filter(r => r.type === 'PARENT').map(r => r.id)}
@@ -340,6 +341,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
           />
           <RelationshipSelector
             currentMemberId={member?.id}
+            currentGenerationId={watch('generationId')}
             type="CHILD"
             label="Children"
             existingRelations={relations.filter(r => r.type === 'CHILD').map(r => r.id)}
@@ -348,6 +350,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
           />
           <RelationshipSelector
             currentMemberId={member?.id}
+            currentGenerationId={watch('generationId')}
             type="SPOUSE"
             label="Spouse(s)"
             existingRelations={relations.filter(r => r.type === 'SPOUSE').map(r => r.id)}
@@ -356,6 +359,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
           />
           <RelationshipSelector
             currentMemberId={member?.id}
+            currentGenerationId={watch('generationId')}
             type="SIBLING"
             label="Siblings"
             existingRelations={relations.filter(r => r.type === 'SIBLING').map(r => r.id)}
