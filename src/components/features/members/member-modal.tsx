@@ -1,6 +1,7 @@
 'use client';
 
-import { Modal } from '@/components/ui/modal';
+import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/use-app-store';
 import { useMembers } from '@/hooks/use-members';
 import {
@@ -13,15 +14,13 @@ import {
   Heart,
   Users,
   Camera,
+  X
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { MemberForm } from './member-form';
 import { MemberDeleteDialog } from './member-delete-dialog';
 import { useMemberMutations } from '@/hooks/use-member-mutations';
 import { MemoryGallery, Memory } from '../memories/memory-gallery';
 import { getGenerationLabel } from '@/utils/date';
-
-import * as React from 'react';
 import { toast } from 'sonner';
 
 interface MemberModalProps {
@@ -42,7 +41,19 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
   const { createMember, updateMember, deleteMember, isSubmitting } =
     useMemberMutations();
 
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMemberModalOpen(false);
+        setIsEditingMember(false);
+      }
+    };
+    if (isMemberModalOpen) window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isMemberModalOpen, setIsMemberModalOpen, setIsEditingMember]);
 
   const member = selectedMemberId
     ? members.find((m) => m.id === selectedMemberId)
@@ -54,8 +65,6 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
   
   const memberGenIndex = memberGeneration ? generations.findIndex(g => g.id === memberGeneration.id) : 0;
   const totalGenerations = generations.length;
-
-  if (!member && !isEditingMember) return null;
 
   const handleClose = () => {
     setIsMemberModalOpen(false);
@@ -88,12 +97,9 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
   };
 
   // Build relationship data
-  const spouses =
-    member?.relationsFrom.filter((r) => r.type === 'SPOUSE') || [];
-  const parents =
-    member?.relationsTo.filter((r) => r.type === 'PARENT') || [];
-  const children =
-    member?.relationsFrom.filter((r) => r.type === 'PARENT') || [];
+  const spouses = member?.relationsFrom.filter((r) => r.type === 'SPOUSE') || [];
+  const parents = member?.relationsTo.filter((r) => r.type === 'PARENT') || [];
+  const children = member?.relationsFrom.filter((r) => r.type === 'PARENT') || [];
   const siblings = [
     ...(member?.relationsFrom.filter((r) => r.type === 'SIBLING') || []),
     ...(member?.relationsTo.filter((r) => r.type === 'SIBLING') || []),
@@ -112,371 +118,370 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
     setSelectedMemberId(id);
   };
 
+  // Mobile check for animation
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
+  const drawerVariants = {
+    hidden: { 
+      opacity: 0, 
+      x: isMobile ? 0 : '100%', 
+      y: isMobile ? '100%' : 0 
+    },
+    visible: { 
+      opacity: 1, 
+      x: 0, 
+      y: 0,
+      transition: { type: 'spring', damping: 25, stiffness: 200 }
+    },
+    exit: { 
+      opacity: 0, 
+      x: isMobile ? 0 : '100%', 
+      y: isMobile ? '100%' : 0,
+      transition: { type: 'tween', duration: 0.2 }
+    }
+  };
+
   return (
     <>
-      <Modal
-        isOpen={isMemberModalOpen}
-        onClose={handleClose}
-        className="max-w-2xl w-full p-0 overflow-hidden"
-      >
-        {/* ── Compact Cover with Avatar Overlay ── */}
-        <div className="h-24 sm:h-28 bg-gradient-to-br from-primary/30 via-purple-500/20 to-rose-500/10 relative overflow-hidden">
-          {member?.coverImage && (
-            <img
-              src={member.coverImage}
-              alt=""
-              className="w-full h-full object-cover"
+      <AnimatePresence>
+        {(isMemberModalOpen && (member || isEditingMember)) && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+              onClick={handleClose}
             />
-          )}
-          {/* Dark gradient overlay for text contrast */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
-          {/* Avatar + Name Overlay */}
-          <div className="absolute bottom-3 left-4 right-14 flex items-end gap-3">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl border-2 border-white/90 dark:border-zinc-800 overflow-hidden bg-muted flex items-center justify-center shadow-lg shrink-0">
-              {member?.avatar ? (
-                <img
-                  src={member.avatar}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <User2 className="w-6 h-6 text-muted-foreground" />
-              )}
-            </div>
-            <div className="flex-1 min-w-0 pb-0.5">
-              {member && !isEditingMember && (
-                <>
-                  <h2 className="text-lg sm:text-xl font-bold text-white truncate leading-tight">
-                    {member.firstName} {member.lastName}
-                  </h2>
-                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-xs font-medium text-white/90">
-                      Gen {memberGenIndex + 1} · {getGenerationLabel(member.birthDate) || memberGeneration?.name || 'Unknown'}
-                    </span>
-                    {age !== null && (
-                      <span className="text-xs text-white/70">
-                        {member.deathDate
-                          ? `Lived ${age} years`
-                          : `${age} years old`}
-                      </span>
+            {/* Drawer */}
+            <motion.div
+              variants={drawerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="fixed inset-x-0 bottom-0 md:inset-x-auto md:right-0 md:top-0 z-50 w-full md:w-[600px] h-[90vh] md:h-screen bg-background md:border-l border-border shadow-2xl flex flex-col rounded-t-3xl md:rounded-none overflow-hidden"
+            >
+              {/* ── Premium Cover & Header ── */}
+              <div className="relative h-48 md:h-64 shrink-0 bg-gradient-to-br from-primary/30 via-purple-500/20 to-rose-500/10">
+                {member?.coverImage && (
+                  <img
+                    src={member.coverImage}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                )}
+                {/* Dark gradient overlay for text contrast */}
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+
+                {/* Close Button */}
+                <button 
+                  onClick={handleClose}
+                  className="absolute top-4 right-4 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-md transition-colors z-10"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                {/* Avatar + Name Overlay */}
+                <div className="absolute -bottom-6 left-6 right-6 flex items-end gap-4">
+                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl border-4 border-background overflow-hidden bg-muted flex items-center justify-center shadow-xl shrink-0 relative z-10">
+                    {member?.avatar ? (
+                      <img
+                        src={member.avatar}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User2 className="w-12 h-12 text-muted-foreground" />
                     )}
                   </div>
-                </>
-              )}
-              {isEditingMember && (
-                <h2 className="text-lg font-bold text-white">
-                  {member ? 'Edit Member' : 'Add New Member'}
-                </h2>
-              )}
-            </div>
-
-            {/* Action Buttons */}
-            {!isEditingMember && member && !readOnly && (
-              <div className="flex gap-1.5 shrink-0">
-                <button
-                  onClick={() => setIsEditingMember(true)}
-                  className="p-2 rounded-xl bg-white/15 backdrop-blur-sm text-white hover:bg-white/25 transition-colors"
-                  aria-label="Edit member"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setIsDeleteDialogOpen(true)}
-                  className="p-2 rounded-xl bg-white/15 backdrop-blur-sm text-red-300 hover:bg-red-500/30 transition-colors"
-                  aria-label="Delete member"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ── Scrollable Content ── */}
-        <div className="px-5 py-4 max-h-[70vh] sm:max-h-[60vh] overflow-y-auto space-y-4 modal-scroll">
-          {isEditingMember ? (
-            <div>
-              <MemberForm
-                member={member}
-                onSubmit={handleSubmit}
-                onCancel={handleClose}
-                isSubmitting={isSubmitting}
-              />
-            </div>
-          ) : (
-            member && (
-              <>
-                {/* ── Bio ── */}
-                {member.bio ? (
-                  <p className="text-sm leading-relaxed text-muted-foreground italic border-l-2 border-primary/30 pl-3">
-                    {member.bio}
-                  </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground/50 italic">
-                    No bio added yet
-                    {!readOnly && (
+                  
+                  <div className="flex-1 min-w-0 pb-8 md:pb-10 relative z-10">
+                    {member && !isEditingMember && (
                       <>
-                        {' — '}
-                        <button
-                          onClick={() => setIsEditingMember(true)}
-                          className="text-primary hover:underline"
-                        >
-                          add one
-                        </button>
+                        <h2 className="text-2xl md:text-3xl font-bold text-foreground truncate leading-tight tracking-tight">
+                          {member.firstName} {member.lastName}
+                        </h2>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-semibold uppercase tracking-wider">
+                            Gen {memberGenIndex + 1} · {getGenerationLabel(member.birthDate) || memberGeneration?.name || 'Unknown'}
+                          </span>
+                          {age !== null && (
+                            <span className="text-sm font-medium text-muted-foreground">
+                              {member.deathDate
+                                ? `Lived ${age} years`
+                                : `${age} years old`}
+                            </span>
+                          )}
+                        </div>
                       </>
                     )}
-                  </p>
-                )}
+                    {isEditingMember && (
+                      <h2 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+                        {member ? 'Edit Member' : 'Add New Member'}
+                      </h2>
+                    )}
+                  </div>
 
-                {/* ── Details Grid ── */}
-                <div className="grid grid-cols-2 gap-2.5">
-                  {member.birthDate && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span className="text-muted-foreground">Born:</span>
-                      <span className="font-medium">
-                        {new Date(member.birthDate).toLocaleDateString(
-                          undefined,
-                          {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          }
-                        )}
-                      </span>
-                    </div>
-                  )}
-                  {getGenerationLabel(member?.birthDate) && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Users className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span className="text-muted-foreground">Generation:</span>
-                      <span className="font-medium">
-                        {getGenerationLabel(member?.birthDate)}
-                      </span>
-                    </div>
-                  )}
-                  {member.deathDate && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span className="text-muted-foreground">Passed:</span>
-                      <span className="font-medium">
-                        {new Date(member.deathDate).toLocaleDateString(
-                          undefined,
-                          {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          }
-                        )}
-                      </span>
-                    </div>
-                  )}
-                  {member.gender && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <User2 className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span className="text-muted-foreground">Gender:</span>
-                      <span className="font-medium capitalize">
-                        {member.gender.toLowerCase()}
-                      </span>
-                    </div>
-                  )}
-                  {member.address ? (
-                    <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span className="truncate">{member.address}</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground/40">
-                      <MapPin className="w-3.5 h-3.5 shrink-0" />
-                      <span className="italic">Location not added</span>
-                    </div>
-                  )}
-                  {member.occupation ? (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Briefcase className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <span className="truncate">{member.occupation}</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground/40">
-                      <Briefcase className="w-3.5 h-3.5 shrink-0" />
-                      <span className="italic">No occupation listed</span>
+                  {/* Action Buttons */}
+                  {!isEditingMember && member && !readOnly && (
+                    <div className="flex gap-2 pb-8 md:pb-10 shrink-0 relative z-10">
+                      <button
+                        onClick={() => setIsEditingMember(true)}
+                        className="p-2.5 rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors shadow-sm"
+                        aria-label="Edit member"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setIsDeleteDialogOpen(true)}
+                        className="p-2.5 rounded-xl bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors shadow-sm"
+                        aria-label="Delete member"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   )}
                 </div>
+              </div>
 
-                {/* ── Relationship Chips ── */}
-                {hasRelationships && (
+              {/* ── Scrollable Content ── */}
+              <div className="flex-1 overflow-y-auto px-6 pt-12 pb-8 modal-scroll">
+                {isEditingMember ? (
                   <div>
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                      Family
-                    </h4>
-                    <div className="space-y-2">
-                      {/* Parents */}
-                      {parents.length > 0 && (
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-[10px] font-semibold text-muted-foreground uppercase w-14 shrink-0">Parents</span>
-                          {parents.map((r) => {
-                            const p = members.find((m) => m.id === r.fromId);
-                            return (
-                              p && (
-                                <button
-                                  key={r.id}
-                                  onClick={() => navigateToMember(p.id)}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs font-medium border border-blue-200/50 dark:border-blue-800/30 hover:bg-blue-100 dark:hover:bg-blue-950/50 hover:scale-[1.03] transition-all cursor-pointer"
-                                >
-                                  <Users className="w-3 h-3" />
-                                  {p.firstName}
-                                </button>
-                              )
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {/* Spouses */}
-                      {spouses.length > 0 && (
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-[10px] font-semibold text-muted-foreground uppercase w-14 shrink-0">Spouse</span>
-                          {spouses.map((r) => {
-                            const s = members.find((m) => m.id === r.toId);
-                            return (
-                              s && (
-                                <button
-                                  key={r.id}
-                                  onClick={() => navigateToMember(s.id)}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 text-xs font-medium border border-rose-200/50 dark:border-rose-800/30 hover:bg-rose-100 dark:hover:bg-rose-950/50 hover:scale-[1.03] transition-all cursor-pointer"
-                                >
-                                  <Heart className="w-3 h-3" />
-                                  {s.firstName}
-                                </button>
-                              )
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {/* Children */}
-                      {children.length > 0 && (
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-[10px] font-semibold text-muted-foreground uppercase w-14 shrink-0">Children</span>
-                          {children.map((r) => {
-                            const c = members.find((m) => m.id === r.toId);
-                            return (
-                              c && (
-                                <button
-                                  key={r.id}
-                                  onClick={() => navigateToMember(c.id)}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 text-xs font-medium border border-emerald-200/50 dark:border-emerald-800/30 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 hover:scale-[1.03] transition-all cursor-pointer"
-                                >
-                                  <Users className="w-3 h-3" />
-                                  {c.firstName}
-                                </button>
-                              )
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {/* Siblings */}
-                      {siblings.length > 0 && (
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-[10px] font-semibold text-muted-foreground uppercase w-14 shrink-0">Siblings</span>
-                          {siblings.map((r) => {
-                            const sibId =
-                              r.fromId === member.id ? r.toId : r.fromId;
-                            const sib = members.find((m) => m.id === sibId);
-                            return (
-                              sib && (
-                                <button
-                                  key={r.id}
-                                  onClick={() => navigateToMember(sib.id)}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs font-medium border border-amber-200/50 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-950/50 hover:scale-[1.03] transition-all cursor-pointer"
-                                >
-                                  <Users className="w-3 h-3" />
-                                  {sib.firstName}
-                                </button>
-                              )
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
+                    <MemberForm
+                      member={member}
+                      onSubmit={handleSubmit}
+                      onCancel={handleClose}
+                      isSubmitting={isSubmitting}
+                    />
                   </div>
-                )}
-
-                {/* Empty Relationships State */}
-                {!hasRelationships && !readOnly && (
-                  <div className="text-center py-3">
-                    <Users className="w-6 h-6 text-muted-foreground/30 mx-auto mb-1.5" />
-                    <p className="text-sm text-muted-foreground/60">
-                      No family connections yet
-                    </p>
-                    <button
-                      onClick={() => setIsEditingMember(true)}
-                      className="text-xs text-primary hover:underline mt-1"
-                    >
-                      Add relationships
-                    </button>
-                  </div>
-                )}
-
-                {/* ── Memories Section ── */}
-                <div className="pt-3 border-t border-border/50">
-                  {readOnly ? (
-                    // Read-only memory preview
-                    memories.length > 0 ? (
-                      <div>
-                        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                          Memories
-                        </h4>
-                        <div className="grid grid-cols-3 gap-2">
-                          {memories.slice(0, 6).map((m: any) => (
-                            <div
-                              key={m.id}
-                              className="aspect-square rounded-xl overflow-hidden bg-muted"
-                            >
-                              <img
-                                src={m.url}
-                                alt={m.caption || ''}
-                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                              />
-                            </div>
-                          ))}
-                        </div>
-                        {memories.length > 6 && (
-                          <p className="text-xs text-muted-foreground text-center mt-2">
-                            +{memories.length - 6} more memories
+                ) : (
+                  member && (
+                    <div className="space-y-8">
+                      {/* ── Bio ── */}
+                      {member.bio ? (
+                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                          <p className="text-[15px] leading-relaxed text-muted-foreground/90">
+                            {member.bio}
                           </p>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground/50 italic">
+                          No bio added yet
+                          {!readOnly && (
+                            <>
+                              {' — '}
+                              <button
+                                onClick={() => setIsEditingMember(true)}
+                                className="text-purple-500 hover:underline font-medium"
+                              >
+                                add one
+                              </button>
+                            </>
+                          )}
+                        </p>
+                      )}
+
+                      {/* ── Details Grid ── */}
+                      <div className="grid grid-cols-2 gap-4">
+                        {member.birthDate && (
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
+                              <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Born</span>
+                              <span className="text-sm font-semibold">
+                                {new Date(member.birthDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        {member.deathDate && (
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-slate-500/10 flex items-center justify-center shrink-0">
+                              <Calendar className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Passed</span>
+                              <span className="text-sm font-semibold">
+                                {new Date(member.deathDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        {member.address && (
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                              <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Location</span>
+                              <span className="text-sm font-semibold truncate">{member.address}</span>
+                            </div>
+                          </div>
+                        )}
+                        {member.occupation && (
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                              <Briefcase className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Occupation</span>
+                              <span className="text-sm font-semibold truncate">{member.occupation}</span>
+                            </div>
+                          </div>
                         )}
                       </div>
-                    ) : (
-                      <div className="text-center py-4">
-                        <Camera className="w-6 h-6 text-muted-foreground/20 mx-auto mb-1.5" />
-                        <p className="text-sm text-muted-foreground/50 italic">
-                          No memories uploaded yet
-                        </p>
+
+                      {/* ── Relationships ── */}
+                      <div>
+                        <h3 className="text-lg font-bold mb-4">Family Connections</h3>
+                        
+                        {hasRelationships ? (
+                          <div className="space-y-4">
+                            {parents.length > 0 && (
+                              <div>
+                                <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Parents</h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {parents.map((r) => {
+                                    const p = members.find((m) => m.id === r.fromId);
+                                    if (!p) return null;
+                                    return (
+                                      <div key={r.id} onClick={() => navigateToMember(p.id)} className="flex items-center gap-2 p-1.5 pr-4 rounded-full bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors border border-border">
+                                        <div className="w-8 h-8 rounded-full bg-muted overflow-hidden">
+                                          {p.avatar ? <img src={p.avatar} alt="" className="w-full h-full object-cover" /> : <User2 className="w-4 h-4 m-2 text-muted-foreground" />}
+                                        </div>
+                                        <span className="text-sm font-medium">{p.firstName} {p.lastName}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
+                            {spouses.length > 0 && (
+                              <div>
+                                <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Spouses</h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {spouses.map((r) => {
+                                    const s = members.find((m) => m.id === r.toId);
+                                    if (!s) return null;
+                                    return (
+                                      <div key={r.id} onClick={() => navigateToMember(s.id)} className="flex items-center gap-2 p-1.5 pr-4 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100 hover:bg-rose-100 dark:hover:bg-rose-900/50 cursor-pointer transition-colors border border-rose-200/50 dark:border-rose-800/30">
+                                        <div className="w-8 h-8 rounded-full bg-rose-200/50 dark:bg-rose-900/50 overflow-hidden flex items-center justify-center">
+                                          {s.avatar ? <img src={s.avatar} alt="" className="w-full h-full object-cover" /> : <Heart className="w-4 h-4 text-rose-500" />}
+                                        </div>
+                                        <span className="text-sm font-medium">{s.firstName} {s.lastName}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
+                            {children.length > 0 && (
+                              <div>
+                                <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Children</h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {children.map((r) => {
+                                    const c = members.find((m) => m.id === r.toId);
+                                    if (!c) return null;
+                                    return (
+                                      <div key={r.id} onClick={() => navigateToMember(c.id)} className="flex items-center gap-2 p-1.5 pr-4 rounded-full bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors border border-border">
+                                        <div className="w-8 h-8 rounded-full bg-muted overflow-hidden">
+                                          {c.avatar ? <img src={c.avatar} alt="" className="w-full h-full object-cover" /> : <User2 className="w-4 h-4 m-2 text-muted-foreground" />}
+                                        </div>
+                                        <span className="text-sm font-medium">{c.firstName} {c.lastName}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
+                            {siblings.length > 0 && (
+                              <div>
+                                <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Siblings</h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {siblings.map((r) => {
+                                    const sibId = r.fromId === member.id ? r.toId : r.fromId;
+                                    const sib = members.find((m) => m.id === sibId);
+                                    if (!sib) return null;
+                                    return (
+                                      <div key={r.id} onClick={() => navigateToMember(sib.id)} className="flex items-center gap-2 p-1.5 pr-4 rounded-full bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors border border-border">
+                                        <div className="w-8 h-8 rounded-full bg-muted overflow-hidden">
+                                          {sib.avatar ? <img src={sib.avatar} alt="" className="w-full h-full object-cover" /> : <User2 className="w-4 h-4 m-2 text-muted-foreground" />}
+                                        </div>
+                                        <span className="text-sm font-medium">{sib.firstName} {sib.lastName}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          !readOnly && (
+                            <div className="text-center py-8 bg-muted/30 rounded-2xl border border-dashed border-border">
+                              <Users className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                              <p className="text-sm font-medium text-muted-foreground">No family connections yet</p>
+                              <button onClick={() => setIsEditingMember(true)} className="text-sm text-purple-500 hover:underline mt-1">
+                                Add relationships
+                              </button>
+                            </div>
+                          )
+                        )}
                       </div>
-                    )
-                  ) : (
-                    <MemoryGallery
-                      memberId={member.id}
-                      memories={memories}
-                      compact
-                      onUpload={async (url, publicId, caption, eventTag) => {
-                        toast.info('Memory uploading is coming soon!', { icon: '📸' });
-                      }}
-                      onDelete={async (id) => {
-                        toast.info('Memory deletion is coming soon!', { icon: '🗑️' });
-                      }}
-                    />
-                  )}
-                </div>
-              </>
-            )
-          )}
-        </div>
-      </Modal>
+
+                      {/* ── Memories Section ── */}
+                      <div>
+                        {readOnly ? (
+                          memories.length > 0 ? (
+                            <div>
+                              <h3 className="text-lg font-bold mb-4">Memories</h3>
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                {memories.slice(0, 6).map((m: any) => (
+                                  <div key={m.id} className="aspect-square rounded-2xl overflow-hidden bg-muted shadow-sm">
+                                    <img src={m.url} alt={m.caption || ''} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                                  </div>
+                                ))}
+                              </div>
+                              {memories.length > 6 && (
+                                <p className="text-sm font-medium text-muted-foreground text-center mt-4">
+                                  +{memories.length - 6} more memories
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8">
+                              <Camera className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
+                              <p className="text-sm text-muted-foreground/50 italic">No memories uploaded yet</p>
+                            </div>
+                          )
+                        ) : (
+                          <MemoryGallery
+                            memberId={member.id}
+                            memories={memories}
+                            onUpload={async (url, publicId, caption, eventTag) => {
+                              toast.info('Memory uploading is coming soon!', { icon: '📸' });
+                            }}
+                            onDelete={async (id) => {
+                              toast.info('Memory deletion is coming soon!', { icon: '🗑️' });
+                            }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {member && !readOnly && (
         <MemberDeleteDialog
@@ -489,3 +494,4 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
     </>
   );
 }
+

@@ -4,6 +4,7 @@ import { MemberWithRelations } from '@/types/member';
 import { useAppStore } from '@/store/use-app-store';
 import { cn } from '@/lib/utils';
 import { User2 } from 'lucide-react';
+import { getGenerationLabel } from '@/utils/date';
 
 interface MemberNodeProps {
   data: {
@@ -18,66 +19,67 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
   
   const isSelected = selectedMemberId === member.id;
   const generation = generations.find(g => g.id === member.generationId);
+  const generationName = getGenerationLabel(member?.birthDate) || generation?.name;
 
   const handleClick = () => {
     setSelectedMemberId(member.id);
     setIsMemberModalOpen(true);
   };
 
+  const birthYear = member.birthDate ? new Date(member.birthDate).getFullYear() : '?';
+  const deathYear = member.deathDate ? new Date(member.deathDate).getFullYear() : 'Present';
+  const displayDates = member.birthDate ? `${birthYear} - ${deathYear}` : '';
+
   return (
     <div
       className={cn(
-        'group relative flex items-center gap-4 w-[280px] p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-border/50 shadow-sm transition-all duration-300 cursor-pointer hover:shadow-xl hover:-translate-y-1',
-        isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : '',
-        member.gender === 'MALE' ? 'hover:border-blue-400/50' : member.gender === 'FEMALE' ? 'hover:border-pink-400/50' : 'hover:border-primary/50'
+        'group relative flex flex-col w-[240px] h-[340px] rounded-[24px] overflow-hidden bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2 hover:scale-[1.03]',
+        isSelected ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-transparent' : '',
       )}
       onClick={handleClick}
     >
       {/* Target handle for incoming parent connections */}
-      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-primary border-background" />
+      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-purple-500 border-background" />
 
-      {/* Avatar */}
-      <div className={cn(
-        "w-16 h-16 shrink-0 rounded-full flex items-center justify-center overflow-hidden border-2 shadow-inner transition-transform group-hover:scale-105",
-        member.gender === 'MALE' ? 'bg-blue-50 border-blue-100 dark:bg-blue-950/30 dark:border-blue-900' : 
-        member.gender === 'FEMALE' ? 'bg-pink-50 border-pink-100 dark:bg-pink-950/30 dark:border-pink-900' : 
-        'bg-slate-50 border-slate-100 dark:bg-slate-900 dark:border-slate-800'
-      )}>
+      {/* Photo Area (70-80% height) */}
+      <div className="flex-1 relative bg-muted flex items-center justify-center overflow-hidden">
         {member.avatar ? (
-          <img src={member.avatar} alt={data.label} className="w-full h-full object-cover" />
+          <img src={member.avatar} alt={data.label} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
         ) : (
-          <User2 className={cn(
-            "w-7 h-7",
-            member.gender === 'MALE' ? 'text-blue-400' : 
-            member.gender === 'FEMALE' ? 'text-pink-400' : 
-            'text-slate-400'
-          )} />
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-rose-500/10 flex items-center justify-center">
+            <User2 className={cn(
+              "w-20 h-20 transition-transform duration-500 group-hover:scale-110",
+              member.gender === 'MALE' ? 'text-blue-400' : 
+              member.gender === 'FEMALE' ? 'text-pink-400' : 
+              'text-slate-400'
+            )} />
+          </div>
         )}
+        
+        {/* Soft gradient at the bottom of the photo for text contrast if needed, but we'll put text in a separate box below */}
       </div>
 
-      {/* Info */}
-      <div className="flex flex-col flex-1 min-w-0 py-0.5">
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <div className="flex flex-col min-w-0">
-            <span className="font-medium text-[13px] text-muted-foreground truncate leading-tight">{member.firstName}</span>
-            <span className="font-bold text-base text-foreground truncate leading-tight">{member.lastName}</span>
-          </div>
-          {generation && (
-            <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-primary/10 text-primary uppercase tracking-wider">
-              {generation.name}
-            </span>
-          )}
-        </div>
+      {/* Info Area */}
+      <div className="h-[90px] shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-3 flex flex-col justify-center border-t border-white/20 dark:border-white/5 relative z-10">
+        <h3 className="font-bold text-[17px] text-foreground truncate leading-tight tracking-tight">
+          {member.firstName} {member.lastName}
+        </h3>
         
-        {member.birthDate && (
-          <span className="text-[11px] font-medium text-muted-foreground mt-0.5">
-            {new Date(member.birthDate).getFullYear()} &ndash; {member.deathDate ? new Date(member.deathDate).getFullYear() : 'Present'}
+        {displayDates && (
+          <span className="text-[13px] font-medium text-muted-foreground mt-0.5 tracking-wide">
+            {displayDates}
+          </span>
+        )}
+        
+        {generationName && (
+          <span className="inline-flex mt-1.5 w-fit items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 uppercase tracking-wider">
+            {generationName}
           </span>
         )}
       </div>
 
       {/* Source handles for outgoing connections */}
-      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-primary border-background" />
+      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-purple-500 border-background" />
       <Handle type="source" position={Position.Right} id="spouse" className="w-3 h-3 top-1/2 bg-rose-500 border-background" />
       <Handle type="target" position={Position.Left} id="spouse-target" className="w-3 h-3 top-1/2 bg-rose-500 border-background" />
     </div>
