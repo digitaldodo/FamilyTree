@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Node, Edge, MarkerType } from '@xyflow/react';
+import dagre from 'dagre';
 import { useMembers } from './use-members';
 import { MemberWithRelations } from '@/types/member';
 import { useAppStore } from '@/store/use-app-store';
@@ -24,51 +25,85 @@ export function useFamilyTree(treeId?: string) {
     const { generations } = useAppStore.getState();
     const sortedGens = [...generations].sort((a, b) => a.orderIndex - b.orderIndex);
 
-    // Group members by their generationId
-    const gens = new Map<string, MemberWithRelations[]>();
-    sortedGens.forEach(g => gens.set(g.id, []));
+    // Group spouses into "Family Units" using Union-Find
+    const parentMap = new Map<string, string>();
+    const find = (i: string): string => {
+      if (parentMap.get(i) === undefined) parentMap.set(i, i);
+      if (parentMap.get(i) === i) return i;
+      const p = find(parentMap.get(i)!);
+      parentMap.set(i, p);
+      return p;
+    };
+    const union = (i: string, j: string) => {
+      parentMap.set(find(i), find(j));
+    };
 
     members.forEach(m => {
-      if (m.generationId) {
-        if (!gens.has(m.generationId)) gens.set(m.generationId, []);
-        gens.get(m.generationId)?.push(m);
-      }
-    });
-
-    // Calculate max width needed for lanes
-    let maxGenNodes = 0;
-    gens.forEach(members => {
-      if (members.length > maxGenNodes) maxGenNodes = members.length;
-    });
-    
-    // Adaptive spacing based on tree size
-    const adaptiveSpacing = maxGenNodes < 4 ? NODE_WIDTH * 1.2 : NODE_WIDTH * 1.5;
-    const laneWidth = Math.max(maxGenNodes * adaptiveSpacing * 2, window.innerWidth * 2, 3000);
-
-    // Create Nodes
-    sortedGens.forEach((gen, genIndex) => {
-      // Add visual lane background node
-      nodes.push({
-        id: `lane-${gen.id}`,
-        type: 'generationLane',
-        position: { x: -laneWidth / 2, y: genIndex * LEVEL_HEIGHT * 2 - 50 },
-        data: {
-          label: gen.name,
-          width: laneWidth,
-          height: LEVEL_HEIGHT * 2,
-          isEven: genIndex % 2 === 0,
-        },
-        zIndex: -1,
-        selectable: false,
-        draggable: false,
-        focusable: false,
+      m.relationsFrom.filter(r => r.type === 'SPOUSE').forEach(r => {
+        union(m.id, r.toId);
       });
+    });
 
-      const genMembers = gens.get(gen.id) || [];
-      genMembers.forEach((member, i) => {
-        // Adaptive horizontal layout centering
-        const xOffset = (i - (genMembers.length - 1) / 2) * adaptiveSpacing;
-        const yOffset = genIndex * LEVEL_HEIGHT * 2;
+    const familyUnits = new Map<string, string[]>();
+    members.forEach(m => {
+      const root = find(m.id);
+      if (!familyUnits.has(root)) familyUnits.set(root, []);
+      familyUnits.get(root)!.push(m.id);
+    });
+
+    const memberToFamily = new Map<string, string>();
+    familyUnits.forEach((familyMembers, root) => {
+      familyMembers.forEach(m => memberToFamily.set(m, root));
+    });
+
+    // Create Dagre Graph
+    const g = new dagre.graphlib.Graph();
+    g.setGraph({ rankdir: 'TB', nodesep: NODE_WIDTH * 0.5, edgesep: 50, ranksep: LEVEL_HEIGHT * 2 });
+    g.setDefaultEdgeLabel(() => ({}));
+
+    // Add nodes to Dagre
+    familyUnits.forEach((familyMembers, root) => {
+      g.setNode(root, { width: familyMembers.length * (NODE_WIDTH * 1.2), height: LEVEL_HEIGHT });
+    });
+
+    // Add edges to Dagre (PARENT relationships)
+    const addedEdges = new Set<string>();
+    members.forEach(m => {
+      m.relationsFrom.filter(r => r.type === 'PARENT').forEach(r => {
+        const fromFamily = memberToFamily.get(m.id);
+        const toFamily = memberToFamily.get(r.toId);
+        if (fromFamily && toFamily && fromFamily !== toFamily) {
+          const edgeKey = `${fromFamily}->${toFamily}`;
+          if (!addedEdges.has(edgeKey)) {
+            g.setEdge(fromFamily, toFamily);
+            addedEdges.add(edgeKey);
+          }
+        }
+      });
+    });
+
+    // Compute layout
+    dagre.layout(g);
+
+    const genOrderMap = new Map<string, number>();
+    sortedGens.forEach((g, i) => genOrderMap.set(g.id, i));
+
+    let minX = Infinity;
+
+    // Create React Flow Nodes (Members)
+    familyUnits.forEach((familyMembers, root) => {
+      const dagreNode = g.node(root);
+      const startX = dagreNode.x - dagreNode.width / 2;
+
+      familyMembers.forEach((memberId, i) => {
+        const member = members.find(m => m.id === memberId)!;
+        const genOrder = genOrderMap.get(member.generationId) ?? 0;
+        
+        // Dagre computes X. We force Y based on user-defined generation.
+        const xOffset = startX + i * (NODE_WIDTH * 1.2) + (NODE_WIDTH * 1.2) / 2;
+        const yOffset = genOrder * LEVEL_HEIGHT * 2;
+
+        minX = Math.min(minX, xOffset);
 
         nodes.push({
           id: member.id,
@@ -77,37 +112,58 @@ export function useFamilyTree(treeId?: string) {
           data: {
             member,
             label: `${member.firstName} ${member.lastName}`,
-            calculatedGeneration: genIndex,
+            calculatedGeneration: genOrder,
           }
         });
+      });
+    });
 
-        // Create Edges from this member
-        member.relationsFrom.forEach(rel => {
-          const edgeId = `e-${member.id}-${rel.toId}-${rel.type}`;
-          
-          let edgeColor = '#94a3b8'; // Default slate
-          let animated = false;
+    // Add lightweight Generation Labels at the far left
+    sortedGens.forEach((gen, genIndex) => {
+      nodes.push({
+        id: `lane-${gen.id}`,
+        type: 'generationLane',
+        position: { x: minX === Infinity ? 0 : minX - NODE_WIDTH * 1.5, y: genIndex * LEVEL_HEIGHT * 2 },
+        data: {
+          label: gen.name,
+          width: 250,
+          height: LEVEL_HEIGHT,
+          isEven: false,
+        },
+        zIndex: -1,
+        selectable: false,
+        draggable: false,
+        focusable: false,
+      });
+    });
 
-          if (rel.type === 'SPOUSE') {
-            edgeColor = '#f43f5e'; // Rose for spouse
-          } else if (rel.type === 'PARENT') {
-            edgeColor = '#6366f1'; // Indigo for child
-            animated = true;
-          }
+    // Create React Flow Edges
+    members.forEach(member => {
+      member.relationsFrom.forEach(rel => {
+        const edgeId = `e-${member.id}-${rel.toId}-${rel.type}`;
+        
+        let edgeColor = '#94a3b8'; // Default slate
+        let animated = false;
 
-          edges.push({
-            id: edgeId,
-            source: member.id,
-            target: rel.toId,
-            type: 'relationship',
-            animated,
-            data: { type: rel.type },
-            style: { stroke: edgeColor, strokeWidth: 2 },
-            markerEnd: rel.type === 'PARENT' ? {
-              type: MarkerType.ArrowClosed,
-              color: edgeColor,
-            } : undefined,
-          });
+        if (rel.type === 'SPOUSE') {
+          edgeColor = '#f43f5e'; // Rose for spouse
+        } else if (rel.type === 'PARENT') {
+          edgeColor = '#6366f1'; // Indigo for child
+          animated = true;
+        }
+
+        edges.push({
+          id: edgeId,
+          source: member.id,
+          target: rel.toId,
+          type: 'relationship',
+          animated,
+          data: { type: rel.type },
+          style: { stroke: edgeColor, strokeWidth: 2 },
+          markerEnd: rel.type === 'PARENT' ? {
+            type: MarkerType.ArrowClosed,
+            color: edgeColor,
+          } : undefined,
         });
       });
     });

@@ -12,15 +12,9 @@ interface GenerationLaneNodeProps {
 
 function GenerationLaneNodeComponent({ data }: GenerationLaneNodeProps) {
   return (
-    <div
-      style={{ width: data.width, height: data.height }}
-      className={cn(
-        "relative flex flex-col justify-start border-t border-border/40 pointer-events-none",
-        data.isEven ? "bg-black/5 dark:bg-white/5" : "bg-transparent"
-      )}
-    >
-      <div className="absolute top-4 left-8 px-4 py-1.5 rounded-full bg-background/80 backdrop-blur-sm border border-border shadow-sm">
-        <span className="text-sm font-semibold tracking-wide text-foreground/80 uppercase">
+    <div className="relative pointer-events-none">
+      <div className="absolute top-1/2 -translate-y-1/2 left-0 px-6 py-2 rounded-2xl bg-background/80 backdrop-blur-md border border-border/50 shadow-md">
+        <span className="text-sm font-bold tracking-widest text-primary/80 uppercase">
           {data.label}
         </span>
       </div>
