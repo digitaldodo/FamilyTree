@@ -100,7 +100,11 @@ export function generateTreeLayout(
     children.forEach(child => {
       const edgeKey = `${parent}->${child}`;
       if (!addedEdges.has(edgeKey)) {
-        g.setEdge(parent, child);
+        const pLevel = familyLevels.get(parent) ?? 0;
+        const cLevel = familyLevels.get(child) ?? 0;
+        const minlen = Math.max(1, cLevel - pLevel);
+        
+        g.setEdge(parent, child, { minlen });
         addedEdges.add(edgeKey);
       }
     });
@@ -111,8 +115,9 @@ export function generateTreeLayout(
 
   // Diagnostics & Verification
   console.log('--- LAYOUT DIAGNOSTICS ---');
-  console.log(`Generations loaded: ${generations.length}`);
+  console.log(`Generations count: ${generations.length}`);
   console.log(`Generation names: ${generations.map(g => g.name).join(', ')}`);
+  console.log(`Generation orders: ${generations.map(g => `${g.name} -> ${g.orderIndex}`).join(', ')}`);
   
   const membersPerGen = new Map<string, number>();
   members.forEach(m => {
@@ -121,7 +126,7 @@ export function generateTreeLayout(
     membersPerGen.set(genName, (membersPerGen.get(genName) || 0) + 1);
   });
   console.log('Members per generation:');
-  membersPerGen.forEach((count, name) => console.log(`  ${name}: ${count}`));
+  membersPerGen.forEach((count, name) => console.log(`  ${name} -> ${count} members`));
 
   generations.forEach(g => {
     if (!g.name) console.error(`VERIFICATION FAILED: Generation ${g.id} has no name`);
@@ -264,33 +269,16 @@ export function generateTreeLayout(
   const laneWidth = Math.max(3000, maxGlobalX - minGlobalX + 1200);
   const laneX = minGlobalX === Infinity ? -1000 : minGlobalX - 600;
 
-  familiesByLevel.forEach((families, level) => {
-    if (families.length === 0) return; // Hide if no members
-
-    // Try to find the generation name based on members at this level
-    const firstFamilyRoot = families[0]?.root;
-    const firstMemberId = firstFamilyRoot ? familyUnits.get(firstFamilyRoot)?.[0] : undefined;
-    const firstMember = firstMemberId ? members.find(m => m.id === firstMemberId) : undefined;
-
-    let label = 'Unnamed Generation';
-    if (firstMember && firstMember.generationId) {
-      const gen = generations.find(g => g.id === firstMember.generationId);
-      if (gen && gen.name) {
-        label = gen.name;
-      }
-    } else {
-      const gen = generations.find(g => g.orderIndex === level);
-      if (gen && gen.name) {
-        label = gen.name;
-      }
-    }
-
+  // We rely strictly on the passed generations array as the source of truth
+  generations.forEach(gen => {
+    const level = gen.orderIndex;
+    
     nodes.push({
       id: `lane-level-${level}`,
       type: 'generationLane',
       position: { x: laneX, y: level * LEVEL_HEIGHT - 60 },
       data: {
-        label: label,
+        label: gen.name || 'Unnamed Generation',
         width: laneWidth,
         height: LEVEL_HEIGHT + 100,
         isEven: level % 2 === 0,
