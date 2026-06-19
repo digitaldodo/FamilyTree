@@ -24,7 +24,9 @@ interface DashboardData {
   activities: any[];
 }
 
-export default function DashboardPage() {
+import { ErrorBoundary } from '@/components/ui/error-boundary';
+
+function DashboardContent() {
   const { activeTreeId, userTrees } = useAppStore();
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -99,7 +101,8 @@ export default function DashboardPage() {
           activities: [], // Activity feed from separate endpoint if needed
         });
       } catch (error) {
-        console.error('Failed to load dashboard data:', error);
+        // eslint-disable-next-line no-console
+        console.log('[App Error] Failed to load dashboard data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -191,5 +194,13 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <ErrorBoundary>
+      <DashboardContent />
+    </ErrorBoundary>
   );
 }

@@ -42,7 +42,14 @@ export async function GET(
 
     return successResponse(generations, 'Generations fetched successfully');
   } catch (error) {
-    console.error('[GENERATIONS_GET_ERROR]', error);
+    // eslint-disable-next-line no-console
+    console.log('[API Debug] GET /api/trees/[id]/generations', {
+      method: 'GET',
+      url: request.url,
+      status: 500,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
   }
 }
@@ -133,7 +140,14 @@ export async function POST(
 
     return successResponse(result, 'Generation created successfully', 201);
   } catch (error) {
-    console.error('[GENERATIONS_POST_ERROR]', error);
+    // eslint-disable-next-line no-console
+    console.log('[API Debug] POST /api/trees/[id]/generations', {
+      method: 'POST',
+      url: request.url,
+      status: 500,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return errorResponse('CREATE_ERROR', getErrorMessage(error), 500);
   }
 }

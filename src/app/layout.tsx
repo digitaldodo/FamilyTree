@@ -4,6 +4,7 @@ import './globals.css';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { Toaster } from '@/components/ui/toast';
 import { SessionProvider } from '@/providers/session-provider';
+import { GlobalErrorListener } from '@/components/providers/global-error-listener';
 
 // TODO: Import QueryProvider
 
@@ -60,6 +61,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased`}>
+        <GlobalErrorListener />
         <SessionProvider>
           <ThemeProvider
             attribute="class"

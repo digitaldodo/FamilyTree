@@ -78,7 +78,14 @@ export async function POST(request: NextRequest) {
 
     return successResponse(newRel, 'Relationship created successfully', 201);
   } catch (error) {
-    console.error('[RELATIONSHIP_CREATE_ERROR]', error);
+    // eslint-disable-next-line no-console
+    console.log('[API Debug] POST /api/relationships', {
+      method: 'POST',
+      url: request.url,
+      status: 500,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return errorResponse('CREATE_ERROR', getErrorMessage(error), 500);
   }
 }

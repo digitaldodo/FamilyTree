@@ -17,7 +17,9 @@ import { GenerationFormModal, GenerationFormMode } from '@/components/features/g
 import { GenerationActionMenu } from '@/components/features/generations/generation-action-menu';
 import { useState, useEffect } from 'react';
 
-export default function MembersPage() {
+import { ErrorBoundary } from '@/components/ui/error-boundary';
+
+function MembersContent() {
   const { activeTreeId, userRole } = useAppStore();
   const { isLoading: membersLoading, fetchMembers } = useMembers();
   const { generations, isLoading: gensLoading, createGeneration, renameGeneration, deleteGeneration, moveGeneration } = useGenerations();
@@ -69,14 +71,11 @@ export default function MembersPage() {
   };
 
   const handleMoveGeneration = async (id: string, direction: 'up' | 'down') => {
-    if (direction === 'up') console.log("Move Up clicked", id);
-    if (direction === 'down') console.log("Move Down clicked", id);
     await moveGeneration(id, direction);
   };
 
   const handleConfirmDelete = async (action?: 'moveMembers' | 'deleteMembers', targetId?: string) => {
     if (!deleteModalGenId) return;
-    console.log("Deleting generation", deleteModalGenId);
     await deleteGeneration(deleteModalGenId, action, targetId);
     setDeleteModalGenId(null);
     fetchMembers(); // refresh members because some might have been moved or deleted
@@ -268,5 +267,13 @@ export default function MembersPage() {
         availableGenerations={sortedGenerations}
       />
     </div>
+  );
+}
+
+export default function MembersPage() {
+  return (
+    <ErrorBoundary>
+      <MembersContent />
+    </ErrorBoundary>
   );
 }

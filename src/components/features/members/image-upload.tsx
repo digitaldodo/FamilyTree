@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { toast } from 'sonner';
 
 import { CldUploadWidget } from 'next-cloudinary';
 import { Camera, X, Loader2 } from 'lucide-react';
@@ -52,7 +53,9 @@ export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', i
         uploadPreset={uploadPreset}
         onSuccess={handleUploadSuccess}
         onError={(error) => {
-          console.error("Cloudinary upload failed", error);
+          // eslint-disable-next-line no-console
+          console.log('[API Debug] Cloudinary upload failed', error);
+          toast.error('Image upload failed');
           setIsProcessing(false);
         }}
         options={{

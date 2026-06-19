@@ -31,7 +31,7 @@ export function Navbar() {
 
   const avatarUrl = session?.user?.image || `https://api.dicebear.com/7.x/initials/svg?seed=${getInitials(session?.user?.name, session?.user?.email)}`;
 
-  const ProfileDropdown = () => (
+  const renderProfileDropdown = () => (
     <div className="relative ml-2" ref={dropdownRef}>
       <div 
         className="h-8 w-8 rounded-full bg-gradient-to-tr from-primary to-purple-400 p-[2px] cursor-pointer"
@@ -101,7 +101,7 @@ export function Navbar() {
             <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </Button>
-          <ProfileDropdown />
+          {renderProfileDropdown()}
         </div>
       </div>
 
@@ -135,7 +135,7 @@ export function Navbar() {
           <span className="absolute top-2 right-2.5 w-2 h-2 bg-primary rounded-full border-2 border-background" />
         </Button>
 
-        <ProfileDropdown />
+        {renderProfileDropdown()}
       </div>
     </header>
   );

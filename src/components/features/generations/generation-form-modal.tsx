@@ -28,6 +28,8 @@ interface GenerationFormModalProps {
   onSubmit: (name: string, insertAt?: number) => Promise<void>;
 }
 
+import { ErrorBoundary } from '@/components/ui/error-boundary';
+
 export function GenerationFormModal({
   isOpen,
   onClose,
@@ -106,45 +108,47 @@ export function GenerationFormModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>{getTitle()}</DialogTitle>
-            <DialogDescription>
-              {getDescription()}
-            </DialogDescription>
-          </DialogHeader>
+    <ErrorBoundary>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <DialogContent className="sm:max-w-[425px]">
+          <form onSubmit={handleSubmit}>
+            <DialogHeader>
+              <DialogTitle>{getTitle()}</DialogTitle>
+              <DialogDescription>
+                {getDescription()}
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="generation-name">Name</Label>
-              <Input
-                id="generation-name"
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  if (error) setError('');
-                }}
-                placeholder="e.g. Grandparents"
-                autoFocus
-                disabled={isSubmitting}
-              />
-              {error && <p className="text-sm font-medium text-destructive">{error}</p>}
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="generation-name">Name</Label>
+                <Input
+                  id="generation-name"
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    if (error) setError('');
+                  }}
+                  placeholder="e.g. Grandparents"
+                  autoFocus
+                  disabled={isSubmitting}
+                />
+                {error && <p className="text-sm font-medium text-destructive">{error}</p>}
+              </div>
             </div>
-          </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting || !name.trim()}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {mode === 'rename' ? 'Save Changes' : 'Create Generation'}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting || !name.trim()}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {mode === 'rename' ? 'Save Changes' : 'Create Generation'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </ErrorBoundary>
   );
 }

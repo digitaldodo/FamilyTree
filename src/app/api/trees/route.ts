@@ -69,9 +69,16 @@ export async function GET(request: NextRequest) {
     return listResponse(allTrees, total, page, limit);
   } catch (error) {
     const session = await auth().catch(() => null);
-    console.error('[API_TREES_ERROR]', error);
-    console.error('User ID:', session?.user?.id);
-    console.error('Query Params:', Object.fromEntries(request.nextUrl.searchParams));
+    // eslint-disable-next-line no-console
+    console.log('[API Debug] GET /api/trees', {
+      method: 'GET',
+      url: request.url,
+      status: 500,
+      userId: session?.user?.id,
+      queryParams: Object.fromEntries(request.nextUrl.searchParams),
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     
     return Response.json(
       { success: false, error: error instanceof Error ? error.message : String(error) },
@@ -126,7 +133,14 @@ export async function POST(request: NextRequest) {
 
     return successResponse(tree, 'Tree created successfully', 201);
   } catch (error) {
-    console.error('[TREE_CREATE_ERROR]', error);
+    // eslint-disable-next-line no-console
+    console.log('[API Debug] POST /api/trees', {
+      method: 'POST',
+      url: request.url,
+      status: 500,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return errorResponse('CREATE_ERROR', getErrorMessage(error), 500);
   }
 }

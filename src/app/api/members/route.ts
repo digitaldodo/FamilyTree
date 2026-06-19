@@ -47,7 +47,15 @@ export async function GET(request: NextRequest) {
 
     return listResponse(members, total, page, limit);
   } catch (error) {
-    console.error('[MEMBER_FETCH_ERROR]', error);
+    // eslint-disable-next-line no-console
+    console.log('[API Debug] GET /api/members', {
+      method: 'GET',
+      url: request.url,
+      status: 500,
+      queryParams: Object.fromEntries(request.nextUrl.searchParams),
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
   }
 }
@@ -62,31 +70,25 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    console.log('[MEMBER_CREATE] Payload received:', {
+    // eslint-disable-next-line no-console
+    console.log('[API Debug] POST /api/members request', {
+      method: 'POST',
+      url: request.url,
       userId: session.user.id,
-      treeId: body.treeId,
-      firstName: body.firstName,
-      lastName: body.lastName,
-      hasRelations: Array.isArray(body.relations) ? body.relations.length : 0,
+      payload: body,
     });
-
-    console.log(
-      '[MEMBER_CREATE_REQUEST]',
-      JSON.stringify(body, null, 2)
-    );
 
     const validation = createMemberSchema.safeParse(body);
 
     if (!validation.success) {
-      console.error(
-        '[MEMBER_VALIDATION_ERROR]',
-        validation.error.flatten()
-      );
-
-      console.error(
-        '[MEMBER_PAYLOAD]',
-        JSON.stringify(body, null, 2)
-      );
+      // eslint-disable-next-line no-console
+      console.log('[API Debug] POST /api/members validation error', {
+        method: 'POST',
+        url: request.url,
+        status: 400,
+        errors: validation.error.flatten(),
+        payload: body,
+      });
 
       return NextResponse.json(
         {
@@ -107,7 +109,11 @@ export async function POST(request: NextRequest) {
 
     const permission = await getTreePermission(session.user.id, treeId);
     if (!canEdit(permission)) {
-      console.error('[MEMBER_CREATE_PERMISSION_ERROR]', {
+      // eslint-disable-next-line no-console
+      console.log('[API Debug] POST /api/members permission error', {
+        method: 'POST',
+        url: request.url,
+        status: 403,
         userId: session.user.id,
         treeId,
         permission,
@@ -203,11 +209,11 @@ export async function POST(request: NextRequest) {
        return errorResponse('VALIDATION_ERROR', 'Generation could not be determined and was not provided.', 400);
     }
 
-    console.log('[MEMBER_CREATE] Creating member with data:', {
+    // eslint-disable-next-line no-console
+    console.log('[API Debug] POST /api/members creating', {
       userId: session.user.id,
       treeId,
       generationId: finalGenerationId,
-      cleanedFields: Object.keys(rest),
       hasBirthDate: !!birthDate,
       hasDeathDate: !!deathDate,
       relationCount: relations.length,
@@ -258,7 +264,10 @@ export async function POST(request: NextRequest) {
             });
           }
         } catch (relError) {
-          console.error('[MEMBER_CREATE_RELATIONSHIP_ERROR]', {
+          // eslint-disable-next-line no-console
+          console.log('[API Debug] POST /api/members relationship error', {
+            method: 'POST',
+            url: request.url,
             memberId: newMember.id,
             relation: rel,
             error: getErrorMessage(relError),
@@ -268,7 +277,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('[MEMBER_CREATE_SUCCESS]', {
+    // eslint-disable-next-line no-console
+    console.log('[API Debug] POST /api/members success', {
+      method: 'POST',
+      url: request.url,
+      status: 201,
       memberId: newMember.id,
       treeId,
       userId: session.user.id,
@@ -276,7 +289,11 @@ export async function POST(request: NextRequest) {
 
     return successResponse(newMember, 'Member created successfully', 201);
   } catch (error) {
-    console.error('[MEMBER_CREATE_ERROR]', {
+    // eslint-disable-next-line no-console
+    console.log('[API Debug] POST /api/members error', {
+      method: 'POST',
+      url: request.url,
+      status: 500,
       error: error instanceof Error ? error.message : error,
       stack: error instanceof Error ? error.stack : undefined,
     });
