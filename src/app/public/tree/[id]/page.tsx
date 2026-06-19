@@ -17,72 +17,19 @@ import {
 import '@xyflow/react/dist/style.css';
 import { MemberNode } from '@/components/features/tree/member-node';
 import { RelationshipEdgeMemo } from '@/components/features/tree/relationship-edge';
+import { GenerationLaneNode } from '@/components/features/tree/generation-lane-node';
+import { FamilyJunctionNode } from '@/components/features/tree/family-junction-node';
 import { TreeBackground } from '@/components/features/tree/tree-background';
 import { Loader2, TreePine, Eye, LogIn } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
 import { User2, Calendar, MapPin, Briefcase, Heart, Users } from 'lucide-react';
 import { MemberAvatar } from '@/components/features/members/member-avatar';
+import { generateTreeLayout } from '@/utils/tree-layout';
 
-const nodeTypes = { member: MemberNode };
+const nodeTypes = { member: MemberNode, generationLane: GenerationLaneNode, familyJunction: FamilyJunctionNode };
 const edgeTypes = { relationship: RelationshipEdgeMemo };
 
-const LEVEL_HEIGHT = 150;
-const NODE_WIDTH = 250;
 
-function buildNodesAndEdges(members: any[], generations: any[]) {
-  const nodes: Node[] = [];
-  const edges: Edge[] = [];
-
-  const gens = new Map<string, any[]>();
-  generations.forEach(g => gens.set(g.id, []));
-
-  members.forEach(m => {
-    if (m.generationId) {
-      if (!gens.has(m.generationId)) gens.set(m.generationId, []);
-      gens.get(m.generationId)?.push(m);
-    }
-  });
-
-  Array.from(gens.entries()).forEach(([genId, genMembers], genIndex) => {
-    genMembers.forEach((member: any, i: number) => {
-      const xOffset = (i - genMembers.length / 2) * NODE_WIDTH * 1.5;
-      const yOffset = genIndex * LEVEL_HEIGHT * 2;
-
-      nodes.push({
-        id: member.id,
-        type: 'member',
-        position: { x: xOffset, y: yOffset },
-        data: {
-          member,
-          label: `${member.firstName} ${member.lastName}`,
-        },
-      });
-
-      member.relationsFrom?.forEach((rel: any) => {
-        const edgeId = `e-${member.id}-${rel.toId}-${rel.type}`;
-        let edgeColor = '#94a3b8';
-        let animated = false;
-        if (rel.type === 'SPOUSE') edgeColor = '#f43f5e';
-        else if (rel.type === 'PARENT') {
-          edgeColor = '#6366f1';
-          animated = true;
-        }
-        edges.push({
-          id: edgeId,
-          source: member.id,
-          target: rel.toId,
-          type: 'relationship',
-          animated,
-          data: { type: rel.type },
-          style: { stroke: edgeColor, strokeWidth: 2 },
-          markerEnd: rel.type === 'PARENT' ? { type: MarkerType.ArrowClosed, color: edgeColor } : undefined,
-        });
-      });
-    });
-  });
-
-  return { nodes, edges };
-}
 
 function PublicMemberModal({ member, members, generations, isOpen, onClose }: { member: any; members: any[]; generations: any[]; isOpen: boolean; onClose: () => void }) {
   if (!member) return null;
@@ -248,9 +195,18 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
 }
 
 function PublicTreeCanvas({ treeData }: { treeData: any }) {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const { nodes: initialNodes, edges: initialEdges } = React.useMemo(
-    () => buildNodesAndEdges(treeData.members || [], treeData.generations || []),
-    [treeData]
+    () => generateTreeLayout(treeData.members || [], treeData.generations || [], isMobile),
+    [treeData, isMobile]
   );
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -278,7 +234,7 @@ function PublicTreeCanvas({ treeData }: { treeData: any }) {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        fitViewOptions={{ padding: 0.2 }}
+        fitViewOptions={{ padding: 0.3 }}
         minZoom={0.1}
         maxZoom={2}
         defaultEdgeOptions={{ zIndex: 0 }}

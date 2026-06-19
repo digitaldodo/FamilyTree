@@ -50,7 +50,7 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
   return (
     <div
       className={cn(
-        'group relative flex flex-col w-[240px] h-[340px] rounded-[24px] overflow-hidden bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2 hover:scale-[1.03]',
+        'group relative flex flex-col w-[220px] h-[300px] rounded-[24px] overflow-hidden bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2 hover:scale-[1.03]',
         isSelected ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-transparent' : '',
       )}
       onClick={handleClick}
