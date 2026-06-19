@@ -58,12 +58,14 @@ export function useFamilyTree(treeId?: string) {
 
     // Create Dagre Graph
     const g = new dagre.graphlib.Graph();
-    g.setGraph({ rankdir: 'TB', nodesep: NODE_WIDTH * 0.5, edgesep: 50, ranksep: LEVEL_HEIGHT * 2 });
+    g.setGraph({ rankdir: 'TB', nodesep: 100, edgesep: 50, ranksep: LEVEL_HEIGHT * 2 });
     g.setDefaultEdgeLabel(() => ({}));
+
+    const MEMBER_SPACING = NODE_WIDTH + 40;
 
     // Add nodes to Dagre
     familyUnits.forEach((familyMembers, root) => {
-      g.setNode(root, { width: familyMembers.length * (NODE_WIDTH * 1.2), height: LEVEL_HEIGHT });
+      g.setNode(root, { width: familyMembers.length * MEMBER_SPACING, height: LEVEL_HEIGHT });
     });
 
     // Add edges to Dagre (PARENT relationships)
@@ -100,8 +102,8 @@ export function useFamilyTree(treeId?: string) {
         const genOrder = genOrderMap.get(member.generationId) ?? 0;
         
         // Dagre computes X. We force Y based on user-defined generation.
-        const xOffset = startX + i * (NODE_WIDTH * 1.2) + (NODE_WIDTH * 1.2) / 2;
-        const yOffset = genOrder * LEVEL_HEIGHT * 2;
+        const xOffset = startX + i * MEMBER_SPACING + MEMBER_SPACING / 2 - NODE_WIDTH / 2;
+        const yOffset = genOrder * LEVEL_HEIGHT * 2.5; // Spread vertically slightly more
 
         minX = Math.min(minX, xOffset);
 
@@ -123,7 +125,7 @@ export function useFamilyTree(treeId?: string) {
       nodes.push({
         id: `lane-${gen.id}`,
         type: 'generationLane',
-        position: { x: minX === Infinity ? 0 : minX - NODE_WIDTH * 1.5, y: genIndex * LEVEL_HEIGHT * 2 },
+        position: { x: minX === Infinity ? 0 : minX - 350, y: genIndex * LEVEL_HEIGHT * 2.5 },
         data: {
           label: gen.name,
           width: 250,

@@ -1,6 +1,11 @@
 'use client';
 
 import * as React from "react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
 export interface DropdownProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -9,31 +14,25 @@ export interface DropdownProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function Dropdown({ trigger, children, className, ...props }: DropdownProps) {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const ref = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  // We use open/onOpenChange internally if needed, but Radix handles most for us
+  const [open, setOpen] = React.useState(false);
 
   return (
-    <div ref={ref} className={cn("relative inline-block text-left", className)} {...props}>
-      <div onClick={() => setIsOpen(!isOpen)} className="cursor-pointer">
-        {trigger}
-      </div>
-      {isOpen && (
-        <div className="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-md bg-background border border-border shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none animate-in fade-in slide-in-from-top-2">
-          <div className="py-1" onClick={() => setIsOpen(false)}>
-            {children}
+    <div className={cn("inline-block", className)} {...props}>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>
+          <div className="cursor-pointer inline-flex items-center justify-center">
+            {trigger}
           </div>
-        </div>
-      )}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent 
+          align="end" 
+          className="w-56 p-1 z-50"
+          onClick={() => setOpen(false)} // Close on any item click by default
+        >
+          {children}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
 }

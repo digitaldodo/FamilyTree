@@ -27,16 +27,30 @@ export function RelationshipSelector({
   onRemoveRelation,
   existingRelations
 }: RelationshipSelectorProps) {
-  const { members } = useAppStore();
+  const { members, generations } = useAppStore();
   const [selectedId, setSelectedId] = React.useState<string>('');
 
   const validCandidates = React.useMemo(
-    () => getValidRelationshipCandidates(members, currentMemberId, type),
-    [members, currentMemberId, type]
+    () => getValidRelationshipCandidates(members, generations, currentMemberId, type),
+    [members, generations, currentMemberId, type]
   );
 
   const handleAdd = () => {
     if (selectedId) {
+      if (type === 'SPOUSE' && currentMemberId) {
+        const currentMember = members.find(m => m.id === currentMemberId);
+        const targetMember = members.find(m => m.id === selectedId);
+        if (currentMember && targetMember) {
+          const currentGen = generations.find(g => g.id === currentMember.generationId);
+          const targetGen = generations.find(g => g.id === targetMember.generationId);
+          if (currentGen && targetGen && currentGen.orderIndex !== targetGen.orderIndex) {
+            const confirmMsg = `Warning: ${targetMember.firstName} is in a different generation (${targetGen.name}) than ${currentMember.firstName} (${currentGen.name}). Spouses usually belong to the same generation. Are you sure you want to add this relationship?`;
+            if (!window.confirm(confirmMsg)) {
+              return;
+            }
+          }
+        }
+      }
       onAddRelation(selectedId, type);
       setSelectedId('');
     }

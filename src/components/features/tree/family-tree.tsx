@@ -20,7 +20,7 @@ import { MemberNode } from './member-node';
 import { GenerationLaneNode } from './generation-lane-node';
 import { RelationshipEdgeMemo } from './relationship-edge';
 import { TreeToolbar } from './tree-toolbar';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Activity } from 'lucide-react';
 import { TreeBackground } from './tree-background';
 import { FloatingFamilyStats } from './floating-family-stats';
 
@@ -38,11 +38,22 @@ function FamilyTreeCanvas() {
   const { initialNodes, initialEdges, isLoading, error } = useFamilyTree(activeTreeId || undefined);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [showDiagnostics, setShowDiagnostics] = React.useState(false);
 
   React.useEffect(() => {
     setNodes(initialNodes);
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
+
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '`' && !e.ctrlKey && !e.metaKey) {
+        setShowDiagnostics(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   if (isLoading) {
     return (
@@ -79,9 +90,9 @@ function FamilyTreeCanvas() {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
-        minZoom={0.1}
-        maxZoom={2}
+        fitViewOptions={{ padding: 0.1, maxZoom: 1, minZoom: 0.2 }}
+        minZoom={0.05}
+        maxZoom={1.5}
         defaultEdgeOptions={{ zIndex: 0 }}
         proOptions={{ hideAttribution: true }}
       >
@@ -140,6 +151,24 @@ function FamilyTreeCanvas() {
             <TreeToolbar />
             <FloatingFamilyStats totalMembers={memberNodes.length} generations={useAppStore.getState().generations.length} />
           </>
+        )}
+
+        {showDiagnostics && (
+          <Panel position="top-left" className="bg-black/80 backdrop-blur-md p-4 rounded-xl text-white font-mono text-xs z-50 min-w-[200px] border border-white/20 shadow-2xl">
+            <div className="flex items-center gap-2 mb-3 border-b border-white/20 pb-2">
+              <Activity className="w-4 h-4 text-emerald-400" />
+              <strong className="text-sm">Tree Diagnostics</strong>
+            </div>
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between"><span>Members:</span> <span>{useAppStore.getState().members.length}</span></div>
+              <div className="flex justify-between"><span>Generations:</span> <span>{useAppStore.getState().generations.length}</span></div>
+              <div className="flex justify-between"><span>Nodes:</span> <span>{nodes.length}</span></div>
+              <div className="flex justify-between"><span>Edges:</span> <span>{edges.length}</span></div>
+              <div className="flex justify-between"><span>Relationships:</span> <span>{useAppStore.getState().members.reduce((acc, m) => acc + m.relationsFrom.length + m.relationsTo.length, 0) / 2}</span></div>
+              <div className="flex justify-between"><span>Photos Loaded:</span> <span className={useAppStore.getState().members.some(m => m.imageUrl) ? 'text-emerald-400' : 'text-amber-400'}>{useAppStore.getState().members.filter(m => m.imageUrl).length}</span></div>
+            </div>
+            <div className="mt-3 text-[10px] text-white/50 text-center pt-2 border-t border-white/20">Press ` to hide</div>
+          </Panel>
         )}
       </ReactFlow>
     </div>
