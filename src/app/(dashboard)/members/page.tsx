@@ -12,8 +12,9 @@ import { ArrowUpToLine, ArrowDownToLine, ArrowUp, ArrowDown, UserPlus, Plus, Use
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageLoader } from '@/components/ui/page-loader';
-import { Dropdown } from '@/components/ui/dropdown';
 import { GenerationDeleteModal } from '@/components/features/generations/generation-delete-modal';
+import { GenerationFormModal, GenerationFormMode } from '@/components/features/generations/generation-form-modal';
+import { GenerationActionMenu } from '@/components/features/generations/generation-action-menu';
 import { useState, useEffect } from 'react';
 
 export default function MembersPage() {
@@ -24,6 +25,13 @@ export default function MembersPage() {
   const { setIsMemberModalOpen, setSelectedMemberId, setIsEditingMember, setDefaultGenerationForNewMember } = useAppStore();
 
   const [deleteModalGenId, setDeleteModalGenId] = useState<string | null>(null);
+  const [formModalState, setFormModalState] = useState<{
+    isOpen: boolean;
+    mode: GenerationFormMode;
+    initialName?: string;
+    targetId?: string;
+    targetOrderIndex?: number;
+  }>({ isOpen: false, mode: 'createFirst' });
 
   const hasEditAccess = userRole === 'OWNER' || userRole === 'ADMIN' || userRole === 'EDITOR';
 
@@ -34,25 +42,19 @@ export default function MembersPage() {
     setIsMemberModalOpen(true);
   };
 
-  const handleAddGenerationAbove = async (orderIndex: number) => {
-    const name = prompt('Enter generation name (e.g. Grandparents):');
-    if (name) {
-      await createGeneration(name, orderIndex);
-    }
+  const openFormModal = (mode: GenerationFormMode, options?: { initialName?: string; targetId?: string; targetOrderIndex?: number }) => {
+    setFormModalState({
+      isOpen: true,
+      mode,
+      ...options,
+    });
   };
 
-  const handleAddGenerationBelow = async (orderIndex: number) => {
-    const name = prompt('Enter generation name (e.g. Children):');
-    if (name) {
-      await createGeneration(name, orderIndex + 1);
-    }
-  };
-
-  const handleRenameGeneration = async (id: string, currentName: string) => {
-    console.log("Rename clicked", id);
-    const newName = prompt('Enter new generation name:', currentName);
-    if (newName && newName !== currentName) {
-      await renameGeneration(id, newName);
+  const handleFormModalSubmit = async (name: string, insertAt?: number) => {
+    if (formModalState.mode === 'rename' && formModalState.targetId) {
+      await renameGeneration(formModalState.targetId, name);
+    } else {
+      await createGeneration(name, insertAt);
     }
   };
 
@@ -120,8 +122,7 @@ export default function MembersPage() {
               className="md:hidden fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg z-30 p-0 flex items-center justify-center bg-primary text-primary-foreground" 
               onClick={() => {
                 if (sortedGenerations.length === 0) {
-                  const name = prompt('Enter first generation name (e.g. Founders):');
-                  if (name) createGeneration(name);
+                  openFormModal('createFirst');
                 } else {
                   handleAddMember();
                 }
@@ -151,10 +152,7 @@ export default function MembersPage() {
             title="No generations added yet"
             description="Start building your family tree by creating the first generation."
             actionLabel={hasEditAccess ? "Create First Generation" : undefined}
-            onAction={hasEditAccess ? () => {
-              const name = prompt('Enter first generation name (e.g. Founders):');
-              if (name) createGeneration(name);
-            } : undefined}
+            onAction={hasEditAccess ? () => openFormModal('createFirst') : undefined}
           />
         </div>
       ) : (
@@ -190,15 +188,15 @@ export default function MembersPage() {
                           <span className="hidden sm:inline">Add Member</span>
                           <span className="sm:hidden">Add</span>
                         </Button>
-                        <Button variant="outline" size="sm" className="hidden lg:flex h-7 text-xs" onClick={() => handleAddGenerationAbove(gen.orderIndex)}>
+                        <Button variant="outline" size="sm" className="hidden lg:flex h-7 text-xs" onClick={() => openFormModal('addAbove', { targetOrderIndex: gen.orderIndex })}>
                           <ArrowUpToLine className="w-3.5 h-3.5 mr-1" />
                           Add Above
                         </Button>
-                        <Button variant="outline" size="sm" className="hidden lg:flex h-7 text-xs" onClick={() => handleAddGenerationBelow(gen.orderIndex)}>
+                        <Button variant="outline" size="sm" className="hidden lg:flex h-7 text-xs" onClick={() => openFormModal('addBelow', { targetOrderIndex: gen.orderIndex })}>
                           <ArrowDownToLine className="w-3.5 h-3.5 mr-1" />
                           Add Below
                         </Button>
-                        <Button variant="outline" size="sm" className="hidden sm:flex h-7 text-xs" onClick={() => handleRenameGeneration(gen.id, gen.name)}>
+                        <Button variant="outline" size="sm" className="hidden sm:flex h-7 text-xs" onClick={() => openFormModal('rename', { initialName: gen.name, targetId: gen.id })}>
                           <Pencil className="w-3.5 h-3.5 mr-1" />
                           Rename
                         </Button>
@@ -206,42 +204,17 @@ export default function MembersPage() {
                           <Trash2 className="w-3.5 h-3.5 mr-1" />
                           Delete
                         </Button>
-                        <Dropdown 
-                          trigger={
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          }
-                        >
-                          <div className="flex flex-col text-sm">
-                            <button className="sm:hidden flex items-center w-full px-4 py-2 text-left hover:bg-muted" onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleAddGenerationAbove(gen.orderIndex); }}>
-                              <ArrowUpToLine className="w-4 h-4 mr-2" /> Add Above
-                            </button>
-                            <button className="sm:hidden flex items-center w-full px-4 py-2 text-left hover:bg-muted" onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleAddGenerationBelow(gen.orderIndex); }}>
-                              <ArrowDownToLine className="w-4 h-4 mr-2" /> Add Below
-                            </button>
-                            <button className="flex items-center w-full px-4 py-2 text-left hover:bg-muted" onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleRenameGeneration(gen.id, gen.name); }}>
-                              <Pencil className="w-4 h-4 mr-2" /> Rename
-                            </button>
-                            <button 
-                              className="flex items-center w-full px-4 py-2 text-left hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed" 
-                              onPointerDown={(e) => { if (idx === 0) return; e.preventDefault(); e.stopPropagation(); handleMoveGeneration(gen.id, 'up'); }}
-                              disabled={idx === 0}
-                            >
-                              <ArrowUp className="w-4 h-4 mr-2" /> Move Up
-                            </button>
-                            <button 
-                              className="flex items-center w-full px-4 py-2 text-left hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed" 
-                              onPointerDown={(e) => { if (idx === sortedGenerations.length - 1) return; e.preventDefault(); e.stopPropagation(); handleMoveGeneration(gen.id, 'down'); }}
-                              disabled={idx === sortedGenerations.length - 1}
-                            >
-                              <ArrowDown className="w-4 h-4 mr-2" /> Move Down
-                            </button>
-                            <button className="flex items-center w-full px-4 py-2 text-left text-destructive hover:bg-muted" onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteGenerationClick(gen.id); }}>
-                              <Trash2 className="w-4 h-4 mr-2" /> Delete
-                            </button>
-                          </div>
-                        </Dropdown>
+                        <GenerationActionMenu
+                          generation={gen}
+                          index={idx}
+                          totalGenerations={sortedGenerations.length}
+                          onAddAbove={() => openFormModal('addAbove', { targetOrderIndex: gen.orderIndex })}
+                          onAddBelow={() => openFormModal('addBelow', { targetOrderIndex: gen.orderIndex })}
+                          onRename={() => openFormModal('rename', { initialName: gen.name, targetId: gen.id })}
+                          onMoveUp={() => handleMoveGeneration(gen.id, 'up')}
+                          onMoveDown={() => handleMoveGeneration(gen.id, 'down')}
+                          onDelete={() => handleDeleteGenerationClick(gen.id)}
+                        />
                       </div>
                     )}
                   </div>
@@ -276,6 +249,16 @@ export default function MembersPage() {
       )}
 
       <MemberModal />
+      <GenerationFormModal
+        isOpen={formModalState.isOpen}
+        onClose={() => setFormModalState(prev => ({ ...prev, isOpen: false }))}
+        mode={formModalState.mode}
+        initialName={formModalState.initialName}
+        targetGenerationId={formModalState.targetId}
+        targetOrderIndex={formModalState.targetOrderIndex}
+        existingGenerations={sortedGenerations}
+        onSubmit={handleFormModalSubmit}
+      />
       <GenerationDeleteModal
         isOpen={!!deleteModalGenId}
         onClose={() => setDeleteModalGenId(null)}
