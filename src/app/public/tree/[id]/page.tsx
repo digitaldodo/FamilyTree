@@ -6,7 +6,6 @@ import Link from 'next/link';
 import {
   ReactFlow,
   Background,
-  MiniMap,
   useNodesState,
   useEdgesState,
   ReactFlowProvider,
@@ -249,17 +248,6 @@ function PublicTreeCanvas({ treeData }: { treeData: any }) {
         elementsSelectable={false}
       >
         <TreeBackground />
-        <MiniMap
-          zoomable
-          pannable
-          nodeColor={(node) => {
-            const data = node.data as any;
-            if (data?.member?.gender === 'MALE') return '#60a5fa';
-            if (data?.member?.gender === 'FEMALE') return '#f472b6';
-            return '#6366f1';
-          }}
-          className="!bottom-6 !left-6 !m-0 rounded-2xl shadow-xl border-border bg-white/50 dark:bg-slate-900/50 backdrop-blur-md"
-        />
       </ReactFlow>
 
       <PublicMemberModal

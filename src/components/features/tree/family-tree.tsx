@@ -5,7 +5,6 @@ import {
   ReactFlow,
   Background,
   Controls,
-  MiniMap,
   useNodesState,
   useEdgesState,
   ReactFlowProvider,
@@ -135,21 +134,6 @@ function FamilyTreeCanvas() {
           </div>
         ) : (
           <>
-            {memberNodes.length >= 5 && (
-              <MiniMap 
-                zoomable 
-                pannable 
-                nodeColor={(node) => {
-                  if (node.type === 'generationLane') return 'transparent';
-                  const data = node.data as any;
-                  if (data?.member?.gender === 'MALE') return '#60a5fa';
-                  if (data?.member?.gender === 'FEMALE') return '#f472b6';
-                  return '#6366f1';
-                }}
-                style={{ width: 220, height: 140 }}
-                className="!bottom-6 !left-6 !m-0 rounded-2xl shadow-xl border-border bg-white/50 dark:bg-slate-900/50 backdrop-blur-md"
-              />
-            )}
             <div className="absolute top-4 inset-x-4 z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pointer-events-none">
               <div className="pointer-events-auto w-full md:w-auto">
                 <FloatingFamilyStats totalMembers={memberNodes.length} generations={useAppStore.getState().generations.length} />

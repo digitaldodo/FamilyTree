@@ -55,11 +55,9 @@ export function generateTreeLayout(
   // 2. Build Hierarchy & Calculate Levels explicitly
   const familyLevels = new Map<string, number>();
   const familyAdjacency = new Map<string, string[]>(); // parent -> children
-  const inDegree = new Map<string, number>();
   
   familyUnits.forEach((_, root) => {
     familyAdjacency.set(root, []);
-    inDegree.set(root, 0);
   });
 
   members.forEach(m => {
@@ -69,42 +67,23 @@ export function generateTreeLayout(
       if (fromFamily && toFamily && fromFamily !== toFamily) {
         if (!familyAdjacency.get(fromFamily)!.includes(toFamily)) {
           familyAdjacency.get(fromFamily)!.push(toFamily);
-          inDegree.set(toFamily, inDegree.get(toFamily)! + 1);
         }
       }
     });
   });
 
-  const queue: string[] = [];
-  const inDegreeCount = new Map(inDegree);
-  inDegree.forEach((deg, root) => {
-    if (deg === 0) {
-      familyLevels.set(root, 0);
-      queue.push(root);
-    }
-  });
-
-  // Topological sort based level calc
-  while (queue.length > 0) {
-    const current = queue.shift()!;
-    const currentLevel = familyLevels.get(current)!;
-    
-    familyAdjacency.get(current)!.forEach(child => {
-      const existingLevel = familyLevels.get(child) ?? 0;
-      familyLevels.set(child, Math.max(existingLevel, currentLevel + 1));
-      
-      inDegreeCount.set(child, inDegreeCount.get(child)! - 1);
-      if (inDegreeCount.get(child) === 0) {
-        queue.push(child);
+  // Level calc using generation orderIndex
+  familyUnits.forEach((familyMembers, root) => {
+    const memberId = familyMembers[0];
+    const member = members.find(m => m.id === memberId);
+    let level = 0;
+    if (member && member.generationId) {
+      const gen = generations.find(g => g.id === member.generationId);
+      if (gen) {
+        level = gen.orderIndex;
       }
-    });
-  }
-
-  // Fallback for cycles or disconnected components
-  familyUnits.forEach((_, root) => {
-    if (!familyLevels.has(root)) {
-      familyLevels.set(root, 0);
     }
+    familyLevels.set(root, level);
   });
 
   // 3. Build Dagre Graph
@@ -132,6 +111,22 @@ export function generateTreeLayout(
 
   // Diagnostics & Verification
   console.log('--- LAYOUT DIAGNOSTICS ---');
+  console.log(`Generations loaded: ${generations.length}`);
+  console.log(`Generation names: ${generations.map(g => g.name).join(', ')}`);
+  
+  const membersPerGen = new Map<string, number>();
+  members.forEach(m => {
+    const gen = generations.find(g => g.id === m.generationId);
+    const genName = gen ? gen.name : 'Unknown';
+    membersPerGen.set(genName, (membersPerGen.get(genName) || 0) + 1);
+  });
+  console.log('Members per generation:');
+  membersPerGen.forEach((count, name) => console.log(`  ${name}: ${count}`));
+
+  generations.forEach(g => {
+    if (!g.name) console.error(`VERIFICATION FAILED: Generation ${g.id} has no name`);
+  });
+
   familyLevels.forEach((level, root) => {
     const membersList = familyUnits.get(root)!.map(id => members.find(m => m.id === id)!.firstName).join(', ');
     const dagreNode = g.node(root);
@@ -270,6 +265,8 @@ export function generateTreeLayout(
   const laneX = minGlobalX === Infinity ? -1000 : minGlobalX - 600;
 
   familiesByLevel.forEach((families, level) => {
+    if (families.length === 0) return; // Hide if no members
+
     // Try to find the generation name based on members at this level
     const firstFamilyRoot = families[0]?.root;
     const firstMemberId = firstFamilyRoot ? familyUnits.get(firstFamilyRoot)?.[0] : undefined;
