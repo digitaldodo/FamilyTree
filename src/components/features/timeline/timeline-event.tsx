@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { Heart, UserPlus, FileText, Star } from "lucide-react";
+import { MemberAvatar } from "../members/member-avatar";
 
 export type TimelineEventType = "BIRTH" | "MARRIAGE" | "DEATH" | "CUSTOM";
 
@@ -76,12 +77,8 @@ export function TimelineEvent({ event, index }: TimelineEventProps) {
           <div className={`flex items-center gap-2 mt-4 ${isEven ? 'md:justify-end' : ''}`}>
             <div className="flex -space-x-2">
               {event.members.map((member) => (
-                <div key={member.id} className="w-8 h-8 rounded-full ring-2 ring-card bg-muted flex items-center justify-center overflow-hidden" title={member.name}>
-                  {member.imageUrl ? (
-                    <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-xs font-medium">{member.name[0]}</span>
-                  )}
+                <div key={member.id} className="relative w-8 h-8 rounded-full ring-2 ring-card bg-muted flex items-center justify-center overflow-hidden" title={member.name}>
+                  <MemberAvatar imageUrl={member.imageUrl} firstName={member.name.split(' ')[0]} lastName={member.name.split(' ')[1] || ''} fallbackSize={16} />
                 </div>
               ))}
             </div>

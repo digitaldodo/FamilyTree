@@ -5,6 +5,7 @@ import { useAppStore } from '@/store/use-app-store';
 import { getGenerationLabel } from '@/utils/date';
 import { format } from 'date-fns';
 import Image from 'next/image';
+import { MemberAvatar } from './member-avatar';
 import { Dropdown } from '@/components/ui/dropdown';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -93,32 +94,22 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
           </div>
         </Dropdown>
       </div>
-      <CardContent className="p-0">
-        <div className={`h-14 bg-gradient-to-r ${genderAccent}`} />
-        <div className="px-4 pb-4 flex flex-col">
-          <div className="flex gap-4">
-            <div className="-mt-8 flex-shrink-0 relative">
-              <div className="w-14 h-14 rounded-xl bg-card border-[3px] border-card flex items-center justify-center overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
-                {member.imageUrl ? (
-                  <Image
-                    src={member.imageUrl}
-                    alt={`${member.firstName} ${member.lastName}`}
-                    width={56}
-                    height={56}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <User2 className="w-7 h-7 text-muted-foreground" />
-                )}
-              </div>
-            </div>
-
-            <div className="flex-1 min-w-0 flex flex-col pt-2">
-              <h3 className="font-semibold text-sm leading-tight group-hover:text-primary transition-colors line-clamp-2 break-words pr-5">
-                {member.firstName} {member.lastName}
-              </h3>
-            </div>
-          </div>
+      <CardContent className="p-0 flex flex-col h-full">
+        <div className="relative w-full h-[180px] shrink-0 bg-muted overflow-hidden">
+          <MemberAvatar 
+            imageUrl={member.imageUrl} 
+            firstName={member.firstName} 
+            lastName={member.lastName} 
+            gender={member.gender} 
+            fallbackSize={48} 
+            iconClassName="transition-transform duration-500 group-hover:scale-110"
+            className="transition-transform duration-500 group-hover:scale-105"
+          />
+        </div>
+        <div className="p-4 flex flex-col flex-1 bg-card">
+          <h3 className="font-semibold text-base leading-tight group-hover:text-primary transition-colors line-clamp-2 break-words pr-5">
+            {member.firstName} {member.lastName}
+          </h3>
 
           <div className="flex items-center gap-1.5 mt-2 flex-wrap">
             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-[10px] font-medium text-primary">
@@ -137,7 +128,7 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
               <div className="flex items-center gap-1.5">
                 <Calendar className="w-3 h-3 shrink-0" />
                 <span>
-                  Born: {format(new Date(member.birthDate), 'dd-MM-yyyy')}
+                  Born: {format(new Date(member.birthDate), 'yyyy')}
                 </span>
               </div>
               {getGenerationLabel(member.birthDate) && (

@@ -21,6 +21,7 @@ import { TreeBackground } from '@/components/features/tree/tree-background';
 import { Loader2, TreePine, Eye, LogIn } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
 import { User2, Calendar, MapPin, Briefcase, Heart, Users } from 'lucide-react';
+import { MemberAvatar } from '@/components/features/members/member-avatar';
 
 const nodeTypes = { member: MemberNode };
 const edgeTypes = { relationship: RelationshipEdgeMemo };
@@ -111,12 +112,14 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
         <div className="absolute bottom-3 left-4 right-4 flex items-end gap-3">
-          <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border-3 border-white/90 dark:border-zinc-800 overflow-hidden bg-muted flex items-center justify-center shadow-lg shrink-0">
-            {member.imageUrl ? (
-              <img src={member.imageUrl} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <User2 className="w-7 h-7 text-muted-foreground" />
-            )}
+          <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border-3 border-white/90 dark:border-zinc-800 overflow-hidden bg-muted flex items-center justify-center shadow-lg shrink-0 relative">
+            <MemberAvatar 
+              imageUrl={member.imageUrl} 
+              firstName={member.firstName} 
+              lastName={member.lastName} 
+              gender={member.gender} 
+              fallbackSize={32} 
+            />
           </div>
           <div className="flex-1 min-w-0 pb-0.5">
             <h2 className="text-lg sm:text-xl font-bold text-white truncate leading-tight">

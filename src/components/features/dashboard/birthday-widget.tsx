@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Cake, Calendar } from "lucide-react";
+import { MemberAvatar } from "../members/member-avatar";
 
 interface BirthdayWidgetProps {
   birthdays: {
@@ -37,12 +38,8 @@ export function BirthdayWidget({ birthdays }: BirthdayWidgetProps) {
               transition={{ delay: 0.4 + i * 0.1 }}
               className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors"
             >
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
-                {birthday.imageUrl ? (
-                  <img src={birthday.imageUrl} alt={birthday.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-sm font-medium text-primary">{birthday.name[0]}</span>
-                )}
+              <div className="relative w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                <MemberAvatar imageUrl={birthday.imageUrl} firstName={birthday.name.split(' ')[0]} lastName={birthday.name.split(' ')[1] || ''} fallbackSize={20} />
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="font-medium text-sm truncate">{birthday.name}</h4>

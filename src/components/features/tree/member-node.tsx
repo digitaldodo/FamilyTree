@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { User2 } from 'lucide-react';
 import { getGenerationLabel } from '@/utils/date';
 import Image from 'next/image';
+import { MemberAvatar } from '../members/member-avatar';
 
 interface MemberNodeProps {
   data: {
@@ -44,19 +45,15 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
 
       {/* Photo Area (70-80% height) */}
       <div className="flex-1 relative bg-muted flex items-center justify-center overflow-hidden">
-        {member.imageUrl ? (
-          <Image src={member.imageUrl} alt={data.label} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-rose-500/10 flex items-center justify-center">
-            <User2 className={cn(
-              "w-20 h-20 transition-transform duration-500 group-hover:scale-110",
-              member.gender === 'MALE' ? 'text-blue-400' : 
-              member.gender === 'FEMALE' ? 'text-pink-400' : 
-              'text-slate-400'
-            )} />
-          </div>
-        )}
-        
+        <MemberAvatar 
+          imageUrl={member.imageUrl} 
+          firstName={member.firstName} 
+          lastName={member.lastName} 
+          gender={member.gender} 
+          fallbackSize={80} 
+          iconClassName="transition-transform duration-500 group-hover:scale-110"
+          className="transition-transform duration-500 group-hover:scale-105"
+        />
         {/* Soft gradient at the bottom of the photo for text contrast if needed, but we'll put text in a separate box below */}
       </div>
 
