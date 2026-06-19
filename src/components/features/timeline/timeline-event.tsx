@@ -13,7 +13,7 @@ export interface TimelineEventProps {
     title: string;
     description?: string;
     date: Date;
-    members: { id: string; name: string; avatar?: string | null }[];
+    members: { id: string; name: string; imageUrl?: string | null }[];
   };
   index: number;
 }
@@ -77,8 +77,8 @@ export function TimelineEvent({ event, index }: TimelineEventProps) {
             <div className="flex -space-x-2">
               {event.members.map((member) => (
                 <div key={member.id} className="w-8 h-8 rounded-full ring-2 ring-card bg-muted flex items-center justify-center overflow-hidden" title={member.name}>
-                  {member.avatar ? (
-                    <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" />
+                  {member.imageUrl ? (
+                    <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
                   ) : (
                     <span className="text-xs font-medium">{member.name[0]}</span>
                   )}

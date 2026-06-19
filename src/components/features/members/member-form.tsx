@@ -54,7 +54,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
     },
   });
 
-  const avatar = watch('avatar');
+  const imageUrl = watch('imageUrl');
   const coverImage = watch('coverImage');
 
   // Relationships state
@@ -133,8 +133,8 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       <div className="flex flex-col items-center justify-center mb-6">
         <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">Profile Photo</label>
         <ImageUpload 
-          value={avatar} 
-          onChange={(val) => setValue('avatar', val || undefined)} 
+          value={imageUrl} 
+          onChange={(val) => setValue('imageUrl', val || undefined)} 
           folder="family-tree/avatars"
         />
       </div>

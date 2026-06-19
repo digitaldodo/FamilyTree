@@ -119,7 +119,7 @@ model Member {
   deathDate     DateTime?
   gender        Gender?
   bio           String?
-  avatar        String?
+  imageUrl      String?        @map("avatar")
   coverImage    String?
   phone         String?
   email         String?

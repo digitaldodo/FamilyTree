@@ -10,7 +10,7 @@ interface BirthdayWidgetProps {
     date: Date;
     ageTurning: number;
     daysRemaining: number;
-    avatar?: string | null;
+    imageUrl?: string | null;
   }[];
 }
 
@@ -38,8 +38,8 @@ export function BirthdayWidget({ birthdays }: BirthdayWidgetProps) {
               className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors"
             >
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
-                {birthday.avatar ? (
-                  <img src={birthday.avatar} alt={birthday.name} className="w-full h-full object-cover" />
+                {birthday.imageUrl ? (
+                  <img src={birthday.imageUrl} alt={birthday.name} className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-sm font-medium text-primary">{birthday.name[0]}</span>
                 )}

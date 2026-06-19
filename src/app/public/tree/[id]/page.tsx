@@ -112,8 +112,8 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
         <div className="absolute bottom-3 left-4 right-4 flex items-end gap-3">
           <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border-3 border-white/90 dark:border-zinc-800 overflow-hidden bg-muted flex items-center justify-center shadow-lg shrink-0">
-            {member.avatar ? (
-              <img src={member.avatar} alt="" className="w-full h-full object-cover" />
+            {member.imageUrl ? (
+              <img src={member.imageUrl} alt="" className="w-full h-full object-cover" />
             ) : (
               <User2 className="w-7 h-7 text-muted-foreground" />
             )}

@@ -11,7 +11,7 @@ export interface Member {
   deathDate?: string | null;
   gender?: 'MALE' | 'FEMALE' | 'OTHER' | null;
   bio?: string | null;
-  avatar?: string | null;
+  imageUrl?: string | null;
   coverImage?: string | null;
   phone?: string | null;
   email?: string | null;
@@ -32,7 +32,7 @@ export interface CreateMemberInput {
   deathDate?: string;
   gender?: 'MALE' | 'FEMALE' | 'OTHER';
   bio?: string;
-  avatar?: string;
+  imageUrl?: string;
   coverImage?: string;
   phone?: string;
   email?: string;
@@ -51,7 +51,7 @@ export interface UpdateMemberInput {
   deathDate?: string;
   gender?: 'MALE' | 'FEMALE' | 'OTHER';
   bio?: string;
-  avatar?: string;
+  imageUrl?: string;
   coverImage?: string;
   phone?: string;
   email?: string;

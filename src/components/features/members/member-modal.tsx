@@ -21,6 +21,8 @@ import { MemberDeleteDialog } from './member-delete-dialog';
 import { useMemberMutations } from '@/hooks/use-member-mutations';
 import { MemoryGallery, Memory } from '../memories/memory-gallery';
 import { getGenerationLabel } from '@/utils/date';
+import { RelationshipSelector } from './relationship-selector';
+import Image from 'next/image';
 import { toast } from 'sonner';
 
 interface MemberModalProps {
@@ -186,10 +188,12 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                 {/* Avatar + Name Overlay */}
                 <div className="absolute -bottom-6 left-6 right-6 flex items-end gap-4">
                   <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl border-4 border-background overflow-hidden bg-muted flex items-center justify-center shadow-xl shrink-0 relative z-10">
-                    {member?.avatar ? (
-                      <img
-                        src={member.avatar}
+                    {member?.imageUrl ? (
+                      <Image
+                        src={member.imageUrl}
                         alt=""
+                        width={128}
+                        height={128}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -351,8 +355,8 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                                     if (!p) return null;
                                     return (
                                       <div key={r.id} onClick={() => navigateToMember(p.id)} className="flex items-center gap-2 p-1.5 pr-4 rounded-full bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors border border-border">
-                                        <div className="w-8 h-8 rounded-full bg-muted overflow-hidden">
-                                          {p.avatar ? <img src={p.avatar} alt="" className="w-full h-full object-cover" /> : <User2 className="w-4 h-4 m-2 text-muted-foreground" />}
+                                        <div className="w-8 h-8 rounded-full bg-muted overflow-hidden relative">
+                                          {p.imageUrl ? <Image src={p.imageUrl} alt="" fill className="object-cover" /> : <User2 className="w-4 h-4 m-2 text-muted-foreground" />}
                                         </div>
                                         <span className="text-sm font-medium">{p.firstName} {p.lastName}</span>
                                       </div>
@@ -371,8 +375,8 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                                     if (!s) return null;
                                     return (
                                       <div key={r.id} onClick={() => navigateToMember(s.id)} className="flex items-center gap-2 p-1.5 pr-4 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100 hover:bg-rose-100 dark:hover:bg-rose-900/50 cursor-pointer transition-colors border border-rose-200/50 dark:border-rose-800/30">
-                                        <div className="w-8 h-8 rounded-full bg-rose-200/50 dark:bg-rose-900/50 overflow-hidden flex items-center justify-center">
-                                          {s.avatar ? <img src={s.avatar} alt="" className="w-full h-full object-cover" /> : <Heart className="w-4 h-4 text-rose-500" />}
+                                        <div className="w-8 h-8 rounded-full bg-rose-200/50 dark:bg-rose-900/50 overflow-hidden relative flex items-center justify-center">
+                                          {s.imageUrl ? <Image src={s.imageUrl} alt="" fill className="object-cover" /> : <Heart className="w-4 h-4 text-rose-500" />}
                                         </div>
                                         <span className="text-sm font-medium">{s.firstName} {s.lastName}</span>
                                       </div>
@@ -391,8 +395,8 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                                     if (!c) return null;
                                     return (
                                       <div key={r.id} onClick={() => navigateToMember(c.id)} className="flex items-center gap-2 p-1.5 pr-4 rounded-full bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors border border-border">
-                                        <div className="w-8 h-8 rounded-full bg-muted overflow-hidden">
-                                          {c.avatar ? <img src={c.avatar} alt="" className="w-full h-full object-cover" /> : <User2 className="w-4 h-4 m-2 text-muted-foreground" />}
+                                        <div className="w-8 h-8 rounded-full bg-muted overflow-hidden relative">
+                                          {c.imageUrl ? <Image src={c.imageUrl} alt="" fill className="object-cover" /> : <User2 className="w-4 h-4 m-2 text-muted-foreground" />}
                                         </div>
                                         <span className="text-sm font-medium">{c.firstName} {c.lastName}</span>
                                       </div>
@@ -412,8 +416,8 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                                     if (!sib) return null;
                                     return (
                                       <div key={r.id} onClick={() => navigateToMember(sib.id)} className="flex items-center gap-2 p-1.5 pr-4 rounded-full bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors border border-border">
-                                        <div className="w-8 h-8 rounded-full bg-muted overflow-hidden">
-                                          {sib.avatar ? <img src={sib.avatar} alt="" className="w-full h-full object-cover" /> : <User2 className="w-4 h-4 m-2 text-muted-foreground" />}
+                                        <div className="w-8 h-8 rounded-full bg-muted overflow-hidden relative">
+                                          {sib.imageUrl ? <Image src={sib.imageUrl} alt="" fill className="object-cover" /> : <User2 className="w-4 h-4 m-2 text-muted-foreground" />}
                                         </div>
                                         <span className="text-sm font-medium">{sib.firstName} {sib.lastName}</span>
                                       </div>

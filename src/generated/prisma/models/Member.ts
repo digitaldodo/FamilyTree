@@ -33,7 +33,7 @@ export type MemberMinAggregateOutputType = {
   deathDate: Date | null
   gender: $Enums.Gender | null
   bio: string | null
-  avatar: string | null
+  imageUrl: string | null
   coverImage: string | null
   phone: string | null
   email: string | null
@@ -54,7 +54,7 @@ export type MemberMaxAggregateOutputType = {
   deathDate: Date | null
   gender: $Enums.Gender | null
   bio: string | null
-  avatar: string | null
+  imageUrl: string | null
   coverImage: string | null
   phone: string | null
   email: string | null
@@ -75,7 +75,7 @@ export type MemberCountAggregateOutputType = {
   deathDate: number
   gender: number
   bio: number
-  avatar: number
+  imageUrl: number
   coverImage: number
   phone: number
   email: number
@@ -98,7 +98,7 @@ export type MemberMinAggregateInputType = {
   deathDate?: true
   gender?: true
   bio?: true
-  avatar?: true
+  imageUrl?: true
   coverImage?: true
   phone?: true
   email?: true
@@ -119,7 +119,7 @@ export type MemberMaxAggregateInputType = {
   deathDate?: true
   gender?: true
   bio?: true
-  avatar?: true
+  imageUrl?: true
   coverImage?: true
   phone?: true
   email?: true
@@ -140,7 +140,7 @@ export type MemberCountAggregateInputType = {
   deathDate?: true
   gender?: true
   bio?: true
-  avatar?: true
+  imageUrl?: true
   coverImage?: true
   phone?: true
   email?: true
@@ -234,7 +234,7 @@ export type MemberGroupByOutputType = {
   deathDate: Date | null
   gender: $Enums.Gender | null
   bio: string | null
-  avatar: string | null
+  imageUrl: string | null
   coverImage: string | null
   phone: string | null
   email: string | null
@@ -276,7 +276,7 @@ export type MemberWhereInput = {
   deathDate?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   gender?: Prisma.EnumGenderNullableFilter<"Member"> | $Enums.Gender | null
   bio?: Prisma.StringNullableFilter<"Member"> | string | null
-  avatar?: Prisma.StringNullableFilter<"Member"> | string | null
+  imageUrl?: Prisma.StringNullableFilter<"Member"> | string | null
   coverImage?: Prisma.StringNullableFilter<"Member"> | string | null
   phone?: Prisma.StringNullableFilter<"Member"> | string | null
   email?: Prisma.StringNullableFilter<"Member"> | string | null
@@ -302,7 +302,7 @@ export type MemberOrderByWithRelationInput = {
   deathDate?: Prisma.SortOrderInput | Prisma.SortOrder
   gender?: Prisma.SortOrderInput | Prisma.SortOrder
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
-  avatar?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   coverImage?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -331,7 +331,7 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   deathDate?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   gender?: Prisma.EnumGenderNullableFilter<"Member"> | $Enums.Gender | null
   bio?: Prisma.StringNullableFilter<"Member"> | string | null
-  avatar?: Prisma.StringNullableFilter<"Member"> | string | null
+  imageUrl?: Prisma.StringNullableFilter<"Member"> | string | null
   coverImage?: Prisma.StringNullableFilter<"Member"> | string | null
   phone?: Prisma.StringNullableFilter<"Member"> | string | null
   email?: Prisma.StringNullableFilter<"Member"> | string | null
@@ -357,7 +357,7 @@ export type MemberOrderByWithAggregationInput = {
   deathDate?: Prisma.SortOrderInput | Prisma.SortOrder
   gender?: Prisma.SortOrderInput | Prisma.SortOrder
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
-  avatar?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   coverImage?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -384,7 +384,7 @@ export type MemberScalarWhereWithAggregatesInput = {
   deathDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Member"> | Date | string | null
   gender?: Prisma.EnumGenderNullableWithAggregatesFilter<"Member"> | $Enums.Gender | null
   bio?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
-  avatar?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
+  imageUrl?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   coverImage?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   phone?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   email?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
@@ -405,7 +405,7 @@ export type MemberCreateInput = {
   deathDate?: Date | string | null
   gender?: $Enums.Gender | null
   bio?: string | null
-  avatar?: string | null
+  imageUrl?: string | null
   coverImage?: string | null
   phone?: string | null
   email?: string | null
@@ -429,7 +429,7 @@ export type MemberUncheckedCreateInput = {
   deathDate?: Date | string | null
   gender?: $Enums.Gender | null
   bio?: string | null
-  avatar?: string | null
+  imageUrl?: string | null
   coverImage?: string | null
   phone?: string | null
   email?: string | null
@@ -453,7 +453,7 @@ export type MemberUpdateInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -477,7 +477,7 @@ export type MemberUncheckedUpdateInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -501,7 +501,7 @@ export type MemberCreateManyInput = {
   deathDate?: Date | string | null
   gender?: $Enums.Gender | null
   bio?: string | null
-  avatar?: string | null
+  imageUrl?: string | null
   coverImage?: string | null
   phone?: string | null
   email?: string | null
@@ -522,7 +522,7 @@ export type MemberUpdateManyMutationInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -541,7 +541,7 @@ export type MemberUncheckedUpdateManyInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -572,7 +572,7 @@ export type MemberCountOrderByAggregateInput = {
   deathDate?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   bio?: Prisma.SortOrder
-  avatar?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrder
   coverImage?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -593,7 +593,7 @@ export type MemberMaxOrderByAggregateInput = {
   deathDate?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   bio?: Prisma.SortOrder
-  avatar?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrder
   coverImage?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -614,7 +614,7 @@ export type MemberMinOrderByAggregateInput = {
   deathDate?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   bio?: Prisma.SortOrder
-  avatar?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrder
   coverImage?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -770,7 +770,7 @@ export type MemberCreateWithoutTreeInput = {
   deathDate?: Date | string | null
   gender?: $Enums.Gender | null
   bio?: string | null
-  avatar?: string | null
+  imageUrl?: string | null
   coverImage?: string | null
   phone?: string | null
   email?: string | null
@@ -793,7 +793,7 @@ export type MemberUncheckedCreateWithoutTreeInput = {
   deathDate?: Date | string | null
   gender?: $Enums.Gender | null
   bio?: string | null
-  avatar?: string | null
+  imageUrl?: string | null
   coverImage?: string | null
   phone?: string | null
   email?: string | null
@@ -845,7 +845,7 @@ export type MemberScalarWhereInput = {
   deathDate?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   gender?: Prisma.EnumGenderNullableFilter<"Member"> | $Enums.Gender | null
   bio?: Prisma.StringNullableFilter<"Member"> | string | null
-  avatar?: Prisma.StringNullableFilter<"Member"> | string | null
+  imageUrl?: Prisma.StringNullableFilter<"Member"> | string | null
   coverImage?: Prisma.StringNullableFilter<"Member"> | string | null
   phone?: Prisma.StringNullableFilter<"Member"> | string | null
   email?: Prisma.StringNullableFilter<"Member"> | string | null
@@ -866,7 +866,7 @@ export type MemberCreateWithoutGenerationInput = {
   deathDate?: Date | string | null
   gender?: $Enums.Gender | null
   bio?: string | null
-  avatar?: string | null
+  imageUrl?: string | null
   coverImage?: string | null
   phone?: string | null
   email?: string | null
@@ -889,7 +889,7 @@ export type MemberUncheckedCreateWithoutGenerationInput = {
   deathDate?: Date | string | null
   gender?: $Enums.Gender | null
   bio?: string | null
-  avatar?: string | null
+  imageUrl?: string | null
   coverImage?: string | null
   phone?: string | null
   email?: string | null
@@ -938,7 +938,7 @@ export type MemberCreateWithoutRelationsFromInput = {
   deathDate?: Date | string | null
   gender?: $Enums.Gender | null
   bio?: string | null
-  avatar?: string | null
+  imageUrl?: string | null
   coverImage?: string | null
   phone?: string | null
   email?: string | null
@@ -961,7 +961,7 @@ export type MemberUncheckedCreateWithoutRelationsFromInput = {
   deathDate?: Date | string | null
   gender?: $Enums.Gender | null
   bio?: string | null
-  avatar?: string | null
+  imageUrl?: string | null
   coverImage?: string | null
   phone?: string | null
   email?: string | null
@@ -989,7 +989,7 @@ export type MemberCreateWithoutRelationsToInput = {
   deathDate?: Date | string | null
   gender?: $Enums.Gender | null
   bio?: string | null
-  avatar?: string | null
+  imageUrl?: string | null
   coverImage?: string | null
   phone?: string | null
   email?: string | null
@@ -1012,7 +1012,7 @@ export type MemberUncheckedCreateWithoutRelationsToInput = {
   deathDate?: Date | string | null
   gender?: $Enums.Gender | null
   bio?: string | null
-  avatar?: string | null
+  imageUrl?: string | null
   coverImage?: string | null
   phone?: string | null
   email?: string | null
@@ -1051,7 +1051,7 @@ export type MemberUpdateWithoutRelationsFromInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1074,7 +1074,7 @@ export type MemberUncheckedUpdateWithoutRelationsFromInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1108,7 +1108,7 @@ export type MemberUpdateWithoutRelationsToInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1131,7 +1131,7 @@ export type MemberUncheckedUpdateWithoutRelationsToInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1154,7 +1154,7 @@ export type MemberCreateWithoutMediaInput = {
   deathDate?: Date | string | null
   gender?: $Enums.Gender | null
   bio?: string | null
-  avatar?: string | null
+  imageUrl?: string | null
   coverImage?: string | null
   phone?: string | null
   email?: string | null
@@ -1177,7 +1177,7 @@ export type MemberUncheckedCreateWithoutMediaInput = {
   deathDate?: Date | string | null
   gender?: $Enums.Gender | null
   bio?: string | null
-  avatar?: string | null
+  imageUrl?: string | null
   coverImage?: string | null
   phone?: string | null
   email?: string | null
@@ -1216,7 +1216,7 @@ export type MemberUpdateWithoutMediaInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1239,7 +1239,7 @@ export type MemberUncheckedUpdateWithoutMediaInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1262,7 +1262,7 @@ export type MemberCreateManyTreeInput = {
   deathDate?: Date | string | null
   gender?: $Enums.Gender | null
   bio?: string | null
-  avatar?: string | null
+  imageUrl?: string | null
   coverImage?: string | null
   phone?: string | null
   email?: string | null
@@ -1282,7 +1282,7 @@ export type MemberUpdateWithoutTreeInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1305,7 +1305,7 @@ export type MemberUncheckedUpdateWithoutTreeInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1328,7 +1328,7 @@ export type MemberUncheckedUpdateManyWithoutTreeInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1348,7 +1348,7 @@ export type MemberCreateManyGenerationInput = {
   deathDate?: Date | string | null
   gender?: $Enums.Gender | null
   bio?: string | null
-  avatar?: string | null
+  imageUrl?: string | null
   coverImage?: string | null
   phone?: string | null
   email?: string | null
@@ -1368,7 +1368,7 @@ export type MemberUpdateWithoutGenerationInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1391,7 +1391,7 @@ export type MemberUncheckedUpdateWithoutGenerationInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1414,7 +1414,7 @@ export type MemberUncheckedUpdateManyWithoutGenerationInput = {
   deathDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   gender?: Prisma.NullableEnumGenderFieldUpdateOperationsInput | $Enums.Gender | null
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1483,7 +1483,7 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   deathDate?: boolean
   gender?: boolean
   bio?: boolean
-  avatar?: boolean
+  imageUrl?: boolean
   coverImage?: boolean
   phone?: boolean
   email?: boolean
@@ -1510,7 +1510,7 @@ export type MemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   deathDate?: boolean
   gender?: boolean
   bio?: boolean
-  avatar?: boolean
+  imageUrl?: boolean
   coverImage?: boolean
   phone?: boolean
   email?: boolean
@@ -1533,7 +1533,7 @@ export type MemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   deathDate?: boolean
   gender?: boolean
   bio?: boolean
-  avatar?: boolean
+  imageUrl?: boolean
   coverImage?: boolean
   phone?: boolean
   email?: boolean
@@ -1556,7 +1556,7 @@ export type MemberSelectScalar = {
   deathDate?: boolean
   gender?: boolean
   bio?: boolean
-  avatar?: boolean
+  imageUrl?: boolean
   coverImage?: boolean
   phone?: boolean
   email?: boolean
@@ -1568,7 +1568,7 @@ export type MemberSelectScalar = {
   updatedAt?: boolean
 }
 
-export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "middleName" | "birthDate" | "deathDate" | "gender" | "bio" | "avatar" | "coverImage" | "phone" | "email" | "address" | "occupation" | "generationId" | "treeId" | "createdAt" | "updatedAt", ExtArgs["result"]["member"]>
+export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "middleName" | "birthDate" | "deathDate" | "gender" | "bio" | "imageUrl" | "coverImage" | "phone" | "email" | "address" | "occupation" | "generationId" | "treeId" | "createdAt" | "updatedAt", ExtArgs["result"]["member"]>
 export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   generation?: boolean | Prisma.GenerationDefaultArgs<ExtArgs>
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
@@ -1604,7 +1604,7 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     deathDate: Date | null
     gender: $Enums.Gender | null
     bio: string | null
-    avatar: string | null
+    imageUrl: string | null
     coverImage: string | null
     phone: string | null
     email: string | null
@@ -2050,7 +2050,7 @@ export interface MemberFieldRefs {
   readonly deathDate: Prisma.FieldRef<"Member", 'DateTime'>
   readonly gender: Prisma.FieldRef<"Member", 'Gender'>
   readonly bio: Prisma.FieldRef<"Member", 'String'>
-  readonly avatar: Prisma.FieldRef<"Member", 'String'>
+  readonly imageUrl: Prisma.FieldRef<"Member", 'String'>
   readonly coverImage: Prisma.FieldRef<"Member", 'String'>
   readonly phone: Prisma.FieldRef<"Member", 'String'>
   readonly email: Prisma.FieldRef<"Member", 'String'>

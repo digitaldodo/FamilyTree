@@ -5,6 +5,7 @@ import { useAppStore } from '@/store/use-app-store';
 import { cn } from '@/lib/utils';
 import { User2 } from 'lucide-react';
 import { getGenerationLabel } from '@/utils/date';
+import Image from 'next/image';
 
 interface MemberNodeProps {
   data: {
@@ -43,8 +44,8 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
 
       {/* Photo Area (70-80% height) */}
       <div className="flex-1 relative bg-muted flex items-center justify-center overflow-hidden">
-        {member.avatar ? (
-          <img src={member.avatar} alt={data.label} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        {member.imageUrl ? (
+          <Image src={member.imageUrl} alt={data.label} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-rose-500/10 flex items-center justify-center">
             <User2 className={cn(

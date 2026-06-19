@@ -46,7 +46,7 @@ export default function TimelinePage() {
               members: [{
                 id: member.id,
                 name: `${member.firstName} ${member.lastName}`,
-                avatar: member.avatar
+                imageUrl: member.imageUrl
               }]
             });
           }
@@ -61,7 +61,7 @@ export default function TimelinePage() {
               members: [{
                 id: member.id,
                 name: `${member.firstName} ${member.lastName}`,
-                avatar: member.avatar
+                imageUrl: member.imageUrl
               }]
             });
           }

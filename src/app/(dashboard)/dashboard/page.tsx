@@ -81,7 +81,7 @@ export default function DashboardPage() {
               date: birthDate,
               ageTurning,
               daysRemaining,
-              avatar: m.avatar,
+              imageUrl: m.imageUrl,
             };
           })
           .sort((a: any, b: any) => a.daysRemaining - b.daysRemaining)

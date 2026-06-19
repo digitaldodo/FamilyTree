@@ -1477,7 +1477,7 @@ export const MemberScalarFieldEnum = {
   deathDate: 'deathDate',
   gender: 'gender',
   bio: 'bio',
-  avatar: 'avatar',
+  imageUrl: 'imageUrl',
   coverImage: 'coverImage',
   phone: 'phone',
   email: 'email',
