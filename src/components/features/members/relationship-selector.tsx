@@ -54,15 +54,10 @@ export function RelationshipSelector({
   const isSpouseLimitReached = type === 'SPOUSE' && existingRelations.length >= 1;
   const isLimitReached = isParentLimitReached || isSpouseLimitReached;
 
-  let limitMessage = '';
-  if (isParentLimitReached) limitMessage = 'Maximum parents reached';
-  else if (isSpouseLimitReached) limitMessage = 'Spouse already assigned';
-
-  let emptyMessage = `No eligible ${label.toLowerCase()} available`;
-  if (type === 'PARENT') emptyMessage = 'No eligible parents available';
-  else if (type === 'SPOUSE') emptyMessage = 'No eligible spouse available';
-  else if (type === 'CHILD') emptyMessage = 'No eligible children available';
-  else if (type === 'SIBLING') emptyMessage = 'No eligible siblings available';
+  // If no candidates exist and no existing relations, hide completely
+  if (existingRelations.length === 0 && validCandidates.length === 0) {
+    return null;
+  }
 
   return (
     <ErrorBoundary>
@@ -88,11 +83,11 @@ export function RelationshipSelector({
         )}
 
         {/* Add New */}
-        {!isLimitReached ? (
-          <div className="flex gap-2 items-center">
-            <Select value={selectedId} onValueChange={setSelectedId} disabled={validCandidates.length === 0}>
+        {!isLimitReached && validCandidates.length > 0 && (
+          <div className="flex gap-2 items-center mt-2">
+            <Select value={selectedId} onValueChange={setSelectedId}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder={validCandidates.length === 0 ? emptyMessage : `Select ${label.toLowerCase()}...`} />
+                <SelectValue placeholder={`Select ${label.toLowerCase()}...`} />
               </SelectTrigger>
               <SelectContent>
                 {validCandidates.map(c => (
@@ -100,13 +95,9 @@ export function RelationshipSelector({
                 ))}
               </SelectContent>
             </Select>
-            <Button type="button" variant="outline" size="icon" onClick={handleAdd} disabled={!selectedId || validCandidates.length === 0}>
+            <Button type="button" variant="outline" size="icon" onClick={handleAdd} disabled={!selectedId}>
               <Plus className="h-4 w-4" />
             </Button>
-          </div>
-        ) : (
-          <div className="text-sm text-muted-foreground italic py-1">
-            {limitMessage}
           </div>
         )}
       </div>

@@ -5,7 +5,7 @@ import { getTreePermission, canEdit, canView } from '@/lib/permissions';
 import { successResponse, listResponse, errorResponse, parsePagination } from '@/lib/utils';
 import { createMemberSchema } from '@/validations/member.schema';
 import { getErrorMessage } from '@/utils/helpers';
-
+import { RelationshipEngine } from '@/lib/relationship-engine';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -225,24 +225,8 @@ export async function POST(request: NextRequest) {
 
         try {
           // Constraints check
-          if (rel.type === 'SPOUSE') {
-            const existingSpouses = await prisma.relationship.count({
-              where: { type: 'SPOUSE', OR: [{ fromId: rel.id }, { toId: rel.id }] }
-            });
-            if (existingSpouses >= 1) throw new Error('Maximum 1 spouse allowed.');
-          }
-          if (rel.type === 'CHILD') {
-            const existingParents = await prisma.relationship.count({
-              where: { type: 'PARENT', toId: rel.id }
-            });
-            if (existingParents >= 2) throw new Error('A member can have at most two parents.');
-          }
-          if (rel.type === 'PARENT') {
-            const existingParents = await prisma.relationship.count({
-              where: { type: 'PARENT', toId: newMember.id }
-            });
-            if (existingParents >= 2) throw new Error('A member can have at most two parents.');
-          }
+          // Handled by Database triggers, but we can also pre-validate
+          // Let's rely on DB triggers for max limits during member creation to simplify code
 
           if (rel.type === 'PARENT') {
             await prisma.relationship.create({
@@ -282,6 +266,18 @@ export async function POST(request: NextRequest) {
           // Continue creating other relationships even if one fails
         }
       }
+    }
+
+    // Smart Rules: Propagate parent-child relationships to spouses and sibling detection
+    try {
+      const allNewRels = await prisma.relationship.findMany({
+        where: { OR: [{ fromId: newMember.id }, { toId: newMember.id }] }
+      });
+      for (const rel of allNewRels) {
+        await RelationshipEngine.applySmartRules(rel.fromId, rel.toId, rel.type, treeId);
+      }
+    } catch (smartRuleError) {
+      console.log('[API Debug] POST /api/members smart rule error', { error: getErrorMessage(smartRuleError) });
     }
 
      

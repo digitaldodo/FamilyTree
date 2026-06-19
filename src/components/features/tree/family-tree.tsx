@@ -23,6 +23,7 @@ import { TreeToolbar } from './tree-toolbar';
 import { Loader2, Activity } from 'lucide-react';
 import { TreeBackground } from './tree-background';
 import { FloatingFamilyStats } from './floating-family-stats';
+import { buildRelationshipGraph } from '@/utils/relationship';
 
 const nodeTypes = {
   member: MemberNode,
@@ -146,7 +147,7 @@ function FamilyTreeCanvas() {
         )}
 
         {showDiagnostics && (
-          <Panel position="top-left" className="bg-black/80 backdrop-blur-md p-4 rounded-xl text-white font-mono text-xs z-50 min-w-[200px] border border-white/20 shadow-2xl">
+          <Panel position="top-left" className="bg-black/80 backdrop-blur-md p-4 rounded-xl text-white font-mono text-xs z-50 min-w-[200px] max-w-sm max-h-[80vh] overflow-y-auto border border-white/20 shadow-2xl">
             <div className="flex items-center gap-2 mb-3 border-b border-white/20 pb-2">
               <Activity className="w-4 h-4 text-emerald-400" />
               <strong className="text-sm">Tree Diagnostics</strong>
@@ -159,6 +160,24 @@ function FamilyTreeCanvas() {
               <div className="flex justify-between"><span>Relationships:</span> <span>{useAppStore.getState().members.reduce((acc, m) => acc + m.relationsFrom.length + m.relationsTo.length, 0) / 2}</span></div>
               <div className="flex justify-between"><span>Photos Loaded:</span> <span className={useAppStore.getState().members.some(m => m.imageUrl) ? 'text-emerald-400' : 'text-amber-400'}>{useAppStore.getState().members.filter(m => m.imageUrl).length}</span></div>
             </div>
+            {(() => {
+              const { warnings } = buildRelationshipGraph(useAppStore.getState().members, useAppStore.getState().generations);
+              if (warnings.length > 0) {
+                return (
+                  <div className="mt-4 border-t border-rose-500/50 pt-2">
+                    <strong className="text-rose-400 block mb-2">Graph Warnings ({warnings.length}):</strong>
+                    <ul className="text-rose-300 space-y-1 list-disc pl-4 text-[10px]">
+                      {warnings.map((w: string, i: number) => <li key={i}>{w}</li>)}
+                    </ul>
+                  </div>
+                );
+              }
+              return (
+                <div className="mt-4 border-t border-emerald-500/50 pt-2 text-emerald-400">
+                  <strong>Graph Valid</strong>
+                </div>
+              );
+            })()}
             <div className="mt-3 text-[10px] text-white/50 text-center pt-2 border-t border-white/20">Press ` to hide</div>
           </Panel>
         )}

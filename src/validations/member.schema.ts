@@ -114,6 +114,7 @@ export const createRelationshipSchema = z.object({
   type: relationshipTypeEnum,
   fromId: z.string().min(1, 'Source member ID is required'),
   toId: z.string().min(1, 'Target member ID is required'),
+  preventPropagation: z.boolean().optional(),
 });
 
 /** Inferred types from schemas */

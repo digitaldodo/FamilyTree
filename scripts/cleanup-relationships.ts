@@ -22,19 +22,20 @@ async function main() {
   let moreThan2ParentsCount = 0;
   let moreThan1SpouseCount = 0;
   let invalidGapCount = 0;
+  let conflictingCategoryCount = 0;
 
-  // 1. Check for duplicates
-  // Since we have fromId, toId, type, duplicates might exist if direction is ignored or exactly same.
-  // We'll collect unique keys and remove extras.
-  const seenRelations = new Set<string>();
   const toDelete = new Set<string>();
 
+  // 1. Check for duplicates and conflicting categories
+  const pairMap = new Map<string, string>(); // pairKey -> relationship type
+  const seenRelations = new Set<string>();
+
   for (const rel of relationships) {
-    // Generate an order-independent key for SPOUSE and SIBLING
+    // Unique key for deduplication
     let key = '';
+    const [id1, id2] = [rel.fromId, rel.toId].sort();
     if (rel.type === 'SPOUSE' || rel.type === 'SIBLING') {
-      const ids = [rel.fromId, rel.toId].sort();
-      key = `${rel.type}-${ids[0]}-${ids[1]}`;
+      key = `${rel.type}-${id1}-${id2}`;
     } else {
       key = `${rel.type}-${rel.fromId}-${rel.toId}`;
     }
@@ -42,33 +43,59 @@ async function main() {
     if (seenRelations.has(key)) {
       toDelete.add(rel.id);
       duplicateCount++;
+      continue;
     } else {
       seenRelations.add(key);
+    }
+
+    // Conflicting categories (A can only have ONE relation type with B)
+    const pairKey = `${id1}-${id2}`;
+    if (pairMap.has(pairKey)) {
+      const existingType = pairMap.get(pairKey);
+      if (existingType !== rel.type) {
+        console.warn(`Conflict: ${id1} and ${id2} are ${existingType} and ${rel.type}. Removing ${rel.type}.`);
+        toDelete.add(rel.id);
+        conflictingCategoryCount++;
+      }
+    } else {
+      pairMap.set(pairKey, rel.type);
     }
   }
 
   // 2. Scan each member for limit violations
-  for (const member of members) {
-    const parents = member.relationsTo.filter(r => r.type === 'PARENT');
-    const spouses = [
-      ...member.relationsFrom.filter(r => r.type === 'SPOUSE'),
-      ...member.relationsTo.filter(r => r.type === 'SPOUSE')
-    ];
+  const deletedParentsForMember = new Map<string, number>();
+  const deletedSpousesForMember = new Map<string, number>();
 
-    if (parents.length > 2) {
-      moreThan2ParentsCount++;
-      console.warn(`Member ${member.firstName} ${member.lastName} (${member.id}) has ${parents.length} parents (Max 2).`);
-    }
+  for (const rel of relationships) {
+    if (toDelete.has(rel.id)) continue;
 
-    if (spouses.length > 1) {
-      moreThan1SpouseCount++;
-      console.warn(`Member ${member.firstName} ${member.lastName} (${member.id}) has ${spouses.length} spouses (Max 1).`);
+    if (rel.type === 'PARENT') {
+      const currentParents = (deletedParentsForMember.get(rel.toId) || 0) + 1;
+      if (currentParents > 2) {
+        console.warn(`Member ${rel.toId} already has 2 parents. Removing extra parent rel ${rel.id}`);
+        toDelete.add(rel.id);
+        moreThan2ParentsCount++;
+      } else {
+        deletedParentsForMember.set(rel.toId, currentParents);
+      }
+    } else if (rel.type === 'SPOUSE') {
+      const currentSpouseFrom = (deletedSpousesForMember.get(rel.fromId) || 0) + 1;
+      const currentSpouseTo = (deletedSpousesForMember.get(rel.toId) || 0) + 1;
+      
+      if (currentSpouseFrom > 1 || currentSpouseTo > 1) {
+        console.warn(`Member ${rel.fromId} or ${rel.toId} already has a spouse. Removing extra spouse rel ${rel.id}`);
+        toDelete.add(rel.id);
+        moreThan1SpouseCount++;
+      } else {
+        deletedSpousesForMember.set(rel.fromId, currentSpouseFrom);
+        deletedSpousesForMember.set(rel.toId, currentSpouseTo);
+      }
     }
   }
 
   // 3. Scan for Invalid Generation Gaps
   for (const rel of relationships) {
-    if (toDelete.has(rel.id)) continue; // skip duplicates
+    if (toDelete.has(rel.id)) continue; 
 
     const fromGen = rel.from.generation.orderIndex;
     const toGen = rel.to.generation.orderIndex;
@@ -76,19 +103,21 @@ async function main() {
     if (rel.type === 'PARENT') {
       if (fromGen !== toGen - 1) {
         invalidGapCount++;
-        console.warn(`Invalid PARENT relationship gap: ${rel.from.firstName} (Gen ${fromGen}) -> ${rel.to.firstName} (Gen ${toGen}). Must be exactly 1 generation apart.`);
+        console.warn(`Invalid PARENT gap: ${rel.from.firstName} (Gen ${fromGen}) -> ${rel.to.firstName} (Gen ${toGen}). Removing.`);
+        toDelete.add(rel.id);
       }
     } else if (rel.type === 'SPOUSE' || rel.type === 'SIBLING') {
       if (fromGen !== toGen) {
         invalidGapCount++;
-        console.warn(`Invalid ${rel.type} relationship gap: ${rel.from.firstName} (Gen ${fromGen}) & ${rel.to.firstName} (Gen ${toGen}). Must be same generation.`);
+        console.warn(`Invalid ${rel.type} gap: ${rel.from.firstName} (Gen ${fromGen}) & ${rel.to.firstName} (Gen ${toGen}). Removing.`);
+        toDelete.add(rel.id);
       }
     }
   }
 
   // Auto-fix duplicates
   if (toDelete.size > 0) {
-    console.log(`\nAuto-fixing ${toDelete.size} duplicate relationships...`);
+    console.log(`\nAuto-fixing ${toDelete.size} invalid relationships...`);
     const deleteResult = await prisma.relationship.deleteMany({
       where: {
         id: {
@@ -96,14 +125,15 @@ async function main() {
         }
       }
     });
-    console.log(`Deleted ${deleteResult.count} duplicate relationships.`);
+    console.log(`Deleted ${deleteResult.count} relationships.`);
   }
 
   console.log('\n--- Audit Report ---');
-  console.log(`Duplicate Relationships Found: ${duplicateCount} (Auto-fixed)`);
-  console.log(`Members with > 2 Parents: ${moreThan2ParentsCount}`);
-  console.log(`Members with > 1 Spouse: ${moreThan1SpouseCount}`);
-  console.log(`Relationships with Invalid Generation Gaps: ${invalidGapCount}`);
+  console.log(`Duplicate Relationships Auto-fixed: ${duplicateCount}`);
+  console.log(`Conflicting Relationships Auto-fixed: ${conflictingCategoryCount}`);
+  console.log(`Excess Parents Auto-fixed: ${moreThan2ParentsCount}`);
+  console.log(`Excess Spouses Auto-fixed: ${moreThan1SpouseCount}`);
+  console.log(`Relationships with Invalid Gaps Auto-fixed: ${invalidGapCount}`);
   console.log('--------------------');
 }
 

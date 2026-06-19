@@ -15,10 +15,20 @@ export function MemberRelationships({ member, members, onNavigateToMember, readO
   const spouses = member.relationsFrom.filter((r) => r.type === 'SPOUSE') || [];
   const parents = member.relationsTo.filter((r) => r.type === 'PARENT') || [];
   const children = member.relationsFrom.filter((r) => r.type === 'PARENT') || [];
-  const siblings = [
-    ...(member.relationsFrom.filter((r) => r.type === 'SIBLING') || []),
-    ...(member.relationsTo.filter((r) => r.type === 'SIBLING') || []),
-  ];
+  
+  const parentIds = parents.map((r) => r.fromId);
+  const derivedSiblingIds = new Set<string>();
+  if (parentIds.length > 0) {
+    members.forEach((m) => {
+      if (m.id === member.id) return;
+      const mParentIds = m.relationsTo.filter((r) => r.type === 'PARENT').map((r) => r.fromId);
+      if (mParentIds.some((pid) => parentIds.includes(pid))) {
+        derivedSiblingIds.add(m.id);
+      }
+    });
+  }
+  const siblings = Array.from(derivedSiblingIds).map(id => members.find(m => m.id === id)).filter(Boolean) as MemberWithRelations[];
+
   const hasRelationships = spouses.length > 0 || parents.length > 0 || children.length > 0 || siblings.length > 0;
 
   return (
@@ -91,12 +101,9 @@ export function MemberRelationships({ member, members, onNavigateToMember, readO
             <div>
               <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Siblings</h4>
               <div className="flex flex-wrap gap-2">
-                {siblings.map((r) => {
-                  const sibId = r.fromId === member.id ? r.toId : r.fromId;
-                  const sib = members.find((m) => m.id === sibId);
-                  if (!sib) return null;
+                {siblings.map((sib) => {
                   return (
-                    <div key={r.id} onClick={() => onNavigateToMember(sib.id)} className="flex items-center gap-2 p-1.5 pr-4 rounded-full bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors border border-border">
+                    <div key={sib.id} onClick={() => onNavigateToMember(sib.id)} className="flex items-center gap-2 p-1.5 pr-4 rounded-full bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors border border-border">
                       <div className="w-8 h-8 rounded-full bg-muted overflow-hidden relative">
                         <MemberAvatar imageUrl={sib.imageUrl} firstName={sib.firstName} lastName={sib.lastName} gender={sib.gender} fallbackSize={16} />
                       </div>

@@ -5,6 +5,7 @@ import { getTreePermission, canEdit, canView } from '@/lib/permissions';
 import { successResponse, errorResponse } from '@/lib/utils';
 import { updateMemberSchema } from '@/validations/member.schema';
 import { getErrorMessage } from '@/utils/helpers';
+import { RelationshipEngine } from '@/lib/relationship-engine';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -253,6 +254,18 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
       return updatedMember;
     });
+
+    // Smart Rules
+    try {
+      const allNewRels = await prisma.relationship.findMany({
+        where: { OR: [{ fromId: id }, { toId: id }] }
+      });
+      for (const rel of allNewRels) {
+        await RelationshipEngine.applySmartRules(rel.fromId, rel.toId, rel.type, existing.treeId);
+      }
+    } catch (smartRuleError) {
+      console.log('[API Debug] PUT /api/members/:id smart rule error', { error: getErrorMessage(smartRuleError) });
+    }
 
     return successResponse(member, 'Member updated successfully');
   } catch (error) {
