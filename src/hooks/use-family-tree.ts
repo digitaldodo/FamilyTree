@@ -3,6 +3,7 @@ import { useMembers } from './use-members';
 import { useAppStore } from '@/store/use-app-store';
 import { generateTreeLayout } from '@/utils/tree-layout';
 import { toast } from 'sonner';
+import { useFilteredGenerations } from './use-filtered-generations';
 
 export function useFamilyTree(treeId?: string) {
   const { members, isLoading, error: fetchError } = useMembers(treeId);
@@ -10,8 +11,10 @@ export function useFamilyTree(treeId?: string) {
   const [isMobile, setIsMobile] = useState(false);
 
   const generations = useAppStore(s => s.generations);
-  const generationFilters = useAppStore(s => s.generationFilters);
-  const setGenerationFilters = useAppStore(s => s.setGenerationFilters);
+  const selectedGenerationIds = useAppStore(s => s.selectedGenerationIds);
+  const setSelectedGenerationIds = useAppStore(s => s.setSelectedGenerationIds);
+
+  const visibleGenerations = useFilteredGenerations(generations, selectedGenerationIds);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -22,33 +25,29 @@ export function useFamilyTree(treeId?: string) {
 
   // Enforce consecutive generations for the tree view
   useEffect(() => {
-    if (generationFilters.length === 0 || generations.length === 0) return;
+    if (visibleGenerations.length <= 1) return;
 
-    const activeGenerations = generations.filter(g => generationFilters.includes(g.id));
-    if (activeGenerations.length <= 1) return;
-
-    const sortedActive = [...activeGenerations].sort((a, b) => a.orderIndex - b.orderIndex);
+    const sortedActive = [...visibleGenerations].sort((a, b) => a.orderIndex - b.orderIndex);
     const minOrder = sortedActive[0].orderIndex;
     const maxOrder = sortedActive[sortedActive.length - 1].orderIndex;
 
     const requiredGenerations = generations.filter(g => g.orderIndex >= minOrder && g.orderIndex <= maxOrder);
 
-    if (requiredGenerations.length > activeGenerations.length) {
+    if (requiredGenerations.length > visibleGenerations.length) {
       const requiredIds = requiredGenerations.map(g => g.id);
-      setGenerationFilters(requiredIds);
+      // Combine required IDs with any other selected IDs
+      const newIds = Array.from(new Set([...selectedGenerationIds, ...requiredIds]));
+      setSelectedGenerationIds(newIds);
       toast("Missing generations automatically included.", {
         description: "Tree view only supports consecutive generations."
       });
     }
-  }, [generationFilters, generations, setGenerationFilters]);
+  }, [selectedGenerationIds, visibleGenerations, generations, setSelectedGenerationIds]);
 
   // Transform members into React Flow Nodes and Edges
   const { nodes: initialNodes, edges: initialEdges } = useMemo(() => {
-    const visibleGenerations = generations.filter(gen => 
-      generationFilters.length === 0 || generationFilters.includes(gen.id)
-    );
     return generateTreeLayout(members, visibleGenerations, isMobile);
-  }, [members, generations, generationFilters, isMobile]);
+  }, [members, visibleGenerations, isMobile]);
 
   return {
     members,

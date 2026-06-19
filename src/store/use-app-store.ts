@@ -17,8 +17,8 @@ interface AppState {
   setDefaultGenerationForNewMember: (genId: string | null) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  generationFilters: string[];
-  setGenerationFilters: (filters: string[]) => void;
+  selectedGenerationIds: string[];
+  setSelectedGenerationIds: (ids: string[]) => void;
   
   // Read-only mode for public viewing
   isReadOnly: boolean;
@@ -69,8 +69,8 @@ export const useAppStore = create<AppState>()(
   
   searchQuery: '',
   setSearchQuery: (query) => set({ searchQuery: query }),
-  generationFilters: [],
-  setGenerationFilters: (filters) => set({ generationFilters: filters }),
+  selectedGenerationIds: [],
+  setSelectedGenerationIds: (ids) => set({ selectedGenerationIds: ids }),
 
   isReadOnly: false,
   setIsReadOnly: (readOnly) => set({ isReadOnly: readOnly }),
@@ -86,13 +86,27 @@ export const useAppStore = create<AppState>()(
   setUserRole: (role) => set({ userRole: role }),
 
   generations: [],
-  setGenerations: (generations) => set({ generations }),
-  addGeneration: (generation) => set((state) => ({ generations: [...state.generations, generation] })),
+  setGenerations: (generations) => set((state) => {
+    // If all were selected previously (or it's empty initialization), select all new ones
+    const isAllSelected = state.generations.length === 0 || state.selectedGenerationIds.length === state.generations.length;
+    return {
+      generations,
+      selectedGenerationIds: isAllSelected ? generations.map(g => g.id) : state.selectedGenerationIds.filter(id => generations.some(g => g.id === id))
+    };
+  }),
+  addGeneration: (generation) => set((state) => {
+    const isAllSelected = state.selectedGenerationIds.length === state.generations.length;
+    return { 
+      generations: [...state.generations, generation],
+      selectedGenerationIds: isAllSelected ? [...state.selectedGenerationIds, generation.id] : state.selectedGenerationIds
+    };
+  }),
   updateGeneration: (id, updatedGeneration) => set((state) => ({
     generations: state.generations.map((g) => (g.id === id ? updatedGeneration : g))
   })),
   deleteGeneration: (id) => set((state) => ({
-    generations: state.generations.filter((g) => g.id !== id)
+    generations: state.generations.filter((g) => g.id !== id),
+    selectedGenerationIds: state.selectedGenerationIds.filter((genId) => genId !== id)
   })),
 
   members: [],

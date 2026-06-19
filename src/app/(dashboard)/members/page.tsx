@@ -4,6 +4,7 @@ import { useAppStore } from '@/store/use-app-store';
 import { useMembers } from '@/hooks/use-members';
 import { useGenerations } from '@/hooks/use-generations';
 import { useSearchMembers } from '@/hooks/use-search-members';
+import { useFilteredGenerations } from '@/hooks/use-filtered-generations';
 import { MemberCard } from '@/components/features/members/member-card';
 import { MemberModal } from '@/components/features/members/member-modal';
 import { MemberSearch } from '@/components/features/members/member-search';
@@ -20,11 +21,14 @@ import { useState, useEffect } from 'react';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 function MembersContent() {
-  const { activeTreeId, userRole, generationFilters } = useAppStore();
+  const { activeTreeId, userRole, selectedGenerationIds } = useAppStore();
   const { isLoading: membersLoading, fetchMembers } = useMembers();
   const { generations, isLoading: gensLoading, createGeneration, renameGeneration, deleteGeneration, moveGeneration } = useGenerations();
   const { filteredMembers } = useSearchMembers();
   const { setIsMemberModalOpen, setSelectedMemberId, setIsEditingMember, setDefaultGenerationForNewMember } = useAppStore();
+
+  const allGenerations = [...generations].sort((a, b) => a.orderIndex - b.orderIndex);
+  const sortedGenerations = useFilteredGenerations(allGenerations, selectedGenerationIds);
 
   const [deleteModalGenId, setDeleteModalGenId] = useState<string | null>(null);
   const [formModalState, setFormModalState] = useState<{
@@ -92,12 +96,7 @@ function MembersContent() {
       </div>
     );
   }
-
   const isLoading = membersLoading || gensLoading;
-  const allGenerations = [...generations].sort((a, b) => a.orderIndex - b.orderIndex);
-  const sortedGenerations = allGenerations.filter(gen => 
-    generationFilters.length === 0 || generationFilters.includes(gen.id)
-  );
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 h-full flex flex-col pb-6">

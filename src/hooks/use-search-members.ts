@@ -3,15 +3,17 @@ import { useAppStore } from '@/store/use-app-store';
 import { MemberWithRelations } from '@/types/member';
 
 export function useSearchMembers() {
-  const { members, searchQuery, generationFilters } = useAppStore();
+  const { members, searchQuery, selectedGenerationIds } = useAppStore();
   const [filteredMembers, setFilteredMembers] = useState<MemberWithRelations[]>([]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
       let filtered = members;
       
-      if (generationFilters.length > 0) {
-        filtered = filtered.filter(m => generationFilters.includes(m.generationId));
+      if (selectedGenerationIds.length > 0) {
+        filtered = filtered.filter(m => selectedGenerationIds.includes(m.generationId));
+      } else {
+        filtered = []; // If no generations selected, no members match.
       }
       
       if (searchQuery.trim()) {
@@ -28,7 +30,7 @@ export function useSearchMembers() {
     }, 300); // 300ms debounce
 
     return () => clearTimeout(handler);
-  }, [searchQuery, members, generationFilters]);
+  }, [searchQuery, members, selectedGenerationIds]);
 
   return {
     filteredMembers,
