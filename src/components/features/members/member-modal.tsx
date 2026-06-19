@@ -210,10 +210,15 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-semibold uppercase tracking-wider">
                             Gen {memberGenIndex + 1} · {getGenerationLabel(member.birthDate) || memberGeneration?.name || 'Unknown'}
                           </span>
+                          {member.deathDate && (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-500/10 text-slate-600 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                              🕊 In Loving Memory
+                            </span>
+                          )}
                           {age !== null && (
                             <span className="text-sm font-medium text-muted-foreground">
                               {member.deathDate
-                                ? `Lived ${age} years`
+                                ? `Age at Passing ${age} years`
                                 : `${age} years old`}
                             </span>
                           )}

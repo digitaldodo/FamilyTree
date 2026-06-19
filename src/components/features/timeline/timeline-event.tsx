@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { Heart, UserPlus, FileText, Star } from "lucide-react";
 import { MemberAvatar } from "../members/member-avatar";
 
-export type TimelineEventType = "BIRTH" | "MARRIAGE" | "DEATH" | "CUSTOM";
+export type TimelineEventType = "BIRTH" | "MARRIAGE" | "DEATH" | "CHILD_BORN" | "CUSTOM";
 
 export interface TimelineEventProps {
   event: {
@@ -21,10 +21,11 @@ export interface TimelineEventProps {
 
 const getEventIcon = (type: TimelineEventType) => {
   switch (type) {
-    case "BIRTH": return <UserPlus className="w-5 h-5 text-blue-500" />;
-    case "MARRIAGE": return <Heart className="w-5 h-5 text-pink-500" />;
-    case "DEATH": return <FileText className="w-5 h-5 text-gray-500" />;
-    case "CUSTOM": return <Star className="w-5 h-5 text-amber-500" />;
+    case "BIRTH": return <span className="text-xl">🎂</span>;
+    case "MARRIAGE": return <span className="text-xl">💍</span>;
+    case "DEATH": return <span className="text-xl">🕊</span>;
+    case "CHILD_BORN": return <span className="text-xl">👶</span>;
+    case "CUSTOM": return <span className="text-xl">✨</span>;
   }
 };
 
@@ -33,6 +34,7 @@ const getEventBg = (type: TimelineEventType) => {
     case "BIRTH": return "bg-blue-500/10 ring-blue-500/20";
     case "MARRIAGE": return "bg-pink-500/10 ring-pink-500/20";
     case "DEATH": return "bg-gray-500/10 ring-gray-500/20";
+    case "CHILD_BORN": return "bg-emerald-500/10 ring-emerald-500/20";
     case "CUSTOM": return "bg-amber-500/10 ring-amber-500/20";
   }
 };

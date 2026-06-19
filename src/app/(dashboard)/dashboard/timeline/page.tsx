@@ -65,6 +65,40 @@ export default function TimelinePage() {
               }]
             });
           }
+
+          member.relationsTo?.forEach((rel: any) => {
+            if (rel.type === 'PARENT' && rel.from && member.birthDate) {
+              timelineEvents.push({
+                id: `child-${member.id}-parent-${rel.from.id}`,
+                title: `${rel.from.firstName} had a child, ${member.firstName}`,
+                date: member.birthDate,
+                type: 'CHILD_BORN',
+                description: `${member.firstName} was born`,
+                members: [
+                  { id: rel.from.id, name: `${rel.from.firstName} ${rel.from.lastName}` },
+                  { id: member.id, name: `${member.firstName} ${member.lastName}`, imageUrl: member.imageUrl }
+                ]
+              });
+            }
+          });
+
+          member.relationsFrom?.forEach((rel: any) => {
+             if (rel.type === 'SPOUSE' && rel.to) {
+               if (member.id < rel.to.id) {
+                 timelineEvents.push({
+                    id: `marriage-${member.id}-${rel.to.id}`,
+                    title: `${member.firstName} and ${rel.to.firstName} were married`,
+                    date: rel.createdAt || new Date(),
+                    type: 'MARRIAGE',
+                    description: `Marriage`,
+                    members: [
+                      { id: member.id, name: `${member.firstName} ${member.lastName}`, imageUrl: member.imageUrl },
+                      { id: rel.to.id, name: `${rel.to.firstName} ${rel.to.lastName}` }
+                    ]
+                 });
+               }
+             }
+          });
         });
 
         setEvents(timelineEvents);

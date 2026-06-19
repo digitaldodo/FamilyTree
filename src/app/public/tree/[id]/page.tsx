@@ -76,12 +76,17 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-xs font-medium text-white/90">
                 {generations.find(g => g.id === member.generationId)?.name || 'Unnamed Generation'}
               </span>
+              {member.deathDate && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900/40 backdrop-blur-sm text-xs font-medium text-white/90">
+                  🕊 In Loving Memory
+                </span>
+              )}
               {member.occupation && (
                 <span className="text-xs text-white/70 truncate">{member.occupation}</span>
               )}
               {age !== null && (
                 <span className="text-xs text-white/70">
-                  {member.deathDate ? `Lived ${age} years` : `${age} years old`}
+                  {member.deathDate ? `Age at Passing ${age} years` : `${age} years old`}
                 </span>
               )}
             </div>
@@ -112,7 +117,7 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
           {member.deathDate && (
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-              <span className="text-muted-foreground">Passed:</span>
+              <span className="text-muted-foreground">Date of Death:</span>
               <span className="font-medium">{new Date(member.deathDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
             </div>
           )}

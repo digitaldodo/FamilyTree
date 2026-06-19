@@ -28,7 +28,7 @@ export function MemberDetails({ member }: MemberDetailsProps) {
             <Calendar className="w-4 h-4 text-slate-600 dark:text-slate-400" />
           </div>
           <div className="flex flex-col">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Passed</span>
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Date of Death</span>
             <span className="text-sm font-semibold">
               {new Date(member.deathDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
             </span>

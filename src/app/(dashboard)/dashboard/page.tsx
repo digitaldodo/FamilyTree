@@ -55,7 +55,8 @@ function DashboardContent() {
         
         // Calculate metrics
         const currentMonth = new Date().getMonth();
-        const birthdaysThisMonth = members.filter((m: any) => m.birthDate && new Date(m.birthDate).getMonth() === currentMonth).length;
+        const isAlive = (m: any) => m.status !== 'DECEASED' && m.status !== 'Deceased' && !m.deathDate;
+        const birthdaysThisMonth = members.filter((m: any) => m.birthDate && isAlive(m) && new Date(m.birthDate).getMonth() === currentMonth).length;
         
         const relationshipsCount = members.reduce((acc: number, m: any) => acc + (m.relationsFrom?.length || 0), 0);
         
@@ -67,7 +68,7 @@ function DashboardContent() {
         // Birthday calculations
         const today = new Date();
         const upcomingBirthdays = members
-          .filter((m: any) => m.birthDate)
+          .filter((m: any) => m.birthDate && isAlive(m))
           .map((m: any) => {
             const birthDate = new Date(m.birthDate);
             const nextBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
