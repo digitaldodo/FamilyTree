@@ -97,14 +97,20 @@ export function useFamilyTree(treeId?: string) {
       const dagreNode = g.node(root);
       const startX = dagreNode.x - dagreNode.width / 2;
 
+      const childrenIds = new Set<string>();
+      let familyMaxYOffset = 0;
+
       familyMembers.forEach((memberId, i) => {
         const member = members.find(m => m.id === memberId)!;
         const genOrder = genOrderMap.get(member.generationId) ?? 0;
         
+        member.relationsFrom.filter(r => r.type === 'PARENT').forEach(r => childrenIds.add(r.toId));
+
         // Dagre computes X. We force Y based on user-defined generation.
         const xOffset = startX + i * MEMBER_SPACING + MEMBER_SPACING / 2 - NODE_WIDTH / 2;
         const yOffset = genOrder * LEVEL_HEIGHT * 2.5; // Spread vertically slightly more
-
+        
+        familyMaxYOffset = Math.max(familyMaxYOffset, yOffset);
         minX = Math.min(minX, xOffset);
 
         nodes.push({
@@ -118,6 +124,56 @@ export function useFamilyTree(treeId?: string) {
           }
         });
       });
+
+      if (childrenIds.size > 0) {
+        const junctionId = `junction-${root}`;
+        // Position junction at the center of the family unit, below the parents
+        const junctionX = dagreNode.x;
+        const junctionY = familyMaxYOffset + 340 + 30; // 340 is the card height + 30px gap
+
+        nodes.push({
+          id: junctionId,
+          type: 'familyJunction',
+          position: { x: junctionX - 6, y: junctionY - 6 }, // Center the 12x12 node
+          data: {},
+          draggable: false,
+          selectable: false,
+          zIndex: 0,
+        });
+
+        // Add edges from parents to junction
+        familyMembers.forEach(mId => {
+          edges.push({
+            id: `e-${mId}-to-${junctionId}`,
+            source: mId,
+            target: junctionId,
+            type: 'relationship',
+            sourceHandle: 'parent-source',
+            targetHandle: 'junction-target',
+            animated: false,
+            zIndex: 0,
+            data: { type: 'PARENT' },
+            style: { stroke: '#6366f1', strokeWidth: 2 },
+          });
+        });
+
+        // Add edges from junction to children
+        childrenIds.forEach(childId => {
+          edges.push({
+            id: `e-${junctionId}-to-${childId}`,
+            source: junctionId,
+            target: childId,
+            type: 'relationship',
+            sourceHandle: 'junction-source',
+            targetHandle: 'child-target',
+            animated: true,
+            zIndex: 0,
+            data: { type: 'PARENT' },
+            style: { stroke: '#6366f1', strokeWidth: 2 },
+            markerEnd: { type: MarkerType.ArrowClosed, color: '#6366f1' },
+          });
+        });
+      }
     });
 
     // Add lightweight Generation Labels at the far left
@@ -139,107 +195,49 @@ export function useFamilyTree(treeId?: string) {
       });
     });
 
-    // Create React Flow Edges
+    // Create React Flow Edges (Only SPOUSE, since PARENT is handled above, and SIBLING is removed)
     const addedEdgeKeys = new Set<string>();
 
     members.forEach(member => {
-      // Process relationships where member is the 'from' node
       member.relationsFrom.forEach(rel => {
+        if (rel.type === 'SIBLING' || rel.type === 'PARENT') return;
+
         const edgeKey = `${member.id}-${rel.toId}-${rel.type}`;
         if (addedEdgeKeys.has(edgeKey)) return;
         addedEdgeKeys.add(edgeKey);
 
-        const edgeId = `e-${edgeKey}`;
-        
-        let edgeColor = '#94a3b8'; // Default slate
-        let animated = false;
-        let sourceHandle: string | undefined = undefined;
-        let targetHandle: string | undefined = undefined;
-        let zIndex = 0;
-
-        if (rel.type === 'SPOUSE') {
-          edgeColor = '#f43f5e'; // Rose for spouse
-          sourceHandle = 'spouse';
-          targetHandle = 'spouse-target';
-          zIndex = 1;
-        } else if (rel.type === 'PARENT') {
-          edgeColor = '#6366f1'; // Indigo for child
-          animated = true;
-          sourceHandle = 'parent-source';
-          targetHandle = 'child-target';
-          zIndex = 0;
-        } else if (rel.type === 'SIBLING') {
-          edgeColor = '#10b981'; // Emerald for sibling
-          sourceHandle = 'spouse'; // Reuse lateral handles for siblings for now
-          targetHandle = 'spouse-target';
-          zIndex = 1;
-        }
-
         edges.push({
-          id: edgeId,
+          id: `e-${edgeKey}`,
           source: member.id,
           target: rel.toId,
           type: 'relationship',
-          sourceHandle,
-          targetHandle,
-          animated,
-          zIndex,
+          sourceHandle: 'spouse',
+          targetHandle: 'spouse-target',
+          animated: false,
+          zIndex: 1,
           data: { type: rel.type },
-          style: { stroke: edgeColor, strokeWidth: 2 },
-          markerEnd: rel.type === 'PARENT' ? {
-            type: MarkerType.ArrowClosed,
-            color: edgeColor,
-          } : undefined,
+          style: { stroke: '#f43f5e', strokeWidth: 2 },
         });
       });
 
-      // Process relationships where member is the 'to' node
       member.relationsTo.forEach(rel => {
+        if (rel.type === 'SIBLING' || rel.type === 'PARENT') return;
+
         const edgeKey = `${rel.fromId}-${member.id}-${rel.type}`;
         if (addedEdgeKeys.has(edgeKey)) return;
         addedEdgeKeys.add(edgeKey);
 
-        const edgeId = `e-${edgeKey}`;
-        
-        let edgeColor = '#94a3b8'; // Default slate
-        let animated = false;
-        let sourceHandle: string | undefined = undefined;
-        let targetHandle: string | undefined = undefined;
-        let zIndex = 0;
-
-        if (rel.type === 'SPOUSE') {
-          edgeColor = '#f43f5e'; // Rose for spouse
-          sourceHandle = 'spouse';
-          targetHandle = 'spouse-target';
-          zIndex = 1;
-        } else if (rel.type === 'PARENT') {
-          edgeColor = '#6366f1'; // Indigo for child
-          animated = true;
-          sourceHandle = 'parent-source';
-          targetHandle = 'child-target';
-          zIndex = 0;
-        } else if (rel.type === 'SIBLING') {
-          edgeColor = '#10b981'; // Emerald for sibling
-          sourceHandle = 'spouse'; // Reuse lateral handles for siblings for now
-          targetHandle = 'spouse-target';
-          zIndex = 1;
-        }
-
         edges.push({
-          id: edgeId,
+          id: `e-${edgeKey}`,
           source: rel.fromId,
           target: member.id,
           type: 'relationship',
-          sourceHandle,
-          targetHandle,
-          animated,
-          zIndex,
+          sourceHandle: 'spouse',
+          targetHandle: 'spouse-target',
+          animated: false,
+          zIndex: 1,
           data: { type: rel.type },
-          style: { stroke: edgeColor, strokeWidth: 2 },
-          markerEnd: rel.type === 'PARENT' ? {
-            type: MarkerType.ArrowClosed,
-            color: edgeColor,
-          } : undefined,
+          style: { stroke: '#f43f5e', strokeWidth: 2 },
         });
       });
     });

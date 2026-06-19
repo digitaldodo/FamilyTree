@@ -18,6 +18,7 @@ import { useAppStore } from '@/store/use-app-store';
 import { useFamilyTree } from '@/hooks/use-family-tree';
 import { MemberNode } from './member-node';
 import { GenerationLaneNode } from './generation-lane-node';
+import { FamilyJunctionNode } from './family-junction-node';
 import { RelationshipEdgeMemo } from './relationship-edge';
 import { TreeToolbar } from './tree-toolbar';
 import { Loader2, Activity } from 'lucide-react';
@@ -27,6 +28,7 @@ import { FloatingFamilyStats } from './floating-family-stats';
 const nodeTypes = {
   member: MemberNode,
   generationLane: GenerationLaneNode,
+  familyJunction: FamilyJunctionNode,
 };
 
 const edgeTypes = {
