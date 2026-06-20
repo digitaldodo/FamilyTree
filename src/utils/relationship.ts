@@ -69,6 +69,18 @@ function getEligibleMembersBase(
 ): MemberWithRelations[] {
   const currentMember = currentMemberId ? members.find(m => m.id === currentMemberId) : undefined;
   
+  if (currentMember) {
+    if (relationType === 'PARENT') {
+      const currentParentsCount = currentMember.relationsTo.filter(r => r.type === 'PARENT').length;
+      if (currentParentsCount >= 2) return [];
+    }
+    if (relationType === 'SPOUSE') {
+      const currentSpousesCount = currentMember.relationsFrom.filter(r => r.type === 'SPOUSE').length +
+                                  currentMember.relationsTo.filter(r => r.type === 'SPOUSE').length;
+      if (currentSpousesCount >= 1) return [];
+    }
+  }
+
   return members.filter(member => {
     if (currentMemberId && member.id === currentMemberId) return false;
     
@@ -78,6 +90,17 @@ function getEligibleMembersBase(
     
     if (wouldCreateConflict(currentMemberId || 'NEW', member.id, relationType, members, generations, currentGenerationId)) {
       return false;
+    }
+
+    if (relationType === 'CHILD') {
+      const candidateParentsCount = member.relationsTo.filter(r => r.type === 'PARENT').length;
+      if (candidateParentsCount >= 2) return false;
+    }
+
+    if (relationType === 'SPOUSE') {
+      const candidateSpousesCount = member.relationsFrom.filter(r => r.type === 'SPOUSE').length +
+                                    member.relationsTo.filter(r => r.type === 'SPOUSE').length;
+      if (candidateSpousesCount >= 1) return false;
     }
 
     return true;

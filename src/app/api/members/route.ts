@@ -184,8 +184,21 @@ export async function POST(request: NextRequest) {
               return errorResponse('VALIDATION_ERROR', 'Child must belong to a younger generation.', 400);
             }
           } else if (rel.type === 'SPOUSE') {
+            const spousesInPayload = relations.filter((r: any) => r.type === 'SPOUSE');
+            if (spousesInPayload.length > 1) {
+              return errorResponse('VALIDATION_ERROR', 'Member already has a spouse.', 400);
+            }
             if (relGenOrder !== targetGenOrder || !isSpouseEligible(rest.gender as string | null | undefined, relative.gender)) {
               return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation and satisfy spouse eligibility rules.', 400);
+            }
+            const relativeSpouseCount = await prisma.relationship.count({
+              where: {
+                type: 'SPOUSE',
+                OR: [{ fromId: rel.id }, { toId: rel.id }]
+              }
+            });
+            if (relativeSpouseCount > 0) {
+              return errorResponse('VALIDATION_ERROR', 'Member already has a spouse.', 400);
             }
           } else if (rel.type === 'SIBLING') {
             if (relGenOrder !== targetGenOrder) {

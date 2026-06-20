@@ -4,8 +4,26 @@ import { CreateMemberInput, UpdateMemberInput, MemberWithRelations } from '@/typ
 import { toast } from 'sonner';
 
 export function useMemberMutations() {
-  const { addMember, updateMember: updateStoreMember, deleteMember: deleteStoreMember, setIsMemberModalOpen, activeTreeId } = useAppStore();
+  const { setMembers, setIsMemberModalOpen, setIsEditingMember, activeTreeId } = useAppStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const refreshTree = async () => {
+    if (!activeTreeId) return;
+    try {
+      const res = await fetch(`/api/trees/${activeTreeId}`);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const treeMembers: MemberWithRelations[] = (data.data.members || []).map((m: any) => ({
+          ...m,
+          relationsFrom: m.relationsFrom || [],
+          relationsTo: m.relationsTo || [],
+        }));
+        setMembers(treeMembers);
+      }
+    } catch (e) {
+      console.error('Failed to refresh tree', e);
+    }
+  };
 
   const handleCreate = async (input: CreateMemberInput) => {
     setIsSubmitting(true);
@@ -25,17 +43,12 @@ export function useMemberMutations() {
         throw new Error(data.message || 'Failed to create member');
       }
 
-      // Optimistic UI: add to store with empty relations (API returns the created member)
-      const newMember: MemberWithRelations = {
-        ...data.data,
-        relationsFrom: data.data.relationsFrom || [],
-        relationsTo: data.data.relationsTo || [],
-      };
-
-      addMember(newMember);
+      await refreshTree();
+      window.dispatchEvent(new Event('refresh-members'));
       toast.success('Member added successfully');
+      setIsEditingMember(false);
       setIsMemberModalOpen(false);
-      return newMember;
+      return data.data;
     } catch (error: any) {
       toast.error(error.message || 'Failed to create member');
     } finally {
@@ -58,20 +71,11 @@ export function useMemberMutations() {
         throw new Error(data.message || 'Failed to update member');
       }
 
-      // Update store with full member data
-      const { members } = useAppStore.getState();
-      const existing = members.find(m => m.id === id);
-      const updated: MemberWithRelations = {
-        ...existing,
-        ...data.data,
-        relationsFrom: existing?.relationsFrom || [],
-        relationsTo: existing?.relationsTo || [],
-      };
-
-      updateStoreMember(id, updated);
+      await refreshTree();
+      window.dispatchEvent(new Event('refresh-members'));
       toast.success('Member updated successfully');
-      setIsMemberModalOpen(false);
-      return updated;
+      setIsEditingMember(false);
+      return data.data;
     } catch (error: any) {
       toast.error(error.message || 'Failed to update member');
     } finally {
@@ -91,8 +95,10 @@ export function useMemberMutations() {
         throw new Error(data.message || 'Failed to delete member');
       }
 
-      deleteStoreMember(id);
+      await refreshTree();
+      window.dispatchEvent(new Event('refresh-members'));
       toast.success('Member removed successfully');
+      setIsEditingMember(false);
       setIsMemberModalOpen(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to delete member');
@@ -106,3 +112,4 @@ export function useMemberMutations() {
     isSubmitting
   };
 }
+

@@ -138,6 +138,11 @@ export async function PUT(request: NextRequest, { params }: Params) {
       // If we are given relations from body, we need to fetch their generations to validate
       if (relations !== undefined && Array.isArray(relations)) {
         const relativeIds = relations.map((r: any) => r.id).filter(Boolean);
+        const spousesInPayload = relations.filter((r: any) => r.type === 'SPOUSE');
+        if (spousesInPayload.length > 1) {
+          return errorResponse('VALIDATION_ERROR', 'Member already has a spouse.', 400);
+        }
+
         const relatives = await prisma.member.findMany({
           where: { id: { in: relativeIds } },
           include: { generation: true }
@@ -153,6 +158,16 @@ export async function PUT(request: NextRequest, { params }: Params) {
             if (relative.generation.orderIndex !== newGeneration.orderIndex || !isSpouseEligible(memberGender, relative.gender)) {
                return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation and satisfy spouse eligibility rules.', 400);
             }
+            const relativeSpouseCount = await prisma.relationship.count({
+              where: {
+                type: 'SPOUSE',
+                OR: [{ fromId: rel.id }, { toId: rel.id }],
+                NOT: { OR: [{ fromId: id }, { toId: id }] }
+              }
+            });
+            if (relativeSpouseCount > 0) {
+              return errorResponse('VALIDATION_ERROR', 'Member already has a spouse.', 400);
+            }
           } else if (rel.type === 'SIBLING') {
             if (relative.generation.orderIndex !== newGeneration.orderIndex) {
                return errorResponse('VALIDATION_ERROR', `Cannot move member. Spouses and siblings must belong to the same generation. Conflicts with relative's generation.`, 400);
@@ -162,10 +177,28 @@ export async function PUT(request: NextRequest, { params }: Params) {
              if (newGeneration.orderIndex <= relative.generation.orderIndex) {
                return errorResponse('VALIDATION_ERROR', `Cannot move member. Children must belong to a younger generation (higher order) than parents.`, 400);
              }
+             // Since member is the child, we must ensure member doesn't exceed 2 parents in total after this update
+             const parentsInPayload = relations.filter((r: any) => r.type === 'PARENT');
+             if (parentsInPayload.length > 2) {
+               return errorResponse('VALIDATION_ERROR', 'A member can have at most two parents.', 400);
+             }
           } else if (rel.type === 'CHILD') {
              // Form says "Children" - meaning the relative is the Child, member is the Parent.
              if (newGeneration.orderIndex >= relative.generation.orderIndex) {
                return errorResponse('VALIDATION_ERROR', `Cannot move member. Parents must belong to an older generation (lower order) than children.`, 400);
+             }
+             const relativeParentCount = await prisma.relationship.count({
+               where: {
+                 type: 'PARENT',
+                 toId: rel.id,
+                 NOT: { fromId: id } // Exclude the current member
+               }
+             });
+             // We are adding member as a parent of rel.id. If rel.id already has 2 parents, it's an error.
+             // Wait, if member is already one of the parents, it doesn't count towards the limit, but if they have 2 OTHER parents, it's > 2.
+             // Actually, if relativeParentCount >= 2, we can't add member as a new parent.
+             if (relativeParentCount >= 2) {
+               return errorResponse('VALIDATION_ERROR', 'This child already has two parents.', 400);
              }
           }
         }
