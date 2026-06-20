@@ -93,18 +93,15 @@ function MembersContent() {
     fetchMembers(); // refresh members because some might have been moved or deleted
   };
 
-  if (!activeTreeId) {
+  const isLoading = membersLoading || gensLoading;
+
+  if (!activeTreeId || isLoading) {
     return (
-      <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh]">
-        <EmptyState
-          icon={TreePine}
-          title="Select a Family Tree"
-          description="Choose a family tree from the sidebar to view its members."
-        />
+      <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh] pt-12 w-full h-full">
+        <MembersSkeleton />
       </div>
     );
   }
-  const isLoading = membersLoading || gensLoading;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 h-full flex flex-col pb-6">
@@ -152,9 +149,7 @@ function MembersContent() {
         </div>
       </div>
 
-      {isLoading ? (
-        <MembersSkeleton />
-      ) : allGenerations.length === 0 ? (
+      {allGenerations.length === 0 ? (
         <div className="py-12">
           <EmptyState 
             icon={UsersRound}

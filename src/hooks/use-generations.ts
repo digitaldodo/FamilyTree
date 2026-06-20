@@ -1,33 +1,16 @@
 import { useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAppStore } from '@/store/use-app-store';
 import { Generation } from '@/types/member';
 import { toast } from 'sonner';
+import { useMembers } from './use-members';
 
 export function useGenerations(treeId?: string) {
   const { activeTreeId } = useAppStore();
   const queryClient = useQueryClient();
   const resolvedTreeId = treeId || activeTreeId;
 
-  // Instead of fetching generations from /api/trees/:id/generations,
-  // we can use the same tree payload to avoid duplicate requests, or keep it separate if needed.
-  // We'll reuse the 'tree' query to take advantage of parallel caching!
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ['tree', resolvedTreeId],
-    queryFn: async () => {
-      const res = await fetch(`/api/trees/${resolvedTreeId}`);
-      const json = await res.json();
-      if (!res.ok || !json.success) throw new Error(json.message);
-      return json.data;
-    },
-    enabled: !!resolvedTreeId,
-  });
-
-  const generations: Generation[] = data?.generations || [];
-
-  // No Zustand sync for generations anymore
-
-  const fetchGenerations = () => refetch();
+  const { generations, isLoading, fetchMembers } = useMembers(resolvedTreeId || undefined);
 
   const createMutation = useMutation({
     mutationFn: async ({ name, insertAt }: { name: string; insertAt?: number }) => {
@@ -139,7 +122,7 @@ export function useGenerations(treeId?: string) {
     generations,
     isLoading,
     isSubmitting,
-    fetchGenerations,
+    fetchGenerations: fetchMembers,
     createGeneration: handleCreate,
     renameGeneration: handleRename,
     deleteGeneration: handleDelete,
