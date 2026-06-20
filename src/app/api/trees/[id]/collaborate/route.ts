@@ -26,7 +26,9 @@ export async function POST(req: NextRequest, { params }: Params) {
     const body = await req.json();
     const { versionId, events } = body as { versionId: string | null; events: ChangeEvent[] };
 
-    if (!events || events.length === 0) {
+    const safeEvents = Array.isArray(events) ? events : [];
+
+    if (safeEvents.length === 0) {
       return NextResponse.json({ success: true, message: 'No events to merge' });
     }
 
@@ -70,7 +72,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     // Run ConflictEngine (currently checks within proposed events if there are overlapping changes, 
     // since we blocked divergence above, existingEvents since base is empty)
-    const conflictReport = ConflictEngine.detectConflicts(events, []);
+    const conflictReport = ConflictEngine.detectConflicts(safeEvents, []);
     if (conflictReport.hasConflict) {
       return NextResponse.json({
         success: false,
@@ -80,7 +82,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
 
     // MergeEngine
-    const mergeResult = MergeEngine.merge(baseMembers, events);
+    const mergeResult = MergeEngine.merge(baseMembers, safeEvents);
     
     if (!mergeResult.success) {
       return NextResponse.json({
@@ -98,7 +100,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         relationsData: [],
         gensData: baseGenerations as any,
         createdBy: session.user.id,
-        name: `Merged ${events.length} change(s)`
+        name: `Merged ${safeEvents.length} change(s)`
       }
     });
 

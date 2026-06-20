@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Node, Edge } from '@xyflow/react';
 import { FamilyGraph } from '@/domain/inference/genealogy-engine';
+import { safeGraph } from '@/lib/safe-helpers';
 
 export const LEVEL_HEIGHT = 450;
 export const NODE_WIDTH = 220;
@@ -18,7 +19,11 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
     const rfNodes: Node[] = [];
     const rfEdges: Edge[] = [];
 
-    if (!familyGraph || familyGraph.nodes.length === 0) {
+    const safeFamilyGraph = safeGraph(familyGraph);
+    const graphNodes = safeFamilyGraph.nodes ?? [];
+    const graphEdges = safeFamilyGraph.edges ?? [];
+
+    if (graphNodes.length === 0) {
       return { nodes: rfNodes, edges: rfEdges };
     }
 
@@ -26,7 +31,7 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
     let maxGlobalX = 0;
 
     // 2. Generate React Flow Nodes for Members
-    for (const node of familyGraph.nodes) {
+    for (const node of graphNodes) {
       const pos = { x: node.layoutHints?.x || 0, y: node.layoutHints?.y || 0 };
       
       minGlobalX = Math.min(minGlobalX, pos.x);
@@ -39,7 +44,7 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
         data: {
           member: node.member,
           label: `${node.member.firstName} ${node.member.lastName}`,
-          generationName: Array.isArray(generations) ? generations.find(g => g.id === node.member.generationId)?.name : undefined,
+          generationName: `Generation ${node.generation}`,
         }
       });
     }
@@ -48,18 +53,20 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
     const laneWidth = Math.max(3000, maxGlobalX - minGlobalX + 1200);
     const laneX = minGlobalX === 0 && maxGlobalX === 0 ? -1000 : minGlobalX - 600;
 
-    const safeGenerations = Array.isArray(generations) ? generations : [];
-    safeGenerations.forEach((gen, index) => {
-      // Use the generation orderIndex to map to our vertical levels
-      // Or fallback to linear index
-      const level = gen.orderIndex !== undefined ? gen.orderIndex : index;
-      
+    const engineGenerations = Object.keys(safeFamilyGraph.generations || {})
+      .map(Number)
+      .sort((a, b) => a - b);
+
+    engineGenerations.forEach((level) => {
+      let label = `Generation ${level}`;
+      if (level === 0) label = 'Generation 0 (Reference)';
+
       rfNodes.push({
-        id: `lane-${gen.id || level}`,
+        id: `lane-${level}`,
         type: 'generationLane',
         position: { x: laneX, y: level * LEVEL_HEIGHT - 60 },
         data: {
-          label: gen.name && gen.name.trim() !== '' ? gen.name : 'Unnamed Generation',
+          label,
           width: laneWidth,
           height: LEVEL_HEIGHT + 100,
           isEven: level % 2 === 0,
@@ -73,7 +80,7 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
 
     // 4. Generate Edges
     // Spouse Edges
-    const spouseEdges = familyGraph.edges.filter(e => e.type === 'SPOUSE');
+    const spouseEdges = graphEdges.filter(e => e.type === 'SPOUSE');
     spouseEdges.forEach(rel => {
       rfEdges.push({
         id: `e-${rel.source}-${rel.target}-SPOUSE`,
@@ -95,8 +102,8 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
     const parentGroups = new Map<string, { parents: string[], children: string[] }>();
     
     // Find all children and their exact parent sets
-    for (const node of familyGraph.nodes) {
-      const parents = familyGraph.derivedRelationships[node.id]?.parents || [];
+    for (const node of graphNodes) {
+      const parents = safeFamilyGraph.derivedRelationships[node.id]?.parents || [];
       if (parents.length > 0) {
         const pKey = parents.slice().sort().join('-');
         if (!parentGroups.has(pKey)) {
@@ -113,7 +120,7 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
       let sumX = 0;
       let maxY = 0;
       parents.forEach(pId => {
-        const pNode = familyGraph.nodes.find(n => n.id === pId);
+        const pNode = graphNodes.find(n => n.id === pId);
         const pos = pNode ? { x: pNode.layoutHints?.x || 0, y: pNode.layoutHints?.y || 0 } : undefined;
         if (pos) {
           sumX += pos.x + (NODE_WIDTH / 2);

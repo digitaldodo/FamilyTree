@@ -7,7 +7,6 @@ import {
   useEdgesState,
   ReactFlowProvider,
   Panel,
-  MiniMap,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -65,7 +64,14 @@ function FamilyTreeCanvas() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  if (!activeTreeId || isLoading) {
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || !activeTreeId) return null;
+
+  if (isLoading) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-background">
         <TreeSkeleton />
@@ -172,17 +178,7 @@ function FamilyTreeCanvas() {
           </>
         )}
         
-        {nodes.length > 10 && (
-          <MiniMap 
-            position="bottom-left" 
-            zoomable 
-            pannable 
-            className="!bg-card !border-border !rounded-xl !shadow-lg"
-            maskColor="var(--color-primary)"
-            maskStrokeColor="transparent"
-            nodeColor="var(--color-muted-foreground)"
-          />
-        )}
+
 
         {showDiagnostics && (
           <Panel position="top-left" className="bg-black/80 backdrop-blur-md p-4 rounded-xl text-white font-mono text-xs z-50 min-w-[200px] max-w-sm max-h-[80vh] overflow-y-auto border border-white/20 shadow-2xl">

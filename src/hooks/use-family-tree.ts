@@ -4,6 +4,8 @@ import { useAppStore } from '@/store/use-app-store';
 import { toast } from 'sonner';
 import { useFilteredGenerations } from './use-filtered-generations';
 import { GenealogyEngine } from '@/domain/inference/genealogy-engine';
+import { safeArray, safeGraph } from '@/lib/safe-helpers';
+
 
 export function useFamilyTree(treeId?: string) {
   const { members: rawMembers, generations, isLoading, error: fetchError } = useMembers(treeId);
@@ -14,27 +16,18 @@ export function useFamilyTree(treeId?: string) {
 
   const visibleGenerations = useFilteredGenerations(generations, selectedGenerationIds);
 
-
-
-  const [debouncedMembers, setDebouncedMembers] = useState(rawMembers);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedMembers(rawMembers);
-    }, 300);
-    return () => clearTimeout(handler);
-  }, [rawMembers]);
-
   const activeTreeId = useAppStore(s => s.activeTreeId);
   const selectedTreeVersionId = useAppStore(s => s.selectedTreeVersionId);
 
   const familyGraph = useMemo(() => {
-    return GenealogyEngine.buildFamilyGraph({
+    const safeMembers = Array.isArray(rawMembers) ? rawMembers : [];
+    const rawGraph = GenealogyEngine.buildFamilyGraph({
       treeId: treeId || activeTreeId || '',
       versionId: selectedTreeVersionId,
-      members: debouncedMembers
+      members: safeMembers
     });
-  }, [debouncedMembers, treeId, activeTreeId, selectedTreeVersionId]);
+    return safeGraph(rawGraph);
+  }, [rawMembers, treeId, activeTreeId, selectedTreeVersionId]);
 
   return {
     members: rawMembers, // original array for legacy UI compatibility

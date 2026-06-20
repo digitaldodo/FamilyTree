@@ -1,4 +1,5 @@
 import { MemberWithRelations } from '@/types/member';
+import { EMPTY_GRAPH } from '@/lib/safe-helpers';
 
 export type FamilyGraphNode = {
   id: string;
@@ -46,162 +47,169 @@ export type BuildGraphPayload = {
 
 export const GenealogyEngine = {
   buildFamilyGraph(payload: BuildGraphPayload): FamilyGraph {
-    const { members } = payload;
-    const nodesMap = new Map<string, FamilyGraphNode>();
-    const edges: FamilyGraphEdge[] = [];
-    
-    // 1. Initialize nodes
-    for (const m of members) {
-      nodesMap.set(m.id, {
-        id: m.id,
-        member: structuredClone(m),
-        generation: 0,
-        layoutHints: {}
-      });
-    }
-
-    const nodes = Array.from(nodesMap.values());
-
-    // Extract basic edges (filter out any legacy SIBLING edges from DB)
-    for (const m of members) {
-      if (!m.relationsFrom) continue;
-      for (const rel of m.relationsFrom) {
-        if (rel.type === 'PARENT' || rel.type === 'SPOUSE') {
-          edges.push({
-            id: rel.id || `e-${rel.fromId}-${rel.toId}-${rel.type}`,
-            source: rel.fromId,
-            target: rel.toId,
-            type: rel.type as 'PARENT' | 'SPOUSE'
-          });
-        }
-      }
-    }
-
-    // De-duplicate spouse edges
-    const uniqueEdges = this.deduplicateSpouseEdges(edges);
-
-    // 2. Derive Generational levels
-    this.inferGenerations(nodes, uniqueEdges);
-
-    // 3. Derive Siblings
-    const siblingEdges = this.inferSiblings(nodes, uniqueEdges);
-    const allEdges = [...uniqueEdges, ...siblingEdges];
-
-    // 4. Resolve Spouse Links (groupings)
-    const spouseGroups = this.resolveSpouseLinks(nodes, allEdges);
-
-    // 5. Build DerivedRelationships & Ancestors
-    const derivedRelationships = this.buildDerivedRelationships(nodes, allEdges);
-    this.inferAncestors(nodes, allEdges, derivedRelationships);
-    
-    // Group siblings for layout hints
-    const siblingGroups = this.buildSiblingGroups(siblingEdges);
-    
-    // Assign layout hints to nodes
-    for (const node of nodes) {
-      for (const [groupId, group] of Object.entries(spouseGroups)) {
-        if (group.includes(node.id)) {
-          node.layoutHints.spouseGroupId = groupId;
-        }
-      }
-      for (const [groupId, group] of Object.entries(siblingGroups)) {
-        if (group.includes(node.id)) {
-          node.layoutHints.siblingGroupId = groupId;
-        }
-      }
-    }
-
-    const generationsRec: Record<number, string[]> = {};
-    for (const node of nodes) {
-      if (!generationsRec[node.generation]) generationsRec[node.generation] = [];
-      generationsRec[node.generation].push(node.id);
-    }
-
-    // 6. Compute Layout (X/Y coordinates)
-    const LEVEL_HEIGHT = 450;
-    const NODE_WIDTH = 220;
-    const GAP = 80;
-
-    const nodePositions = new Map<string, { x: number, y: number }>();
-    const levels = Object.keys(generationsRec).map(Number).sort((a, b) => a - b);
-    const levelRightEdge = new Map<number, number>();
-
-    for (const level of levels) {
-      const nodeIds = generationsRec[level] || [];
-      let currentX = levelRightEdge.get(level) || 0;
+    try {
+      let { members } = payload;
+      members = Array.isArray(members) ? members : [];
       
-      nodeIds.sort((a, b) => {
-        const aParents = derivedRelationships[a]?.parents || [];
-        const bParents = derivedRelationships[b]?.parents || [];
-        const aParentX = aParents.length > 0 ? (nodePositions.get(aParents[0])?.x || 0) : 0;
-        const bParentX = bParents.length > 0 ? (nodePositions.get(bParents[0])?.x || 0) : 0;
-        return aParentX - bParentX;
-      });
-
-      const levelGroups = new Set<string>();
-      const groupedNodes: string[][] = [];
+      const nodesMap = new Map<string, FamilyGraphNode>();
+      const edges: FamilyGraphEdge[] = [];
       
-      for (const id of nodeIds) {
-        const node = nodesMap.get(id)!;
-        const spouseGroup = node.layoutHints.spouseGroupId;
-        if (spouseGroup) {
-          if (!levelGroups.has(spouseGroup)) {
-            levelGroups.add(spouseGroup);
-            const membersInGroup = nodes
-              .filter(n => n.layoutHints.spouseGroupId === spouseGroup && n.generation === level)
-              .map(n => n.id);
-            groupedNodes.push(membersInGroup);
+      // 1. Initialize nodes
+      for (const m of members) {
+        nodesMap.set(m.id, {
+          id: m.id,
+          member: structuredClone(m),
+          generation: 0,
+          layoutHints: {}
+        });
+      }
+
+      const nodes = Array.from(nodesMap.values());
+
+      // Extract basic edges (filter out any legacy SIBLING edges from DB)
+      for (const m of members) {
+        if (!m.relationsFrom) continue;
+        for (const rel of m.relationsFrom) {
+          if (rel.type === 'PARENT' || rel.type === 'SPOUSE') {
+            edges.push({
+              id: rel.id || `e-${rel.fromId}-${rel.toId}-${rel.type}`,
+              source: rel.fromId,
+              target: rel.toId,
+              type: rel.type as 'PARENT' | 'SPOUSE'
+            });
           }
-        } else {
-          groupedNodes.push([id]);
         }
       }
 
-      for (const group of groupedNodes) {
-        let parentAvgX = 0;
-        let parentCount = 0;
+      // De-duplicate spouse edges
+      const uniqueEdges = this.deduplicateSpouseEdges(edges);
+
+      // 2. Derive Generational levels
+      this.inferGenerations(nodes, uniqueEdges);
+
+      // 3. Derive Siblings
+      const siblingEdges = this.inferSiblings(nodes, uniqueEdges);
+      const allEdges = [...uniqueEdges, ...siblingEdges];
+
+      // 4. Resolve Spouse Links (groupings)
+      const spouseGroups = this.resolveSpouseLinks(nodes, allEdges);
+
+      // 5. Build DerivedRelationships & Ancestors
+      const derivedRelationships = this.buildDerivedRelationships(nodes, allEdges);
+      this.inferAncestors(nodes, allEdges, derivedRelationships);
+      
+      // Group siblings for layout hints
+      const siblingGroups = this.buildSiblingGroups(siblingEdges);
+      
+      // Assign layout hints to nodes
+      for (const node of nodes) {
+        for (const [groupId, group] of Object.entries(spouseGroups)) {
+          if (group.includes(node.id)) {
+            node.layoutHints.spouseGroupId = groupId;
+          }
+        }
+        for (const [groupId, group] of Object.entries(siblingGroups)) {
+          if (group.includes(node.id)) {
+            node.layoutHints.siblingGroupId = groupId;
+          }
+        }
+      }
+
+      const generationsRec: Record<number, string[]> = {};
+      for (const node of nodes) {
+        if (!generationsRec[node.generation]) generationsRec[node.generation] = [];
+        generationsRec[node.generation].push(node.id);
+      }
+
+      // 6. Compute Layout (X/Y coordinates)
+      const LEVEL_HEIGHT = 450;
+      const NODE_WIDTH = 220;
+      const GAP = 80;
+
+      const nodePositions = new Map<string, { x: number, y: number }>();
+      const levels = Object.keys(generationsRec).map(Number).sort((a, b) => a - b);
+      const levelRightEdge = new Map<number, number>();
+
+      for (const level of levels) {
+        const nodeIds = generationsRec[level] || [];
+        let currentX = levelRightEdge.get(level) || 0;
         
-        for (const id of group) {
-          const parents = derivedRelationships[id]?.parents || [];
-          for (const p of parents) {
-            const pPos = nodePositions.get(p);
-            if (pPos) {
-              parentAvgX += pPos.x;
-              parentCount++;
+        nodeIds.sort((a, b) => {
+          const aParents = derivedRelationships[a]?.parents || [];
+          const bParents = derivedRelationships[b]?.parents || [];
+          const aParentX = aParents.length > 0 ? (nodePositions.get(aParents[0])?.x || 0) : 0;
+          const bParentX = bParents.length > 0 ? (nodePositions.get(bParents[0])?.x || 0) : 0;
+          return aParentX - bParentX;
+        });
+
+        const levelGroups = new Set<string>();
+        const groupedNodes: string[][] = [];
+        
+        for (const id of nodeIds) {
+          const node = nodesMap.get(id)!;
+          const spouseGroup = node.layoutHints.spouseGroupId;
+          if (spouseGroup) {
+            if (!levelGroups.has(spouseGroup)) {
+              levelGroups.add(spouseGroup);
+              const membersInGroup = nodes
+                .filter(n => n.layoutHints.spouseGroupId === spouseGroup && n.generation === level)
+                .map(n => n.id);
+              groupedNodes.push(membersInGroup);
+            }
+          } else {
+            groupedNodes.push([id]);
+          }
+        }
+
+        for (const group of groupedNodes) {
+          let parentAvgX = 0;
+          let parentCount = 0;
+          
+          for (const id of group) {
+            const parents = derivedRelationships[id]?.parents || [];
+            for (const p of parents) {
+              const pPos = nodePositions.get(p);
+              if (pPos) {
+                parentAvgX += pPos.x;
+                parentCount++;
+              }
             }
           }
-        }
-        
-        if (parentCount > 0) {
-          const desiredCenterX = parentAvgX / parentCount;
-          const startXForGroup = desiredCenterX - ((group.length * (NODE_WIDTH + GAP)) / 2) + (NODE_WIDTH / 2);
-          currentX = Math.max(currentX, startXForGroup);
-        }
+          
+          if (parentCount > 0) {
+            const desiredCenterX = parentAvgX / parentCount;
+            const startXForGroup = desiredCenterX - ((group.length * (NODE_WIDTH + GAP)) / 2) + (NODE_WIDTH / 2);
+            currentX = Math.max(currentX, startXForGroup);
+          }
 
-        for (let i = 0; i < group.length; i++) {
-          const id = group[i];
-          nodePositions.set(id, { x: currentX, y: level * LEVEL_HEIGHT });
-          const node = nodesMap.get(id)!;
-          node.layoutHints.x = currentX;
-          node.layoutHints.y = level * LEVEL_HEIGHT;
-          currentX += NODE_WIDTH + GAP;
+          for (let i = 0; i < group.length; i++) {
+            const id = group[i];
+            nodePositions.set(id, { x: currentX, y: level * LEVEL_HEIGHT });
+            const node = nodesMap.get(id)!;
+            node.layoutHints.x = currentX;
+            node.layoutHints.y = level * LEVEL_HEIGHT;
+            currentX += NODE_WIDTH + GAP;
+          }
         }
+        levelRightEdge.set(level, currentX);
       }
-      levelRightEdge.set(level, currentX);
+
+      const graph: FamilyGraph = {
+        nodes,
+        edges: allEdges,
+        derivedRelationships,
+        generations: generationsRec,
+        layoutHints: {
+          spouseGroups,
+          siblingGroups
+        }
+      };
+
+      return graph;
+    } catch (error) {
+      console.error('Inference Engine Error:', error);
+      return EMPTY_GRAPH;
     }
-
-    const graph: FamilyGraph = {
-      nodes,
-      edges: allEdges,
-      derivedRelationships,
-      generations: generationsRec,
-      layoutHints: {
-        spouseGroups,
-        siblingGroups
-      }
-    };
-
-    return graph;
   },
 
   deduplicateSpouseEdges(edges: FamilyGraphEdge[]): FamilyGraphEdge[] {
@@ -216,65 +224,59 @@ export const GenealogyEngine = {
   },
 
   inferGenerations(nodes: FamilyGraphNode[], edges: FamilyGraphEdge[]) {
-    const childrenMap = new Map<string, string[]>();
-    const parentsMap = new Map<string, string[]>();
-
+    // Determine adjacency with weights:
+    // PARENT (down): +1
+    // PARENT (up): -1
+    // SPOUSE: 0
+    const adj = new Map<string, { target: string; weight: number }[]>();
     for (const n of nodes) {
-      childrenMap.set(n.id, []);
-      parentsMap.set(n.id, []);
+      adj.set(n.id, []);
     }
 
     for (const e of edges) {
       if (e.type === 'PARENT') {
-        childrenMap.get(e.source)?.push(e.target);
-        parentsMap.get(e.target)?.push(e.source);
-      }
-    }
-
-    const queue: string[] = [];
-    const inDegree = new Map<string, number>();
-    for (const n of nodes) {
-      const pCount = parentsMap.get(n.id)?.length || 0;
-      inDegree.set(n.id, pCount);
-      if (pCount === 0) {
-        queue.push(n.id);
+        adj.get(e.source)?.push({ target: e.target, weight: 1 });
+        adj.get(e.target)?.push({ target: e.source, weight: -1 });
+      } else if (e.type === 'SPOUSE') {
+        adj.get(e.source)?.push({ target: e.target, weight: 0 });
+        adj.get(e.target)?.push({ target: e.source, weight: 0 });
       }
     }
 
     const genMap = new Map<string, number>();
-    for (const q of queue) genMap.set(q, 0);
+    const visited = new Set<string>();
 
-    const processed = new Set<string>();
+    for (const n of nodes) {
+      if (!visited.has(n.id)) {
+        // Find reference node (first node in subgraph is Gen 0)
+        const queue: string[] = [n.id];
+        genMap.set(n.id, 0);
+        visited.add(n.id);
 
-    while (queue.length > 0) {
-      const curr = queue.shift()!;
-      processed.add(curr);
-      const currentGen = genMap.get(curr) || 0;
+        while (queue.length > 0) {
+          const curr = queue.shift()!;
+          const currGen = genMap.get(curr)!;
 
-      const children = childrenMap.get(curr) || [];
-      for (const child of children) {
-        const existingChildGen = genMap.get(child) || 0;
-        genMap.set(child, Math.max(existingChildGen, currentGen + 1));
-
-        inDegree.set(child, (inDegree.get(child) || 0) - 1);
-        if (inDegree.get(child) === 0) {
-          queue.push(child);
+          const neighbors = adj.get(curr) || [];
+          for (const neighbor of neighbors) {
+            if (!visited.has(neighbor.target)) {
+              visited.add(neighbor.target);
+              genMap.set(neighbor.target, currGen + neighbor.weight);
+              queue.push(neighbor.target);
+            }
+          }
         }
       }
     }
 
     for (const n of nodes) {
-      if (!processed.has(n.id)) {
-        genMap.set(n.id, 0);
+      const gen = genMap.get(n.id);
+      if (gen === undefined || gen === null || isNaN(gen)) {
+        console.warn(`[GenealogyEngine] generation missing for member ${n.id}. Assigning fallback 0`);
+        n.generation = 0;
+      } else {
+        n.generation = gen;
       }
-    }
-
-    // Map computed generations back to nodes
-    for (const n of nodes) {
-      // NOTE: We also respect the explicit generation from the DB if available and prefer it 
-      // over computed if necessary. But to enforce pure engine rules, we map computed.
-      // Wait, let's keep it purely computed as requested.
-      n.generation = genMap.get(n.id) || 0;
     }
   },
 

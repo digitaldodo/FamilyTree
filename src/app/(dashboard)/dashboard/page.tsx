@@ -34,38 +34,16 @@ function DashboardContent() {
 
   const { members, generations, isLoading: isMembersLoading } = useMembers(activeTreeId || undefined);
 
-  // No active tree selected
-  if (!isMembersLoading && !isUserTreesLoading && !activeTreeId) {
-    if (userTrees.length === 0) {
-      return (
-        <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh]">
-          <EmptyState
-            icon={TreePine}
-            title="Welcome to Family Legacy"
-            description="Create your first family tree to start preserving your family's history, memories, and connections."
-            actionLabel="Create Your First Tree"
-            onAction={() => {
-              const event = new CustomEvent('open-create-tree-modal');
-              window.dispatchEvent(event);
-            }}
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh]">
-        <EmptyState
-          icon={TreePine}
-          title="Select a Family Tree"
-          description="Choose a family tree from the sidebar to view its dashboard."
-        />
-      </div>
-    );
+  // GLOBAL HYDRATION GUARD
+  if (isMembersLoading || isUserTreesLoading) {
+    return <DashboardSkeleton />;
   }
 
-  // GLOBAL HYDRATION GUARD
-  if (!activeTreeId || isMembersLoading || isUserTreesLoading) {
+  if (!activeTreeId) {
+    return null;
+  }
+
+  if (!members || !generations) {
     return <DashboardSkeleton />;
   }
 

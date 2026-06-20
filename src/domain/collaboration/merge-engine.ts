@@ -1,6 +1,7 @@
 import { ChangeEvent } from './change-events';
 import { MemberWithRelations } from '@/types/member';
 import { GenealogyEngine } from '../inference/genealogy-engine';
+import { safeGraph } from '@/lib/safe-helpers';
 
 export interface MergeResult {
   success: boolean;
@@ -10,7 +11,8 @@ export interface MergeResult {
 
 export const MergeEngine = {
   merge(baseMembers: MemberWithRelations[], events: ChangeEvent[]): MergeResult {
-    const members: MemberWithRelations[] = JSON.parse(JSON.stringify(baseMembers));
+    const safeBaseMembers = Array.isArray(baseMembers) ? baseMembers : [];
+    const members: MemberWithRelations[] = JSON.parse(JSON.stringify(safeBaseMembers));
     const memberMap = new Map<string, MemberWithRelations>();
     
     for (const m of members) {
@@ -21,7 +23,9 @@ export const MergeEngine = {
 
     const getRealId = (id: string) => tempIdMap.get(id) || id;
 
-    for (const e of events) {
+    const safeEvents = Array.isArray(events) ? events : [];
+    for (const e of safeEvents) {
+      if (!e || typeof e !== 'object' || !e.type || !e.payload) continue;
       switch (e.type) {
         case 'ADD_MEMBER': {
           const newId = `merged-${crypto.randomUUID()}`;
@@ -135,7 +139,8 @@ export const MergeEngine = {
 
     // Validate using Inference Engine
     const graphPayload = { treeId: 'validation', members: finalMembers };
-    const graph = GenealogyEngine.buildFamilyGraph(graphPayload);
+    const rawGraph = GenealogyEngine.buildFamilyGraph(graphPayload);
+    const graph = safeGraph(rawGraph);
     const validation = GenealogyEngine.validateFamilyGraph(graph);
 
     return {

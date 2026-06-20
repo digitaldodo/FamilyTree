@@ -14,6 +14,13 @@ export function useTreeCollaboration(treeId: string | null, versionId: string | 
   const syncChanges = useCallback(async () => {
     if (pendingChanges.length === 0 || isSyncing || hasConflict || !treeId) return;
 
+    const validEvents = pendingChanges.filter(e => e && typeof e === 'object' && e.type && e.payload);
+    
+    if (validEvents.length === 0) {
+      if (pendingChanges.length > 0) clearPendingChanges();
+      return;
+    }
+
     setIsSyncing(true);
     try {
       const res = await fetch(`/api/trees/${treeId}/collaborate`, {
@@ -21,7 +28,7 @@ export function useTreeCollaboration(treeId: string | null, versionId: string | 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           versionId,
-          events: pendingChanges
+          events: validEvents
         })
       });
 
@@ -36,7 +43,6 @@ export function useTreeCollaboration(treeId: string | null, versionId: string | 
       } else {
         clearPendingChanges();
         queryClient.invalidateQueries({ queryKey: ['tree', treeId] });
-        window.dispatchEvent(new Event('refresh-members'));
       }
     } catch (error: any) {
       toast.error(error.message || 'Failed to sync changes');
@@ -44,14 +50,6 @@ export function useTreeCollaboration(treeId: string | null, versionId: string | 
       setIsSyncing(false);
     }
   }, [pendingChanges, isSyncing, treeId, versionId, hasConflict, queryClient, clearPendingChanges, setHasConflict]);
-
-  // Auto-sync every 3 seconds if there are pending changes
-  useEffect(() => {
-    const timer = setInterval(() => {
-      syncChanges();
-    }, 3000);
-    return () => clearInterval(timer);
-  }, [syncChanges]);
 
   return {
     pendingChanges,

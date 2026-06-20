@@ -95,7 +95,7 @@ function MembersContent() {
 
   const isLoading = membersLoading || gensLoading;
 
-  if (!activeTreeId || isLoading) {
+  if (!activeTreeId || isLoading || !generations || !filteredMembers) {
     return (
       <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh] pt-12 w-full h-full">
         <MembersSkeleton />

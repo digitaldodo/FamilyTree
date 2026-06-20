@@ -92,23 +92,15 @@ export default function TimelinePage() {
   }, [members]);
 
   // GLOBAL HYDRATION GUARD
-  if (!activeTreeId || isLoading) {
+  if (isLoading) {
     return <TimelineSkeleton />;
   }
 
-  if (!members || members.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <EmptyState
-          icon={Clock}
-          title="Select a Family Tree"
-          description="Choose a family tree from the sidebar to view its timeline."
-        />
-      </div>
-    );
+  if (!activeTreeId) {
+    return null;
   }
 
-  if (isLoading) {
+  if (!members || !events) {
     return <TimelineSkeleton />;
   }
 

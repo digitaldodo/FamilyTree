@@ -57,9 +57,9 @@ export function RelationshipSelector({
     }
   };
 
-  const isParentLimitReached = type === 'PARENT' && existingRelations.length >= 2;
   const isSpouseLimitReached = type === 'SPOUSE' && existingRelations.length >= 1;
-  const isLimitReached = isParentLimitReached || isSpouseLimitReached;
+  const isParentLimitReached = type === 'PARENT' && existingRelations.length >= 2;
+  const isLimitReached = isParentLimitReached; // Do not completely block spouse, we want to show Replace
 
   // If no candidates exist and no existing relations, hide completely
   if (existingRelations.length === 0 && validCandidates.length === 0) {
@@ -91,20 +91,25 @@ export function RelationshipSelector({
 
         {/* Add New */}
         {!isLimitReached && validCandidates.length > 0 && (
-          <div className="flex gap-2 items-center mt-2">
-            <Select value={selectedId} onValueChange={setSelectedId}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder={`Select ${label.toLowerCase()}...`} />
-              </SelectTrigger>
-              <SelectContent>
-                {validCandidates.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button type="button" variant="outline" size="icon" onClick={handleAdd} disabled={!selectedId}>
-              <Plus className="h-4 w-4" />
-            </Button>
+          <div className="flex flex-col gap-2 mt-2">
+            {type === 'SPOUSE' && isSpouseLimitReached && (
+               <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Replace Spouse:</span>
+            )}
+            <div className="flex gap-2 items-center">
+              <Select value={selectedId} onValueChange={setSelectedId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={isSpouseLimitReached ? "Select replacement spouse..." : `Select ${label.toLowerCase()}...`} />
+                </SelectTrigger>
+                <SelectContent>
+                  {validCandidates.map(c => (
+                    <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button type="button" variant="outline" size="icon" onClick={handleAdd} disabled={!selectedId}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         )}
       </div>
