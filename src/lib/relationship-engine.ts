@@ -8,12 +8,34 @@ export type MemberWithRelations = Member & {
   relationsTo: Relationship[];
 };
 
+// Simple Graph Structure for Inference
+type AdjacencyList = Record<string, string[]>;
+type Graph = {
+  parents: AdjacencyList;
+  children: AdjacencyList;
+  spouses: AdjacencyList;
+  explicitSiblings: AdjacencyList;
+};
+
 export class RelationshipEngine {
   /**
-   * Core conflict check: Only ONE family relationship category may exist between two members.
+   * Conflict Matrix Validation
+   * Rejects invalid combinations before saving.
    */
-  static async checkRelationshipConflict(fromId: string, toId: string): Promise<void> {
-    const existing = await prisma.relationship.findFirst({
+  static async validateRelationship(fromMember: MemberWithRelations, toMember: MemberWithRelations, type: RelationshipType): Promise<void> {
+    const fromId = fromMember.id;
+    const toId = toMember.id;
+
+    if (fromId === toId) {
+      throw new Error('A member cannot be related to themselves.');
+    }
+
+    if (fromMember.treeId !== toMember.treeId) {
+      throw new Error('Members must belong to the same tree.');
+    }
+
+    // Load existing relationships between these two
+    const existingOverlaps = await prisma.relationship.findMany({
       where: {
         OR: [
           { fromId, toId },
@@ -22,9 +44,77 @@ export class RelationshipEngine {
       }
     });
 
-    if (existing) {
-      throw new Error('Members already have an incompatible relationship. Only one relationship category may exist between two members.');
+    if (existingOverlaps.length > 0) {
+      const types = existingOverlaps.map(r => r.type);
+      if (types.includes(type)) {
+        throw new Error('Relationship already exists.');
+      }
+      throw new Error(`Members already have an incompatible relationship: ${types.join(', ')}.`);
     }
+
+    // 2. Chronological/Generation Validation
+    const fromGen = fromMember.generation.orderIndex;
+    const toGen = toMember.generation.orderIndex;
+
+    if (type === 'SPOUSE' || type === 'SIBLING') {
+      if (fromGen !== toGen) {
+        throw new Error(`${type === 'SPOUSE' ? 'Spouse' : 'Sibling'} must belong to the same generation.`);
+      }
+      if (type === 'SPOUSE') {
+        if (!isSpouseEligible(fromMember.gender, toMember.gender)) {
+          throw new Error('Spouse eligibility rules not met based on gender configurations.');
+        }
+      }
+    } else if (type === 'PARENT') {
+      // fromId is PARENT of toId
+      if (fromGen !== toGen - 1) {
+        throw new Error('Parent must belong exactly to the generation immediately above the child.');
+      }
+    }
+
+    // 3. Limit Validations & Exclusivity
+    if (type === 'SPOUSE') {
+      // Spouse Exclusivity
+      const existingFromSpouses = await prisma.relationship.count({
+        where: { type: 'SPOUSE', OR: [{ fromId }, { toId: fromId }] }
+      });
+      if (existingFromSpouses >= 1) throw new Error('Maximum 1 spouse allowed for ' + fromMember.firstName);
+
+      const existingToSpouses = await prisma.relationship.count({
+        where: { type: 'SPOUSE', OR: [{ fromId: toId }, { toId }] }
+      });
+      if (existingToSpouses >= 1) throw new Error('Maximum 1 spouse allowed for ' + toMember.firstName);
+    } else if (type === 'PARENT') {
+      // Parent Exclusivity
+      const existingParents = await prisma.relationship.findMany({
+        where: { type: 'PARENT', toId: toId }
+      });
+      
+      if (existingParents.length >= 2) {
+        throw new Error('Maximum two parents allowed.');
+      }
+
+      // Child Ownership Rules: Prevent Child duplication across unrelated families.
+      if (existingParents.length === 1) {
+        const firstParentId = existingParents[0].fromId;
+        // The new parent (fromId) must ideally be a spouse of firstParentId, or have no spouses.
+        // We can enforce that if firstParentId has a spouse, it MUST be fromId.
+        const firstParentSpouses = await prisma.relationship.findMany({
+          where: { type: 'SPOUSE', OR: [{ fromId: firstParentId }, { toId: firstParentId }] }
+        });
+        
+        if (firstParentSpouses.length > 0) {
+          const spouseIds = firstParentSpouses.map(s => s.fromId === firstParentId ? s.toId : s.fromId);
+          if (!spouseIds.includes(fromId)) {
+            // firstParent has a spouse, but new parent is not that spouse!
+            throw new Error('Child already belongs to a family. Cannot assign unrelated third parent.');
+          }
+        }
+      }
+    }
+
+    // 4. Cycle Detection
+    await this.detectCycle(fromId, toId, type);
   }
 
   /**
@@ -61,94 +151,11 @@ export class RelationshipEngine {
   }
 
   /**
-   * Validate all constraints before inserting
-   */
-  static async validateRelationship(fromMember: MemberWithRelations, toMember: MemberWithRelations, type: RelationshipType): Promise<void> {
-    const fromId = fromMember.id;
-    const toId = toMember.id;
-
-    if (fromId === toId) {
-      throw new Error('A member cannot be related to themselves.');
-    }
-
-    if (fromMember.treeId !== toMember.treeId) {
-      throw new Error('Members must belong to the same tree.');
-    }
-
-    // 1. Unique Relationship Rule
-    const existingOverlaps = await prisma.relationship.findFirst({
-      where: {
-        OR: [
-          { fromId, toId },
-          { fromId: toId, toId: fromId }
-        ]
-      }
-    });
-
-    if (existingOverlaps && existingOverlaps.type !== type) {
-      throw new Error('Members already have an incompatible relationship.');
-    }
-
-    if (existingOverlaps && existingOverlaps.type === type) {
-      throw new Error('Relationship already exists.');
-    }
-
-    // 2. Chronological/Generation Validation
-    const fromGen = fromMember.generation.orderIndex;
-    const toGen = toMember.generation.orderIndex;
-
-    if (type === 'SPOUSE' || type === 'SIBLING') {
-      if (fromGen !== toGen) {
-        if (type === 'SPOUSE') {
-          throw new Error('Spouse must belong to the same generation and satisfy spouse eligibility rules.');
-        } else {
-          throw new Error('Sibling must belong to the same generation.');
-        }
-      }
-      
-      if (type === 'SPOUSE') {
-        if (!isSpouseEligible(fromMember.gender, toMember.gender)) {
-          throw new Error('Spouse must belong to the same generation and satisfy spouse eligibility rules.');
-        }
-      }
-    } else if (type === 'PARENT') {
-      if (fromGen !== toGen - 1) {
-        throw new Error('Parent must belong exactly to the generation immediately above the child.');
-      }
-    }
-
-    // 3. Limit Validations
-    if (type === 'SPOUSE') {
-      const existingFromSpouses = await prisma.relationship.count({
-        where: { type: 'SPOUSE', OR: [{ fromId }, { toId: fromId }] }
-      });
-      const existingToSpouses = await prisma.relationship.count({
-        where: { type: 'SPOUSE', OR: [{ fromId: toId }, { toId }] }
-      });
-      if (existingFromSpouses >= 1 || existingToSpouses >= 1) {
-        throw new Error('Maximum 1 spouse allowed.');
-      }
-    } else if (type === 'PARENT') {
-      const existingParents = await prisma.relationship.count({
-        where: { type: 'PARENT', toId: toId }
-      });
-      if (existingParents >= 2) {
-        throw new Error('Maximum two parents allowed.');
-      }
-    }
-
-    // 4. Cycle Detection
-    await this.detectCycle(fromId, toId, type);
-  }
-
-  /**
-   * Apply Smart Rules: Sibling detection, Spouse child sharing.
+   * Automatic Parent Propagation
    */
   static async applySmartRules(fromId: string, toId: string, type: RelationshipType, treeId: string): Promise<void> {
     if (type === 'PARENT') {
-      // fromId is parent, toId is child
-      
-      // 1. Share child with spouse
+      // share child with spouse
       const spouses = await prisma.relationship.findMany({
         where: { type: 'SPOUSE', OR: [{ fromId }, { toId: fromId }] }
       });
@@ -156,20 +163,14 @@ export class RelationshipEngine {
       for (const spouseRel of spouses) {
         const spouseId = spouseRel.fromId === fromId ? spouseRel.toId : spouseRel.fromId;
         
-        const existingParentRel = await prisma.relationship.findFirst({
-          where: {
-            OR: [
-              { fromId: spouseId, toId },
-              { fromId: toId, toId: spouseId }
-            ]
-          }
+        const existingParentRel = await prisma.relationship.count({
+          where: { type: 'PARENT', fromId: spouseId, toId }
         });
         
-        if (!existingParentRel) {
+        if (existingParentRel === 0) {
           const parentCount = await prisma.relationship.count({
             where: { type: 'PARENT', toId }
           });
-          
           if (parentCount < 2) {
             await prisma.relationship.create({
               data: { type: 'PARENT', fromId: spouseId, toId }
@@ -177,66 +178,24 @@ export class RelationshipEngine {
           }
         }
       }
-
-      // 2. Sibling Detection
-      // Find all children of this parent
-      const otherChildrenRels = await prisma.relationship.findMany({
-        where: { type: 'PARENT', fromId, toId: { not: toId } }
-      });
-
-      for (const siblingRel of otherChildrenRels) {
-        const siblingId = siblingRel.toId;
-        
-        const existingRelation = await prisma.relationship.findFirst({
-          where: {
-            OR: [
-              { fromId: toId, toId: siblingId },
-              { fromId: siblingId, toId: toId }
-            ]
-          }
-        });
-
-        if (!existingRelation) {
-          // Sort IDs to prevent duplicates in symmetrical relation
-          const [id1, id2] = [toId, siblingId].sort();
-          await prisma.relationship.create({
-            data: { type: 'SIBLING', fromId: id1, toId: id2 }
-          });
-        }
-      }
     } else if (type === 'SPOUSE') {
-      // Share children between new spouses
-      const childrenA = await prisma.relationship.findMany({
-        where: { type: 'PARENT', fromId }
-      });
-      const childrenB = await prisma.relationship.findMany({
-        where: { type: 'PARENT', fromId: toId }
-      });
+      // share existing children between new spouses
+      const childrenA = await prisma.relationship.findMany({ where: { type: 'PARENT', fromId } });
+      const childrenB = await prisma.relationship.findMany({ where: { type: 'PARENT', fromId: toId } });
       
       const childIdsA = childrenA.map(c => c.toId);
       const childIdsB = childrenB.map(c => c.toId);
       
       for (const childId of childIdsA) {
         if (!childIdsB.includes(childId)) {
-          const overlap = await prisma.relationship.findFirst({
-            where: { OR: [{ fromId: toId, toId: childId }, { fromId: childId, toId }] }
-          });
-          if (overlap) continue;
-
           const parentCount = await prisma.relationship.count({ where: { type: 'PARENT', toId: childId } });
           if (parentCount < 2) {
             await prisma.relationship.create({ data: { type: 'PARENT', fromId: toId, toId: childId } });
           }
         }
       }
-      
       for (const childId of childIdsB) {
         if (!childIdsA.includes(childId)) {
-          const overlap = await prisma.relationship.findFirst({
-            where: { OR: [{ fromId, toId: childId }, { fromId: childId, toId: fromId }] }
-          });
-          if (overlap) continue;
-
           const parentCount = await prisma.relationship.count({ where: { type: 'PARENT', toId: childId } });
           if (parentCount < 2) {
             await prisma.relationship.create({ data: { type: 'PARENT', fromId, toId: childId } });
@@ -246,7 +205,111 @@ export class RelationshipEngine {
     }
   }
 
+  /**
+   * Load entire graph in memory for fast inference
+   */
+  private static async loadGraph(treeId: string): Promise<Graph> {
+    const relations = await prisma.relationship.findMany({
+      where: { from: { treeId } }
+    });
+
+    const graph: Graph = {
+      parents: {},
+      children: {},
+      spouses: {},
+      explicitSiblings: {}
+    };
+
+    const addEdge = (list: AdjacencyList, u: string, v: string) => {
+      if (!list[u]) list[u] = [];
+      if (!list[u].includes(v)) list[u].push(v);
+    };
+
+    for (const rel of relations) {
+      if (rel.type === 'PARENT') {
+        addEdge(graph.children, rel.fromId, rel.toId);
+        addEdge(graph.parents, rel.toId, rel.fromId);
+      } else if (rel.type === 'SPOUSE') {
+        addEdge(graph.spouses, rel.fromId, rel.toId);
+        addEdge(graph.spouses, rel.toId, rel.fromId);
+      } else if (rel.type === 'SIBLING') {
+        addEdge(graph.explicitSiblings, rel.fromId, rel.toId);
+        addEdge(graph.explicitSiblings, rel.toId, rel.fromId);
+      }
+    }
+
+    return graph;
+  }
+
+  /**
+   * Infer relationships for a specific member dynamically.
+   */
+  static async inferRelationshipsForMember(memberId: string, treeId: string) {
+    const graph = await this.loadGraph(treeId);
+
+    const parents = graph.parents[memberId] || [];
+    const children = graph.children[memberId] || [];
+    const spouses = graph.spouses[memberId] || [];
+    
+    // Inferred Siblings: share both parents, plus explicitly defined siblings
+    const siblingsSet = new Set<string>(graph.explicitSiblings[memberId] || []);
+    if (parents.length === 2) {
+      const [p1, p2] = parents;
+      const c1 = graph.children[p1] || [];
+      const c2 = graph.children[p2] || [];
+      // Intersection of children
+      for (const siblingCandidate of c1) {
+        if (c2.includes(siblingCandidate) && siblingCandidate !== memberId) {
+          siblingsSet.add(siblingCandidate);
+        }
+      }
+    }
+
+    // Grandparents: parents of parents
+    const grandparentsSet = new Set<string>();
+    for (const p of parents) {
+      const grandP = graph.parents[p] || [];
+      grandP.forEach(gp => grandparentsSet.add(gp));
+    }
+
+    // Grandchildren: children of children
+    const grandchildrenSet = new Set<string>();
+    for (const c of children) {
+      const grandC = graph.children[c] || [];
+      grandC.forEach(gc => grandchildrenSet.add(gc));
+    }
+
+    // Uncles/Aunts: siblings of parents
+    // Nephews/Nieces: children of siblings
+    // Cousins: children of uncles/aunts
+
+    return {
+      parents,
+      children,
+      spouses,
+      siblings: Array.from(siblingsSet),
+      grandparents: Array.from(grandparentsSet),
+      grandchildren: Array.from(grandchildrenSet)
+    };
+  }
+
+  /**
+   * Build full graph for Tree layout
+   */
   static async buildRelationshipGraph(treeId: string) {
+    const members = await prisma.member.findMany({
+      where: { treeId },
+      include: { generation: true }
+    });
+
+    const graph = await this.loadGraph(treeId);
+    
+    // Map inferred relationships for all members
+    const inferred = new Map<string, any>();
+    for (const member of members) {
+      inferred.set(member.id, await this.inferRelationshipsForMember(member.id, treeId));
+    }
+
     const relations = await prisma.relationship.findMany({
       where: { from: { treeId } },
       include: {
@@ -255,21 +318,6 @@ export class RelationshipEngine {
       }
     });
 
-    const warnings: string[] = [];
-
-    // Validations on full graph
-    for (const rel of relations) {
-      if (rel.type === 'PARENT' && rel.from.generation.orderIndex !== rel.to.generation.orderIndex - 1) {
-         warnings.push(`Warning: Generation gap for parent ${rel.from.firstName} and child ${rel.to.firstName} is invalid.`);
-      }
-      if (rel.type === 'SPOUSE' && rel.from.generation.orderIndex !== rel.to.generation.orderIndex) {
-         warnings.push(`Warning: Spouses ${rel.from.firstName} and ${rel.to.firstName} are in different generations.`);
-      }
-      if (rel.type === 'SIBLING' && rel.from.generation.orderIndex !== rel.to.generation.orderIndex) {
-         warnings.push(`Warning: Siblings ${rel.from.firstName} and ${rel.to.firstName} are in different generations.`);
-      }
-    }
-
-    return { relations, warnings };
+    return { relations, inferred: Object.fromEntries(inferred), warnings: [] };
   }
 }

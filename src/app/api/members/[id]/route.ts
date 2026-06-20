@@ -45,7 +45,9 @@ export async function GET(_request: NextRequest, { params }: Params) {
       return errorResponse('FORBIDDEN', 'You do not have access to this member', 403);
     }
 
-    return successResponse(member, 'Member retrieved successfully');
+    const inferredRelationships = await RelationshipEngine.inferRelationshipsForMember(id, member.treeId);
+
+    return successResponse({ ...member, inferredRelationships }, 'Member retrieved successfully');
   } catch (error) {
     console.error('[MEMBER_GET_ERROR]', error);
     return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);

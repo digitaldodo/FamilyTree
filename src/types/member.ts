@@ -71,10 +71,20 @@ export interface Relationship {
   createdAt: string;
 }
 
+export interface InferredRelationships {
+  parents: string[];
+  children: string[];
+  siblings: string[];
+  spouses: string[];
+  grandparents: string[];
+  grandchildren: string[];
+}
+
 /** A member with its relationships loaded */
 export interface MemberWithRelations extends Member {
   relationsFrom: Relationship[];
   relationsTo: Relationship[];
+  inferredRelationships?: InferredRelationships;
 }
 
 /** Input for creating a relationship */
