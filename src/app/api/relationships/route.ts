@@ -71,6 +71,8 @@ export async function POST(request: NextRequest) {
     if (!preventPropagation) {
       await RelationshipEngine.applySmartRules(fromId, toId, type, fromMember.treeId);
     }
+    
+    RelationshipEngine.invalidateCache(fromMember.treeId, [fromId, toId]);
 
     return successResponse(newRel, 'Relationship created successfully', 201);
   } catch (error) {

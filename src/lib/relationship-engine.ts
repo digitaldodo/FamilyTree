@@ -17,7 +17,67 @@ type Graph = {
   explicitSiblings: AdjacencyList;
 };
 
+type InferredRelationships = {
+  parents: string[];
+  children: string[];
+  spouses: string[];
+  siblings: string[];
+  grandparents: string[];
+  grandchildren: string[];
+};
+
+type CacheEntry = {
+  data: InferredRelationships;
+};
+
+type TreeCache = {
+  graphVersion: number;
+  memberCache: Record<string, CacheEntry>;
+  graph?: Graph;
+};
+
 export class RelationshipEngine {
+  private static treeCaches: Record<string, TreeCache> = {};
+
+  private static getTreeCache(treeId: string): TreeCache {
+    if (!this.treeCaches[treeId]) {
+      this.treeCaches[treeId] = { graphVersion: 1, memberCache: {} };
+    }
+    return this.treeCaches[treeId];
+  }
+
+  /**
+   * Invalidates cached relationships using dependency paths.
+   */
+  static invalidateCache(treeId: string, changedMemberIds?: string[]) {
+    const cache = this.getTreeCache(treeId);
+    cache.graphVersion++;
+    cache.graph = undefined;
+
+    if (changedMemberIds && changedMemberIds.length > 0) {
+      const toInvalidate = new Set<string>(changedMemberIds);
+      
+      // Trace dependencies from the cached inferences
+      for (const memberId of changedMemberIds) {
+        const cached = cache.memberCache[memberId];
+        if (cached) {
+          cached.data.parents.forEach(id => toInvalidate.add(id));
+          cached.data.children.forEach(id => toInvalidate.add(id));
+          cached.data.spouses.forEach(id => toInvalidate.add(id));
+          cached.data.siblings.forEach(id => toInvalidate.add(id));
+          cached.data.grandparents.forEach(id => toInvalidate.add(id));
+          cached.data.grandchildren.forEach(id => toInvalidate.add(id));
+        }
+      }
+
+      toInvalidate.forEach(id => {
+        delete cache.memberCache[id];
+      });
+    } else {
+      cache.memberCache = {};
+    }
+  }
+
   /**
    * Conflict Matrix Validation
    * Rejects invalid combinations before saving.
@@ -209,6 +269,11 @@ export class RelationshipEngine {
    * Load entire graph in memory for fast inference
    */
   private static async loadGraph(treeId: string): Promise<Graph> {
+    const cache = this.getTreeCache(treeId);
+    if (cache.graph) {
+      return cache.graph;
+    }
+
     const relations = await prisma.relationship.findMany({
       where: { from: { treeId } }
     });
@@ -238,20 +303,26 @@ export class RelationshipEngine {
       }
     }
 
+    cache.graph = graph;
     return graph;
   }
 
   /**
    * Infer relationships for a specific member dynamically.
    */
-  static async inferRelationshipsForMember(memberId: string, treeId: string) {
+  static async inferRelationshipsForMember(memberId: string, treeId: string): Promise<InferredRelationships> {
+    const cache = this.getTreeCache(treeId);
+    if (cache.memberCache[memberId]) {
+      return cache.memberCache[memberId].data;
+    }
+
     const graph = await this.loadGraph(treeId);
 
     const parents = graph.parents[memberId] || [];
     const children = graph.children[memberId] || [];
     const spouses = graph.spouses[memberId] || [];
     
-    // Inferred Siblings: share both parents, plus explicitly defined siblings
+    // Inferred Siblings: share both parents, plus explicitly defined siblings (legacy)
     const siblingsSet = new Set<string>(graph.explicitSiblings[memberId] || []);
     if (parents.length === 2) {
       const [p1, p2] = parents;
@@ -263,6 +334,9 @@ export class RelationshipEngine {
           siblingsSet.add(siblingCandidate);
         }
       }
+    } else if (parents.length === 1) {
+       // Optional: half-siblings? Usually we only infer full siblings if 2 parents match, or any shared parent?
+       // Leaving as full siblings or just preserving what it had.
     }
 
     // Grandparents: parents of parents
@@ -279,11 +353,7 @@ export class RelationshipEngine {
       grandC.forEach(gc => grandchildrenSet.add(gc));
     }
 
-    // Uncles/Aunts: siblings of parents
-    // Nephews/Nieces: children of siblings
-    // Cousins: children of uncles/aunts
-
-    return {
+    const result = {
       parents,
       children,
       spouses,
@@ -291,6 +361,9 @@ export class RelationshipEngine {
       grandparents: Array.from(grandparentsSet),
       grandchildren: Array.from(grandchildrenSet)
     };
+
+    cache.memberCache[memberId] = { data: result };
+    return result;
   }
 
   /**
@@ -305,7 +378,7 @@ export class RelationshipEngine {
     const graph = await this.loadGraph(treeId);
     
     // Map inferred relationships for all members
-    const inferred = new Map<string, any>();
+    const inferred = new Map<string, InferredRelationships>();
     for (const member of members) {
       inferred.set(member.id, await this.inferRelationshipsForMember(member.id, treeId));
     }

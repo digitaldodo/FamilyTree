@@ -346,6 +346,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
       console.log('[API Debug] PUT /api/members/:id smart rule error', { error: getErrorMessage(smartRuleError) });
     }
 
+    RelationshipEngine.invalidateCache(existing.treeId, [id]);
+
     // Re-fetch the member with full relations so the response has the complete updated state
     const freshMember = await prisma.member.findUnique({
       where: { id },
@@ -395,6 +397,8 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
       prisma.media.deleteMany({ where: { memberId: id } }),
       prisma.member.delete({ where: { id } }),
     ]);
+
+    RelationshipEngine.invalidateCache(existing.treeId, [id]);
 
     return successResponse({ id }, 'Member deleted successfully');
   } catch (error) {
