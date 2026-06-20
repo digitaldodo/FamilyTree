@@ -25,18 +25,21 @@ export function useFamilyTree(treeId?: string) {
 
   // Enforce consecutive generations for the tree view
   useEffect(() => {
-    if (visibleGenerations.length <= 1) return;
+    const safeVisibleGens = Array.isArray(visibleGenerations) ? visibleGenerations : [];
+    if (safeVisibleGens.length <= 1) return;
 
-    const sortedActive = [...visibleGenerations].sort((a, b) => a.orderIndex - b.orderIndex);
+    const sortedActive = [...safeVisibleGens].sort((a, b) => a.orderIndex - b.orderIndex);
     const minOrder = sortedActive[0].orderIndex;
     const maxOrder = sortedActive[sortedActive.length - 1].orderIndex;
 
-    const requiredGenerations = generations.filter(g => g.orderIndex >= minOrder && g.orderIndex <= maxOrder);
+    const safeGens = Array.isArray(generations) ? generations : [];
+    const requiredGenerations = safeGens.filter(g => g.orderIndex >= minOrder && g.orderIndex <= maxOrder);
 
-    if (requiredGenerations.length > visibleGenerations.length) {
+    if (requiredGenerations.length > safeVisibleGens.length) {
       const requiredIds = requiredGenerations.map(g => g.id);
+      const safeSelectedIds = Array.isArray(selectedGenerationIds) ? selectedGenerationIds : [];
       // Combine required IDs with any other selected IDs
-      const newIds = Array.from(new Set([...selectedGenerationIds, ...requiredIds]));
+      const newIds = Array.from(new Set([...safeSelectedIds, ...requiredIds]));
       setSelectedGenerationIds(newIds);
       toast("Missing generations automatically included.", {
         description: "Tree view only supports consecutive generations."

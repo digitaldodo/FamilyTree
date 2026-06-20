@@ -34,14 +34,17 @@ export function generateTreeLayout(
     parentMap.set(find(i), find(j));
   };
 
-  members.forEach(m => {
-    m.relationsFrom.filter(r => r.type === 'SPOUSE').forEach(r => {
+  const safeMembers1 = Array.isArray(members) ? members : [];
+  safeMembers1.forEach(m => {
+    const safeFrom = Array.isArray(m.relationsFrom) ? m.relationsFrom : [];
+    safeFrom.filter(r => r.type === 'SPOUSE').forEach(r => {
       union(m.id, r.toId);
     });
   });
 
   const familyUnits = new Map<string, string[]>();
-  members.forEach(m => {
+  const safeMembers2 = Array.isArray(members) ? members : [];
+  safeMembers2.forEach(m => {
     const root = find(m.id);
     if (!familyUnits.has(root)) familyUnits.set(root, []);
     familyUnits.get(root)!.push(m.id);
@@ -60,8 +63,10 @@ export function generateTreeLayout(
     familyAdjacency.set(root, []);
   });
 
-  members.forEach(m => {
-    m.relationsFrom.filter(r => r.type === 'PARENT').forEach(r => {
+  const safeMembers3 = Array.isArray(members) ? members : [];
+  safeMembers3.forEach(m => {
+    const safeFrom = Array.isArray(m.relationsFrom) ? m.relationsFrom : [];
+    safeFrom.filter(r => r.type === 'PARENT').forEach(r => {
       const fromFamily = memberToFamily.get(m.id);
       const toFamily = memberToFamily.get(r.toId);
       if (fromFamily && toFamily && fromFamily !== toFamily) {
@@ -73,12 +78,13 @@ export function generateTreeLayout(
   });
 
   // Level calc using generation orderIndex
+  const safeGenerations1 = Array.isArray(generations) ? generations : [];
   familyUnits.forEach((familyMembers, root) => {
     const memberId = familyMembers[0];
     const member = members.find(m => m.id === memberId);
     let level = 0;
     if (member && member.generationId) {
-      const gen = generations.find(g => g.id === member.generationId);
+      const gen = safeGenerations1.find(g => g.id === member.generationId);
       if (gen) {
         level = gen.orderIndex;
       }
@@ -114,21 +120,23 @@ export function generateTreeLayout(
   dagre.layout(g);
 
   // Diagnostics & Verification
+  const safeGenerations2 = Array.isArray(generations) ? generations : [];
   console.log('--- LAYOUT DIAGNOSTICS ---');
-  console.log(`Generations count: ${generations.length}`);
-  console.log(`Generation names: ${generations.map(g => g.name).join(', ')}`);
-  console.log(`Generation orders: ${generations.map(g => `${g.name} -> ${g.orderIndex}`).join(', ')}`);
+  console.log(`Generations count: ${safeGenerations2.length}`);
+  console.log(`Generation names: ${safeGenerations2.map(g => g.name).join(', ')}`);
+  console.log(`Generation orders: ${safeGenerations2.map(g => `${g.name} -> ${g.orderIndex}`).join(', ')}`);
   
   const membersPerGen = new Map<string, number>();
-  members.forEach(m => {
-    const gen = generations.find(g => g.id === m.generationId);
+  const safeMembers4 = Array.isArray(members) ? members : [];
+  safeMembers4.forEach(m => {
+    const gen = safeGenerations2.find(g => g.id === m.generationId);
     const genName = gen ? gen.name : 'Unknown';
     membersPerGen.set(genName, (membersPerGen.get(genName) || 0) + 1);
   });
   console.log('Members per generation:');
   membersPerGen.forEach((count, name) => console.log(`  ${name} -> ${count} members`));
 
-  generations.forEach(g => {
+  safeGenerations2.forEach(g => {
     if (!g.name) console.error(`VERIFICATION FAILED: Generation ${g.id} has no name`);
   });
 
@@ -195,11 +203,13 @@ export function generateTreeLayout(
     const yOffset = dagreNode.y;
 
     const childrenIds = new Set<string>();
+    const safeMembers5 = Array.isArray(members) ? members : [];
     
     familyMembers.forEach((memberId, i) => {
-      const member = members.find(m => m.id === memberId)!;
+      const member = safeMembers5.find(m => m.id === memberId)!;
       
-      member.relationsFrom.filter(r => r.type === 'PARENT').forEach(r => childrenIds.add(r.toId));
+      const safeFrom = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
+      safeFrom.filter(r => r.type === 'PARENT').forEach(r => childrenIds.add(r.toId));
 
       const xOffset = startX + i * MEMBER_SPACING + gap / 2 + NODE_WIDTH / 2; // Center inside allocated space
       const actualX = xOffset - NODE_WIDTH / 2; // Flow expects top-left
@@ -270,7 +280,8 @@ export function generateTreeLayout(
   const laneX = minGlobalX === Infinity ? -1000 : minGlobalX - 600;
 
   // We rely strictly on the passed generations array as the source of truth
-  generations.forEach(gen => {
+  const safeGenerations3 = Array.isArray(generations) ? generations : [];
+  safeGenerations3.forEach(gen => {
     const level = gen.orderIndex;
     
     nodes.push({
@@ -292,7 +303,8 @@ export function generateTreeLayout(
 
   // 7. Spouse Edges
   const addedSpouseKeys = new Set<string>();
-  members.forEach(member => {
+  const safeMembers6 = Array.isArray(members) ? members : [];
+  safeMembers6.forEach(member => {
     const addSpouseEdge = (rel: any, fromId: string, toId: string) => {
       if (rel.type !== 'SPOUSE') return;
       const edgeKey = `${fromId}-${toId}-SPOUSE`;
@@ -314,8 +326,10 @@ export function generateTreeLayout(
       });
     };
 
-    member.relationsFrom.forEach(rel => addSpouseEdge(rel, member.id, rel.toId));
-    member.relationsTo.forEach(rel => addSpouseEdge(rel, rel.fromId, member.id));
+    const safeFrom2 = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
+    const safeTo2 = Array.isArray(member.relationsTo) ? member.relationsTo : [];
+    safeFrom2.forEach(rel => addSpouseEdge(rel, member.id, rel.toId));
+    safeTo2.forEach(rel => addSpouseEdge(rel, rel.fromId, member.id));
   });
 
   return { nodes, edges };

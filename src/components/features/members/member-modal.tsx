@@ -102,15 +102,18 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
   };
 
   // Build relationship data — check BOTH directions for symmetric types (SPOUSE, SIBLING)
+  const safeRelsFrom = Array.isArray(member?.relationsFrom) ? member!.relationsFrom : [];
+  const safeRelsTo = Array.isArray(member?.relationsTo) ? member!.relationsTo : [];
+  
   const spouses = [
-    ...(member?.relationsFrom.filter((r) => r.type === 'SPOUSE') || []),
-    ...(member?.relationsTo.filter((r) => r.type === 'SPOUSE') || []),
+    ...(safeRelsFrom.filter((r) => r.type === 'SPOUSE')),
+    ...(safeRelsTo.filter((r) => r.type === 'SPOUSE')),
   ];
-  const parents = member?.relationsTo.filter((r) => r.type === 'PARENT') || [];
-  const children = member?.relationsFrom.filter((r) => r.type === 'PARENT') || [];
+  const parents = safeRelsTo.filter((r) => r.type === 'PARENT');
+  const children = safeRelsFrom.filter((r) => r.type === 'PARENT');
   const siblings = [
-    ...(member?.relationsFrom.filter((r) => r.type === 'SIBLING') || []),
-    ...(member?.relationsTo.filter((r) => r.type === 'SIBLING') || []),
+    ...(safeRelsFrom.filter((r) => r.type === 'SIBLING')),
+    ...(safeRelsTo.filter((r) => r.type === 'SIBLING')),
   ];
   const hasRelationships =
     spouses.length > 0 ||

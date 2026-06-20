@@ -29,8 +29,8 @@ export function BirthdayWidget({ birthdays }: BirthdayWidgetProps) {
       </div>
 
       <div className="flex-1 overflow-y-auto pr-2 space-y-4">
-        {birthdays.length > 0 ? (
-          birthdays.map((birthday, i) => (
+        {(Array.isArray(birthdays) ? birthdays : []).length > 0 ? (
+          (Array.isArray(birthdays) ? birthdays : []).map((birthday, i) => (
             <motion.div
               key={birthday.id}
               initial={{ opacity: 0, x: -10 }}

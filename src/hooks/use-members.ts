@@ -22,11 +22,12 @@ export function useMembers(treeId?: string) {
     enabled: !!resolvedTreeId,
   });
 
-  const members: MemberWithRelations[] = data?.members?.map((m: any) => ({
+  const safeMembers = Array.isArray(data?.members) ? data.members : [];
+  const members: MemberWithRelations[] = safeMembers.map((m: any) => ({
     ...m,
-    relationsFrom: m.relationsFrom || [],
-    relationsTo: m.relationsTo || [],
-  })) || [];
+    relationsFrom: Array.isArray(m.relationsFrom) ? m.relationsFrom : [],
+    relationsTo: Array.isArray(m.relationsTo) ? m.relationsTo : [],
+  }));
 
   // Sync to zustand for components using getState() or direct store access
   useEffect(() => {

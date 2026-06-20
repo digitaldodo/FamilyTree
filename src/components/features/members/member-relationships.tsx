@@ -12,28 +12,34 @@ interface MemberRelationshipsProps {
 }
 
 export function MemberRelationships({ member, members, onNavigateToMember, readOnly, onAddRelationshipsClick }: MemberRelationshipsProps) {
+  const safeRelsFrom = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
+  const safeRelsTo = Array.isArray(member.relationsTo) ? member.relationsTo : [];
+
   // Check BOTH directions for symmetric relationship types (SPOUSE)
   const spouseIds = [
-    ...member.relationsFrom.filter((r) => r.type === 'SPOUSE').map(r => r.toId),
-    ...member.relationsTo.filter((r) => r.type === 'SPOUSE').map(r => r.fromId),
+    ...safeRelsFrom.filter((r) => r.type === 'SPOUSE').map(r => r.toId),
+    ...safeRelsTo.filter((r) => r.type === 'SPOUSE').map(r => r.fromId),
   ];
   const uniqueSpouseIds = [...new Set(spouseIds)];
 
-  const parents = member.relationsTo.filter((r) => r.type === 'PARENT') || [];
-  const children = member.relationsFrom.filter((r) => r.type === 'PARENT') || [];
+  const parents = safeRelsTo.filter((r) => r.type === 'PARENT') || [];
+  const children = safeRelsFrom.filter((r) => r.type === 'PARENT') || [];
   
   const parentIds = parents.map((r) => r.fromId);
   const derivedSiblingIds = new Set<string>();
   if (parentIds.length > 0) {
-    members.forEach((m) => {
+    const safeMembers = Array.isArray(members) ? members : [];
+    safeMembers.forEach((m) => {
       if (m.id === member.id) return;
-      const mParentIds = m.relationsTo.filter((r) => r.type === 'PARENT').map((r) => r.fromId);
+      const mSafeRelsTo = Array.isArray(m.relationsTo) ? m.relationsTo : [];
+      const mParentIds = mSafeRelsTo.filter((r) => r.type === 'PARENT').map((r) => r.fromId);
       if (mParentIds.some((pid) => parentIds.includes(pid))) {
         derivedSiblingIds.add(m.id);
       }
     });
   }
-  const siblings = Array.from(derivedSiblingIds).map(id => members.find(m => m.id === id)).filter(Boolean) as MemberWithRelations[];
+  const safeMembersForFind = Array.isArray(members) ? members : [];
+  const siblings = Array.from(derivedSiblingIds).map(id => safeMembersForFind.find(m => m.id === id)).filter(Boolean) as MemberWithRelations[];
 
   const hasRelationships = uniqueSpouseIds.length > 0 || parents.length > 0 || children.length > 0 || siblings.length > 0;
 
