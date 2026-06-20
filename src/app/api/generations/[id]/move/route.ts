@@ -59,6 +59,46 @@ export async function PATCH(
       return errorResponse('CONFLICT', `Cannot move generation ${direction}`, 400);
     }
 
+    // --- Relationship Consistency Validation ---
+    // Moving a generation changes its orderIndex. We must ensure this doesn't break
+    // engine rules (e.g., Parent must be exactly 1 generation older than Child).
+    const membersInGenerations = await prisma.member.findMany({
+      where: { generationId: { in: [id, adjacentGen.id] } },
+      select: { id: true }
+    });
+    const memberIds = membersInGenerations.map(m => m.id);
+
+    if (memberIds.length > 0) {
+      const relationships = await prisma.relationship.findMany({
+        where: { OR: [{ fromId: { in: memberIds } }, { toId: { in: memberIds } }] },
+        include: {
+          from: { include: { generation: true } },
+          to: { include: { generation: true } }
+        }
+      });
+
+      for (const rel of relationships) {
+        const getSimulatedGenIndex = (memberGenId: string, originalIndex: number) => {
+          if (memberGenId === id) return adjacentGen.orderIndex;
+          if (memberGenId === adjacentGen.id) return generation.orderIndex;
+          return originalIndex;
+        };
+
+        const fromGenIndex = getSimulatedGenIndex(rel.from.generationId, rel.from.generation.orderIndex);
+        const toGenIndex = getSimulatedGenIndex(rel.to.generationId, rel.to.generation.orderIndex);
+
+        if (rel.type === 'PARENT') {
+          if (fromGenIndex !== toGenIndex - 1) {
+            return errorResponse('VALIDATION_ERROR', `Cannot move generation: this would break the chronological parent-child relationship between ${rel.from.firstName} and ${rel.to.firstName}.`, 400);
+          }
+        } else if (rel.type === 'SPOUSE' || rel.type === 'SIBLING') {
+          if (fromGenIndex !== toGenIndex) {
+            return errorResponse('VALIDATION_ERROR', `Cannot move generation: this would break the chronological ${rel.type.toLowerCase()} relationship between ${rel.from.firstName} and ${rel.to.firstName}.`, 400);
+          }
+        }
+      }
+    }
+
     await prisma.$transaction([
       prisma.generation.update({
         where: { id },

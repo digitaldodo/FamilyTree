@@ -130,8 +130,8 @@ export async function DELETE(
              const parentGenIndex = memberIdsToMove.includes(rel.fromId) ? targetGen.orderIndex : rel.from.generation.orderIndex;
              const childGenIndex = memberIdsToMove.includes(rel.toId) ? targetGen.orderIndex : rel.to.generation.orderIndex;
 
-             if (childGenIndex <= parentGenIndex) {
-               return errorResponse('VALIDATION_ERROR', `Cannot move members: this would violate chronological order. Parents must be older than children. Conflict between ${rel.from.firstName} and ${rel.to.firstName}.`, 400);
+             if (childGenIndex !== parentGenIndex + 1) {
+               return errorResponse('VALIDATION_ERROR', `Cannot move members: this would violate chronological order. Parent must be exactly one generation above child. Conflict between ${rel.from.firstName} and ${rel.to.firstName}.`, 400);
              }
           } else if (rel.type === 'SPOUSE' || rel.type === 'SIBLING') {
              const gen1Index = memberIdsToMove.includes(rel.fromId) ? targetGen.orderIndex : rel.from.generation.orderIndex;
