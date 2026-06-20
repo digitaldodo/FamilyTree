@@ -6,6 +6,7 @@ import { successResponse, listResponse, errorResponse, parsePagination } from '@
 import { createMemberSchema } from '@/validations/member.schema';
 import { getErrorMessage } from '@/utils/helpers';
 import { isSpouseEligible } from '@/utils/relationship';
+import { createTreeSnapshot } from '@/lib/versioning';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -285,6 +286,12 @@ export async function POST(request: NextRequest) {
       treeId,
       userId: session.user.id,
     });
+
+    try {
+      await createTreeSnapshot(treeId, session.user.id, `Added member ${newMember.firstName}`);
+    } catch (e) {
+      console.error('Failed to create tree snapshot', e);
+    }
 
     return successResponse(newMember, 'Member created successfully', 201);
   } catch (error) {

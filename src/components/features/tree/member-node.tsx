@@ -2,7 +2,6 @@ import { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { MemberWithRelations } from '@/types/member';
 import { useAppStore } from '@/store/use-app-store';
-import { useGenerations } from '@/hooks/use-generations';
 import { cn } from '@/lib/utils';
 import { getGenerationLabel } from '@/utils/date';
 import { MemberAvatar } from '../members/member-avatar';
@@ -12,6 +11,7 @@ interface MemberNodeProps {
   data: {
     member: MemberWithRelations;
     label: string;
+    generationName?: string;
   };
 }
 
@@ -20,11 +20,9 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
   const selectedMemberId = useAppStore(s => s.selectedMemberId);
   const setSelectedMemberId = useAppStore(s => s.setSelectedMemberId);
   const setIsMemberModalOpen = useAppStore(s => s.setIsMemberModalOpen);
-  const { generations = [] } = useGenerations();
   
   const isSelected = selectedMemberId === member.id;
-  const generation = generations.find(g => g.id === member.generationId);
-  const generationName = getGenerationLabel(member?.birthDate) || generation?.name;
+  const generationName = getGenerationLabel(member?.birthDate) || data.generationName;
 
   const handleClick = () => {
     setSelectedMemberId(member.id);
@@ -41,15 +39,6 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
   const childrenCount = safeRelsFrom.filter(r => r.type === 'PARENT').length;
   const spouseCount = safeRelsFrom.filter(r => r.type === 'SPOUSE').length + safeRelsTo.filter(r => r.type === 'SPOUSE').length;
   const siblingCount = safeRelsFrom.filter(r => r.type === 'SIBLING').length + safeRelsTo.filter(r => r.type === 'SIBLING').length;
-
-  console.log({
-    memberId: member.id,
-    imageUrl: member.imageUrl,
-    generationId: member.generationId,
-    parents: safeRelsTo.filter(r => r.type === 'PARENT'),
-    children: safeRelsFrom.filter(r => r.type === 'PARENT'),
-    spouse: [...safeRelsFrom.filter(r => r.type === 'SPOUSE'), ...safeRelsTo.filter(r => r.type === 'SPOUSE')]
-  });
 
   return (
     <div

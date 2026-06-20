@@ -1,104 +1,107 @@
 import { useState } from 'react';
 import { useAppStore } from '@/store/use-app-store';
-import { CreateMemberInput, UpdateMemberInput, MemberWithRelations } from '@/types/member';
+import { CreateMemberInput, UpdateMemberInput } from '@/types/member';
 import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
 
 export function useMemberMutations() {
-  const queryClient = useQueryClient();
   const setIsMemberModalOpen = useAppStore(s => s.setIsMemberModalOpen);
   const setIsEditingMember = useAppStore(s => s.setIsEditingMember);
   const activeTreeId = useAppStore(s => s.activeTreeId);
+  const selectedTreeVersionId = useAppStore(s => s.selectedTreeVersionId);
+  const addChangeEvent = useAppStore(s => s.addChangeEvent);
+  const hasConflict = useAppStore(s => s.hasConflict);
+  const isReadOnly = useAppStore(s => s.isReadOnly);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const checkCanEdit = () => {
+    if (isReadOnly) {
+      toast.error('Cannot edit in read-only mode.');
+      return false;
+    }
+    if (hasConflict) {
+      toast.error('Cannot edit while in conflict state. Please refresh.');
+      return false;
+    }
+    return true;
+  };
+
   const handleCreate = async (input: CreateMemberInput) => {
+    if (!checkCanEdit()) return;
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/members', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...input,
-          treeId: input.treeId || activeTreeId,
-        }),
+      const temporaryId = `temp-${Date.now()}`;
+      addChangeEvent({
+        id: crypto.randomUUID(),
+        treeId: input.treeId || activeTreeId || '',
+        versionId: selectedTreeVersionId || '',
+        userId: 'local',
+        timestamp: new Date().toISOString(),
+        type: 'ADD_MEMBER',
+        payload: {
+           member: input,
+           temporaryId
+        }
       });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || 'Failed to create member');
-      }
-
-      window.dispatchEvent(new Event('refresh-members'));
-      queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
-      toast.success('Member added successfully');
+      
+      toast.success('Member creation queued');
       setIsEditingMember(false);
       setIsMemberModalOpen(false);
-      return data.data;
+      return { id: temporaryId };
     } catch (error: any) {
-      toast.error(error.message || 'Failed to create member');
+      toast.error(error.message || 'Failed to queue member creation');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleUpdate = async (id: string, input: UpdateMemberInput) => {
+    if (!checkCanEdit()) return;
     setIsSubmitting(true);
-    console.log("PATCH PAYLOAD", input);
     try {
-      const res = await fetch(`/api/members/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
+      addChangeEvent({
+        id: crypto.randomUUID(),
+        treeId: activeTreeId || '',
+        versionId: selectedTreeVersionId || '',
+        userId: 'local',
+        timestamp: new Date().toISOString(),
+        type: 'UPDATE_MEMBER',
+        payload: {
+           memberId: id,
+           changes: input
+        }
       });
 
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || 'Failed to update member');
-      }
-
-      // POST-SAVE VERIFICATION (client side)
-      const verifyRes = await fetch(`/api/members/${id}?t=${Date.now()}`, { cache: 'no-store' });
-      const verifyData = await verifyRes.json();
-      if (!verifyData.success || (input.firstName && verifyData.data.firstName !== input.firstName)) {
-        throw new Error('Database update confirmed failed');
-      }
-
-      window.dispatchEvent(new Event('refresh-members'));
-      
-      // Cache Audit / Invalidation equivalent
-      queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
-      
-      toast.success('Member updated successfully');
+      toast.success('Member update queued');
       setIsEditingMember(false);
-      return data.data;
+      return { id };
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update member');
+      toast.error(error.message || 'Failed to queue update');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
+    if (!checkCanEdit()) return;
     try {
-      const res = await fetch(`/api/members/${id}`, {
-        method: 'DELETE',
+      addChangeEvent({
+        id: crypto.randomUUID(),
+        treeId: activeTreeId || '',
+        versionId: selectedTreeVersionId || '',
+        userId: 'local',
+        timestamp: new Date().toISOString(),
+        type: 'DELETE_MEMBER',
+        payload: {
+           memberId: id
+        }
       });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || 'Failed to delete member');
-      }
-
-      window.dispatchEvent(new Event('refresh-members'));
-      queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
-      toast.success('Member removed successfully');
+      
+      toast.success('Member deletion queued');
       setIsEditingMember(false);
       setIsMemberModalOpen(false);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete member');
+      toast.error(error.message || 'Failed to queue deletion');
     }
   };
 
@@ -109,4 +112,3 @@ export function useMemberMutations() {
     isSubmitting
   };
 }
-

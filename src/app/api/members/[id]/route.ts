@@ -7,6 +7,7 @@ import { updateMemberSchema } from '@/validations/member.schema';
 import { getErrorMessage } from '@/utils/helpers';
 import { RelationshipEngine } from '@/lib/relationship-engine';
 import { isSpouseEligible } from '@/utils/relationship';
+import { createTreeSnapshot } from '@/lib/versioning';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -337,6 +338,12 @@ export async function PUT(request: NextRequest, { params }: Params) {
       },
     });
 
+    try {
+      await createTreeSnapshot(existing.treeId, session.user.id, `Updated member ${freshMember?.firstName || id}`);
+    } catch (e) {
+      console.error('Failed to create tree snapshot', e);
+    }
+
     return successResponse(freshMember, 'Member updated successfully');
   } catch (error) {
     console.error('[MEMBER_UPDATE_ERROR]', error);
@@ -374,6 +381,12 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     ]);
 
     RelationshipEngine.invalidateCache(existing.treeId, [id]);
+
+    try {
+      await createTreeSnapshot(existing.treeId, session.user.id, `Deleted member ${existing.firstName}`);
+    } catch (e) {
+      console.error('Failed to create tree snapshot', e);
+    }
 
     return successResponse({ id }, 'Member deleted successfully');
   } catch (error) {

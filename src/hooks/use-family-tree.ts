@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useMembers } from './use-members';
 import { useAppStore } from '@/store/use-app-store';
-import { generateTreeLayout } from '@/utils/tree-layout';
 import { toast } from 'sonner';
 import { useFilteredGenerations } from './use-filtered-generations';
 import { GenealogyEngine } from '@/domain/inference/genealogy-engine';
@@ -9,19 +8,11 @@ import { GenealogyEngine } from '@/domain/inference/genealogy-engine';
 export function useFamilyTree(treeId?: string) {
   const { members: rawMembers, generations, isLoading, error: fetchError } = useMembers(treeId);
   const [error, setError] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
 
   const selectedGenerationIds = useAppStore(s => s.selectedGenerationIds);
   const setSelectedGenerationIds = useAppStore(s => s.setSelectedGenerationIds);
 
   const visibleGenerations = useFilteredGenerations(generations, selectedGenerationIds);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   // Enforce consecutive generations for the tree view
   useEffect(() => {
@@ -47,21 +38,31 @@ export function useFamilyTree(treeId?: string) {
     }
   }, [selectedGenerationIds, visibleGenerations, generations, setSelectedGenerationIds]);
 
-  const familyGraph = useMemo(() => {
-    return GenealogyEngine.buildFamilyGraph(rawMembers);
+  const [debouncedMembers, setDebouncedMembers] = useState(rawMembers);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedMembers(rawMembers);
+    }, 300);
+    return () => clearTimeout(handler);
   }, [rawMembers]);
 
-  // Transform members into React Flow Nodes and Edges
-  const { nodes: initialNodes, edges: initialEdges } = useMemo(() => {
-    return generateTreeLayout(familyGraph, visibleGenerations, isMobile);
-  }, [familyGraph, visibleGenerations, isMobile]);
+  const activeTreeId = useAppStore(s => s.activeTreeId);
+  const selectedTreeVersionId = useAppStore(s => s.selectedTreeVersionId);
+
+  const familyGraph = useMemo(() => {
+    return GenealogyEngine.buildFamilyGraph({
+      treeId: treeId || activeTreeId || '',
+      versionId: selectedTreeVersionId,
+      members: debouncedMembers
+    });
+  }, [debouncedMembers, treeId, activeTreeId, selectedTreeVersionId]);
 
   return {
     members: rawMembers, // original array for legacy UI compatibility
     familyGraph, // new pure deterministic graph
-    generations,
-    initialNodes,
-    initialEdges,
+    generations: visibleGenerations, // return visible ones specifically
+    allGenerations: generations, // raw DB generations
     isLoading,
     error: fetchError || error,
   };

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { MemberWithRelations, Generation } from '@/types/member';
 import { TreeSummary, TreePermission } from '@/types/tree';
+import { ChangeEvent } from '@/domain/collaboration/change-events';
 
 interface AppState {
   sidebarOpen: boolean;
@@ -29,10 +30,19 @@ interface AppState {
   setActiveTreeId: (id: string | null) => void;
   isInitializingTrees: boolean;
   setIsInitializingTrees: (isInit: boolean) => void;
+  selectedTreeVersionId: string | null;
+  setSelectedTreeVersionId: (id: string | null) => void;
   userTrees: TreeSummary[];
   setUserTrees: (trees: TreeSummary[]) => void;
   userRole: TreePermission;
   setUserRole: (role: TreePermission) => void;
+
+  // Collaboration
+  pendingChanges: ChangeEvent[];
+  addChangeEvent: (event: ChangeEvent) => void;
+  clearPendingChanges: () => void;
+  hasConflict: boolean;
+  setHasConflict: (conflict: boolean) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -67,10 +77,19 @@ export const useAppStore = create<AppState>()(
   setActiveTreeId: (id) => set({ activeTreeId: id }),
   isInitializingTrees: true,
   setIsInitializingTrees: (isInit) => set({ isInitializingTrees: isInit }),
+  selectedTreeVersionId: null,
+  setSelectedTreeVersionId: (id) => set({ selectedTreeVersionId: id }),
   userTrees: [],
   setUserTrees: (trees) => set({ userTrees: trees }),
   userRole: null,
   setUserRole: (role) => set({ userRole: role }),
+
+  // Collaboration
+  pendingChanges: [],
+  addChangeEvent: (event) => set((state) => ({ pendingChanges: [...state.pendingChanges, event] })),
+  clearPendingChanges: () => set({ pendingChanges: [] }),
+  hasConflict: false,
+  setHasConflict: (conflict) => set({ hasConflict: conflict }),
     }),
     {
       name: 'family-tree-storage',

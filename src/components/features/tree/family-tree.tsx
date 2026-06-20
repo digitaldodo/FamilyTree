@@ -16,16 +16,18 @@ import '@xyflow/react/dist/style.css';
 
 import { useAppStore } from '@/store/use-app-store';
 import { useFamilyTree } from '@/hooks/use-family-tree';
+import { useTreeCollaboration } from '@/hooks/use-tree-collaboration';
 import { MemberNode } from './member-node';
 import { GenerationLaneNode } from './generation-lane-node';
 import { FamilyJunctionNode } from './family-junction-node';
 import { RelationshipEdgeMemo } from './relationship-edge';
 import { TreeToolbar } from './tree-toolbar';
-import { Loader2, Activity } from 'lucide-react';
+import { Loader2, Activity, SaveAll, AlertTriangle } from 'lucide-react';
 import { TreeBackground } from './tree-background';
 import { FloatingFamilyStats } from './floating-family-stats';
 import { GenealogyEngine } from '@/domain/inference/genealogy-engine';
 import { TreeSkeleton } from '@/components/ui/tree-skeleton';
+import { useFamilyTreeRenderer } from './family-tree-renderer';
 
 const nodeTypes = {
   member: MemberNode,
@@ -39,15 +41,22 @@ const edgeTypes = {
 
 function FamilyTreeCanvas() {
   const activeTreeId = useAppStore(s => s.activeTreeId);
-  const { members: treeMembers, familyGraph, generations, initialNodes, initialEdges, isLoading, error } = useFamilyTree(activeTreeId || undefined);
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const selectedTreeVersionId = useAppStore(s => s.selectedTreeVersionId);
+  
+  const { isSyncing, hasConflict, pendingChanges } = useTreeCollaboration(activeTreeId, selectedTreeVersionId);
+  
+  const { members: treeMembers, familyGraph, generations, isLoading, error } = useFamilyTree(activeTreeId || undefined);
+  
+  const { nodes: rendererNodes, edges: rendererEdges } = useFamilyTreeRenderer(familyGraph, generations);
+  
+  const [nodes, setNodes, onNodesChange] = useNodesState(rendererNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(rendererEdges);
   const [showDiagnostics, setShowDiagnostics] = React.useState(false);
 
   React.useEffect(() => {
-    setNodes(initialNodes);
-    setEdges(initialEdges);
-  }, [initialNodes, initialEdges, setNodes, setEdges]);
+    setNodes(rendererNodes);
+    setEdges(rendererEdges);
+  }, [rendererNodes, rendererEdges, setNodes, setEdges]);
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -59,7 +68,7 @@ function FamilyTreeCanvas() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  if (isLoading) {
+  if (!activeTreeId || isLoading) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-background">
         <TreeSkeleton />
@@ -96,6 +105,7 @@ function FamilyTreeCanvas() {
         maxZoom={1.5}
         defaultEdgeOptions={{ zIndex: 0 }}
         proOptions={{ hideAttribution: true }}
+        onlyRenderVisibleElements={true}
       >
         <TreeBackground />
         
@@ -139,6 +149,26 @@ function FamilyTreeCanvas() {
                 <FloatingFamilyStats totalMembers={memberNodes.length} generations={generations.length} />
               </div>
               <div className="pointer-events-auto w-full md:w-auto flex justify-start md:justify-end overflow-x-hidden">
+                <div className="flex items-center gap-2 mr-4">
+                  {hasConflict && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-destructive/10 text-destructive text-sm font-medium rounded-full border border-destructive/20">
+                      <AlertTriangle className="w-4 h-4" />
+                      <span>Conflict</span>
+                    </div>
+                  )}
+                  {!hasConflict && pendingChanges.length > 0 && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-500 text-sm font-medium rounded-full border border-amber-500/20">
+                      <SaveAll className="w-4 h-4" />
+                      <span>{pendingChanges.length} Pending</span>
+                    </div>
+                  )}
+                  {isSyncing && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full border border-primary/20">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Syncing</span>
+                    </div>
+                  )}
+                </div>
                 <TreeToolbar />
               </div>
             </div>

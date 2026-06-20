@@ -45,14 +45,12 @@ export async function GET(_request: NextRequest, { params }: Params) {
           generation: { select: { id: true, name: true, orderIndex: true } },
           relationsFrom: {
             select: {
-              id: true, type: true, fromId: true, toId: true,
-              to: { select: { id: true, firstName: true, lastName: true, imageUrl: true } }
+              id: true, type: true, fromId: true, toId: true
             }
           },
           relationsTo: {
             select: {
-              id: true, type: true, fromId: true, toId: true,
-              from: { select: { id: true, firstName: true, lastName: true, imageUrl: true } }
+              id: true, type: true, fromId: true, toId: true
             }
           },
           media: { select: { id: true, url: true, type: true } },
@@ -73,6 +71,21 @@ export async function GET(_request: NextRequest, { params }: Params) {
         relationsTo: Array.isArray(m.relationsTo) ? m.relationsTo : []
       })) : [],
     };
+
+    // Auto-wrap into v1 if no versions exist
+    const versionsCount = await prisma.treeVersion.count({ where: { treeId: id } });
+    if (versionsCount === 0) {
+      await prisma.treeVersion.create({
+        data: {
+          treeId: id,
+          name: "v1",
+          membersData: JSON.stringify(tree.members),
+          relationsData: JSON.stringify([]),
+          gensData: JSON.stringify(tree.generations),
+          createdBy: session.user.id
+        }
+      });
+    }
 
     return successResponse(tree, 'Tree retrieved successfully');
   } catch (error) {

@@ -23,7 +23,8 @@ import { Loader2, TreePine, Eye, LogIn } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
 import { User2, Calendar, MapPin, Briefcase, Heart, Users } from 'lucide-react';
 import { MemberAvatar } from '@/components/features/members/member-avatar';
-import { generateTreeLayout } from '@/utils/tree-layout';
+import { GenealogyEngine } from '@/domain/inference/genealogy-engine';
+import { useFamilyTreeRenderer } from '@/components/features/tree/family-tree-renderer';
 
 const nodeTypes = { member: MemberNode, generationLane: GenerationLaneNode, familyJunction: FamilyJunctionNode };
 const edgeTypes = { relationship: RelationshipEdgeMemo };
@@ -208,18 +209,20 @@ function PublicTreeCanvas({ treeData }: { treeData: any }) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const { nodes: initialNodes, edges: initialEdges } = React.useMemo(
-    () => generateTreeLayout(treeData.members || [], treeData.generations || [], isMobile),
-    [treeData, isMobile]
-  );
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const familyGraph = React.useMemo(() => {
+    return GenealogyEngine.buildFamilyGraph(treeData.members || []);
+  }, [treeData.members]);
+
+  const { nodes: rendererNodes, edges: rendererEdges } = useFamilyTreeRenderer(familyGraph, treeData.generations || []);
+  
+  const [nodes, setNodes, onNodesChange] = useNodesState(rendererNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(rendererEdges);
   const [selectedMember, setSelectedMember] = React.useState<any>(null);
 
   React.useEffect(() => {
-    setNodes(initialNodes);
-    setEdges(initialEdges);
-  }, [initialNodes, initialEdges, setNodes, setEdges]);
+    setNodes(rendererNodes);
+    setEdges(rendererEdges);
+  }, [rendererNodes, rendererEdges, setNodes, setEdges]);
 
   // Listen for member clicks via the store — override to use local state
   const handleNodeClick = React.useCallback((_: any, node: any) => {

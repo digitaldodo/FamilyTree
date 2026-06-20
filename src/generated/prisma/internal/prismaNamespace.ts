@@ -396,7 +396,8 @@ export const ModelName = {
   Session: 'Session',
   VerificationToken: 'VerificationToken',
   Notification: 'Notification',
-  Invite: 'Invite'
+  Invite: 'Invite',
+  TreeVersion: 'TreeVersion'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -412,7 +413,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "tree" | "treeCollaborator" | "generation" | "member" | "relationship" | "media" | "activityLog" | "account" | "session" | "verificationToken" | "notification" | "invite"
+    modelProps: "user" | "tree" | "treeCollaborator" | "generation" | "member" | "relationship" | "media" | "activityLog" | "account" | "session" | "verificationToken" | "notification" | "invite" | "treeVersion"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1378,6 +1379,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TreeVersion: {
+      payload: Prisma.$TreeVersionPayload<ExtArgs>
+      fields: Prisma.TreeVersionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TreeVersionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeVersionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TreeVersionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeVersionPayload>
+        }
+        findFirst: {
+          args: Prisma.TreeVersionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeVersionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TreeVersionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeVersionPayload>
+        }
+        findMany: {
+          args: Prisma.TreeVersionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeVersionPayload>[]
+        }
+        create: {
+          args: Prisma.TreeVersionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeVersionPayload>
+        }
+        createMany: {
+          args: Prisma.TreeVersionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TreeVersionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeVersionPayload>[]
+        }
+        delete: {
+          args: Prisma.TreeVersionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeVersionPayload>
+        }
+        update: {
+          args: Prisma.TreeVersionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeVersionPayload>
+        }
+        deleteMany: {
+          args: Prisma.TreeVersionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TreeVersionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TreeVersionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeVersionPayload>[]
+        }
+        upsert: {
+          args: Prisma.TreeVersionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TreeVersionPayload>
+        }
+        aggregate: {
+          args: Prisma.TreeVersionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTreeVersion>
+        }
+        groupBy: {
+          args: Prisma.TreeVersionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TreeVersionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TreeVersionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TreeVersionCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1497,6 +1572,7 @@ export const RelationshipScalarFieldEnum = {
   type: 'type',
   fromId: 'fromId',
   toId: 'toId',
+  treeId: 'treeId',
   createdAt: 'createdAt'
 } as const
 
@@ -1593,6 +1669,20 @@ export const InviteScalarFieldEnum = {
 export type InviteScalarFieldEnum = (typeof InviteScalarFieldEnum)[keyof typeof InviteScalarFieldEnum]
 
 
+export const TreeVersionScalarFieldEnum = {
+  id: 'id',
+  treeId: 'treeId',
+  name: 'name',
+  membersData: 'membersData',
+  relationsData: 'relationsData',
+  gensData: 'gensData',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt'
+} as const
+
+export type TreeVersionScalarFieldEnum = (typeof TreeVersionScalarFieldEnum)[keyof typeof TreeVersionScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1607,6 +1697,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -1909,6 +2006,7 @@ export type GlobalOmitConfig = {
   verificationToken?: Prisma.VerificationTokenOmit
   notification?: Prisma.NotificationOmit
   invite?: Prisma.InviteOmit
+  treeVersion?: Prisma.TreeVersionOmit
 }
 
 /* Types for Logging */

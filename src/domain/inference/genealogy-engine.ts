@@ -38,11 +38,26 @@ export type FamilyGraph = {
   };
 };
 
+const graphCache = new Map<string, FamilyGraph>();
+
+export type BuildGraphPayload = {
+  treeId: string;
+  versionId?: string | null;
+  members: MemberWithRelations[];
+};
+
 /**
  * Pure functions to derive family structures from raw database relationships.
  */
 export const GenealogyEngine = {
-  buildFamilyGraph(members: MemberWithRelations[]): FamilyGraph {
+  buildFamilyGraph(payload: BuildGraphPayload): FamilyGraph {
+    const cacheKey = `${payload.treeId}-${payload.versionId || 'latest'}`;
+    
+    if (graphCache.has(cacheKey)) {
+      return graphCache.get(cacheKey)!;
+    }
+
+    const { members } = payload;
     const nodesMap = new Map<string, FamilyGraphNode>();
     const edges: FamilyGraphEdge[] = [];
     
@@ -124,6 +139,7 @@ export const GenealogyEngine = {
       }
     };
 
+    graphCache.set(cacheKey, graph);
     return graph;
   },
 

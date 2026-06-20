@@ -63,7 +63,8 @@ export const ModelName = {
   Session: 'Session',
   VerificationToken: 'VerificationToken',
   Notification: 'Notification',
-  Invite: 'Invite'
+  Invite: 'Invite',
+  TreeVersion: 'TreeVersion'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -162,6 +163,7 @@ export const RelationshipScalarFieldEnum = {
   type: 'type',
   fromId: 'fromId',
   toId: 'toId',
+  treeId: 'treeId',
   createdAt: 'createdAt'
 } as const
 
@@ -258,6 +260,20 @@ export const InviteScalarFieldEnum = {
 export type InviteScalarFieldEnum = (typeof InviteScalarFieldEnum)[keyof typeof InviteScalarFieldEnum]
 
 
+export const TreeVersionScalarFieldEnum = {
+  id: 'id',
+  treeId: 'treeId',
+  name: 'name',
+  membersData: 'membersData',
+  relationsData: 'relationsData',
+  gensData: 'gensData',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt'
+} as const
+
+export type TreeVersionScalarFieldEnum = (typeof TreeVersionScalarFieldEnum)[keyof typeof TreeVersionScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -272,6 +288,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

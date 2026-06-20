@@ -7,12 +7,17 @@ import { useEffect, useMemo } from 'react';
 
 export function useMembers(treeId?: string) {
   const activeTreeId = useAppStore(s => s.activeTreeId);
+  const selectedTreeVersionId = useAppStore(s => s.selectedTreeVersionId);
   const resolvedTreeId = treeId || activeTreeId;
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['tree', resolvedTreeId],
+    queryKey: ['tree', resolvedTreeId, selectedTreeVersionId],
     queryFn: async () => {
-      const res = await fetch(`/api/trees/${resolvedTreeId}?t=${Date.now()}`);
+      const endpoint = selectedTreeVersionId 
+        ? `/api/treeVersion/${selectedTreeVersionId}` 
+        : `/api/trees/${resolvedTreeId}`;
+        
+      const res = await fetch(endpoint);
       const json = await res.json();
       if (!res.ok || !json.success) {
         throw new Error(json.message || 'Failed to load tree data');
@@ -23,7 +28,7 @@ export function useMembers(treeId?: string) {
   });
 
   const members: MemberWithRelations[] = useMemo(() => {
-    const safeMembers = Array.isArray(data?.members) ? data.members : [];
+    const safeMembers = Array.isArray(data?.members) ? data.members : (Array.isArray(data?.membersData) ? data.membersData : []);
     return safeMembers.map((m: any) => ({
       ...m,
       relationsFrom: Array.isArray(m.relationsFrom) ? m.relationsFrom : [],
@@ -32,17 +37,10 @@ export function useMembers(treeId?: string) {
   }, [data]);
 
   const generations: Generation[] = useMemo(() => {
-    return Array.isArray(data?.generations) ? data.generations : [];
+    return Array.isArray(data?.generations) ? data.generations : (Array.isArray(data?.gensData) ? data.gensData : []);
   }, [data]);
 
   // Handled entirely by React Query now. No duplicate state in Zustand.
-
-  // Handle manual refresh
-  useEffect(() => {
-    const handleRefresh = () => refetch();
-    window.addEventListener('refresh-members', handleRefresh);
-    return () => window.removeEventListener('refresh-members', handleRefresh);
-  }, [refetch]);
 
   return { members, generations, isLoading, error: error?.message || null, fetchMembers: refetch };
 }

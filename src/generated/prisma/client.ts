@@ -106,3 +106,8 @@ export type Notification = Prisma.NotificationModel
  * 
  */
 export type Invite = Prisma.InviteModel
+/**
+ * Model TreeVersion
+ * 
+ */
+export type TreeVersion = Prisma.TreeVersionModel

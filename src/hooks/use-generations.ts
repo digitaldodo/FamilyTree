@@ -15,7 +15,7 @@ export function useGenerations(treeId?: string) {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['tree', resolvedTreeId],
     queryFn: async () => {
-      const res = await fetch(`/api/trees/${resolvedTreeId}?t=${Date.now()}`);
+      const res = await fetch(`/api/trees/${resolvedTreeId}`);
       const json = await res.json();
       if (!res.ok || !json.success) throw new Error(json.message);
       return json.data;
@@ -99,10 +99,6 @@ export function useGenerations(treeId?: string) {
 
       toast.success('Generation deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
-      
-      if (action) {
-        window.dispatchEvent(new Event('refresh-members'));
-      }
     } catch (error: any) {
       toast.error(error.message || 'Failed to delete generation');
       throw error;

@@ -20,8 +20,12 @@ export function MemberRelationships({ member, members, onNavigateToMember, readO
   };
 
   const familyGraph = useMemo(() => {
-    return GenealogyEngine.buildFamilyGraph(safeMembersForFind);
-  }, [safeMembersForFind]);
+    return GenealogyEngine.buildFamilyGraph({
+      treeId: member.treeId,
+      versionId: null, // UI components that use this locally can default to null or pull from store if needed
+      members: safeMembersForFind
+    });
+  }, [safeMembersForFind, member.treeId]);
 
   const derived = familyGraph.derivedRelationships[member.id] || {
     parents: [],
