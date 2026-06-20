@@ -37,8 +37,7 @@ export type Gender = (typeof Gender)[keyof typeof Gender]
 
 export const RelationshipType = {
   PARENT: 'PARENT',
-  SPOUSE: 'SPOUSE',
-  SIBLING: 'SIBLING'
+  SPOUSE: 'SPOUSE'
 } as const
 
 export type RelationshipType = (typeof RelationshipType)[keyof typeof RelationshipType]

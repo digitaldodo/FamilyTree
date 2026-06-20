@@ -16,6 +16,7 @@ import { ImageUpload } from './image-upload';
 import { RelationshipSelector } from './relationship-selector';
 import { useAppStore } from '@/store/use-app-store';
 import { useGenerations } from '@/hooks/use-generations';
+import { useMembers } from '@/hooks/use-members';
 
 const formSchema = updateMemberSchema.extend({
   firstName: z.string().min(1, 'First name is required'),
@@ -36,6 +37,7 @@ interface MemberFormProps {
 export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberFormProps) {
   const { activeTreeId, defaultGenerationForNewMember } = useAppStore();
   const { generations, createGeneration } = useGenerations();
+  const { members } = useMembers();
   const [status, setStatus] = React.useState<'Alive' | 'Deceased'>(member?.deathDate ? 'Deceased' : 'Alive');
 
   const {
@@ -105,7 +107,6 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       }
       
       // Check if the selected parent has a spouse
-      const members = useAppStore.getState().members;
       const selectedParent = members.find(m => m.id === id);
       if (selectedParent) {
         const spouseRel = selectedParent.relationsFrom.find(r => r.type === 'SPOUSE') || 

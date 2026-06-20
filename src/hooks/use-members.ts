@@ -2,13 +2,11 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useAppStore } from '@/store/use-app-store';
-import { MemberWithRelations } from '@/types/member';
+import { MemberWithRelations, Generation } from '@/types/member';
 import { useEffect, useMemo } from 'react';
 
 export function useMembers(treeId?: string) {
   const activeTreeId = useAppStore(s => s.activeTreeId);
-  const setMembers = useAppStore(s => s.setMembers);
-  const setGenerations = useAppStore(s => s.setGenerations);
   const resolvedTreeId = treeId || activeTreeId;
 
   const { data, isLoading, error, refetch } = useQuery({
@@ -33,19 +31,11 @@ export function useMembers(treeId?: string) {
     }));
   }, [data]);
 
-  const generations = useMemo(() => {
+  const generations: Generation[] = useMemo(() => {
     return Array.isArray(data?.generations) ? data.generations : [];
   }, [data]);
 
-  // Sync to zustand for components using getState() or direct store access
-  useEffect(() => {
-    if (members.length >= 0) {
-      setMembers(members);
-    }
-    if (generations.length > 0 || (data && data.generations)) {
-      setGenerations(generations);
-    }
-  }, [members, generations, setMembers, setGenerations, data]);
+  // Handled entirely by React Query now. No duplicate state in Zustand.
 
   // Handle manual refresh
   useEffect(() => {
@@ -54,5 +44,5 @@ export function useMembers(treeId?: string) {
     return () => window.removeEventListener('refresh-members', handleRefresh);
   }, [refetch]);
 
-  return { members, isLoading, error: error?.message || null, fetchMembers: refetch };
+  return { members, generations, isLoading, error: error?.message || null, fetchMembers: refetch };
 }

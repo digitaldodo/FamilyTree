@@ -5,7 +5,7 @@ import { Generation } from '@/types/member';
 import { toast } from 'sonner';
 
 export function useGenerations(treeId?: string) {
-  const { activeTreeId, setGenerations } = useAppStore();
+  const { activeTreeId } = useAppStore();
   const queryClient = useQueryClient();
   const resolvedTreeId = treeId || activeTreeId;
 
@@ -25,12 +25,7 @@ export function useGenerations(treeId?: string) {
 
   const generations: Generation[] = data?.generations || [];
 
-  // Sync with Zustand for components that rely on useAppStore(s => s.generations)
-  useEffect(() => {
-    if (generations.length >= 0) {
-      setGenerations(generations);
-    }
-  }, [generations, setGenerations]);
+  // No Zustand sync for generations anymore
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 

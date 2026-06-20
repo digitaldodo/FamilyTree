@@ -286,11 +286,11 @@ export type MemberWhereInput = {
   treeId?: Prisma.StringFilter<"Member"> | string
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
+  media?: Prisma.MediaListRelationFilter
   generation?: Prisma.XOR<Prisma.GenerationScalarRelationFilter, Prisma.GenerationWhereInput>
   tree?: Prisma.XOR<Prisma.TreeScalarRelationFilter, Prisma.TreeWhereInput>
   relationsFrom?: Prisma.RelationshipListRelationFilter
   relationsTo?: Prisma.RelationshipListRelationFilter
-  media?: Prisma.MediaListRelationFilter
 }
 
 export type MemberOrderByWithRelationInput = {
@@ -312,11 +312,11 @@ export type MemberOrderByWithRelationInput = {
   treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  media?: Prisma.MediaOrderByRelationAggregateInput
   generation?: Prisma.GenerationOrderByWithRelationInput
   tree?: Prisma.TreeOrderByWithRelationInput
   relationsFrom?: Prisma.RelationshipOrderByRelationAggregateInput
   relationsTo?: Prisma.RelationshipOrderByRelationAggregateInput
-  media?: Prisma.MediaOrderByRelationAggregateInput
 }
 
 export type MemberWhereUniqueInput = Prisma.AtLeast<{
@@ -341,11 +341,11 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   treeId?: Prisma.StringFilter<"Member"> | string
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
+  media?: Prisma.MediaListRelationFilter
   generation?: Prisma.XOR<Prisma.GenerationScalarRelationFilter, Prisma.GenerationWhereInput>
   tree?: Prisma.XOR<Prisma.TreeScalarRelationFilter, Prisma.TreeWhereInput>
   relationsFrom?: Prisma.RelationshipListRelationFilter
   relationsTo?: Prisma.RelationshipListRelationFilter
-  media?: Prisma.MediaListRelationFilter
 }, "id">
 
 export type MemberOrderByWithAggregationInput = {
@@ -413,11 +413,11 @@ export type MemberCreateInput = {
   occupation?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  media?: Prisma.MediaCreateNestedManyWithoutMemberInput
   generation: Prisma.GenerationCreateNestedOneWithoutMembersInput
   tree: Prisma.TreeCreateNestedOneWithoutMembersInput
   relationsFrom?: Prisma.RelationshipCreateNestedManyWithoutFromInput
   relationsTo?: Prisma.RelationshipCreateNestedManyWithoutToInput
-  media?: Prisma.MediaCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateInput = {
@@ -439,9 +439,9 @@ export type MemberUncheckedCreateInput = {
   treeId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutMemberInput
   relationsFrom?: Prisma.RelationshipUncheckedCreateNestedManyWithoutFromInput
   relationsTo?: Prisma.RelationshipUncheckedCreateNestedManyWithoutToInput
-  media?: Prisma.MediaUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUpdateInput = {
@@ -461,11 +461,11 @@ export type MemberUpdateInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  media?: Prisma.MediaUpdateManyWithoutMemberNestedInput
   generation?: Prisma.GenerationUpdateOneRequiredWithoutMembersNestedInput
   tree?: Prisma.TreeUpdateOneRequiredWithoutMembersNestedInput
   relationsFrom?: Prisma.RelationshipUpdateManyWithoutFromNestedInput
   relationsTo?: Prisma.RelationshipUpdateManyWithoutToNestedInput
-  media?: Prisma.MediaUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateInput = {
@@ -487,9 +487,9 @@ export type MemberUncheckedUpdateInput = {
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  media?: Prisma.MediaUncheckedUpdateManyWithoutMemberNestedInput
   relationsFrom?: Prisma.RelationshipUncheckedUpdateManyWithoutFromNestedInput
   relationsTo?: Prisma.RelationshipUncheckedUpdateManyWithoutToNestedInput
-  media?: Prisma.MediaUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateManyInput = {
@@ -778,10 +778,10 @@ export type MemberCreateWithoutTreeInput = {
   occupation?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  media?: Prisma.MediaCreateNestedManyWithoutMemberInput
   generation: Prisma.GenerationCreateNestedOneWithoutMembersInput
   relationsFrom?: Prisma.RelationshipCreateNestedManyWithoutFromInput
   relationsTo?: Prisma.RelationshipCreateNestedManyWithoutToInput
-  media?: Prisma.MediaCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutTreeInput = {
@@ -802,9 +802,9 @@ export type MemberUncheckedCreateWithoutTreeInput = {
   generationId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutMemberInput
   relationsFrom?: Prisma.RelationshipUncheckedCreateNestedManyWithoutFromInput
   relationsTo?: Prisma.RelationshipUncheckedCreateNestedManyWithoutToInput
-  media?: Prisma.MediaUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutTreeInput = {
@@ -874,10 +874,10 @@ export type MemberCreateWithoutGenerationInput = {
   occupation?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  media?: Prisma.MediaCreateNestedManyWithoutMemberInput
   tree: Prisma.TreeCreateNestedOneWithoutMembersInput
   relationsFrom?: Prisma.RelationshipCreateNestedManyWithoutFromInput
   relationsTo?: Prisma.RelationshipCreateNestedManyWithoutToInput
-  media?: Prisma.MediaCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutGenerationInput = {
@@ -898,9 +898,9 @@ export type MemberUncheckedCreateWithoutGenerationInput = {
   treeId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutMemberInput
   relationsFrom?: Prisma.RelationshipUncheckedCreateNestedManyWithoutFromInput
   relationsTo?: Prisma.RelationshipUncheckedCreateNestedManyWithoutToInput
-  media?: Prisma.MediaUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutGenerationInput = {
@@ -946,10 +946,10 @@ export type MemberCreateWithoutRelationsFromInput = {
   occupation?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  media?: Prisma.MediaCreateNestedManyWithoutMemberInput
   generation: Prisma.GenerationCreateNestedOneWithoutMembersInput
   tree: Prisma.TreeCreateNestedOneWithoutMembersInput
   relationsTo?: Prisma.RelationshipCreateNestedManyWithoutToInput
-  media?: Prisma.MediaCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutRelationsFromInput = {
@@ -971,8 +971,8 @@ export type MemberUncheckedCreateWithoutRelationsFromInput = {
   treeId: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  relationsTo?: Prisma.RelationshipUncheckedCreateNestedManyWithoutToInput
   media?: Prisma.MediaUncheckedCreateNestedManyWithoutMemberInput
+  relationsTo?: Prisma.RelationshipUncheckedCreateNestedManyWithoutToInput
 }
 
 export type MemberCreateOrConnectWithoutRelationsFromInput = {
@@ -997,10 +997,10 @@ export type MemberCreateWithoutRelationsToInput = {
   occupation?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  media?: Prisma.MediaCreateNestedManyWithoutMemberInput
   generation: Prisma.GenerationCreateNestedOneWithoutMembersInput
   tree: Prisma.TreeCreateNestedOneWithoutMembersInput
   relationsFrom?: Prisma.RelationshipCreateNestedManyWithoutFromInput
-  media?: Prisma.MediaCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutRelationsToInput = {
@@ -1022,8 +1022,8 @@ export type MemberUncheckedCreateWithoutRelationsToInput = {
   treeId: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  relationsFrom?: Prisma.RelationshipUncheckedCreateNestedManyWithoutFromInput
   media?: Prisma.MediaUncheckedCreateNestedManyWithoutMemberInput
+  relationsFrom?: Prisma.RelationshipUncheckedCreateNestedManyWithoutFromInput
 }
 
 export type MemberCreateOrConnectWithoutRelationsToInput = {
@@ -1059,10 +1059,10 @@ export type MemberUpdateWithoutRelationsFromInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  media?: Prisma.MediaUpdateManyWithoutMemberNestedInput
   generation?: Prisma.GenerationUpdateOneRequiredWithoutMembersNestedInput
   tree?: Prisma.TreeUpdateOneRequiredWithoutMembersNestedInput
   relationsTo?: Prisma.RelationshipUpdateManyWithoutToNestedInput
-  media?: Prisma.MediaUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutRelationsFromInput = {
@@ -1084,8 +1084,8 @@ export type MemberUncheckedUpdateWithoutRelationsFromInput = {
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  relationsTo?: Prisma.RelationshipUncheckedUpdateManyWithoutToNestedInput
   media?: Prisma.MediaUncheckedUpdateManyWithoutMemberNestedInput
+  relationsTo?: Prisma.RelationshipUncheckedUpdateManyWithoutToNestedInput
 }
 
 export type MemberUpsertWithoutRelationsToInput = {
@@ -1116,10 +1116,10 @@ export type MemberUpdateWithoutRelationsToInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  media?: Prisma.MediaUpdateManyWithoutMemberNestedInput
   generation?: Prisma.GenerationUpdateOneRequiredWithoutMembersNestedInput
   tree?: Prisma.TreeUpdateOneRequiredWithoutMembersNestedInput
   relationsFrom?: Prisma.RelationshipUpdateManyWithoutFromNestedInput
-  media?: Prisma.MediaUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutRelationsToInput = {
@@ -1141,8 +1141,8 @@ export type MemberUncheckedUpdateWithoutRelationsToInput = {
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  relationsFrom?: Prisma.RelationshipUncheckedUpdateManyWithoutFromNestedInput
   media?: Prisma.MediaUncheckedUpdateManyWithoutMemberNestedInput
+  relationsFrom?: Prisma.RelationshipUncheckedUpdateManyWithoutFromNestedInput
 }
 
 export type MemberCreateWithoutMediaInput = {
@@ -1290,10 +1290,10 @@ export type MemberUpdateWithoutTreeInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  media?: Prisma.MediaUpdateManyWithoutMemberNestedInput
   generation?: Prisma.GenerationUpdateOneRequiredWithoutMembersNestedInput
   relationsFrom?: Prisma.RelationshipUpdateManyWithoutFromNestedInput
   relationsTo?: Prisma.RelationshipUpdateManyWithoutToNestedInput
-  media?: Prisma.MediaUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutTreeInput = {
@@ -1314,9 +1314,9 @@ export type MemberUncheckedUpdateWithoutTreeInput = {
   generationId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  media?: Prisma.MediaUncheckedUpdateManyWithoutMemberNestedInput
   relationsFrom?: Prisma.RelationshipUncheckedUpdateManyWithoutFromNestedInput
   relationsTo?: Prisma.RelationshipUncheckedUpdateManyWithoutToNestedInput
-  media?: Prisma.MediaUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateManyWithoutTreeInput = {
@@ -1376,10 +1376,10 @@ export type MemberUpdateWithoutGenerationInput = {
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  media?: Prisma.MediaUpdateManyWithoutMemberNestedInput
   tree?: Prisma.TreeUpdateOneRequiredWithoutMembersNestedInput
   relationsFrom?: Prisma.RelationshipUpdateManyWithoutFromNestedInput
   relationsTo?: Prisma.RelationshipUpdateManyWithoutToNestedInput
-  media?: Prisma.MediaUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutGenerationInput = {
@@ -1400,9 +1400,9 @@ export type MemberUncheckedUpdateWithoutGenerationInput = {
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  media?: Prisma.MediaUncheckedUpdateManyWithoutMemberNestedInput
   relationsFrom?: Prisma.RelationshipUncheckedUpdateManyWithoutFromNestedInput
   relationsTo?: Prisma.RelationshipUncheckedUpdateManyWithoutToNestedInput
-  media?: Prisma.MediaUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateManyWithoutGenerationInput = {
@@ -1431,15 +1431,15 @@ export type MemberUncheckedUpdateManyWithoutGenerationInput = {
  */
 
 export type MemberCountOutputType = {
+  media: number
   relationsFrom: number
   relationsTo: number
-  media: number
 }
 
 export type MemberCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  media?: boolean | MemberCountOutputTypeCountMediaArgs
   relationsFrom?: boolean | MemberCountOutputTypeCountRelationsFromArgs
   relationsTo?: boolean | MemberCountOutputTypeCountRelationsToArgs
-  media?: boolean | MemberCountOutputTypeCountMediaArgs
 }
 
 /**
@@ -1455,6 +1455,13 @@ export type MemberCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Exten
 /**
  * MemberCountOutputType without action
  */
+export type MemberCountOutputTypeCountMediaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MediaWhereInput
+}
+
+/**
+ * MemberCountOutputType without action
+ */
 export type MemberCountOutputTypeCountRelationsFromArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.RelationshipWhereInput
 }
@@ -1464,13 +1471,6 @@ export type MemberCountOutputTypeCountRelationsFromArgs<ExtArgs extends runtime.
  */
 export type MemberCountOutputTypeCountRelationsToArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.RelationshipWhereInput
-}
-
-/**
- * MemberCountOutputType without action
- */
-export type MemberCountOutputTypeCountMediaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.MediaWhereInput
 }
 
 
@@ -1493,11 +1493,11 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   treeId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  media?: boolean | Prisma.Member$mediaArgs<ExtArgs>
   generation?: boolean | Prisma.GenerationDefaultArgs<ExtArgs>
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
   relationsFrom?: boolean | Prisma.Member$relationsFromArgs<ExtArgs>
   relationsTo?: boolean | Prisma.Member$relationsToArgs<ExtArgs>
-  media?: boolean | Prisma.Member$mediaArgs<ExtArgs>
   _count?: boolean | Prisma.MemberCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["member"]>
 
@@ -1570,11 +1570,11 @@ export type MemberSelectScalar = {
 
 export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "middleName" | "birthDate" | "deathDate" | "gender" | "bio" | "imageUrl" | "coverImage" | "phone" | "email" | "address" | "occupation" | "generationId" | "treeId" | "createdAt" | "updatedAt", ExtArgs["result"]["member"]>
 export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  media?: boolean | Prisma.Member$mediaArgs<ExtArgs>
   generation?: boolean | Prisma.GenerationDefaultArgs<ExtArgs>
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
   relationsFrom?: boolean | Prisma.Member$relationsFromArgs<ExtArgs>
   relationsTo?: boolean | Prisma.Member$relationsToArgs<ExtArgs>
-  media?: boolean | Prisma.Member$mediaArgs<ExtArgs>
   _count?: boolean | Prisma.MemberCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MemberIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1589,11 +1589,11 @@ export type MemberIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
 export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Member"
   objects: {
+    media: Prisma.$MediaPayload<ExtArgs>[]
     generation: Prisma.$GenerationPayload<ExtArgs>
     tree: Prisma.$TreePayload<ExtArgs>
     relationsFrom: Prisma.$RelationshipPayload<ExtArgs>[]
     relationsTo: Prisma.$RelationshipPayload<ExtArgs>[]
-    media: Prisma.$MediaPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2008,11 +2008,11 @@ readonly fields: MemberFieldRefs;
  */
 export interface Prisma__MemberClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  media<T extends Prisma.Member$mediaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$mediaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MediaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   generation<T extends Prisma.GenerationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GenerationDefaultArgs<ExtArgs>>): Prisma.Prisma__GenerationClient<runtime.Types.Result.GetResult<Prisma.$GenerationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   tree<T extends Prisma.TreeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TreeDefaultArgs<ExtArgs>>): Prisma.Prisma__TreeClient<runtime.Types.Result.GetResult<Prisma.$TreePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   relationsFrom<T extends Prisma.Member$relationsFromArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$relationsFromArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RelationshipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   relationsTo<T extends Prisma.Member$relationsToArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$relationsToArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RelationshipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  media<T extends Prisma.Member$mediaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$mediaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MediaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2461,6 +2461,30 @@ export type MemberDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
 }
 
 /**
+ * Member.media
+ */
+export type Member$mediaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Media
+   */
+  select?: Prisma.MediaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Media
+   */
+  omit?: Prisma.MediaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MediaInclude<ExtArgs> | null
+  where?: Prisma.MediaWhereInput
+  orderBy?: Prisma.MediaOrderByWithRelationInput | Prisma.MediaOrderByWithRelationInput[]
+  cursor?: Prisma.MediaWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MediaScalarFieldEnum | Prisma.MediaScalarFieldEnum[]
+}
+
+/**
  * Member.relationsFrom
  */
 export type Member$relationsFromArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2506,30 +2530,6 @@ export type Member$relationsToArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.RelationshipScalarFieldEnum | Prisma.RelationshipScalarFieldEnum[]
-}
-
-/**
- * Member.media
- */
-export type Member$mediaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Media
-   */
-  select?: Prisma.MediaSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Media
-   */
-  omit?: Prisma.MediaOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.MediaInclude<ExtArgs> | null
-  where?: Prisma.MediaWhereInput
-  orderBy?: Prisma.MediaOrderByWithRelationInput | Prisma.MediaOrderByWithRelationInput[]
-  cursor?: Prisma.MediaWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.MediaScalarFieldEnum | Prisma.MediaScalarFieldEnum[]
 }
 
 /**

@@ -33,19 +33,6 @@ interface AppState {
   setUserTrees: (trees: TreeSummary[]) => void;
   userRole: TreePermission;
   setUserRole: (role: TreePermission) => void;
-  
-  // Shared global member state for optimistic UI across list and tree
-  generations: Generation[];
-  setGenerations: (generations: Generation[]) => void;
-  addGeneration: (generation: Generation) => void;
-  updateGeneration: (id: string, generation: Generation) => void;
-  deleteGeneration: (id: string) => void;
-  
-  members: MemberWithRelations[];
-  setMembers: (members: MemberWithRelations[]) => void;
-  addMember: (member: MemberWithRelations) => void;
-  updateMember: (id: string, member: MemberWithRelations) => void;
-  deleteMember: (id: string) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -77,48 +64,13 @@ export const useAppStore = create<AppState>()(
 
   // Multi-tree support
   activeTreeId: null,
-  setActiveTreeId: (id) => set({ activeTreeId: id, members: [], generations: [] }),
+  setActiveTreeId: (id) => set({ activeTreeId: id }),
   isInitializingTrees: true,
   setIsInitializingTrees: (isInit) => set({ isInitializingTrees: isInit }),
   userTrees: [],
   setUserTrees: (trees) => set({ userTrees: trees }),
   userRole: null,
   setUserRole: (role) => set({ userRole: role }),
-
-  generations: [],
-  setGenerations: (generations) => set((state) => {
-    const safeGenerations = Array.isArray(generations) ? generations : [];
-    // If all were selected previously (or it's empty initialization), select all new ones
-    const isAllSelected = state.generations.length === 0 || state.selectedGenerationIds.length === state.generations.length;
-    return {
-      generations: safeGenerations,
-      selectedGenerationIds: isAllSelected ? safeGenerations.map(g => g.id) : state.selectedGenerationIds.filter(id => safeGenerations.some(g => g.id === id))
-    };
-  }),
-  addGeneration: (generation) => set((state) => {
-    const isAllSelected = state.selectedGenerationIds.length === state.generations.length;
-    return { 
-      generations: [...state.generations, generation],
-      selectedGenerationIds: isAllSelected ? [...state.selectedGenerationIds, generation.id] : state.selectedGenerationIds
-    };
-  }),
-  updateGeneration: (id, updatedGeneration) => set((state) => ({
-    generations: state.generations.map((g) => (g.id === id ? updatedGeneration : g))
-  })),
-  deleteGeneration: (id) => set((state) => ({
-    generations: state.generations.filter((g) => g.id !== id),
-    selectedGenerationIds: state.selectedGenerationIds.filter((genId) => genId !== id)
-  })),
-
-  members: [],
-  setMembers: (members) => set({ members: Array.isArray(members) ? members : [] }),
-  addMember: (member) => set((state) => ({ members: [...state.members, member] })),
-  updateMember: (id, updatedMember) => set((state) => ({
-    members: state.members.map((m) => (m.id === id ? updatedMember : m))
-  })),
-  deleteMember: (id) => set((state) => ({
-    members: state.members.filter((m) => m.id !== id)
-  })),
     }),
     {
       name: 'family-tree-storage',

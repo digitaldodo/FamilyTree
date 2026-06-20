@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { MemberWithRelations } from '@/types/member';
 import { useAppStore } from '@/store/use-app-store';
+import { useGenerations } from '@/hooks/use-generations';
 import { cn } from '@/lib/utils';
 import { getGenerationLabel } from '@/utils/date';
 import { MemberAvatar } from '../members/member-avatar';
@@ -19,7 +20,7 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
   const selectedMemberId = useAppStore(s => s.selectedMemberId);
   const setSelectedMemberId = useAppStore(s => s.setSelectedMemberId);
   const setIsMemberModalOpen = useAppStore(s => s.setIsMemberModalOpen);
-  const generations = useAppStore(s => s.generations);
+  const { generations = [] } = useGenerations();
   
   const isSelected = selectedMemberId === member.id;
   const generation = generations.find(g => g.id === member.generationId);

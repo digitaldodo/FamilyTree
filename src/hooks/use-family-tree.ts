@@ -4,13 +4,13 @@ import { useAppStore } from '@/store/use-app-store';
 import { generateTreeLayout } from '@/utils/tree-layout';
 import { toast } from 'sonner';
 import { useFilteredGenerations } from './use-filtered-generations';
+import { GenealogyEngine } from '@/domain/inference/genealogy-engine';
 
 export function useFamilyTree(treeId?: string) {
-  const { members, isLoading, error: fetchError } = useMembers(treeId);
+  const { members: rawMembers, generations, isLoading, error: fetchError } = useMembers(treeId);
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  const generations = useAppStore(s => s.generations);
   const selectedGenerationIds = useAppStore(s => s.selectedGenerationIds);
   const setSelectedGenerationIds = useAppStore(s => s.setSelectedGenerationIds);
 
@@ -47,13 +47,18 @@ export function useFamilyTree(treeId?: string) {
     }
   }, [selectedGenerationIds, visibleGenerations, generations, setSelectedGenerationIds]);
 
+  const familyGraph = useMemo(() => {
+    return GenealogyEngine.buildFamilyGraph(rawMembers);
+  }, [rawMembers]);
+
   // Transform members into React Flow Nodes and Edges
   const { nodes: initialNodes, edges: initialEdges } = useMemo(() => {
-    return generateTreeLayout(members, visibleGenerations, isMobile);
-  }, [members, visibleGenerations, isMobile]);
+    return generateTreeLayout(familyGraph, visibleGenerations, isMobile);
+  }, [familyGraph, visibleGenerations, isMobile]);
 
   return {
-    members,
+    members: familyGraph,
+    generations,
     initialNodes,
     initialEdges,
     isLoading,

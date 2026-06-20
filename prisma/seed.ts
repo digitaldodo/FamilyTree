@@ -406,18 +406,7 @@ async function main() {
     });
   }
 
-  // Sibling relationships among the 5 sons
-  for (let i = 0; i < allSons.length; i++) {
-    for (let j = i + 1; j < allSons.length; j++) {
-      await prisma.relationship.create({
-        data: {
-          type: RelationshipType.SIBLING,
-          fromId: allSons[i].id,
-          toId: allSons[j].id,
-        },
-      });
-    }
-  }
+  // Sibling relationships are inferred automatically
 
   // Family 1: Harsh & Shashi → Garima, Ankur
   await prisma.relationship.create({
@@ -431,9 +420,7 @@ async function main() {
       data: { type: RelationshipType.PARENT, fromId: shashi.id, toId: child.id },
     });
   }
-  await prisma.relationship.create({
-    data: { type: RelationshipType.SIBLING, fromId: garima.id, toId: ankur.id },
-  });
+  // Siblings inferred automatically
 
   // Family 2: Rajesh & Bhavna → Swaza, Tanay
   await prisma.relationship.create({
@@ -447,9 +434,7 @@ async function main() {
       data: { type: RelationshipType.PARENT, fromId: bhavna.id, toId: child.id },
     });
   }
-  await prisma.relationship.create({
-    data: { type: RelationshipType.SIBLING, fromId: swaza.id, toId: tanay.id },
-  });
+  // Siblings inferred automatically
 
   // Family 3: Parag & Savita → Sparsh, Tanishq
   await prisma.relationship.create({
@@ -463,9 +448,7 @@ async function main() {
       data: { type: RelationshipType.PARENT, fromId: savita.id, toId: child.id },
     });
   }
-  await prisma.relationship.create({
-    data: { type: RelationshipType.SIBLING, fromId: sparsh.id, toId: tanishq.id },
-  });
+  // Siblings inferred automatically
 
   // Family 4: Vikash & Amita → Ansh, Avni
   await prisma.relationship.create({
@@ -479,9 +462,7 @@ async function main() {
       data: { type: RelationshipType.PARENT, fromId: amita.id, toId: child.id },
     });
   }
-  await prisma.relationship.create({
-    data: { type: RelationshipType.SIBLING, fromId: ansh.id, toId: avni.id },
-  });
+  // Siblings inferred automatically
 
   console.log('   ✓ Created all family relationships\n');
 

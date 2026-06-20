@@ -25,6 +25,8 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
   };
 
   const handleRepair = async () => {
+    alert("Repair function is temporarily disabled during the architecture freeze.");
+    return;
     if (!resolvedTreeId) return;
     if (!window.confirm("Run tree relationship repair? This will automatically link children to both spouses where links are missing.")) return;
     

@@ -39,7 +39,7 @@ const edgeTypes = {
 
 function FamilyTreeCanvas() {
   const activeTreeId = useAppStore(s => s.activeTreeId);
-  const { initialNodes, initialEdges, isLoading, error } = useFamilyTree(activeTreeId || undefined);
+  const { members: treeMembers, generations, initialNodes, initialEdges, isLoading, error } = useFamilyTree(activeTreeId || undefined);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [showDiagnostics, setShowDiagnostics] = React.useState(false);
@@ -136,7 +136,7 @@ function FamilyTreeCanvas() {
           <>
             <div className="absolute top-4 inset-x-4 z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pointer-events-none">
               <div className="pointer-events-auto w-full md:w-auto">
-                <FloatingFamilyStats totalMembers={memberNodes.length} generations={useAppStore.getState().generations.length} />
+                <FloatingFamilyStats totalMembers={memberNodes.length} generations={generations.length} />
               </div>
               <div className="pointer-events-auto w-full md:w-auto flex justify-start md:justify-end overflow-x-hidden">
                 <TreeToolbar />
@@ -164,15 +164,15 @@ function FamilyTreeCanvas() {
               <strong className="text-sm">Tree Diagnostics</strong>
             </div>
             <div className="flex flex-col gap-2">
-              <div className="flex justify-between"><span>Members:</span> <span>{useAppStore.getState().members.length}</span></div>
-              <div className="flex justify-between"><span>Generations:</span> <span>{useAppStore.getState().generations.length}</span></div>
+              <div className="flex justify-between"><span>Members:</span> <span>{treeMembers.length}</span></div>
+              <div className="flex justify-between"><span>Generations:</span> <span>{generations.length}</span></div>
               <div className="flex justify-between"><span>Nodes:</span> <span>{nodes.length}</span></div>
               <div className="flex justify-between"><span>Edges:</span> <span>{edges.length}</span></div>
-              <div className="flex justify-between"><span>Relationships:</span> <span>{useAppStore.getState().members.reduce((acc, m) => acc + m.relationsFrom.length + m.relationsTo.length, 0) / 2}</span></div>
-              <div className="flex justify-between"><span>Photos Loaded:</span> <span className={useAppStore.getState().members.some(m => m.imageUrl) ? 'text-emerald-400' : 'text-amber-400'}>{useAppStore.getState().members.filter(m => m.imageUrl).length}</span></div>
+              <div className="flex justify-between"><span>Relationships:</span> <span>{treeMembers.reduce((acc, m) => acc + m.relationsFrom.length + m.relationsTo.length, 0) / 2}</span></div>
+              <div className="flex justify-between"><span>Photos Loaded:</span> <span className={treeMembers.some(m => m.imageUrl) ? 'text-emerald-400' : 'text-amber-400'}>{treeMembers.filter(m => m.imageUrl).length}</span></div>
             </div>
             {(() => {
-              const { warnings } = buildRelationshipGraph(useAppStore.getState().members, useAppStore.getState().generations);
+              const { warnings } = buildRelationshipGraph(treeMembers, generations);
               if (warnings.length > 0) {
                 return (
                   <div className="mt-4 border-t border-rose-500/50 pt-2">

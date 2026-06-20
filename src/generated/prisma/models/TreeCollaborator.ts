@@ -182,8 +182,8 @@ export type TreeCollaboratorWhereInput = {
   userId?: Prisma.StringFilter<"TreeCollaborator"> | string
   treeId?: Prisma.StringFilter<"TreeCollaborator"> | string
   createdAt?: Prisma.DateTimeFilter<"TreeCollaborator"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   tree?: Prisma.XOR<Prisma.TreeScalarRelationFilter, Prisma.TreeWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type TreeCollaboratorOrderByWithRelationInput = {
@@ -192,8 +192,8 @@ export type TreeCollaboratorOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  user?: Prisma.UserOrderByWithRelationInput
   tree?: Prisma.TreeOrderByWithRelationInput
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type TreeCollaboratorWhereUniqueInput = Prisma.AtLeast<{
@@ -206,8 +206,8 @@ export type TreeCollaboratorWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringFilter<"TreeCollaborator"> | string
   treeId?: Prisma.StringFilter<"TreeCollaborator"> | string
   createdAt?: Prisma.DateTimeFilter<"TreeCollaborator"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   tree?: Prisma.XOR<Prisma.TreeScalarRelationFilter, Prisma.TreeWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "userId_treeId">
 
 export type TreeCollaboratorOrderByWithAggregationInput = {
@@ -236,8 +236,8 @@ export type TreeCollaboratorCreateInput = {
   id?: string
   role?: $Enums.TreeRole
   createdAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutCollaborationsInput
   tree: Prisma.TreeCreateNestedOneWithoutCollaboratorsInput
+  user: Prisma.UserCreateNestedOneWithoutCollaborationsInput
 }
 
 export type TreeCollaboratorUncheckedCreateInput = {
@@ -252,8 +252,8 @@ export type TreeCollaboratorUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumTreeRoleFieldUpdateOperationsInput | $Enums.TreeRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutCollaborationsNestedInput
   tree?: Prisma.TreeUpdateOneRequiredWithoutCollaboratorsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutCollaborationsNestedInput
 }
 
 export type TreeCollaboratorUncheckedUpdateInput = {
@@ -568,8 +568,8 @@ export type TreeCollaboratorSelect<ExtArgs extends runtime.Types.Extensions.Inte
   userId?: boolean
   treeId?: boolean
   createdAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["treeCollaborator"]>
 
 export type TreeCollaboratorSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -578,8 +578,8 @@ export type TreeCollaboratorSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   userId?: boolean
   treeId?: boolean
   createdAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["treeCollaborator"]>
 
 export type TreeCollaboratorSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -588,8 +588,8 @@ export type TreeCollaboratorSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   userId?: boolean
   treeId?: boolean
   createdAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["treeCollaborator"]>
 
 export type TreeCollaboratorSelectScalar = {
@@ -602,23 +602,23 @@ export type TreeCollaboratorSelectScalar = {
 
 export type TreeCollaboratorOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "role" | "userId" | "treeId" | "createdAt", ExtArgs["result"]["treeCollaborator"]>
 export type TreeCollaboratorInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type TreeCollaboratorIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type TreeCollaboratorIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $TreeCollaboratorPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "TreeCollaborator"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
     tree: Prisma.$TreePayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1020,8 +1020,8 @@ readonly fields: TreeCollaboratorFieldRefs;
  */
 export interface Prisma__TreeCollaboratorClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   tree<T extends Prisma.TreeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TreeDefaultArgs<ExtArgs>>): Prisma.Prisma__TreeClient<runtime.Types.Result.GetResult<Prisma.$TreePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

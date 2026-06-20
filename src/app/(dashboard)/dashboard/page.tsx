@@ -39,8 +39,8 @@ function DashboardContent() {
       if (!res.ok || !json.success) throw new Error(json.message);
       
       const tree = json.data;
-      const members = tree.members || [];
-      const generations = tree.generations || [];
+      const members = Array.isArray(tree.members) ? tree.members : [];
+      const generations = Array.isArray(tree.generations) ? tree.generations : [];
       const totalGenerations = generations.length;
       
       // Calculate metrics

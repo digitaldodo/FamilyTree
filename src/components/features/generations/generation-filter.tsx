@@ -1,13 +1,15 @@
 'use client';
 
 import { useAppStore } from '@/store/use-app-store';
+import { useGenerations } from '@/hooks/use-generations';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Filter } from 'lucide-react';
 import { useMemo } from 'react';
 
 export function GenerationFilter() {
-  const { generations, selectedGenerationIds, setSelectedGenerationIds } = useAppStore();
+  const { selectedGenerationIds, setSelectedGenerationIds } = useAppStore();
+  const { generations = [] } = useGenerations();
   const sortedGenerations = [...generations].sort((a, b) => a.orderIndex - b.orderIndex);
 
   const handleToggle = (id: string) => {

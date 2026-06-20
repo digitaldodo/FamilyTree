@@ -55,11 +55,11 @@ export async function repairGenealogy(treeId: string): Promise<RepairReport> {
     const fromGen = rel.from.generation.orderIndex;
     const toGen = rel.to.generation.orderIndex;
 
-    if (rel.type === 'SPOUSE' || rel.type === 'SIBLING') {
+    if (rel.type === 'SPOUSE') {
       if (fromGen !== toGen) {
         report.issues.push({
           type: 'ERROR',
-          message: `${rel.type === 'SPOUSE' ? 'Spouses' : 'Siblings'} across different generations.`,
+          message: `Spouses across different generations.`,
           details: { from: rel.from.firstName, to: rel.to.firstName, fromGen, toGen },
           recommendation: `Move ${rel.from.firstName} and ${rel.to.firstName} to the same generation.`
         });
@@ -123,18 +123,6 @@ export async function repairGenealogy(treeId: string): Promise<RepairReport> {
     }
   }
 
-  // 5. Unnecessary Sibling Links (since we now infer them)
-  const inferredRelationshipsMap = new Map<string, string[]>();
-  // To avoid fully testing inference, we just flag existing SIBLING records as warnings for clean up
-  const explicitSiblings = relationships.filter(r => r.type === 'SIBLING');
-  if (explicitSiblings.length > 0) {
-    report.issues.push({
-      type: 'WARNING',
-      message: 'Explicit Sibling records exist.',
-      details: { count: explicitSiblings.length },
-      recommendation: `Consider deleting the ${explicitSiblings.length} explicit SIBLING records. The Genealogy Engine now dynamically infers siblings based on shared parents.`
-    });
-  }
 
   return report;
 }

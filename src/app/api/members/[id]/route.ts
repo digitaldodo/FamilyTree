@@ -168,10 +168,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
             if (relativeSpouseCount > 0) {
               return errorResponse('VALIDATION_ERROR', 'Member already has a spouse.', 400);
             }
-          } else if (rel.type === 'SIBLING') {
-            if (relative.generation.orderIndex !== newGeneration.orderIndex) {
-               return errorResponse('VALIDATION_ERROR', `Cannot move member. Spouses and siblings must belong to the same generation. Conflicts with relative's generation.`, 400);
-            }
           } else if (rel.type === 'PARENT') {
              // Form says "Parents" - meaning the relative is the Parent, member is the Child.
              if (newGeneration.orderIndex <= relative.generation.orderIndex) {
@@ -215,11 +211,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
             const memberGender = body.gender !== undefined ? body.gender : existing.gender;
             if (relative.generation.orderIndex !== newGeneration.orderIndex || !isSpouseEligible(memberGender, relative.gender)) {
                return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation and satisfy spouse eligibility rules.', 400);
-            }
-          } else if (rel.type === 'SIBLING') {
-            const relative = rel.fromId === id ? rel.to : rel.from;
-            if (relative.generation.orderIndex !== newGeneration.orderIndex) {
-               return errorResponse('VALIDATION_ERROR', `Cannot move member. Spouses and siblings must belong to the same generation. Conflicts with ${relative.firstName}.`, 400);
             }
           } else if (rel.type === 'PARENT') {
              const parentOrder = rel.fromId === id ? newGeneration.orderIndex : rel.from.generation.orderIndex;
@@ -280,8 +271,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
               { type: 'PARENT', fromId: id },
               { type: 'SPOUSE', fromId: id },
               { type: 'SPOUSE', toId: id },
-              { type: 'SIBLING', fromId: id },
-              { type: 'SIBLING', toId: id },
             ]
           }
         });

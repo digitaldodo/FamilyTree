@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/use-app-store';
 import { MemberWithRelations } from '@/types/member';
+import { useMembers } from './use-members';
 
 export function useSearchMembers() {
-  const { members, searchQuery, selectedGenerationIds } = useAppStore();
+  const { searchQuery, selectedGenerationIds } = useAppStore();
+  const { members } = useMembers();
   const [filteredMembers, setFilteredMembers] = useState<MemberWithRelations[]>([]);
 
   useEffect(() => {

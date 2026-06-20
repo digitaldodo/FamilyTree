@@ -116,9 +116,9 @@ export class RelationshipEngine {
     const fromGen = fromMember.generation.orderIndex;
     const toGen = toMember.generation.orderIndex;
 
-    if (type === 'SPOUSE' || type === 'SIBLING') {
+    if (type === 'SPOUSE') {
       if (fromGen !== toGen) {
-        throw new Error(`${type === 'SPOUSE' ? 'Spouse' : 'Sibling'} must belong to the same generation.`);
+        throw new Error(`Spouse must belong to the same generation.`);
       }
       if (type === 'SPOUSE') {
         if (!isSpouseEligible(fromMember.gender, toMember.gender)) {
@@ -214,6 +214,9 @@ export class RelationshipEngine {
    * Automatic Parent Propagation
    */
   static async applySmartRules(fromId: string, toId: string, type: RelationshipType, treeId: string): Promise<void> {
+    // PHASE 1 STABILIZATION FREEZE: Disable auto inference loops
+    return;
+    /*
     if (type === 'PARENT') {
       // share child with spouse
       const spouses = await prisma.relationship.findMany({
@@ -263,6 +266,7 @@ export class RelationshipEngine {
         }
       }
     }
+    */
   }
 
   /**
@@ -297,9 +301,6 @@ export class RelationshipEngine {
       } else if (rel.type === 'SPOUSE') {
         addEdge(graph.spouses, rel.fromId, rel.toId);
         addEdge(graph.spouses, rel.toId, rel.fromId);
-      } else if (rel.type === 'SIBLING') {
-        addEdge(graph.explicitSiblings, rel.fromId, rel.toId);
-        addEdge(graph.explicitSiblings, rel.toId, rel.fromId);
       }
     }
 

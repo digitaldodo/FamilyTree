@@ -2,6 +2,7 @@ import { MemberWithRelations } from '@/types/member';
 import { Card, CardContent } from '@/components/ui/card';
 import { User2, Calendar, Users, MoreVertical, Eye, Pencil, ArrowRightLeft, Trash2 } from 'lucide-react';
 import { useAppStore } from '@/store/use-app-store';
+import { useGenerations } from '@/hooks/use-generations';
 import { getGenerationLabel } from '@/utils/date';
 import { format } from 'date-fns';
 import Image from 'next/image';
@@ -16,7 +17,8 @@ interface MemberCardProps {
 }
 
 export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
-  const { generations, setSelectedMemberId, setIsMemberModalOpen, setIsEditingMember, deleteMember: deleteStoreMember } = useAppStore();
+  const { setSelectedMemberId, setIsMemberModalOpen, setIsEditingMember } = useAppStore();
+  const { generations } = useGenerations();
 
   const handleClick = () => {
     setSelectedMemberId(member.id);
@@ -45,7 +47,6 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
       try {
         const res = await fetch(`/api/members/${member.id}`, { method: 'DELETE' });
         if (res.ok) {
-          deleteStoreMember(member.id);
           toast.success('Member deleted successfully');
           window.dispatchEvent(new Event('refresh-members'));
         } else {

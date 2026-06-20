@@ -15,8 +15,7 @@ const GENERATION_COLORS = [
 ];
 
 export function GenerationLegend() {
-  const { members } = useMembers();
-  const { generations } = useAppStore();
+  const { members, generations } = useMembers();
 
   const sortedGens = [...generations].sort((a, b) => a.orderIndex - b.orderIndex);
 

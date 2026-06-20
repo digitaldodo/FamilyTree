@@ -34,7 +34,7 @@ async function main() {
     // Unique key for deduplication
     let key = '';
     const [id1, id2] = [rel.fromId, rel.toId].sort();
-    if (rel.type === 'SPOUSE' || rel.type === 'SIBLING') {
+    if (rel.type === 'SPOUSE') {
       key = `${rel.type}-${id1}-${id2}`;
     } else {
       key = `${rel.type}-${rel.fromId}-${rel.toId}`;
@@ -106,7 +106,7 @@ async function main() {
         console.warn(`Invalid PARENT gap: ${rel.from.firstName} (Gen ${fromGen}) -> ${rel.to.firstName} (Gen ${toGen}). Removing.`);
         toDelete.add(rel.id);
       }
-    } else if (rel.type === 'SPOUSE' || rel.type === 'SIBLING') {
+    } else if (rel.type === 'SPOUSE') {
       if (fromGen !== toGen) {
         invalidGapCount++;
         console.warn(`Invalid ${rel.type} gap: ${rel.from.firstName} (Gen ${fromGen}) & ${rel.to.firstName} (Gen ${toGen}). Removing.`);

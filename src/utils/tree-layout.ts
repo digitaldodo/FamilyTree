@@ -101,19 +101,17 @@ export function generateTreeLayout(
     g.setNode(root, { width: familyMembers.length * MEMBER_SPACING, height: NODE_HEIGHT });
   });
 
-  const addedEdges = new Set<string>();
-  familyAdjacency.forEach((children, parent) => {
-    children.forEach(child => {
-      const edgeKey = `${parent}->${child}`;
-      if (!addedEdges.has(edgeKey)) {
-        const pLevel = familyLevels.get(parent) ?? 0;
-        const cLevel = familyLevels.get(child) ?? 0;
-        const minlen = Math.max(1, cLevel - pLevel);
-        
-        g.setEdge(parent, child, { minlen });
-        addedEdges.add(edgeKey);
-      }
-    });
+  const uniqueEdges = Array.from(familyAdjacency.entries()).flatMap(([parent, children]) => 
+    children.map(child => ({ parent, child, edgeKey: `${parent}->${child}` }))
+  ).filter((edge, index, self) => 
+    index === self.findIndex((e) => e.edgeKey === edge.edgeKey)
+  );
+
+  uniqueEdges.forEach(({ parent, child }) => {
+    const pLevel = familyLevels.get(parent) ?? 0;
+    const cLevel = familyLevels.get(child) ?? 0;
+    const minlen = Math.max(1, cLevel - pLevel);
+    g.setEdge(parent, child, { minlen });
   });
 
   // Execute Dagre layout
@@ -202,14 +200,20 @@ export function generateTreeLayout(
     const startX = dagreNode.x - dagreNode.width / 2;
     const yOffset = dagreNode.y;
 
-    const childrenIds = new Set<string>();
     const safeMembers5 = Array.isArray(members) ? members : [];
     
+    // Compute unique children for this family unit using pure arrays
+    const childrenIds = Array.from(new Set(
+      familyMembers.flatMap(memberId => {
+        const member = safeMembers5.find(m => m.id === memberId);
+        if (!member) return [];
+        const safeFrom = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
+        return safeFrom.filter(r => r.type === 'PARENT').map(r => r.toId);
+      })
+    ));
+
     familyMembers.forEach((memberId, i) => {
       const member = safeMembers5.find(m => m.id === memberId)!;
-      
-      const safeFrom = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
-      safeFrom.filter(r => r.type === 'PARENT').forEach(r => childrenIds.add(r.toId));
 
       const xOffset = startX + i * MEMBER_SPACING + gap / 2 + NODE_WIDTH / 2; // Center inside allocated space
       const actualX = xOffset - NODE_WIDTH / 2; // Flow expects top-left
@@ -228,7 +232,7 @@ export function generateTreeLayout(
       });
     });
 
-    if (childrenIds.size > 0) {
+    if (childrenIds.length > 0) {
       const junctionId = `junction-${root}`;
       const junctionX = dagreNode.x; // Center of family unit
       const junctionY = yOffset + NODE_HEIGHT + (gap / 2); // Below parents
@@ -301,35 +305,39 @@ export function generateTreeLayout(
     });
   });
 
-  // 7. Spouse Edges
-  const addedSpouseKeys = new Set<string>();
-  const safeMembers6 = Array.isArray(members) ? members : [];
-  safeMembers6.forEach(member => {
-    const addSpouseEdge = (rel: any, fromId: string, toId: string) => {
-      if (rel.type !== 'SPOUSE') return;
-      const edgeKey = `${fromId}-${toId}-SPOUSE`;
-      const reverseKey = `${toId}-${fromId}-SPOUSE`;
-      if (addedSpouseKeys.has(edgeKey) || addedSpouseKeys.has(reverseKey)) return;
-      addedSpouseKeys.add(edgeKey);
+  // 7. Spouse Edges (Pure array processing)
+  const spouseEdges = Array.isArray(members) ? members.flatMap(member => {
+    const safeFrom = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
+    const safeTo = Array.isArray(member.relationsTo) ? member.relationsTo : [];
+    return [
+      ...safeFrom.filter(r => r.type === 'SPOUSE').map(r => ({ fromId: member.id, toId: r.toId, type: r.type })),
+      ...safeTo.filter(r => r.type === 'SPOUSE').map(r => ({ fromId: r.fromId, toId: member.id, type: r.type }))
+    ];
+  }) : [];
 
-      edges.push({
-        id: `e-${edgeKey}`,
-        source: fromId,
-        target: toId,
-        type: 'relationship',
-        sourceHandle: 'spouse',
-        targetHandle: 'spouse-target',
-        animated: false,
-        zIndex: 1,
-        data: { type: rel.type },
-        style: { stroke: '#f43f5e', strokeWidth: 2 },
-      });
-    };
+  // Remove duplicate undirected spouse edges
+  const uniqueSpouseEdges = spouseEdges.filter((rel, index, self) => {
+    const [a, b] = [rel.fromId, rel.toId].sort();
+    return index === self.findIndex((r) => {
+      const [rA, rB] = [r.fromId, r.toId].sort();
+      return a === rA && b === rB;
+    });
+  });
 
-    const safeFrom2 = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
-    const safeTo2 = Array.isArray(member.relationsTo) ? member.relationsTo : [];
-    safeFrom2.forEach(rel => addSpouseEdge(rel, member.id, rel.toId));
-    safeTo2.forEach(rel => addSpouseEdge(rel, rel.fromId, member.id));
+  uniqueSpouseEdges.forEach(rel => {
+    const edgeKey = `${rel.fromId}-${rel.toId}-SPOUSE`;
+    edges.push({
+      id: `e-${edgeKey}`,
+      source: rel.fromId,
+      target: rel.toId,
+      type: 'relationship',
+      sourceHandle: 'spouse',
+      targetHandle: 'spouse-target',
+      animated: false,
+      zIndex: 1,
+      data: { type: rel.type },
+      style: { stroke: '#f43f5e', strokeWidth: 2 },
+    });
   });
 
   return { nodes, edges };

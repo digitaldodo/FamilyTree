@@ -67,7 +67,11 @@ export async function GET(_request: NextRequest, { params }: Params) {
     const tree = {
       ...treeData,
       generations: Array.isArray(generations) ? generations : [],
-      members: Array.isArray(members) ? members : [],
+      members: Array.isArray(members) ? members.map((m: any) => ({
+        ...m,
+        relationsFrom: Array.isArray(m.relationsFrom) ? m.relationsFrom : [],
+        relationsTo: Array.isArray(m.relationsTo) ? m.relationsTo : []
+      })) : [],
     };
 
     return successResponse(tree, 'Tree retrieved successfully');

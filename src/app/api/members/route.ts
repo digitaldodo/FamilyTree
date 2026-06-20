@@ -5,7 +5,6 @@ import { getTreePermission, canEdit, canView } from '@/lib/permissions';
 import { successResponse, listResponse, errorResponse, parsePagination } from '@/lib/utils';
 import { createMemberSchema } from '@/validations/member.schema';
 import { getErrorMessage } from '@/utils/helpers';
-import { RelationshipEngine } from '@/lib/relationship-engine';
 import { isSpouseEligible } from '@/utils/relationship';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -200,10 +199,6 @@ export async function POST(request: NextRequest) {
             if (relativeSpouseCount > 0) {
               return errorResponse('VALIDATION_ERROR', 'Member already has a spouse.', 400);
             }
-          } else if (rel.type === 'SIBLING') {
-            if (relGenOrder !== targetGenOrder) {
-              return errorResponse('VALIDATION_ERROR', 'Sibling must belong to the same generation.', 400);
-            }
           }
         }
       }
@@ -282,19 +277,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Smart Rules: Propagate parent-child relationships to spouses and sibling detection
-    try {
-      const allNewRels = await prisma.relationship.findMany({
-        where: { OR: [{ fromId: newMember.id }, { toId: newMember.id }] }
-      });
-      for (const rel of allNewRels) {
-        await RelationshipEngine.applySmartRules(rel.fromId, rel.toId, rel.type, treeId);
-      }
-    } catch (smartRuleError) {
-      console.log('[API Debug] POST /api/members smart rule error', { error: getErrorMessage(smartRuleError) });
-    }
-
-     
     console.log('[API Debug] POST /api/members success', {
       method: 'POST',
       url: request.url,

@@ -41,8 +41,7 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
     isEditingMember,
     setIsEditingMember,
   } = useAppStore();
-  const { members } = useMembers();
-  const { generations } = useAppStore();
+  const { members, generations } = useMembers();
   const { createMember, updateMember, deleteMember, isSubmitting } =
     useMemberMutations();
 

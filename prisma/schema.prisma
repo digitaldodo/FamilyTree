@@ -219,7 +219,6 @@ enum Gender {
 enum RelationshipType {
   PARENT
   SPOUSE
-  SIBLING
 }
 
 enum ActivityType {

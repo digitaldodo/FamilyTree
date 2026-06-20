@@ -6,29 +6,10 @@ import { useQueryClient } from '@tanstack/react-query';
 
 export function useMemberMutations() {
   const queryClient = useQueryClient();
-  const setMembers = useAppStore(s => s.setMembers);
   const setIsMemberModalOpen = useAppStore(s => s.setIsMemberModalOpen);
   const setIsEditingMember = useAppStore(s => s.setIsEditingMember);
   const activeTreeId = useAppStore(s => s.activeTreeId);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const refreshTree = async () => {
-    if (!activeTreeId) return;
-    try {
-      const res = await fetch(`/api/trees/${activeTreeId}?t=${Date.now()}`, { cache: 'no-store' });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        const treeMembers: MemberWithRelations[] = (data.data.members || []).map((m: any) => ({
-          ...m,
-          relationsFrom: m.relationsFrom || [],
-          relationsTo: m.relationsTo || [],
-        }));
-        setMembers(treeMembers);
-      }
-    } catch (e) {
-      console.error('Failed to refresh tree', e);
-    }
-  };
 
   const handleCreate = async (input: CreateMemberInput) => {
     setIsSubmitting(true);
@@ -48,7 +29,6 @@ export function useMemberMutations() {
         throw new Error(data.message || 'Failed to create member');
       }
 
-      await refreshTree();
       window.dispatchEvent(new Event('refresh-members'));
       queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
       toast.success('Member added successfully');
@@ -85,7 +65,6 @@ export function useMemberMutations() {
         throw new Error('Database update confirmed failed');
       }
 
-      await refreshTree();
       window.dispatchEvent(new Event('refresh-members'));
       
       // Cache Audit / Invalidation equivalent
@@ -113,7 +92,6 @@ export function useMemberMutations() {
         throw new Error(data.message || 'Failed to delete member');
       }
 
-      await refreshTree();
       window.dispatchEvent(new Event('refresh-members'));
       queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
       toast.success('Member removed successfully');

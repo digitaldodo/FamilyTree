@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useAppStore } from '@/store/use-app-store';
+import { useMembers } from '@/hooks/use-members';
 import { getEligibleParents, getEligibleSpouses, getEligibleChildren, getEligibleSiblings } from '@/utils/relationship';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -33,7 +34,7 @@ export function RelationshipSelector({
   allSelectedIds,
   currentGender
 }: RelationshipSelectorProps) {
-  const { members, generations } = useAppStore();
+  const { members, generations } = useMembers();
   const [selectedId, setSelectedId] = React.useState<string>('');
 
   const validCandidates = React.useMemo(

@@ -89,7 +89,7 @@ export interface MemberWithRelations extends Member {
 
 /** Input for creating a relationship */
 export interface CreateRelationshipInput {
-  type: 'PARENT' | 'SPOUSE' | 'SIBLING';
+  type: 'PARENT' | 'SPOUSE';
   fromId: string;
   toId: string;
 }

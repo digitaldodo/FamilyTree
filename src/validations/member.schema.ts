@@ -7,7 +7,7 @@ import { z } from 'zod';
 const genderEnum = z.enum(['MALE', 'FEMALE', 'OTHER']);
 
 /** Relationship type enum values */
-const relationshipTypeEnum = z.enum(['PARENT', 'SPOUSE', 'SIBLING']);
+const relationshipTypeEnum = z.enum(['PARENT', 'SPOUSE']);
 
 /**
  * Coerce empty strings to undefined so optional validators work correctly.
