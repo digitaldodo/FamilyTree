@@ -70,6 +70,8 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
         existing.push({ type: 'CHILD', id: r.toId });
       } else if (r.type === 'SPOUSE') {
         existing.push({ type: r.type, id: r.toId });
+      } else if (r.type === 'SIBLING') {
+        existing.push({ type: r.type, id: r.toId });
       }
     });
 
@@ -77,6 +79,8 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       if (r.type === 'PARENT') {
         existing.push({ type: 'PARENT', id: r.fromId });
       } else if (r.type === 'SPOUSE') {
+        existing.push({ type: r.type, id: r.fromId });
+      } else if (r.type === 'SIBLING') {
         existing.push({ type: r.type, id: r.fromId });
       }
     });

@@ -312,7 +312,21 @@ export async function PUT(request: NextRequest, { params }: Params) {
       console.log('[API Debug] PUT /api/members/:id smart rule error', { error: getErrorMessage(smartRuleError) });
     }
 
-    return successResponse(member, 'Member updated successfully');
+    // Re-fetch the member with full relations so the response has the complete updated state
+    const freshMember = await prisma.member.findUnique({
+      where: { id },
+      include: {
+        relationsFrom: {
+          include: { to: true },
+        },
+        relationsTo: {
+          include: { from: true },
+        },
+        media: true,
+      },
+    });
+
+    return successResponse(freshMember, 'Member updated successfully');
   } catch (error) {
     console.error('[MEMBER_UPDATE_ERROR]', error);
     return errorResponse('UPDATE_ERROR', getErrorMessage(error), 500);

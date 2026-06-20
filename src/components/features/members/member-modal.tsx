@@ -101,8 +101,11 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
     );
   };
 
-  // Build relationship data
-  const spouses = member?.relationsFrom.filter((r) => r.type === 'SPOUSE') || [];
+  // Build relationship data — check BOTH directions for symmetric types (SPOUSE, SIBLING)
+  const spouses = [
+    ...(member?.relationsFrom.filter((r) => r.type === 'SPOUSE') || []),
+    ...(member?.relationsTo.filter((r) => r.type === 'SPOUSE') || []),
+  ];
   const parents = member?.relationsTo.filter((r) => r.type === 'PARENT') || [];
   const children = member?.relationsFrom.filter((r) => r.type === 'PARENT') || [];
   const siblings = [
