@@ -3,7 +3,9 @@ import { EMPTY_GRAPH } from '@/lib/safe-helpers';
 
 export type FamilyGraphNode = {
   id: string;
-  member: MemberWithRelations;
+  type?: 'MEMBER' | 'COUPLE_CONTAINER';
+  member?: MemberWithRelations;
+  members?: MemberWithRelations[];
   generation: number;
   layoutHints: {
     x?: number;
@@ -94,20 +96,65 @@ export const GenealogyEngine = {
       // 4. Resolve Spouse Links (groupings)
       const spouseGroups = this.resolveSpouseLinks(nodes, allEdges);
 
-      // 5. Build DerivedRelationships & Ancestors
-      const derivedRelationships = this.buildDerivedRelationships(nodes, allEdges);
-      this.inferAncestors(nodes, allEdges, derivedRelationships);
+      const finalNodes: FamilyGraphNode[] = [];
+      const nodeToContainerMap = new Map<string, string>();
       
-      // Group siblings for layout hints
-      const siblingGroups = this.buildSiblingGroups(siblingEdges);
-      
-      // Assign layout hints to nodes
-      for (const node of nodes) {
-        for (const [groupId, group] of Object.entries(spouseGroups)) {
-          if (group.includes(node.id)) {
-            node.layoutHints.spouseGroupId = groupId;
+      for (const [groupId, group] of Object.entries(spouseGroups)) {
+        if (group.length > 1) {
+          const membersInGroup = group.map(id => nodesMap.get(id)!.member!);
+          const minGen = Math.min(...group.map(id => nodesMap.get(id)!.generation));
+          const coupleNode: FamilyGraphNode = {
+            id: groupId,
+            type: 'COUPLE_CONTAINER',
+            members: membersInGroup,
+            generation: minGen,
+            layoutHints: { spouseGroupId: groupId }
+          };
+          finalNodes.push(coupleNode);
+          nodesMap.set(groupId, coupleNode);
+          for (const id of group) {
+            nodeToContainerMap.set(id, groupId);
           }
         }
+      }
+      
+      for (const node of nodes) {
+        if (!nodeToContainerMap.has(node.id)) {
+          node.type = 'MEMBER';
+          finalNodes.push(node);
+        }
+      }
+      
+      const finalEdges: FamilyGraphEdge[] = [];
+      const seenEdgeKeys = new Set<string>();
+      
+      for (const e of allEdges) {
+         const newSource = nodeToContainerMap.get(e.source) || e.source;
+         const newTarget = nodeToContainerMap.get(e.target) || e.target;
+         
+         if (newSource === newTarget) continue;
+         
+         const edgeKey = `${newSource}-${newTarget}-${e.type}`;
+         if (!seenEdgeKeys.has(edgeKey)) {
+             seenEdgeKeys.add(edgeKey);
+             finalEdges.push({
+                 id: e.id,
+                 source: newSource,
+                 target: newTarget,
+                 type: e.type
+             });
+         }
+      }
+
+      // 5. Build DerivedRelationships & Ancestors using final nodes/edges
+      const derivedRelationships = this.buildDerivedRelationships(finalNodes, finalEdges);
+      this.inferAncestors(finalNodes, finalEdges, derivedRelationships);
+      
+      // Group siblings for layout hints (using finalEdges)
+      const siblingGroups = this.buildSiblingGroups(finalEdges);
+      
+      // Assign layout hints to final nodes
+      for (const node of finalNodes) {
         for (const [groupId, group] of Object.entries(siblingGroups)) {
           if (group.includes(node.id)) {
             node.layoutHints.siblingGroupId = groupId;
@@ -116,7 +163,7 @@ export const GenealogyEngine = {
       }
 
       const generationsRec: Record<number, string[]> = {};
-      for (const node of nodes) {
+      for (const node of finalNodes) {
         if (!generationsRec[node.generation]) generationsRec[node.generation] = [];
         generationsRec[node.generation].push(node.id);
       }
@@ -142,61 +189,41 @@ export const GenealogyEngine = {
           return aParentX - bParentX;
         });
 
-        const levelGroups = new Set<string>();
-        const groupedNodes: string[][] = [];
-        
         for (const id of nodeIds) {
-          const node = nodesMap.get(id)!;
-          const spouseGroup = node.layoutHints.spouseGroupId;
-          if (spouseGroup) {
-            if (!levelGroups.has(spouseGroup)) {
-              levelGroups.add(spouseGroup);
-              const membersInGroup = nodes
-                .filter(n => n.layoutHints.spouseGroupId === spouseGroup && n.generation === level)
-                .map(n => n.id);
-              groupedNodes.push(membersInGroup);
-            }
-          } else {
-            groupedNodes.push([id]);
-          }
-        }
-
-        for (const group of groupedNodes) {
+          const parents = derivedRelationships[id]?.parents || [];
           let parentAvgX = 0;
           let parentCount = 0;
           
-          for (const id of group) {
-            const parents = derivedRelationships[id]?.parents || [];
-            for (const p of parents) {
-              const pPos = nodePositions.get(p);
-              if (pPos) {
-                parentAvgX += pPos.x;
-                parentCount++;
-              }
+          for (const p of parents) {
+            const pPos = nodePositions.get(p);
+            if (pPos) {
+              parentAvgX += pPos.x;
+              parentCount++;
             }
           }
           
           if (parentCount > 0) {
             const desiredCenterX = parentAvgX / parentCount;
-            const startXForGroup = desiredCenterX - ((group.length * (NODE_WIDTH + GAP)) / 2) + (NODE_WIDTH / 2);
-            currentX = Math.max(currentX, startXForGroup);
+            const startXForNode = desiredCenterX;
+            currentX = Math.max(currentX, startXForNode);
           }
 
-          for (let i = 0; i < group.length; i++) {
-            const id = group[i];
-            nodePositions.set(id, { x: currentX, y: level * LEVEL_HEIGHT });
-            const node = nodesMap.get(id)!;
-            node.layoutHints.x = currentX;
-            node.layoutHints.y = level * LEVEL_HEIGHT;
-            currentX += NODE_WIDTH + GAP;
-          }
+          nodePositions.set(id, { x: currentX, y: level * LEVEL_HEIGHT });
+          const node = nodesMap.get(id)!;
+          node.layoutHints.x = currentX;
+          node.layoutHints.y = level * LEVEL_HEIGHT;
+          
+          const isCouple = node.type === 'COUPLE_CONTAINER';
+          const nodeWidth = isCouple ? NODE_WIDTH * 2 + GAP : NODE_WIDTH;
+          
+          currentX += nodeWidth + GAP;
         }
         levelRightEdge.set(level, currentX);
       }
 
       const graph: FamilyGraph = {
-        nodes,
-        edges: allEdges,
+        nodes: finalNodes,
+        edges: finalEdges,
         derivedRelationships,
         generations: generationsRec,
         layoutHints: {
@@ -224,47 +251,64 @@ export const GenealogyEngine = {
   },
 
   inferGenerations(nodes: FamilyGraphNode[], edges: FamilyGraphEdge[]) {
-    // Determine adjacency with weights:
-    // PARENT (down): +1
-    // PARENT (up): -1
-    // SPOUSE: 0
-    const adj = new Map<string, { target: string; weight: number }[]>();
-    for (const n of nodes) {
-      adj.set(n.id, []);
+    const parentEdges = edges.filter(e => e.type === 'PARENT');
+    
+    const parentsOf = new Map<string, string[]>();
+    for (const e of parentEdges) {
+      if (!parentsOf.has(e.target)) parentsOf.set(e.target, []);
+      parentsOf.get(e.target)!.push(e.source);
     }
 
-    for (const e of edges) {
-      if (e.type === 'PARENT') {
-        adj.get(e.source)?.push({ target: e.target, weight: 1 });
-        adj.get(e.target)?.push({ target: e.source, weight: -1 });
-      } else if (e.type === 'SPOUSE') {
-        adj.get(e.source)?.push({ target: e.target, weight: 0 });
-        adj.get(e.target)?.push({ target: e.source, weight: 0 });
-      }
-    }
+    const roots = nodes.filter(n => !parentsOf.has(n.id) || parentsOf.get(n.id)!.length === 0);
 
     const genMap = new Map<string, number>();
     const visited = new Set<string>();
+    const queue: { id: string, gen: number }[] = [];
+    
+    for (const root of roots) {
+      queue.push({ id: root.id, gen: 0 });
+      genMap.set(root.id, 0);
+      visited.add(root.id);
+    }
 
-    for (const n of nodes) {
-      if (!visited.has(n.id)) {
-        // Find reference node (first node in subgraph is Gen 0)
-        const queue: string[] = [n.id];
-        genMap.set(n.id, 0);
-        visited.add(n.id);
+    if (roots.length === 0 && nodes.length > 0) {
+      queue.push({ id: nodes[0].id, gen: 0 });
+      genMap.set(nodes[0].id, 0);
+      visited.add(nodes[0].id);
+    }
 
-        while (queue.length > 0) {
-          const curr = queue.shift()!;
-          const currGen = genMap.get(curr)!;
+    const childrenOf = new Map<string, string[]>();
+    const spousesOf = new Map<string, string[]>();
+    for (const e of edges) {
+      if (e.type === 'PARENT') {
+        if (!childrenOf.has(e.source)) childrenOf.set(e.source, []);
+        childrenOf.get(e.source)!.push(e.target);
+      } else if (e.type === 'SPOUSE') {
+        if (!spousesOf.has(e.source)) spousesOf.set(e.source, []);
+        if (!spousesOf.has(e.target)) spousesOf.set(e.target, []);
+        spousesOf.get(e.source)!.push(e.target);
+        spousesOf.get(e.target)!.push(e.source);
+      }
+    }
 
-          const neighbors = adj.get(curr) || [];
-          for (const neighbor of neighbors) {
-            if (!visited.has(neighbor.target)) {
-              visited.add(neighbor.target);
-              genMap.set(neighbor.target, currGen + neighbor.weight);
-              queue.push(neighbor.target);
-            }
-          }
+    while (queue.length > 0) {
+      const { id: curr, gen: currGen } = queue.shift()!;
+      
+      const spouses = spousesOf.get(curr) || [];
+      for (const sp of spouses) {
+        if (!visited.has(sp)) {
+          visited.add(sp);
+          genMap.set(sp, currGen);
+          queue.push({ id: sp, gen: currGen });
+        }
+      }
+
+      const children = childrenOf.get(curr) || [];
+      for (const child of children) {
+        if (!visited.has(child)) {
+          visited.add(child);
+          genMap.set(child, currGen + 1);
+          queue.push({ id: child, gen: currGen + 1 });
         }
       }
     }

@@ -57,7 +57,12 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       return errorResponse('FORBIDDEN', 'You do not have permission to manage collaborators', 403);
     }
 
-    const body = await request.json();
+    let body = null;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return Response.json({ success: false, message: "Invalid request body" }, { status: 400 });
+    }
     const { userId } = body;
 
     if (!userId) {

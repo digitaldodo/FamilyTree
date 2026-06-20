@@ -32,7 +32,12 @@ export function useMemberMutations() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...input, treeId: input.treeId || activeTreeId }),
       });
-      const data = await res.json();
+      let data = null;
+    try {
+      data = await res.json();
+    } catch (e) {
+      throw new Error("Invalid server response");
+    }
       if (!res.ok || !data.success) throw new Error(data.message || 'Failed to create member');
       return data.data;
     },
@@ -54,7 +59,12 @@ export function useMemberMutations() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(input),
       });
-      const data = await res.json();
+      let data = null;
+    try {
+      data = await res.json();
+    } catch (e) {
+      throw new Error("Invalid server response");
+    }
       if (!res.ok || !data.success) throw new Error(data.message || 'Failed to update member');
       return data.data;
     },
@@ -73,7 +83,12 @@ export function useMemberMutations() {
       const res = await fetch(`/api/members/${id}`, {
         method: 'DELETE',
       });
-      const data = await res.json();
+      let data = null;
+    try {
+      data = await res.json();
+    } catch (e) {
+      throw new Error("Invalid server response");
+    }
       if (!res.ok || !data.success) throw new Error(data.message || 'Failed to delete member');
       return data.data;
     },

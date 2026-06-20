@@ -23,7 +23,12 @@ export async function POST(req: NextRequest, { params }: Params) {
       return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
     }
 
-    const body = await req.json();
+    let body = null;
+    try {
+      body = await req.json();
+    } catch (e) {
+      return Response.json({ success: false, message: "Invalid request body" }, { status: 400 });
+    }
     const { versionId, events } = body as { versionId: string | null; events: ChangeEvent[] };
 
     const safeEvents = Array.isArray(events) ? events : [];

@@ -34,16 +34,22 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
     for (const node of graphNodes) {
       const pos = { x: node.layoutHints?.x || 0, y: node.layoutHints?.y || 0 };
       
+      const isCouple = node.type === 'COUPLE_CONTAINER';
+      const nodeWidth = isCouple ? NODE_WIDTH * 2 + 80 : NODE_WIDTH; // Approximate width
+
       minGlobalX = Math.min(minGlobalX, pos.x);
-      maxGlobalX = Math.max(maxGlobalX, pos.x + NODE_WIDTH);
+      maxGlobalX = Math.max(maxGlobalX, pos.x + nodeWidth);
 
       rfNodes.push({
         id: node.id,
-        type: 'member',
+        type: isCouple ? 'coupleContainer' : 'member',
         position: { x: pos.x, y: pos.y },
-        data: {
+        data: isCouple ? {
+          members: node.members,
+          generationName: `Generation ${node.generation}`,
+        } : {
           member: node.member,
-          label: `${node.member.firstName} ${node.member.lastName}`,
+          label: `${node.member?.firstName} ${node.member?.lastName}`,
           generationName: `Generation ${node.generation}`,
         }
       });
@@ -123,7 +129,9 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
         const pNode = graphNodes.find(n => n.id === pId);
         const pos = pNode ? { x: pNode.layoutHints?.x || 0, y: pNode.layoutHints?.y || 0 } : undefined;
         if (pos) {
-          sumX += pos.x + (NODE_WIDTH / 2);
+          const isCouple = pNode?.type === 'COUPLE_CONTAINER';
+          const nWidth = isCouple ? NODE_WIDTH * 2 + 80 : NODE_WIDTH;
+          sumX += pos.x + (nWidth / 2);
           maxY = Math.max(maxY, pos.y);
         }
       });

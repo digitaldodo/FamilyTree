@@ -56,7 +56,12 @@ export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', i
         body: formData,
       });
 
-      const data = await res.json();
+      let data = null;
+    try {
+      data = await res.json();
+    } catch (e) {
+      throw new Error("Invalid server response");
+    }
       
       if (data.secure_url) {
         onChange(data.secure_url);

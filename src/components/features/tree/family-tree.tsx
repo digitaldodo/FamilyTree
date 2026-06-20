@@ -14,6 +14,7 @@ import { useAppStore } from '@/store/use-app-store';
 import { useFamilyTree } from '@/hooks/use-family-tree';
 import { useTreeCollaboration } from '@/hooks/use-tree-collaboration';
 import { MemberNode } from './member-node';
+import { CoupleContainerNode } from './couple-container-node';
 import { GenerationLaneNode } from './generation-lane-node';
 import { FamilyJunctionNode } from './family-junction-node';
 import { RelationshipEdgeMemo } from './relationship-edge';
@@ -27,6 +28,7 @@ import { useFamilyTreeRenderer } from './family-tree-renderer';
 
 const nodeTypes = {
   member: MemberNode,
+  coupleContainer: CoupleContainerNode,
   generationLane: GenerationLaneNode,
   familyJunction: FamilyJunctionNode,
 };

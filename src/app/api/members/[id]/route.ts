@@ -46,6 +46,13 @@ export async function GET(_request: NextRequest, { params }: Params) {
       return errorResponse('FORBIDDEN', 'You do not have access to this member', 403);
     }
 
+    if (!member) {
+      return Response.json({
+        success: false,
+        error: "No data returned"
+      }, { status: 500 });
+    }
+
     return successResponse({ ...member }, 'Member retrieved successfully');
   } catch (error) {
     console.error('[MEMBER_GET_ERROR]', error);
@@ -74,7 +81,12 @@ export async function PUT(request: NextRequest, { params }: Params) {
       return errorResponse('FORBIDDEN', 'You do not have permission to edit this member', 403);
     }
 
-    const body = await request.json();
+    let body = null;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
+    }
     console.log('[MEMBER_UPDATE_REQUEST]', JSON.stringify(body, null, 2));
     console.log("REQUEST BODY", body);
 
@@ -342,6 +354,13 @@ export async function PUT(request: NextRequest, { params }: Params) {
       await createTreeSnapshot(existing.treeId, session.user.id, `Updated member ${freshMember?.firstName || id}`);
     } catch (e) {
       console.error('Failed to create tree snapshot', e);
+    }
+
+    if (!freshMember) {
+      return Response.json({
+        success: false,
+        error: "No data returned"
+      }, { status: 500 });
     }
 
     return successResponse(freshMember, 'Member updated successfully');

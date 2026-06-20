@@ -46,6 +46,13 @@ export async function GET(request: NextRequest) {
       prisma.member.count({ where: { treeId } }),
     ]);
 
+    if (!members) {
+      return Response.json({
+        success: false,
+        error: "No data returned"
+      }, { status: 500 });
+    }
+
     return listResponse(members, total, page, limit);
   } catch (error) {
      
@@ -69,7 +76,12 @@ export async function POST(request: NextRequest) {
       return errorResponse('UNAUTHORIZED', 'Authentication required', 401);
     }
 
-    const body = await request.json();
+    let body = null;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
+    }
 
      
     console.log('[API Debug] POST /api/members request', {
@@ -291,6 +303,13 @@ export async function POST(request: NextRequest) {
       await createTreeSnapshot(treeId, session.user.id, `Added member ${newMember.firstName}`);
     } catch (e) {
       console.error('Failed to create tree snapshot', e);
+    }
+
+    if (!newMember) {
+      return Response.json({
+        success: false,
+        error: "No data returned"
+      }, { status: 500 });
     }
 
     return successResponse(newMember, 'Member created successfully', 201);

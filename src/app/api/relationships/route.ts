@@ -16,7 +16,12 @@ export async function POST(request: NextRequest) {
       return errorResponse('UNAUTHORIZED', 'Authentication required', 401);
     }
 
-    const body = await request.json();
+    let body = null;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
+    }
     const validation = createRelationshipSchema.safeParse(body);
 
     if (!validation.success) {
@@ -54,6 +59,13 @@ export async function POST(request: NextRequest) {
     const newRel = await prisma.relationship.create({
       data: { type, fromId, toId }
     });
+
+    if (!newRel) {
+      return Response.json({
+        success: false,
+        error: "No data returned"
+      }, { status: 500 });
+    }
 
     return successResponse(newRel, 'Relationship created successfully', 201);
   } catch (error) {

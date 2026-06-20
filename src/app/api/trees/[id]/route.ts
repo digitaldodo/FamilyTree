@@ -87,6 +87,13 @@ export async function GET(_request: NextRequest, { params }: Params) {
       });
     }
 
+    if (!tree) {
+      return Response.json({
+        success: false,
+        error: "No data returned"
+      }, { status: 500 });
+    }
+
     return successResponse(tree, 'Tree retrieved successfully');
   } catch (error) {
     console.error('[TREE_GET_ERROR]', error);
@@ -109,7 +116,12 @@ export async function PUT(request: NextRequest, { params }: Params) {
       return errorResponse('FORBIDDEN', 'You do not have permission to edit this tree', 403);
     }
 
-    const body = await request.json();
+    let body = null;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return Response.json({ success: false, message: "Invalid request body" }, { status: 400 });
+    }
     const validation = updateTreeSchema.safeParse(body);
 
     if (!validation.success) {
@@ -131,6 +143,13 @@ export async function PUT(request: NextRequest, { params }: Params) {
         _count: { select: { members: true } },
       },
     });
+
+    if (!tree) {
+      return Response.json({
+        success: false,
+        error: "No data returned"
+      }, { status: 500 });
+    }
 
     return successResponse(tree, 'Tree updated successfully');
   } catch (error) {

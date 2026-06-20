@@ -66,6 +66,13 @@ export async function GET(request: NextRequest) {
     const allTrees = [...ownedWithRole, ...collabWithRole];
     const total = ownedTotal + collabTotal;
 
+    if (!allTrees) {
+      return Response.json({
+        success: false,
+        error: "No data returned"
+      }, { status: 500 });
+    }
+
     return listResponse(allTrees, total, page, limit);
   } catch (error) {
     const session = await auth().catch(() => null);
@@ -95,7 +102,12 @@ export async function POST(request: NextRequest) {
       return errorResponse('UNAUTHORIZED', 'Authentication required', 401);
     }
 
-    const body = await request.json();
+    let body = null;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
+    }
     // Strip ownerId from body — we always use session user
     const { ownerId: _ignoredOwnerId, ...bodyWithoutOwner } = body;
 
@@ -130,6 +142,13 @@ export async function POST(request: NextRequest) {
         _count: { select: { members: true } },
       },
     });
+
+    if (!tree) {
+      return Response.json({
+        success: false,
+        error: "No data returned"
+      }, { status: 500 });
+    }
 
     return successResponse(tree, 'Tree created successfully', 201);
   } catch (error) {

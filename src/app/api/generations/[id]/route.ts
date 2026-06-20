@@ -48,7 +48,12 @@ export async function PATCH(
     const access = await verifyGenerationAccess(id, session.user.id);
     if (access.error) return access.error;
 
-    const body = await request.json();
+    let body = null;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return Response.json({ success: false, message: "Invalid request body" }, { status: 400 });
+    }
     const validation = updateGenerationSchema.safeParse(body);
 
     if (!validation.success) {

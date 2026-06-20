@@ -19,7 +19,12 @@ export function useGenerations(treeId?: string) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, insertAt }),
       });
-      const json = await res.json();
+      let json = null;
+    try {
+      json = await res.json();
+    } catch (e) {
+      throw new Error("Invalid server response");
+    }
       if (!res.ok || !json.success) throw new Error(json.message || 'Failed to create generation');
       return json.data;
     },
@@ -39,7 +44,12 @@ export function useGenerations(treeId?: string) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name }),
       });
-      const json = await res.json();
+      let json = null;
+    try {
+      json = await res.json();
+    } catch (e) {
+      throw new Error("Invalid server response");
+    }
       if (!res.ok || !json.success) throw new Error(json.message || 'Failed to rename generation');
       return json.data;
     },
@@ -63,7 +73,12 @@ export function useGenerations(treeId?: string) {
       const res = await fetch(`/api/generations/${id}${queryString}`, {
         method: 'DELETE',
       });
-      const json = await res.json();
+      let json = null;
+    try {
+      json = await res.json();
+    } catch (e) {
+      throw new Error("Invalid server response");
+    }
       if (!res.ok || !json.success) throw new Error(json.message || 'Failed to delete generation');
       return json.data;
     },
@@ -83,7 +98,12 @@ export function useGenerations(treeId?: string) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ direction }),
       });
-      const json = await res.json();
+      let json = null;
+    try {
+      json = await res.json();
+    } catch (e) {
+      throw new Error("Invalid server response");
+    }
       if (!res.ok || !json.success) throw new Error(json.message || 'Failed to move generation');
       return json.data;
     },

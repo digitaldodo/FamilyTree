@@ -43,7 +43,12 @@ export async function createTree(
     body: JSON.stringify(input),
   });
   if (!res.ok) {
-    const err = await res.json();
+    let err = null;
+    try {
+      err = await res.json();
+    } catch (e) {
+      throw new Error("Invalid server response");
+    }
     throw new Error(err.message || 'Failed to create tree');
   }
   return res.json();
@@ -60,7 +65,12 @@ export async function updateTree(
     body: JSON.stringify(input),
   });
   if (!res.ok) {
-    const err = await res.json();
+    let err = null;
+    try {
+      err = await res.json();
+    } catch (e) {
+      throw new Error("Invalid server response");
+    }
     throw new Error(err.message || 'Failed to update tree');
   }
   return res.json();

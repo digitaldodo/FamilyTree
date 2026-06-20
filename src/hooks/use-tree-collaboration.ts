@@ -32,7 +32,12 @@ export function useTreeCollaboration(treeId: string | null, versionId: string | 
         })
       });
 
-      const data = await res.json();
+      let data = null;
+    try {
+      data = await res.json();
+    } catch (e) {
+      throw new Error("Invalid server response");
+    }
       if (!res.ok || !data.success) {
         if (data.conflict) {
            setHasConflict(true);

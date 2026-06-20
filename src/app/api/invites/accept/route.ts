@@ -15,7 +15,12 @@ export async function POST(request: NextRequest) {
       return errorResponse('UNAUTHORIZED', 'Authentication required', 401);
     }
 
-    const body = await request.json();
+    let body = null;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return Response.json({ success: false, message: "Invalid request body" }, { status: 400 });
+    }
     const { token } = body;
 
     if (!token) {

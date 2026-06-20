@@ -82,7 +82,12 @@ export async function POST(
       return errorResponse('FORBIDDEN', 'Insufficient permissions to create generations', 403);
     }
 
-    const body = await request.json();
+    let body = null;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return Response.json({ success: false, message: "Invalid request body" }, { status: 400 });
+    }
     const validation = createGenerationSchema.safeParse(body);
 
     if (!validation.success) {
