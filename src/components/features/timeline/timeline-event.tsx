@@ -41,6 +41,7 @@ const getEventBg = (type: TimelineEventType) => {
 
 export function TimelineEvent({ event, index }: TimelineEventProps) {
   const isEven = index % 2 === 0;
+  const safeMembers = Array.isArray(event.members) ? event.members : [];
 
   return (
     <motion.div
@@ -78,14 +79,14 @@ export function TimelineEvent({ event, index }: TimelineEventProps) {
 
           <div className={`flex items-center gap-2 mt-4 ${isEven ? 'md:justify-end' : ''}`}>
             <div className="flex -space-x-2">
-              {event.members.map((member) => (
+              {safeMembers.map((member) => (
                 <div key={member.id} className="relative w-8 h-8 rounded-full ring-2 ring-card bg-muted flex items-center justify-center overflow-hidden" title={member.name}>
                   <MemberAvatar imageUrl={member.imageUrl} firstName={member.name.split(' ')[0]} lastName={member.name.split(' ')[1] || ''} fallbackSize={16} />
                 </div>
               ))}
             </div>
             <span className="text-sm text-muted-foreground ml-2">
-              {event.members.length} {event.members.length === 1 ? 'member' : 'members'} involved
+              {safeMembers.length} {safeMembers.length === 1 ? 'member' : 'members'} involved
             </span>
           </div>
         </div>

@@ -66,8 +66,8 @@ export async function GET(_request: NextRequest, { params }: Params) {
 
     const tree = {
       ...treeData,
-      generations,
-      members,
+      generations: Array.isArray(generations) ? generations : [],
+      members: Array.isArray(members) ? members : [],
     };
 
     return successResponse(tree, 'Tree retrieved successfully');

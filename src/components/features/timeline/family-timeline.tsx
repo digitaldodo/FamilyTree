@@ -9,8 +9,11 @@ interface FamilyTimelineProps {
 }
 
 export function FamilyTimeline({ events }: FamilyTimelineProps) {
+  // Normalize events to ensure it is always an array
+  const safeEvents = Array.isArray(events) ? events : [];
+  
   // Sort events chronologically
-  const sortedEvents = [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const sortedEvents = [...safeEvents].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
   // Group by decade
   const groupedEvents: Record<string, TimelineEventProps['event'][]> = {};

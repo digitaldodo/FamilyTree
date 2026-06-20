@@ -70,7 +70,7 @@ export const useAppStore = create<AppState>()(
   searchQuery: '',
   setSearchQuery: (query) => set({ searchQuery: query }),
   selectedGenerationIds: [],
-  setSelectedGenerationIds: (ids) => set({ selectedGenerationIds: ids }),
+  setSelectedGenerationIds: (ids) => set({ selectedGenerationIds: Array.isArray(ids) ? ids : [] }),
 
   isReadOnly: false,
   setIsReadOnly: (readOnly) => set({ isReadOnly: readOnly }),
@@ -87,11 +87,12 @@ export const useAppStore = create<AppState>()(
 
   generations: [],
   setGenerations: (generations) => set((state) => {
+    const safeGenerations = Array.isArray(generations) ? generations : [];
     // If all were selected previously (or it's empty initialization), select all new ones
     const isAllSelected = state.generations.length === 0 || state.selectedGenerationIds.length === state.generations.length;
     return {
-      generations,
-      selectedGenerationIds: isAllSelected ? generations.map(g => g.id) : state.selectedGenerationIds.filter(id => generations.some(g => g.id === id))
+      generations: safeGenerations,
+      selectedGenerationIds: isAllSelected ? safeGenerations.map(g => g.id) : state.selectedGenerationIds.filter(id => safeGenerations.some(g => g.id === id))
     };
   }),
   addGeneration: (generation) => set((state) => {
@@ -110,7 +111,7 @@ export const useAppStore = create<AppState>()(
   })),
 
   members: [],
-  setMembers: (members) => set({ members }),
+  setMembers: (members) => set({ members: Array.isArray(members) ? members : [] }),
   addMember: (member) => set((state) => ({ members: [...state.members, member] })),
   updateMember: (id, updatedMember) => set((state) => ({
     members: state.members.map((m) => (m.id === id ? updatedMember : m))

@@ -18,7 +18,7 @@ export default function TimelinePage() {
       const json = await res.json();
       if (!res.ok || !json.success) throw new Error(json.message);
 
-      const members = json.data.members || [];
+      const members = Array.isArray(json.data?.members) ? json.data.members : [];
       const timelineEvents: TimelineEventProps['event'][] = [];
 
       members.forEach((member: any) => {
@@ -54,7 +54,8 @@ export default function TimelinePage() {
           });
         }
 
-        member.relationsTo?.forEach((rel: any) => {
+        const relationsTo = Array.isArray(member.relationsTo) ? member.relationsTo : [];
+        relationsTo.forEach((rel: any) => {
           if (rel.type === 'PARENT' && rel.from && member.birthDate) {
             timelineEvents.push({
               id: `child-${member.id}-parent-${rel.from.id}`,
@@ -70,7 +71,8 @@ export default function TimelinePage() {
           }
         });
 
-        member.relationsFrom?.forEach((rel: any) => {
+        const relationsFrom = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
+        relationsFrom.forEach((rel: any) => {
            if (rel.type === 'SPOUSE' && rel.to) {
              if (member.id < rel.to.id) {
                timelineEvents.push({
