@@ -21,7 +21,17 @@ export async function getMembers(
   });
   const res = await fetch(`${API_ROUTES.MEMBERS}?${params}`);
   if (!res.ok) throw new Error('Failed to fetch members');
-  return res.json();
+  let data;
+      try {
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error("Invalid JSON response from server");
+        }
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
+      return data;
 }
 
 /** Fetch a single member by ID with relationships */
@@ -30,7 +40,17 @@ export async function getMemberById(
 ): Promise<ApiResponse<MemberWithRelations>> {
   const res = await fetch(`${API_ROUTES.MEMBERS}/${id}`);
   if (!res.ok) throw new Error('Failed to fetch member');
-  return res.json();
+  let data;
+      try {
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error("Invalid JSON response from server");
+        }
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
+      return data;
 }
 
 /** Create a new member */
@@ -51,7 +71,17 @@ export async function createMember(
     }
     throw new Error(err.message || 'Failed to create member');
   }
-  return res.json();
+  let data;
+      try {
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error("Invalid JSON response from server");
+        }
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
+      return data;
 }
 
 /** Update an existing member */
@@ -73,7 +103,17 @@ export async function updateMember(
     }
     throw new Error(err.message || 'Failed to update member');
   }
-  return res.json();
+  let data;
+      try {
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error("Invalid JSON response from server");
+        }
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
+      return data;
 }
 
 /** Delete a member */

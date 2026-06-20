@@ -67,10 +67,7 @@ export async function GET(request: NextRequest) {
     const total = ownedTotal + collabTotal;
 
     if (!allTrees) {
-      return Response.json({
-        success: false,
-        error: "No data returned"
-      }, { status: 500 });
+      return errorResponse('FETCH_ERROR', 'No data returned', 500);
     }
 
     return listResponse(allTrees, total, page, limit);
@@ -144,10 +141,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!tree) {
-      return Response.json({
-        success: false,
-        error: "No data returned"
-      }, { status: 500 });
+      return errorResponse('FETCH_ERROR', 'No data returned', 500);
     }
 
     return successResponse(tree, 'Tree created successfully', 201);

@@ -28,7 +28,17 @@ export default function TreePage() {
     queryKey: ['tree-versions', activeTreeId],
     queryFn: async () => {
       const res = await fetch(`/api/trees/${activeTreeId}/versions`);
-      return res.json();
+      let data;
+      try {
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error("Invalid JSON response from server");
+        }
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
+      return data;
     },
     enabled: !!activeTreeId,
   });

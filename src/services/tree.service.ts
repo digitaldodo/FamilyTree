@@ -21,7 +21,17 @@ export async function getTrees(
   });
   const res = await fetch(`${API_ROUTES.TREES}?${params}`);
   if (!res.ok) throw new Error('Failed to fetch trees');
-  return res.json();
+  let data;
+      try {
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error("Invalid JSON response from server");
+        }
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
+      return data;
 }
 
 /** Fetch a single tree by ID with all members and relationships */
@@ -30,7 +40,17 @@ export async function getTreeById(
 ): Promise<ApiResponse<TreeWithMembers>> {
   const res = await fetch(`${API_ROUTES.TREES}/${id}`);
   if (!res.ok) throw new Error('Failed to fetch tree');
-  return res.json();
+  let data;
+      try {
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error("Invalid JSON response from server");
+        }
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
+      return data;
 }
 
 /** Create a new tree */
@@ -51,7 +71,17 @@ export async function createTree(
     }
     throw new Error(err.message || 'Failed to create tree');
   }
-  return res.json();
+  let data;
+      try {
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error("Invalid JSON response from server");
+        }
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
+      return data;
 }
 
 /** Update a tree */
@@ -73,7 +103,17 @@ export async function updateTree(
     }
     throw new Error(err.message || 'Failed to update tree');
   }
-  return res.json();
+  let data;
+      try {
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error("Invalid JSON response from server");
+        }
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
+      return data;
 }
 
 /** Delete a tree and all its members */

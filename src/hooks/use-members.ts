@@ -20,7 +20,11 @@ export function useMembers(treeId?: string) {
       const res = await fetch(endpoint);
       let json = null;
     try {
-      json = await res.json();
+      try {
+        json = await res.json();
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
     } catch (e) {
       throw new Error("Invalid server response");
     }

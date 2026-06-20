@@ -55,7 +55,17 @@ export function InviteModal({ isOpen, onClose, treeId, treeName }: InviteModalPr
         body: JSON.stringify(linkData) // No email = persistent link
       });
       if (!res.ok) throw new Error("Failed to generate link");
-      return res.json();
+      let data;
+      try {
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error("Invalid JSON response from server");
+        }
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
+      return data;
     },
     onSuccess: async (data) => {
       const link = `${window.location.origin}/invite/${data.token}`;

@@ -56,7 +56,17 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
     mutationFn: async () => {
       const res = await fetch(`/api/members/${member.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete member');
-      return res.json();
+      let data;
+      try {
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error("Invalid JSON response from server");
+        }
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
+      return data;
     },
     onSuccess: () => {
       toast.success('Member deleted successfully');

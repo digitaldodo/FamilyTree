@@ -88,10 +88,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
     }
 
     if (!tree) {
-      return Response.json({
-        success: false,
-        error: "No data returned"
-      }, { status: 500 });
+      return errorResponse('FETCH_ERROR', 'No data returned', 500);
     }
 
     return successResponse(tree, 'Tree retrieved successfully');
@@ -120,7 +117,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     try {
       body = await request.json();
     } catch (e) {
-      return Response.json({ success: false, message: "Invalid request body" }, { status: 400 });
+      return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const validation = updateTreeSchema.safeParse(body);
 
@@ -145,10 +142,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     });
 
     if (!tree) {
-      return Response.json({
-        success: false,
-        error: "No data returned"
-      }, { status: 500 });
+      return errorResponse('FETCH_ERROR', 'No data returned', 500);
     }
 
     return successResponse(tree, 'Tree updated successfully');

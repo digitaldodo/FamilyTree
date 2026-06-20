@@ -21,7 +21,11 @@ export function useGenerations(treeId?: string) {
       });
       let json = null;
     try {
-      json = await res.json();
+      try {
+        json = await res.json();
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
     } catch (e) {
       throw new Error("Invalid server response");
     }
@@ -46,7 +50,11 @@ export function useGenerations(treeId?: string) {
       });
       let json = null;
     try {
-      json = await res.json();
+      try {
+        json = await res.json();
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
     } catch (e) {
       throw new Error("Invalid server response");
     }
@@ -75,7 +83,11 @@ export function useGenerations(treeId?: string) {
       });
       let json = null;
     try {
-      json = await res.json();
+      try {
+        json = await res.json();
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
     } catch (e) {
       throw new Error("Invalid server response");
     }
@@ -100,7 +112,11 @@ export function useGenerations(treeId?: string) {
       });
       let json = null;
     try {
-      json = await res.json();
+      try {
+        json = await res.json();
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
     } catch (e) {
       throw new Error("Invalid server response");
     }

@@ -47,10 +47,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     if (!members) {
-      return Response.json({
-        success: false,
-        error: "No data returned"
-      }, { status: 500 });
+      return errorResponse('FETCH_ERROR', 'No data returned', 500);
     }
 
     return listResponse(members, total, page, limit);
@@ -306,10 +303,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!newMember) {
-      return Response.json({
-        success: false,
-        error: "No data returned"
-      }, { status: 500 });
+      return errorResponse('FETCH_ERROR', 'No data returned', 500);
     }
 
     return successResponse(newMember, 'Member created successfully', 201);

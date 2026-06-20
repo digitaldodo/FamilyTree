@@ -29,11 +29,15 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
   const repairMutation = useMutation({
     mutationFn: async () => {
       const res = await fetch(`/api/trees/${resolvedTreeId}/repair`, { method: 'POST' });
-      let data = null;
+      let data;
     try {
-      data = await res.json();
+      try {
+        data = await res.json();
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
     } catch (e) {
-      throw new Error("Invalid server response");
+      throw new Error("Invalid JSON response from server");
     }
       if (!res.ok) throw new Error(data.message || 'Unknown error');
       return data.data;

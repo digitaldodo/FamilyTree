@@ -181,42 +181,68 @@ export const GenealogyEngine = {
         const nodeIds = generationsRec[level] || [];
         let currentX = levelRightEdge.get(level) || 0;
         
-        nodeIds.sort((a, b) => {
-          const aParents = derivedRelationships[a]?.parents || [];
-          const bParents = derivedRelationships[b]?.parents || [];
-          const aParentX = aParents.length > 0 ? (nodePositions.get(aParents[0])?.x || 0) : 0;
-          const bParentX = bParents.length > 0 ? (nodePositions.get(bParents[0])?.x || 0) : 0;
+        // Group nodes by their primary parent (or no parent)
+        const groups = new Map<string, string[]>();
+        for (const id of nodeIds) {
+          const parents = derivedRelationships[id]?.parents || [];
+          const primaryParent = parents.length > 0 ? parents[0] : 'root';
+          if (!groups.has(primaryParent)) groups.set(primaryParent, []);
+          groups.get(primaryParent)!.push(id);
+        }
+
+        // Sort groups by parent X position
+        const sortedGroups = Array.from(groups.entries()).sort((a, b) => {
+          if (a[0] === 'root' && b[0] !== 'root') return -1;
+          if (a[0] !== 'root' && b[0] === 'root') return 1;
+          const aParentX = nodePositions.get(a[0])?.x || 0;
+          const bParentX = nodePositions.get(b[0])?.x || 0;
           return aParentX - bParentX;
         });
 
-        for (const id of nodeIds) {
-          const parents = derivedRelationships[id]?.parents || [];
-          let parentAvgX = 0;
-          let parentCount = 0;
-          
-          for (const p of parents) {
-            const pPos = nodePositions.get(p);
-            if (pPos) {
-              parentAvgX += pPos.x;
-              parentCount++;
+        for (const [parentId, groupNodeIds] of sortedGroups) {
+          // Sort nodes within group by ID for stability
+          groupNodeIds.sort((a, b) => a.localeCompare(b));
+
+          // Calculate total width of this group
+          let totalGroupWidth = 0;
+          for (let i = 0; i < groupNodeIds.length; i++) {
+            const id = groupNodeIds[i];
+            const node = nodesMap.get(id)!;
+            const isCouple = node.type === 'COUPLE_CONTAINER';
+            const nodeWidth = isCouple ? NODE_WIDTH * 2 + GAP : NODE_WIDTH;
+            totalGroupWidth += nodeWidth;
+            if (i < groupNodeIds.length - 1) {
+              totalGroupWidth += GAP;
             }
           }
-          
-          if (parentCount > 0) {
-            const desiredCenterX = parentAvgX / parentCount;
-            const startXForNode = desiredCenterX;
-            currentX = Math.max(currentX, startXForNode);
+
+          let startX = currentX;
+          if (parentId !== 'root') {
+            const parentPos = nodePositions.get(parentId);
+            if (parentPos) {
+              const parentNode = nodesMap.get(parentId)!;
+              const parentIsCouple = parentNode.type === 'COUPLE_CONTAINER';
+              const parentWidth = parentIsCouple ? NODE_WIDTH * 2 + GAP : NODE_WIDTH;
+              const parentCenterX = parentPos.x + parentWidth / 2;
+              
+              const desiredStartX = parentCenterX - totalGroupWidth / 2;
+              startX = Math.max(currentX, desiredStartX);
+            }
           }
 
-          nodePositions.set(id, { x: currentX, y: level * LEVEL_HEIGHT });
-          const node = nodesMap.get(id)!;
-          node.layoutHints.x = currentX;
-          node.layoutHints.y = level * LEVEL_HEIGHT;
-          
-          const isCouple = node.type === 'COUPLE_CONTAINER';
-          const nodeWidth = isCouple ? NODE_WIDTH * 2 + GAP : NODE_WIDTH;
-          
-          currentX += nodeWidth + GAP;
+          let nodeX = startX;
+          for (const id of groupNodeIds) {
+            nodePositions.set(id, { x: nodeX, y: level * LEVEL_HEIGHT });
+            const node = nodesMap.get(id)!;
+            node.layoutHints.x = nodeX;
+            node.layoutHints.y = level * LEVEL_HEIGHT;
+            
+            const isCouple = node.type === 'COUPLE_CONTAINER';
+            const nodeWidth = isCouple ? NODE_WIDTH * 2 + GAP : NODE_WIDTH;
+            
+            nodeX += nodeWidth + GAP;
+          }
+          currentX = nodeX;
         }
         levelRightEdge.set(level, currentX);
       }
@@ -259,12 +285,16 @@ export const GenealogyEngine = {
       parentsOf.get(e.target)!.push(e.source);
     }
 
+    // 1. Identify roots (nodes with no parents)
     const roots = nodes.filter(n => !parentsOf.has(n.id) || parentsOf.get(n.id)!.length === 0);
 
     const genMap = new Map<string, number>();
     const visited = new Set<string>();
     const queue: { id: string, gen: number }[] = [];
     
+    // Sort roots for stable initialization
+    roots.sort((a, b) => a.id.localeCompare(b.id));
+
     for (const root of roots) {
       queue.push({ id: root.id, gen: 0 });
       genMap.set(root.id, 0);
@@ -295,32 +325,45 @@ export const GenealogyEngine = {
       const { id: curr, gen: currGen } = queue.shift()!;
       
       const spouses = spousesOf.get(curr) || [];
+      spouses.sort(); // Stable
       for (const sp of spouses) {
         if (!visited.has(sp)) {
           visited.add(sp);
           genMap.set(sp, currGen);
           queue.push({ id: sp, gen: currGen });
+        } else {
+          // If spouse already visited, ensure they share the minimum generation
+          const existingGen = genMap.get(sp)!;
+          if (currGen < existingGen) {
+             genMap.set(sp, currGen);
+             queue.push({ id: sp, gen: currGen });
+          }
         }
       }
 
       const children = childrenOf.get(curr) || [];
+      children.sort(); // Stable
       for (const child of children) {
         if (!visited.has(child)) {
           visited.add(child);
           genMap.set(child, currGen + 1);
           queue.push({ id: child, gen: currGen + 1 });
+        } else {
+          // Ensure child is strictly below parent (DAG safety)
+          if (genMap.get(child)! <= currGen) {
+             genMap.set(child, currGen + 1);
+             queue.push({ id: child, gen: currGen + 1 });
+          }
         }
       }
     }
 
     for (const n of nodes) {
-      const gen = genMap.get(n.id);
+      let gen = genMap.get(n.id);
       if (gen === undefined || gen === null || isNaN(gen)) {
-        console.warn(`[GenealogyEngine] generation missing for member ${n.id}. Assigning fallback 0`);
-        n.generation = 0;
-      } else {
-        n.generation = gen;
+        gen = 0; // Fallback for orphans not caught by BFS roots
       }
+      n.generation = gen;
     }
   },
 

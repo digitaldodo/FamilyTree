@@ -47,10 +47,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
     }
 
     if (!member) {
-      return Response.json({
-        success: false,
-        error: "No data returned"
-      }, { status: 500 });
+      return errorResponse('FETCH_ERROR', 'No data returned', 500);
     }
 
     return successResponse({ ...member }, 'Member retrieved successfully');
@@ -357,10 +354,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     }
 
     if (!freshMember) {
-      return Response.json({
-        success: false,
-        error: "No data returned"
-      }, { status: 500 });
+      return errorResponse('FETCH_ERROR', 'No data returned', 500);
     }
 
     return successResponse(freshMember, 'Member updated successfully');

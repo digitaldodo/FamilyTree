@@ -61,10 +61,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!newRel) {
-      return Response.json({
-        success: false,
-        error: "No data returned"
-      }, { status: 500 });
+      return errorResponse('FETCH_ERROR', 'No data returned', 500);
     }
 
     return successResponse(newRel, 'Relationship created successfully', 201);

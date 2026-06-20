@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
 import { getTreePermission, canEdit } from '@/lib/permissions';
+import { errorResponse } from '@/lib/utils';
 import { ChangeEvent } from '@/domain/collaboration/change-events';
 import { ConflictEngine } from '@/domain/collaboration/conflict-engine';
 import { MergeEngine } from '@/domain/collaboration/merge-engine';
@@ -13,21 +14,21 @@ export async function POST(req: NextRequest, { params }: Params) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+      return errorResponse('UNAUTHORIZED', 'Unauthorized', 401);
     }
 
     const { id } = await params;
     
     const permission = await getTreePermission(session.user.id, id);
     if (!canEdit(permission)) {
-      return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
+      return errorResponse('FORBIDDEN', 'Forbidden', 403);
     }
 
     let body = null;
     try {
       body = await req.json();
     } catch (e) {
-      return Response.json({ success: false, message: "Invalid request body" }, { status: 400 });
+      return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const { versionId, events } = body as { versionId: string | null; events: ChangeEvent[] };
 
@@ -127,6 +128,6 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   } catch (error: any) {
     console.error('[COLLABORATION_ERROR]', error);
-    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    return errorResponse('SERVER_ERROR', error.message, 500);
   }
 }

@@ -30,7 +30,17 @@ export default function AdminPage() {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('Failed to delete tree');
-      return res.json();
+      let data;
+      try {
+        try {
+          data = await res.json();
+        } catch (e) {
+          throw new Error("Invalid JSON response from server");
+        }
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
+      return data;
     },
     onSuccess: () => {
       toast.success('Tree deleted successfully');

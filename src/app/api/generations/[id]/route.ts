@@ -52,7 +52,7 @@ export async function PATCH(
     try {
       body = await request.json();
     } catch (e) {
-      return Response.json({ success: false, message: "Invalid request body" }, { status: 400 });
+      return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const validation = updateGenerationSchema.safeParse(body);
 

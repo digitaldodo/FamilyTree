@@ -32,11 +32,15 @@ export function useMemberMutations() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...input, treeId: input.treeId || activeTreeId }),
       });
-      let data = null;
+      let data;
     try {
-      data = await res.json();
+      try {
+        data = await res.json();
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
     } catch (e) {
-      throw new Error("Invalid server response");
+      throw new Error("Invalid JSON response from server");
     }
       if (!res.ok || !data.success) throw new Error(data.message || 'Failed to create member');
       return data.data;
@@ -59,11 +63,15 @@ export function useMemberMutations() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(input),
       });
-      let data = null;
+      let data;
     try {
-      data = await res.json();
+      try {
+        data = await res.json();
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
     } catch (e) {
-      throw new Error("Invalid server response");
+      throw new Error("Invalid JSON response from server");
     }
       if (!res.ok || !data.success) throw new Error(data.message || 'Failed to update member');
       return data.data;
@@ -83,11 +91,15 @@ export function useMemberMutations() {
       const res = await fetch(`/api/members/${id}`, {
         method: 'DELETE',
       });
-      let data = null;
+      let data;
     try {
-      data = await res.json();
+      try {
+        data = await res.json();
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
     } catch (e) {
-      throw new Error("Invalid server response");
+      throw new Error("Invalid JSON response from server");
     }
       if (!res.ok || !data.success) throw new Error(data.message || 'Failed to delete member');
       return data.data;

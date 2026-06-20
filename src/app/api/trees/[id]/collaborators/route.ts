@@ -61,7 +61,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     try {
       body = await request.json();
     } catch (e) {
-      return Response.json({ success: false, message: "Invalid request body" }, { status: 400 });
+      return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const { userId } = body;
 

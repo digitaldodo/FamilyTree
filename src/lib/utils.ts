@@ -9,8 +9,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function successResponse(data: any, message = 'Success', status = 200) {
-  return Response.json({ success: true, message, data }, { status });
+export function successResponse(data: any, message = 'Operation successful', status = 200) {
+  return Response.json({ success: true, data, message }, { status });
 }
 
 export function constructMetadata({
@@ -39,22 +39,18 @@ export function constructMetadata({
   return meta;
 }
 
-export function errorResponse(messageOrCode: string = 'An error occurred', detailsOrMessage?: any, statusOrStatus?: any) {
-  let message = messageOrCode;
-  let status = 400;
-  let errors = undefined;
+export function errorResponse(messageOrCode: string = 'Unknown error', detailsOrMessage?: any, statusOrStatus?: any) {
+  let error = messageOrCode;
+  let status = 500;
 
   if (typeof statusOrStatus === 'number') {
     status = statusOrStatus;
-    message = typeof detailsOrMessage === 'string' ? detailsOrMessage : messageOrCode;
-    errors = typeof detailsOrMessage !== 'string' ? detailsOrMessage : undefined;
+    error = typeof detailsOrMessage === 'string' ? detailsOrMessage : messageOrCode;
   } else if (typeof detailsOrMessage === 'number') {
     status = detailsOrMessage;
-  } else {
-    errors = detailsOrMessage;
   }
 
-  return Response.json({ success: false, message, errors }, { status });
+  return Response.json({ success: false, error }, { status });
 }
 
 export function listResponse(data: any[], totalOrMeta?: number | any, page?: number, limit?: number) {

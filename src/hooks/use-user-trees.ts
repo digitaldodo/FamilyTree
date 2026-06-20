@@ -8,7 +8,11 @@ export function useUserTrees() {
       const res = await fetch('/api/trees');
       let json = null;
     try {
-      json = await res.json();
+      try {
+        json = await res.json();
+      } catch (e) {
+        throw new Error("Invalid JSON response from server");
+      }
     } catch (e) {
       throw new Error("Invalid server response");
     }
