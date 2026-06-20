@@ -57,7 +57,8 @@ export function useFamilyTree(treeId?: string) {
   }, [familyGraph, visibleGenerations, isMobile]);
 
   return {
-    members: familyGraph,
+    members: rawMembers, // original array for legacy UI compatibility
+    familyGraph, // new pure deterministic graph
     generations,
     initialNodes,
     initialEdges,

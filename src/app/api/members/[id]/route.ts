@@ -45,9 +45,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
       return errorResponse('FORBIDDEN', 'You do not have access to this member', 403);
     }
 
-    const inferredRelationships = await RelationshipEngine.inferRelationshipsForMember(id, member.treeId);
-
-    return successResponse({ ...member, inferredRelationships }, 'Member retrieved successfully');
+    return successResponse({ ...member }, 'Member retrieved successfully');
   } catch (error) {
     console.error('[MEMBER_GET_ERROR]', error);
     return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
@@ -321,18 +319,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const verifyMember = await prisma.member.findUnique({ where: { id } });
     if (!verifyMember || verifyMember.firstName !== body.firstName) { // simple check
       return errorResponse('UPDATE_FAILED', 'Database update confirmed failed', 500);
-    }
-
-    // Smart Rules
-    try {
-      const allNewRels = await prisma.relationship.findMany({
-        where: { OR: [{ fromId: id }, { toId: id }] }
-      });
-      for (const rel of allNewRels) {
-        await RelationshipEngine.applySmartRules(rel.fromId, rel.toId, rel.type, existing.treeId);
-      }
-    } catch (smartRuleError) {
-      console.log('[API Debug] PUT /api/members/:id smart rule error', { error: getErrorMessage(smartRuleError) });
     }
 
     RelationshipEngine.invalidateCache(existing.treeId, [id]);

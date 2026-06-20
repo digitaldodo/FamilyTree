@@ -100,25 +100,7 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
     );
   };
 
-  // Build relationship data — check BOTH directions for symmetric types (SPOUSE, SIBLING)
-  const safeRelsFrom = Array.isArray(member?.relationsFrom) ? member!.relationsFrom : [];
-  const safeRelsTo = Array.isArray(member?.relationsTo) ? member!.relationsTo : [];
-  
-  const spouses = [
-    ...(safeRelsFrom.filter((r) => r.type === 'SPOUSE')),
-    ...(safeRelsTo.filter((r) => r.type === 'SPOUSE')),
-  ];
-  const parents = safeRelsTo.filter((r) => r.type === 'PARENT');
-  const children = safeRelsFrom.filter((r) => r.type === 'PARENT');
-  const siblings = [
-    ...(safeRelsFrom.filter((r) => r.type === 'SIBLING')),
-    ...(safeRelsTo.filter((r) => r.type === 'SIBLING')),
-  ];
-  const hasRelationships =
-    spouses.length > 0 ||
-    parents.length > 0 ||
-    children.length > 0 ||
-    siblings.length > 0;
+
   const age = getAge();
   const memories: Memory[] =
     (member as any)?.media?.filter((m: any) => m.type === 'image') || [];

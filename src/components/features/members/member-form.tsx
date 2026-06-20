@@ -60,10 +60,10 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
   const coverImage = watch('coverImage');
 
   // Relationships state
-  const [relations, setRelations] = React.useState<{type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING', id: string}[]>(() => {
+  const [relations, setRelations] = React.useState<{type: 'PARENT' | 'CHILD' | 'SPOUSE', id: string}[]>(() => {
     if (!member) return [];
     // Initialize with existing relationships
-    const existing: {type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING', id: string}[] = [];
+    const existing: {type: 'PARENT' | 'CHILD' | 'SPOUSE', id: string}[] = [];
     
     // member.relationsFrom means member is the 'from' in the relationship.
     // If PARENT, member is Parent -> toId is Child.
@@ -72,8 +72,6 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
         existing.push({ type: 'CHILD', id: r.toId });
       } else if (r.type === 'SPOUSE') {
         existing.push({ type: r.type, id: r.toId });
-      } else if (r.type === 'SIBLING') {
-        existing.push({ type: r.type, id: r.toId });
       }
     });
 
@@ -81,8 +79,6 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       if (r.type === 'PARENT') {
         existing.push({ type: 'PARENT', id: r.fromId });
       } else if (r.type === 'SPOUSE') {
-        existing.push({ type: r.type, id: r.fromId });
-      } else if (r.type === 'SIBLING') {
         existing.push({ type: r.type, id: r.fromId });
       }
     });
@@ -93,7 +89,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
 
   const allSelectedIds = relations.map(r => r.id);
 
-  const handleAddRelation = (id: string, type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING') => {
+  const handleAddRelation = (id: string, type: 'PARENT' | 'CHILD' | 'SPOUSE') => {
     if (type === 'SPOUSE') {
       // Replace existing spouse to enforce single spouse rule
       setRelations(prev => [...prev.filter(r => r.type !== 'SPOUSE'), { id, type }]);
@@ -150,7 +146,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
     setRelations(prev => [...prev, { id, type }]);
   };
 
-  const handleRemoveRelation = (id: string, type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING') => {
+  const handleRemoveRelation = (id: string, type: 'PARENT' | 'CHILD' | 'SPOUSE') => {
     setRelations(prev => prev.filter(r => !(r.id === id && r.type === type)));
   };
 

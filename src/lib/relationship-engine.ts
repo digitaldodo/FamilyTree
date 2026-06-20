@@ -8,74 +8,13 @@ export type MemberWithRelations = Member & {
   relationsTo: Relationship[];
 };
 
-// Simple Graph Structure for Inference
-type AdjacencyList = Record<string, string[]>;
-type Graph = {
-  parents: AdjacencyList;
-  children: AdjacencyList;
-  spouses: AdjacencyList;
-  explicitSiblings: AdjacencyList;
-};
-
-type InferredRelationships = {
-  parents: string[];
-  children: string[];
-  spouses: string[];
-  siblings: string[];
-  grandparents: string[];
-  grandchildren: string[];
-};
-
-type CacheEntry = {
-  data: InferredRelationships;
-};
-
-type TreeCache = {
-  graphVersion: number;
-  memberCache: Record<string, CacheEntry>;
-  graph?: Graph;
-};
-
 export class RelationshipEngine {
-  private static treeCaches: Record<string, TreeCache> = {};
-
-  private static getTreeCache(treeId: string): TreeCache {
-    if (!this.treeCaches[treeId]) {
-      this.treeCaches[treeId] = { graphVersion: 1, memberCache: {} };
-    }
-    return this.treeCaches[treeId];
-  }
-
   /**
    * Invalidates cached relationships using dependency paths.
    */
   static invalidateCache(treeId: string, changedMemberIds?: string[]) {
-    const cache = this.getTreeCache(treeId);
-    cache.graphVersion++;
-    cache.graph = undefined;
-
-    if (changedMemberIds && changedMemberIds.length > 0) {
-      const toInvalidate = new Set<string>(changedMemberIds);
-      
-      // Trace dependencies from the cached inferences
-      for (const memberId of changedMemberIds) {
-        const cached = cache.memberCache[memberId];
-        if (cached) {
-          cached.data.parents.forEach(id => toInvalidate.add(id));
-          cached.data.children.forEach(id => toInvalidate.add(id));
-          cached.data.spouses.forEach(id => toInvalidate.add(id));
-          cached.data.siblings.forEach(id => toInvalidate.add(id));
-          cached.data.grandparents.forEach(id => toInvalidate.add(id));
-          cached.data.grandchildren.forEach(id => toInvalidate.add(id));
-        }
-      }
-
-      toInvalidate.forEach(id => {
-        delete cache.memberCache[id];
-      });
-    } else {
-      cache.memberCache = {};
-    }
+    // Cache invalidation was previously used for inference cache.
+    // It's a no-op now as inference is purely client-side/in-memory on fetch.
   }
 
   /**
@@ -120,10 +59,8 @@ export class RelationshipEngine {
       if (fromGen !== toGen) {
         throw new Error(`Spouse must belong to the same generation.`);
       }
-      if (type === 'SPOUSE') {
-        if (!isSpouseEligible(fromMember.gender, toMember.gender)) {
-          throw new Error('Spouse eligibility rules not met based on gender configurations.');
-        }
+      if (!isSpouseEligible(fromMember.gender, toMember.gender)) {
+        throw new Error('Spouse eligibility rules not met based on gender configurations.');
       }
     } else if (type === 'PARENT') {
       // fromId is PARENT of toId
@@ -157,8 +94,6 @@ export class RelationshipEngine {
       // Child Ownership Rules: Prevent Child duplication across unrelated families.
       if (existingParents.length === 1) {
         const firstParentId = existingParents[0].fromId;
-        // The new parent (fromId) must ideally be a spouse of firstParentId, or have no spouses.
-        // We can enforce that if firstParentId has a spouse, it MUST be fromId.
         const firstParentSpouses = await prisma.relationship.findMany({
           where: { type: 'SPOUSE', OR: [{ fromId: firstParentId }, { toId: firstParentId }] }
         });
@@ -166,7 +101,6 @@ export class RelationshipEngine {
         if (firstParentSpouses.length > 0) {
           const spouseIds = firstParentSpouses.map(s => s.fromId === firstParentId ? s.toId : s.fromId);
           if (!spouseIds.includes(fromId)) {
-            // firstParent has a spouse, but new parent is not that spouse!
             throw new Error('Child already belongs to a family. Cannot assign unrelated third parent.');
           }
         }
@@ -187,7 +121,7 @@ export class RelationshipEngine {
     // We must ensure that fromId is not already a descendant of toId.
     const visited = new Set<string>();
     
-    const checkDescendant = async (currentId: string, targetId: string) => {
+    const checkDescendant = async (currentId: string, targetId: string): Promise<boolean> => {
       if (currentId === targetId) return true;
       if (visited.has(currentId)) return false;
       visited.add(currentId);
@@ -208,190 +142,5 @@ export class RelationshipEngine {
     if (hasCycle) {
       throw new Error('Ancestry cycle detected. A descendant cannot be added as a parent.');
     }
-  }
-
-  /**
-   * Automatic Parent Propagation
-   */
-  static async applySmartRules(fromId: string, toId: string, type: RelationshipType, treeId: string): Promise<void> {
-    // PHASE 1 STABILIZATION FREEZE: Disable auto inference loops
-    return;
-    /*
-    if (type === 'PARENT') {
-      // share child with spouse
-      const spouses = await prisma.relationship.findMany({
-        where: { type: 'SPOUSE', OR: [{ fromId }, { toId: fromId }] }
-      });
-      
-      for (const spouseRel of spouses) {
-        const spouseId = spouseRel.fromId === fromId ? spouseRel.toId : spouseRel.fromId;
-        
-        const existingParentRel = await prisma.relationship.count({
-          where: { type: 'PARENT', fromId: spouseId, toId }
-        });
-        
-        if (existingParentRel === 0) {
-          const parentCount = await prisma.relationship.count({
-            where: { type: 'PARENT', toId }
-          });
-          if (parentCount < 2) {
-            await prisma.relationship.create({
-              data: { type: 'PARENT', fromId: spouseId, toId }
-            });
-          }
-        }
-      }
-    } else if (type === 'SPOUSE') {
-      // share existing children between new spouses
-      const childrenA = await prisma.relationship.findMany({ where: { type: 'PARENT', fromId } });
-      const childrenB = await prisma.relationship.findMany({ where: { type: 'PARENT', fromId: toId } });
-      
-      const childIdsA = childrenA.map(c => c.toId);
-      const childIdsB = childrenB.map(c => c.toId);
-      
-      for (const childId of childIdsA) {
-        if (!childIdsB.includes(childId)) {
-          const parentCount = await prisma.relationship.count({ where: { type: 'PARENT', toId: childId } });
-          if (parentCount < 2) {
-            await prisma.relationship.create({ data: { type: 'PARENT', fromId: toId, toId: childId } });
-          }
-        }
-      }
-      for (const childId of childIdsB) {
-        if (!childIdsA.includes(childId)) {
-          const parentCount = await prisma.relationship.count({ where: { type: 'PARENT', toId: childId } });
-          if (parentCount < 2) {
-            await prisma.relationship.create({ data: { type: 'PARENT', fromId, toId: childId } });
-          }
-        }
-      }
-    }
-    */
-  }
-
-  /**
-   * Load entire graph in memory for fast inference
-   */
-  private static async loadGraph(treeId: string): Promise<Graph> {
-    const cache = this.getTreeCache(treeId);
-    if (cache.graph) {
-      return cache.graph;
-    }
-
-    const relations = await prisma.relationship.findMany({
-      where: { from: { treeId } }
-    });
-
-    const graph: Graph = {
-      parents: {},
-      children: {},
-      spouses: {},
-      explicitSiblings: {}
-    };
-
-    const addEdge = (list: AdjacencyList, u: string, v: string) => {
-      if (!list[u]) list[u] = [];
-      if (!list[u].includes(v)) list[u].push(v);
-    };
-
-    for (const rel of relations) {
-      if (rel.type === 'PARENT') {
-        addEdge(graph.children, rel.fromId, rel.toId);
-        addEdge(graph.parents, rel.toId, rel.fromId);
-      } else if (rel.type === 'SPOUSE') {
-        addEdge(graph.spouses, rel.fromId, rel.toId);
-        addEdge(graph.spouses, rel.toId, rel.fromId);
-      }
-    }
-
-    cache.graph = graph;
-    return graph;
-  }
-
-  /**
-   * Infer relationships for a specific member dynamically.
-   */
-  static async inferRelationshipsForMember(memberId: string, treeId: string): Promise<InferredRelationships> {
-    const cache = this.getTreeCache(treeId);
-    if (cache.memberCache[memberId]) {
-      return cache.memberCache[memberId].data;
-    }
-
-    const graph = await this.loadGraph(treeId);
-
-    const parents = graph.parents[memberId] || [];
-    const children = graph.children[memberId] || [];
-    const spouses = graph.spouses[memberId] || [];
-    
-    // Inferred Siblings: share both parents, plus explicitly defined siblings (legacy)
-    const siblingsSet = new Set<string>(graph.explicitSiblings[memberId] || []);
-    if (parents.length === 2) {
-      const [p1, p2] = parents;
-      const c1 = graph.children[p1] || [];
-      const c2 = graph.children[p2] || [];
-      // Intersection of children
-      for (const siblingCandidate of c1) {
-        if (c2.includes(siblingCandidate) && siblingCandidate !== memberId) {
-          siblingsSet.add(siblingCandidate);
-        }
-      }
-    } else if (parents.length === 1) {
-       // Optional: half-siblings? Usually we only infer full siblings if 2 parents match, or any shared parent?
-       // Leaving as full siblings or just preserving what it had.
-    }
-
-    // Grandparents: parents of parents
-    const grandparentsSet = new Set<string>();
-    for (const p of parents) {
-      const grandP = graph.parents[p] || [];
-      grandP.forEach(gp => grandparentsSet.add(gp));
-    }
-
-    // Grandchildren: children of children
-    const grandchildrenSet = new Set<string>();
-    for (const c of children) {
-      const grandC = graph.children[c] || [];
-      grandC.forEach(gc => grandchildrenSet.add(gc));
-    }
-
-    const result = {
-      parents,
-      children,
-      spouses,
-      siblings: Array.from(siblingsSet),
-      grandparents: Array.from(grandparentsSet),
-      grandchildren: Array.from(grandchildrenSet)
-    };
-
-    cache.memberCache[memberId] = { data: result };
-    return result;
-  }
-
-  /**
-   * Build full graph for Tree layout
-   */
-  static async buildRelationshipGraph(treeId: string) {
-    const members = await prisma.member.findMany({
-      where: { treeId },
-      include: { generation: true }
-    });
-
-    const graph = await this.loadGraph(treeId);
-    
-    // Map inferred relationships for all members
-    const inferred = new Map<string, InferredRelationships>();
-    for (const member of members) {
-      inferred.set(member.id, await this.inferRelationshipsForMember(member.id, treeId));
-    }
-
-    const relations = await prisma.relationship.findMany({
-      where: { from: { treeId } },
-      include: {
-        from: { include: { generation: true } },
-        to: { include: { generation: true } }
-      }
-    });
-
-    return { relations, inferred: Object.fromEntries(inferred), warnings: [] };
   }
 }

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Users } from 'lucide-react';
 import { MemberWithRelations } from '@/types/member';
 import { MemberAvatar } from './member-avatar';
+import { GenealogyEngine } from '@/domain/inference/genealogy-engine';
 
 interface MemberRelationshipsProps {
   member: MemberWithRelations;
@@ -18,51 +19,30 @@ export function MemberRelationships({ member, members, onNavigateToMember, readO
     return ids.map(id => safeMembersForFind.find(m => m.id === id)).filter(Boolean) as MemberWithRelations[];
   };
 
-  let parentMembers: MemberWithRelations[] = [];
-  let childMembers: MemberWithRelations[] = [];
-  let spouseMembers: MemberWithRelations[] = [];
-  let siblingMembers: MemberWithRelations[] = [];
-  let grandparentMembers: MemberWithRelations[] = [];
-  let grandchildMembers: MemberWithRelations[] = [];
+  const familyGraph = useMemo(() => {
+    return GenealogyEngine.buildFamilyGraph(safeMembersForFind);
+  }, [safeMembersForFind]);
 
-  if (member.inferredRelationships) {
-    const inferred = member.inferredRelationships;
-    parentMembers = getMembersByIds(inferred.parents);
-    childMembers = getMembersByIds(inferred.children);
-    spouseMembers = getMembersByIds(inferred.spouses);
-    siblingMembers = getMembersByIds(inferred.siblings);
-    grandparentMembers = getMembersByIds(inferred.grandparents);
-    grandchildMembers = getMembersByIds(inferred.grandchildren);
-  } else {
-    // Fallback if not populated
-    const safeRelsFrom = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
-    const safeRelsTo = Array.isArray(member.relationsTo) ? member.relationsTo : [];
+  const derived = familyGraph.derivedRelationships[member.id] || {
+    parents: [],
+    children: [],
+    spouses: [],
+    siblings: [],
+    ancestors: []
+  };
 
-    const spouseIds = [
-      ...safeRelsFrom.filter((r) => r.type === 'SPOUSE').map(r => r.toId),
-      ...safeRelsTo.filter((r) => r.type === 'SPOUSE').map(r => r.fromId),
-    ];
-    spouseMembers = getMembersByIds([...new Set(spouseIds)]);
+  const parentMembers = getMembersByIds(derived.parents);
+  const childMembers = getMembersByIds(derived.children);
+  const spouseMembers = getMembersByIds(derived.spouses);
+  const siblingMembers = getMembersByIds(derived.siblings);
+  
+  // Grandparents
+  const grandparentsIds = derived.parents.flatMap(pid => familyGraph.derivedRelationships[pid]?.parents || []);
+  const grandparentMembers = getMembersByIds(Array.from(new Set(grandparentsIds)));
 
-    const parents = safeRelsTo.filter((r) => r.type === 'PARENT');
-    parentMembers = getMembersByIds(parents.map(r => r.fromId));
-
-    const children = safeRelsFrom.filter((r) => r.type === 'PARENT');
-    childMembers = getMembersByIds(children.map(r => r.toId));
-
-    const derivedSiblingIds = new Set<string>();
-    if (parentMembers.length > 0) {
-      safeMembersForFind.forEach((m) => {
-        if (m.id === member.id) return;
-        const mSafeRelsTo = Array.isArray(m.relationsTo) ? m.relationsTo : [];
-        const mParentIds = mSafeRelsTo.filter((r) => r.type === 'PARENT').map((r) => r.fromId);
-        if (mParentIds.some((pid) => parentMembers.some(p => p.id === pid))) {
-          derivedSiblingIds.add(m.id);
-        }
-      });
-    }
-    siblingMembers = getMembersByIds(Array.from(derivedSiblingIds));
-  }
+  // Grandchildren
+  const grandchildrenIds = derived.children.flatMap(cid => familyGraph.derivedRelationships[cid]?.children || []);
+  const grandchildMembers = getMembersByIds(Array.from(new Set(grandchildrenIds)));
 
   const hasRelationships = spouseMembers.length > 0 || parentMembers.length > 0 || childMembers.length > 0 || siblingMembers.length > 0 || grandparentMembers.length > 0 || grandchildMembers.length > 0;
 

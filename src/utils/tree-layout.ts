@@ -1,27 +1,27 @@
 import { Node, Edge } from '@xyflow/react';
 import dagre from 'dagre';
-import { MemberWithRelations } from '@/types/member';
+import { FamilyGraph } from '@/domain/inference/genealogy-engine';
 
 export const LEVEL_HEIGHT = 450;
 export const NODE_WIDTH = 220;
 export const NODE_HEIGHT = 300;
 
 export function generateTreeLayout(
-  members: MemberWithRelations[],
+  graph: FamilyGraph,
   generations: any[],
   isMobile: boolean = false
 ) {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
   
-  if (members.length === 0) {
+  if (!graph || graph.nodes.length === 0) {
     return { nodes, edges };
   }
 
   const gap = isMobile ? 40 : 80;
   const MEMBER_SPACING = NODE_WIDTH + gap;
 
-  // 1. Group spouses using Union-Find
+  // 1. Group spouses & siblings using Union-Find on graph edges
   const parentMap = new Map<string, string>();
   const find = (i: string): string => {
     if (parentMap.get(i) === undefined) parentMap.set(i, i);
@@ -34,20 +34,15 @@ export function generateTreeLayout(
     parentMap.set(find(i), find(j));
   };
 
-  const safeMembers1 = Array.isArray(members) ? members : [];
-  safeMembers1.forEach(m => {
-    const safeFrom = Array.isArray(m.relationsFrom) ? m.relationsFrom : [];
-    safeFrom.filter(r => r.type === 'SPOUSE' || r.type === 'SIBLING').forEach(r => {
-      union(m.id, r.toId);
-    });
+  graph.edges.filter(e => e.type === 'SPOUSE' || e.type === 'SIBLING').forEach(e => {
+    union(e.source, e.target);
   });
 
   const familyUnits = new Map<string, string[]>();
-  const safeMembers2 = Array.isArray(members) ? members : [];
-  safeMembers2.forEach(m => {
-    const root = find(m.id);
+  graph.nodes.forEach(n => {
+    const root = find(n.id);
     if (!familyUnits.has(root)) familyUnits.set(root, []);
-    familyUnits.get(root)!.push(m.id);
+    familyUnits.get(root)!.push(n.id);
   });
 
   const memberToFamily = new Map<string, string>();
@@ -63,28 +58,26 @@ export function generateTreeLayout(
     familyAdjacency.set(root, []);
   });
 
-  const safeMembers3 = Array.isArray(members) ? members : [];
-  safeMembers3.forEach(m => {
-    const safeFrom = Array.isArray(m.relationsFrom) ? m.relationsFrom : [];
-    safeFrom.filter(r => r.type === 'PARENT').forEach(r => {
-      const fromFamily = memberToFamily.get(m.id);
-      const toFamily = memberToFamily.get(r.toId);
-      if (fromFamily && toFamily && fromFamily !== toFamily) {
-        if (!familyAdjacency.get(fromFamily)!.includes(toFamily)) {
-          familyAdjacency.get(fromFamily)!.push(toFamily);
-        }
+  graph.edges.filter(e => e.type === 'PARENT').forEach(e => {
+    const fromFamily = memberToFamily.get(e.source);
+    const toFamily = memberToFamily.get(e.target);
+    if (fromFamily && toFamily && fromFamily !== toFamily) {
+      if (!familyAdjacency.get(fromFamily)!.includes(toFamily)) {
+        familyAdjacency.get(fromFamily)!.push(toFamily);
       }
-    });
+    }
   });
 
-  // Level calc using generation orderIndex
+  // Level calc using generation orderIndex or computed from graph
   const safeGenerations1 = Array.isArray(generations) ? generations : [];
   familyUnits.forEach((familyMembers, root) => {
     const memberId = familyMembers[0];
-    const member = members.find(m => m.id === memberId);
-    let level = 0;
-    if (member && member.generationId) {
-      const gen = safeGenerations1.find(g => g.id === member.generationId);
+    const graphNode = graph.nodes.find(m => m.id === memberId);
+    let level = graphNode ? graphNode.generation : 0;
+    
+    // We can fallback to explicit generation index if available
+    if (graphNode && graphNode.member.generationId) {
+      const gen = safeGenerations1.find(g => g.id === graphNode.member.generationId);
       if (gen) {
         level = gen.orderIndex;
       }
@@ -116,45 +109,6 @@ export function generateTreeLayout(
 
   // Execute Dagre layout
   dagre.layout(g);
-
-  // Diagnostics & Verification
-  const safeGenerations2 = Array.isArray(generations) ? generations : [];
-  console.log('--- LAYOUT DIAGNOSTICS ---');
-  console.log(`Generations count: ${safeGenerations2.length}`);
-  console.log(`Generation names: ${safeGenerations2.map(g => g.name).join(', ')}`);
-  console.log(`Generation orders: ${safeGenerations2.map(g => `${g.name} -> ${g.orderIndex}`).join(', ')}`);
-  
-  const membersPerGen = new Map<string, number>();
-  const safeMembers4 = Array.isArray(members) ? members : [];
-  safeMembers4.forEach(m => {
-    const gen = safeGenerations2.find(g => g.id === m.generationId);
-    const genName = gen ? gen.name : 'Unknown';
-    membersPerGen.set(genName, (membersPerGen.get(genName) || 0) + 1);
-  });
-  console.log('Members per generation:');
-  membersPerGen.forEach((count, name) => console.log(`  ${name} -> ${count} members`));
-
-  safeGenerations2.forEach(g => {
-    if (!g.name) console.error(`VERIFICATION FAILED: Generation ${g.id} has no name`);
-  });
-
-  familyLevels.forEach((level, root) => {
-    const membersList = familyUnits.get(root)!.map(id => members.find(m => m.id === id)!.firstName).join(', ');
-    const dagreNode = g.node(root);
-    console.log(`Family [${membersList}]: Computed Level = ${level}, Dagre Y = ${dagreNode?.y}`);
-  });
-
-  familyAdjacency.forEach((children, parent) => {
-    const parentLevel = familyLevels.get(parent)!;
-    children.forEach(child => {
-      const childLevel = familyLevels.get(child)!;
-      if (childLevel <= parentLevel) {
-        console.error(`VERIFICATION FAILED: Child family is on level ${childLevel}, but parent is on level ${parentLevel}`);
-      } else {
-        console.log(`Verified edge: Parent(L${parentLevel}) -> Child(L${childLevel})`);
-      }
-    });
-  });
 
   // 4. Collision Prevention per Level
   const familiesByLevel = new Map<number, { root: string, x: number, width: number, y: number }[]>();
@@ -200,20 +154,13 @@ export function generateTreeLayout(
     const startX = dagreNode.x - dagreNode.width / 2;
     const yOffset = dagreNode.y;
 
-    const safeMembers5 = Array.isArray(members) ? members : [];
-    
-    // Compute unique children for this family unit using pure arrays
     const childrenIds = Array.from(new Set(
-      familyMembers.flatMap(memberId => {
-        const member = safeMembers5.find(m => m.id === memberId);
-        if (!member) return [];
-        const safeFrom = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
-        return safeFrom.filter(r => r.type === 'PARENT').map(r => r.toId);
-      })
+      familyMembers.flatMap(memberId => graph.derivedRelationships[memberId].children)
     ));
 
     familyMembers.forEach((memberId, i) => {
-      const member = safeMembers5.find(m => m.id === memberId)!;
+      const graphNode = graph.nodes.find(n => n.id === memberId)!;
+      const member = graphNode.member;
 
       const xOffset = startX + i * MEMBER_SPACING + gap / 2 + NODE_WIDTH / 2; // Center inside allocated space
       const actualX = xOffset - NODE_WIDTH / 2; // Flow expects top-left
@@ -306,30 +253,14 @@ export function generateTreeLayout(
   });
 
   // 7. Spouse Edges (Pure array processing)
-  const spouseEdges = Array.isArray(members) ? members.flatMap(member => {
-    const safeFrom = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
-    const safeTo = Array.isArray(member.relationsTo) ? member.relationsTo : [];
-    return [
-      ...safeFrom.filter(r => r.type === 'SPOUSE').map(r => ({ fromId: member.id, toId: r.toId, type: r.type })),
-      ...safeTo.filter(r => r.type === 'SPOUSE').map(r => ({ fromId: r.fromId, toId: member.id, type: r.type }))
-    ];
-  }) : [];
+  const spouseEdges = graph.edges.filter(e => e.type === 'SPOUSE');
 
-  // Remove duplicate undirected spouse edges
-  const uniqueSpouseEdges = spouseEdges.filter((rel, index, self) => {
-    const [a, b] = [rel.fromId, rel.toId].sort();
-    return index === self.findIndex((r) => {
-      const [rA, rB] = [r.fromId, r.toId].sort();
-      return a === rA && b === rB;
-    });
-  });
-
-  uniqueSpouseEdges.forEach(rel => {
-    const edgeKey = `${rel.fromId}-${rel.toId}-SPOUSE`;
+  spouseEdges.forEach(rel => {
+    const edgeKey = `${rel.source}-${rel.target}-SPOUSE`;
     edges.push({
       id: `e-${edgeKey}`,
-      source: rel.fromId,
-      target: rel.toId,
+      source: rel.source,
+      target: rel.target,
       type: 'relationship',
       sourceHandle: 'spouse',
       targetHandle: 'spouse-target',

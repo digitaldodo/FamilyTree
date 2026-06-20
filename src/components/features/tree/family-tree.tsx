@@ -24,7 +24,7 @@ import { TreeToolbar } from './tree-toolbar';
 import { Loader2, Activity } from 'lucide-react';
 import { TreeBackground } from './tree-background';
 import { FloatingFamilyStats } from './floating-family-stats';
-import { buildRelationshipGraph } from '@/utils/relationship';
+import { GenealogyEngine } from '@/domain/inference/genealogy-engine';
 import { TreeSkeleton } from '@/components/ui/tree-skeleton';
 
 const nodeTypes = {
@@ -39,7 +39,7 @@ const edgeTypes = {
 
 function FamilyTreeCanvas() {
   const activeTreeId = useAppStore(s => s.activeTreeId);
-  const { members: treeMembers, generations, initialNodes, initialEdges, isLoading, error } = useFamilyTree(activeTreeId || undefined);
+  const { members: treeMembers, familyGraph, generations, initialNodes, initialEdges, isLoading, error } = useFamilyTree(activeTreeId || undefined);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [showDiagnostics, setShowDiagnostics] = React.useState(false);
@@ -172,7 +172,7 @@ function FamilyTreeCanvas() {
               <div className="flex justify-between"><span>Photos Loaded:</span> <span className={treeMembers.some(m => m.imageUrl) ? 'text-emerald-400' : 'text-amber-400'}>{treeMembers.filter(m => m.imageUrl).length}</span></div>
             </div>
             {(() => {
-              const { warnings } = buildRelationshipGraph(treeMembers, generations);
+              const { errors: warnings } = GenealogyEngine.validateFamilyGraph(familyGraph);
               if (warnings.length > 0) {
                 return (
                   <div className="mt-4 border-t border-rose-500/50 pt-2">
