@@ -12,7 +12,7 @@ import { MemberFilter } from '@/components/features/members/member-filter';
 import { ArrowUpToLine, ArrowDownToLine, ArrowUp, ArrowDown, UserPlus, Plus, UsersRound, TreePine, Pencil, Trash2, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
-import { PageLoader } from '@/components/ui/page-loader';
+import { MembersSkeleton } from '@/components/ui/members-skeleton';
 import { GenerationDeleteModal } from '@/components/features/generations/generation-delete-modal';
 import { GenerationFormModal, GenerationFormMode } from '@/components/features/generations/generation-form-modal';
 import { GenerationActionMenu } from '@/components/features/generations/generation-action-menu';
@@ -145,7 +145,7 @@ function MembersContent() {
       </div>
 
       {isLoading ? (
-        <PageLoader />
+        <MembersSkeleton />
       ) : allGenerations.length === 0 ? (
         <div className="py-12">
           <EmptyState 

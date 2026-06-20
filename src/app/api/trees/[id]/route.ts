@@ -34,22 +34,20 @@ export async function GET(_request: NextRequest, { params }: Params) {
         members: {
           orderBy: [{ firstName: 'asc' }],
           include: {
-            generation: true,
+            generation: { select: { id: true, name: true, orderIndex: true } },
             relationsFrom: {
-              include: {
-                to: {
-                  select: { id: true, firstName: true, lastName: true },
-                },
-              },
+              select: {
+                id: true, type: true, fromId: true, toId: true,
+                to: { select: { id: true, firstName: true, lastName: true, imageUrl: true } }
+              }
             },
             relationsTo: {
-              include: {
-                from: {
-                  select: { id: true, firstName: true, lastName: true },
-                },
-              },
+              select: {
+                id: true, type: true, fromId: true, toId: true,
+                from: { select: { id: true, firstName: true, lastName: true, imageUrl: true } }
+              }
             },
-            media: true,
+            media: { select: { id: true, url: true, type: true } },
           },
         },
         _count: { select: { members: true } },

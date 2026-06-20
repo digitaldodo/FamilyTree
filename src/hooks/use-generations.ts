@@ -1,50 +1,59 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAppStore } from '@/store/use-app-store';
 import { Generation } from '@/types/member';
 import { toast } from 'sonner';
 
-export function useGenerations() {
-  const { activeTreeId, generations, setGenerations, addGeneration, updateGeneration: updateStoreGen, deleteGeneration: deleteStoreGen } = useAppStore();
-  const [isLoading, setIsLoading] = useState(false);
+export function useGenerations(treeId?: string) {
+  const { activeTreeId, setGenerations } = useAppStore();
+  const queryClient = useQueryClient();
+  const resolvedTreeId = treeId || activeTreeId;
+
+  // Instead of fetching generations from /api/trees/:id/generations,
+  // we can use the same tree payload to avoid duplicate requests, or keep it separate if needed.
+  // We'll reuse the 'tree' query to take advantage of parallel caching!
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['tree', resolvedTreeId],
+    queryFn: async () => {
+      const res = await fetch(`/api/trees/${resolvedTreeId}?t=${Date.now()}`);
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.message);
+      return json.data;
+    },
+    enabled: !!resolvedTreeId,
+  });
+
+  const generations: Generation[] = data?.generations || [];
+
+  // Sync with Zustand for components that rely on useAppStore(s => s.generations)
+  useEffect(() => {
+    if (generations.length >= 0) {
+      setGenerations(generations);
+    }
+  }, [generations, setGenerations]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchGenerations = useCallback(async () => {
-    if (!activeTreeId) return;
-    setIsLoading(true);
-    try {
-      const res = await fetch(`/api/trees/${activeTreeId}/generations`);
-      const data = await res.json();
-      if (data.success) {
-        setGenerations(data.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch generations', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [activeTreeId, setGenerations]);
-
-  // Initial fetch when active tree changes
-  useEffect(() => {
-    fetchGenerations();
-  }, [fetchGenerations]);
+    await refetch();
+  }, [refetch]);
 
   const handleCreate = async (name: string, insertAt?: number) => {
-    if (!activeTreeId) return;
+    if (!resolvedTreeId) return;
     setIsSubmitting(true);
     try {
-      const res = await fetch(`/api/trees/${activeTreeId}/generations`, {
+      const res = await fetch(`/api/trees/${resolvedTreeId}/generations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, insertAt }),
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message || 'Failed to create generation');
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.message || 'Failed to create generation');
 
       toast.success('Generation created successfully');
-      await fetchGenerations(); // Refetch to get the updated order indexes
-      return data.data;
+      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
+      return json.data;
     } catch (error: any) {
       toast.error(error.message || 'Failed to create generation');
       throw error;
@@ -54,6 +63,7 @@ export function useGenerations() {
   };
 
   const handleRename = async (id: string, name: string) => {
+    if (!resolvedTreeId) return;
     setIsSubmitting(true);
     try {
       const res = await fetch(`/api/generations/${id}`, {
@@ -62,11 +72,11 @@ export function useGenerations() {
         body: JSON.stringify({ name }),
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message || 'Failed to rename generation');
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.message || 'Failed to rename generation');
 
-      updateStoreGen(id, data.data);
       toast.success('Generation renamed successfully');
+      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
     } catch (error: any) {
       toast.error(error.message || 'Failed to rename generation');
       throw error;
@@ -76,6 +86,7 @@ export function useGenerations() {
   };
 
   const handleDelete = async (id: string, action?: 'moveMembers' | 'deleteMembers', targetId?: string) => {
+    if (!resolvedTreeId) return;
     setIsSubmitting(true);
     try {
       const queryParams = new URLSearchParams();
@@ -88,17 +99,12 @@ export function useGenerations() {
         method: 'DELETE',
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message || 'Failed to delete generation');
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.message || 'Failed to delete generation');
 
-      deleteStoreGen(id);
       toast.success('Generation deleted successfully');
-      await fetchGenerations(); // Refetch to ensure order indexes are in sync
+      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
       
-      // We also need to refetch members if members were moved or deleted!
-      // But this hook doesn't have useMembers. 
-      // We can rely on the caller to refresh members or trigger a window reload or global event.
-      // Easiest is to dispatch a custom event or let the caller handle it.
       if (action) {
         window.dispatchEvent(new Event('refresh-members'));
       }
@@ -111,6 +117,7 @@ export function useGenerations() {
   };
 
   const handleMove = async (id: string, direction: 'up' | 'down') => {
+    if (!resolvedTreeId) return;
     setIsSubmitting(true);
     try {
       const res = await fetch(`/api/generations/${id}/move`, {
@@ -119,11 +126,11 @@ export function useGenerations() {
         body: JSON.stringify({ direction }),
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message || 'Failed to move generation');
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.message || 'Failed to move generation');
 
       toast.success('Generation moved successfully');
-      await fetchGenerations(); // Refetch to get the updated order indexes
+      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
     } catch (error: any) {
       toast.error(error.message || 'Failed to move generation');
       throw error;
@@ -143,3 +150,4 @@ export function useGenerations() {
     moveGeneration: handleMove,
   };
 }
+

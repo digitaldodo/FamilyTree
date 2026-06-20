@@ -1,87 +1,46 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAppStore } from '@/store/use-app-store';
 import { MemberWithRelations } from '@/types/member';
+import { useEffect } from 'react';
 
 export function useMembers(treeId?: string) {
-  const { members, setMembers, activeTreeId } = useAppStore();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
+  const { activeTreeId, setMembers } = useAppStore();
   const resolvedTreeId = treeId || activeTreeId;
 
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['tree', resolvedTreeId],
+    queryFn: async () => {
+      const res = await fetch(`/api/trees/${resolvedTreeId}?t=${Date.now()}`);
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || 'Failed to load tree data');
+      }
+      return json.data;
+    },
+    enabled: !!resolvedTreeId,
+  });
+
+  const members: MemberWithRelations[] = data?.members?.map((m: any) => ({
+    ...m,
+    relationsFrom: m.relationsFrom || [],
+    relationsTo: m.relationsTo || [],
+  })) || [];
+
+  // Sync to zustand for components using getState() or direct store access
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchMembers = async () => {
-      if (!resolvedTreeId) {
-        setMembers([]);
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const res = await fetch(`/api/trees/${resolvedTreeId}`);
-        const data = await res.json();
-
-        if (!res.ok || !data.success) {
-          throw new Error(data.message || 'Failed to load members');
-        }
-
-        if (isMounted) {
-          // The tree endpoint returns members with relations
-          const treeMembers: MemberWithRelations[] = (data.data.members || []).map((m: any) => ({
-            ...m,
-            relationsFrom: m.relationsFrom || [],
-            relationsTo: m.relationsTo || [],
-          }));
-          setMembers(treeMembers);
-        }
-      } catch (err: any) {
-        if (isMounted) {
-          setError(err.message || 'Failed to load members');
-          setMembers([]);
-        }
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    fetchMembers();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [resolvedTreeId, setMembers]);
-
-  const fetchMembersManual = async () => {
-    if (!resolvedTreeId) return;
-    try {
-      setIsLoading(true);
-      const res = await fetch(`/api/trees/${resolvedTreeId}`);
-      const data = await res.json();
-      if (res.ok && data.success) {
-        const treeMembers: MemberWithRelations[] = (data.data.members || []).map((m: any) => ({
-          ...m,
-          relationsFrom: m.relationsFrom || [],
-          relationsTo: m.relationsTo || [],
-        }));
-        setMembers(treeMembers);
-      }
-    } finally {
-      setIsLoading(false);
+    if (members.length >= 0) {
+      setMembers(members);
     }
-  };
+  }, [members, setMembers]);
 
+  // Handle manual refresh
   useEffect(() => {
-    const handleRefresh = () => fetchMembersManual();
+    const handleRefresh = () => refetch();
     window.addEventListener('refresh-members', handleRefresh);
     return () => window.removeEventListener('refresh-members', handleRefresh);
-  }, [resolvedTreeId]);
+  }, [refetch]);
 
-  return { members, isLoading, error, fetchMembers: fetchMembersManual };
+  return { members, isLoading, error: error?.message || null, fetchMembers: refetch };
 }

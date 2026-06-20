@@ -6,8 +6,7 @@ import { Toaster } from '@/components/ui/toast';
 import { SessionProvider } from '@/providers/session-provider';
 import { GlobalErrorListener } from '@/components/providers/global-error-listener';
 
-// TODO: Import QueryProvider
-
+import QueryProvider from '@/providers/query-provider';
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -69,8 +68,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {/* TODO: Wrap with QueryProvider */}
-            {children}
+            <QueryProvider>
+              {children}
+            </QueryProvider>
             <Toaster />
           </ThemeProvider>
         </SessionProvider>

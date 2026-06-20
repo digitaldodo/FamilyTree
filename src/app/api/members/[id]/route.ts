@@ -74,10 +74,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
     }
 
     const body = await request.json();
-    console.log(
-      '[MEMBER_UPDATE_REQUEST]',
-      JSON.stringify(body, null, 2)
-    );
+    console.log('[MEMBER_UPDATE_REQUEST]', JSON.stringify(body, null, 2));
+    console.log("REQUEST BODY", body);
 
     const validation = updateMemberSchema.safeParse(body);
 
@@ -233,6 +231,18 @@ export async function PUT(request: NextRequest, { params }: Params) {
       }
     }
 
+    // DATABASE Before update
+    const before = await prisma.member.findUnique({ where: { id }, include: { relationsFrom: true, relationsTo: true } });
+    console.log("BEFORE", JSON.stringify(before, null, 2));
+
+    // RELATIONSHIP TABLES Before update
+    const existingSpousesBefore = await prisma.relationship.findMany({ where: { type: 'SPOUSE', OR: [{ fromId: id }, { toId: id }] } });
+    const existingParentsBefore = await prisma.relationship.findMany({ where: { type: 'PARENT', toId: id } });
+    const existingChildrenBefore = await prisma.relationship.findMany({ where: { type: 'PARENT', fromId: id } });
+    console.log("EXISTING SPOUSES BEFORE", existingSpousesBefore);
+    console.log("EXISTING PARENTS BEFORE", existingParentsBefore);
+    console.log("EXISTING CHILDREN BEFORE", existingChildrenBefore);
+
     // Use transaction to update member and replace relationships if provided
     const member = await prisma.$transaction(async (tx) => {
       const updatedMember = await tx.member.update({
@@ -299,6 +309,28 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
       return updatedMember;
     });
+
+    // DATABASE After update
+    const after = await prisma.member.findUnique({ where: { id }, include: { relationsFrom: true, relationsTo: true } });
+    console.log("AFTER", JSON.stringify(after, null, 2));
+
+    // RELATIONSHIP TABLES After update
+    const existingSpousesAfter = await prisma.relationship.findMany({ where: { type: 'SPOUSE', OR: [{ fromId: id }, { toId: id }] } });
+    const existingParentsAfter = await prisma.relationship.findMany({ where: { type: 'PARENT', toId: id } });
+    const existingChildrenAfter = await prisma.relationship.findMany({ where: { type: 'PARENT', fromId: id } });
+    console.log("EXISTING SPOUSES AFTER", existingSpousesAfter);
+    console.log("EXISTING PARENTS AFTER", existingParentsAfter);
+    console.log("EXISTING CHILDREN AFTER", existingChildrenAfter);
+
+    if (JSON.stringify(before) === JSON.stringify(after)) {
+      console.log("UPDATE NEVER OCCURRED");
+    }
+
+    // POST-SAVE VERIFICATION
+    const verifyMember = await prisma.member.findUnique({ where: { id } });
+    if (!verifyMember || verifyMember.firstName !== body.firstName) { // simple check
+      return errorResponse('UPDATE_FAILED', 'Database update confirmed failed', 500);
+    }
 
     // Smart Rules
     try {

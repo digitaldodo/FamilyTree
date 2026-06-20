@@ -24,6 +24,7 @@ import { Loader2, Activity } from 'lucide-react';
 import { TreeBackground } from './tree-background';
 import { FloatingFamilyStats } from './floating-family-stats';
 import { buildRelationshipGraph } from '@/utils/relationship';
+import { TreeSkeleton } from '@/components/ui/tree-skeleton';
 
 const nodeTypes = {
   member: MemberNode,
@@ -60,10 +61,7 @@ function FamilyTreeCanvas() {
   if (isLoading) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4 text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p>Loading family tree...</p>
-        </div>
+        <TreeSkeleton />
       </div>
     );
   }

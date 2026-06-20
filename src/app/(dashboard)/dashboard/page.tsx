@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/use-app-store';
 import { AnalyticsCards } from '@/components/features/dashboard/analytics-cards';
 import { GenerationChart } from '@/components/features/dashboard/generation-chart';
@@ -24,93 +23,76 @@ interface DashboardData {
   activities: any[];
 }
 
+import { useQuery } from '@tanstack/react-query';
+import { DashboardSkeleton } from '@/components/ui/dashboard-skeleton';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 function DashboardContent() {
   const { activeTreeId, userTrees } = useAppStore();
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (!activeTreeId) {
-      setIsLoading(false);
-      return;
-    }
+  const { data, isLoading } = useQuery({
+    queryKey: ['tree', activeTreeId],
+    queryFn: async () => {
+      const res = await fetch(`/api/trees/${activeTreeId}?t=${Date.now()}`);
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.message);
+      
+      const tree = json.data;
+      const members = tree.members || [];
+      const generations = tree.generations || [];
+      const totalGenerations = generations.length;
+      
+      // Calculate metrics
+      const currentMonth = new Date().getMonth();
+      const isAlive = (m: any) => m.status !== 'DECEASED' && m.status !== 'Deceased' && !m.deathDate;
+      const birthdaysThisMonth = members.filter((m: any) => m.birthDate && isAlive(m) && new Date(m.birthDate).getMonth() === currentMonth).length;
+      
+      const relationshipsCount = members.reduce((acc: number, m: any) => acc + (m.relationsFrom?.length || 0), 0);
+      
+      const generationData = generations.map((gen: any) => ({
+        generation: gen.name,
+        members: members.filter((m: any) => m.generationId === gen.id).length
+      }));
 
-    const fetchDashboard = async () => {
-      setIsLoading(true);
-      try {
-        const res = await fetch(`/api/trees/${activeTreeId}`);
-        const json = await res.json();
-        
-        if (!json.success) {
-          setIsLoading(false);
-          return;
-        }
+      // Birthday calculations
+      const today = new Date();
+      const upcomingBirthdays = members
+        .filter((m: any) => m.birthDate && isAlive(m))
+        .map((m: any) => {
+          const birthDate = new Date(m.birthDate);
+          const nextBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+          if (nextBirthday < today) {
+            nextBirthday.setFullYear(today.getFullYear() + 1);
+          }
+          const diffTime = Math.abs(nextBirthday.getTime() - today.getTime());
+          const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          const ageTurning = nextBirthday.getFullYear() - birthDate.getFullYear();
+          return {
+            id: m.id,
+            name: `${m.firstName} ${m.lastName}`,
+            date: birthDate,
+            ageTurning,
+            daysRemaining,
+            imageUrl: m.imageUrl,
+          };
+        })
+        .sort((a: any, b: any) => a.daysRemaining - b.daysRemaining)
+        .slice(0, 5);
 
-        const tree = json.data;
-        const members = tree.members || [];
-        const generations = tree.generations || [];
-        const totalGenerations = generations.length;
-        
-        // Calculate metrics
-        const currentMonth = new Date().getMonth();
-        const isAlive = (m: any) => m.status !== 'DECEASED' && m.status !== 'Deceased' && !m.deathDate;
-        const birthdaysThisMonth = members.filter((m: any) => m.birthDate && isAlive(m) && new Date(m.birthDate).getMonth() === currentMonth).length;
-        
-        const relationshipsCount = members.reduce((acc: number, m: any) => acc + (m.relationsFrom?.length || 0), 0);
-        
-        const generationData = generations.map((gen: any) => ({
-          generation: gen.name,
-          members: members.filter((m: any) => m.generationId === gen.id).length
-        }));
-
-        // Birthday calculations
-        const today = new Date();
-        const upcomingBirthdays = members
-          .filter((m: any) => m.birthDate && isAlive(m))
-          .map((m: any) => {
-            const birthDate = new Date(m.birthDate);
-            const nextBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
-            if (nextBirthday < today) {
-              nextBirthday.setFullYear(today.getFullYear() + 1);
-            }
-            const diffTime = Math.abs(nextBirthday.getTime() - today.getTime());
-            const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const ageTurning = nextBirthday.getFullYear() - birthDate.getFullYear();
-            return {
-              id: m.id,
-              name: `${m.firstName} ${m.lastName}`,
-              date: birthDate,
-              ageTurning,
-              daysRemaining,
-              imageUrl: m.imageUrl,
-            };
-          })
-          .sort((a: any, b: any) => a.daysRemaining - b.daysRemaining)
-          .slice(0, 5);
-
-        setData({
-          metrics: {
-            totalMembers: members.length,
-            totalGenerations,
-            relationshipsCount,
-            birthdaysThisMonth,
-          },
-          generationData,
-          upcomingBirthdays,
-          activities: [], // Activity feed from separate endpoint if needed
-        });
-      } catch (error) {
-         
-        console.log('[App Error] Failed to load dashboard data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchDashboard();
-  }, [activeTreeId]);
+      return {
+        metrics: {
+          totalMembers: members.length,
+          totalGenerations,
+          relationshipsCount,
+          birthdaysThisMonth,
+        },
+        generationData,
+        upcomingBirthdays,
+        activities: [], // Activity feed from separate endpoint if needed
+      } as DashboardData;
+    },
+    enabled: !!activeTreeId,
+  });
 
   // No active tree selected
   if (!isLoading && !activeTreeId) {
@@ -123,7 +105,6 @@ function DashboardContent() {
             description="Create your first family tree to start preserving your family's history, memories, and connections."
             actionLabel="Create Your First Tree"
             onAction={() => {
-              // This will be handled by the tree selector / create modal
               const event = new CustomEvent('open-create-tree-modal');
               window.dispatchEvent(event);
             }}
@@ -144,7 +125,7 @@ function DashboardContent() {
   }
 
   if (isLoading) {
-    return <PageLoader />;
+    return <DashboardSkeleton />;
   }
 
   if (!data) {

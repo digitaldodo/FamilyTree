@@ -10,7 +10,7 @@ export function useMemberMutations() {
   const refreshTree = async () => {
     if (!activeTreeId) return;
     try {
-      const res = await fetch(`/api/trees/${activeTreeId}`);
+      const res = await fetch(`/api/trees/${activeTreeId}?t=${Date.now()}`, { cache: 'no-store' });
       const data = await res.json();
       if (res.ok && data.success) {
         const treeMembers: MemberWithRelations[] = (data.data.members || []).map((m: any) => ({
@@ -58,6 +58,7 @@ export function useMemberMutations() {
 
   const handleUpdate = async (id: string, input: UpdateMemberInput) => {
     setIsSubmitting(true);
+    console.log("PATCH PAYLOAD", input);
     try {
       const res = await fetch(`/api/members/${id}`, {
         method: 'PUT',
@@ -71,8 +72,20 @@ export function useMemberMutations() {
         throw new Error(data.message || 'Failed to update member');
       }
 
+      // POST-SAVE VERIFICATION (client side)
+      const verifyRes = await fetch(`/api/members/${id}?t=${Date.now()}`, { cache: 'no-store' });
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success || (input.firstName && verifyData.data.firstName !== input.firstName)) {
+        throw new Error('Database update confirmed failed');
+      }
+
       await refreshTree();
       window.dispatchEvent(new Event('refresh-members'));
+      
+      // Cache Audit / Invalidation equivalent
+      // In a real scenario we'd invalidate react-query caches or Next router cache here
+      // But we bypassed the cache on fetch calls above.
+      
       toast.success('Member updated successfully');
       setIsEditingMember(false);
       return data.data;

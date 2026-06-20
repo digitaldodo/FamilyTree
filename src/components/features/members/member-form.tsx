@@ -168,6 +168,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       generationId: data.generationId || member?.generationId || defaultGenerationForNewMember || undefined,
       relations
     };
+    console.log("FORM VALUES", formattedData);
     await onSubmit(formattedData);
   };
 
