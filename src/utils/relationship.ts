@@ -88,8 +88,27 @@ export function getEligibleParents(members: MemberWithRelations[], generations: 
   return getEligibleMembersBase(members, generations, currentMemberId, 'PARENT', currentGenerationId);
 }
 
-export function getEligibleSpouses(members: MemberWithRelations[], generations: Generation[], currentMemberId: string | undefined, currentGenerationId?: string) {
-  return getEligibleMembersBase(members, generations, currentMemberId, 'SPOUSE', currentGenerationId);
+export function isSpouseEligible(genderA?: string | null, genderB?: string | null): boolean {
+  if (genderA === 'MALE' && genderB !== 'FEMALE') return false;
+  if (genderA === 'FEMALE' && genderB !== 'MALE') return false;
+  if (genderB === 'MALE' && genderA !== 'FEMALE') return false;
+  if (genderB === 'FEMALE' && genderA !== 'MALE') return false;
+  return true;
+}
+
+export function getEligibleSpouses(
+  members: MemberWithRelations[], 
+  generations: Generation[], 
+  currentMemberId: string | undefined, 
+  currentGenerationId?: string,
+  currentGender?: string | null
+) {
+  const currentMember = currentMemberId ? members.find(m => m.id === currentMemberId) : undefined;
+  const effectiveGender = currentGender !== undefined ? currentGender : currentMember?.gender;
+  
+  const eligible = getEligibleMembersBase(members, generations, currentMemberId, 'SPOUSE', currentGenerationId);
+  
+  return eligible.filter(candidate => isSpouseEligible(effectiveGender, candidate.gender));
 }
 
 export function getEligibleChildren(members: MemberWithRelations[], generations: Generation[], currentMemberId: string | undefined, currentGenerationId?: string) {

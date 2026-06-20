@@ -17,6 +17,7 @@ interface RelationshipSelectorProps {
   onRemoveRelation: (memberId: string, type: 'PARENT' | 'CHILD' | 'SPOUSE' | 'SIBLING') => void;
   existingRelations: string[]; // array of member IDs already related in this type
   allSelectedIds: string[]; // array of all member IDs already related in the form across all types
+  currentGender?: string | null;
 }
 
 import { ErrorBoundary } from '@/components/ui/error-boundary';
@@ -29,7 +30,8 @@ export function RelationshipSelector({
   onAddRelation,
   onRemoveRelation,
   existingRelations,
-  allSelectedIds
+  allSelectedIds,
+  currentGender
 }: RelationshipSelectorProps) {
   const { members, generations } = useAppStore();
   const [selectedId, setSelectedId] = React.useState<string>('');
@@ -39,13 +41,13 @@ export function RelationshipSelector({
       let candidates: MemberWithRelations[] = [];
       if (type === 'PARENT') candidates = getEligibleParents(members, generations, currentMemberId, currentGenerationId);
       else if (type === 'CHILD') candidates = getEligibleChildren(members, generations, currentMemberId, currentGenerationId);
-      else if (type === 'SPOUSE') candidates = getEligibleSpouses(members, generations, currentMemberId, currentGenerationId);
+      else if (type === 'SPOUSE') candidates = getEligibleSpouses(members, generations, currentMemberId, currentGenerationId, currentGender);
       else if (type === 'SIBLING') candidates = getEligibleSiblings(members, generations, currentMemberId, currentGenerationId);
       
       // Filter out anyone already selected in the form for ANY relationship
       return candidates.filter(c => !allSelectedIds.includes(c.id));
     },
-    [members, generations, currentMemberId, type, currentGenerationId, allSelectedIds]
+    [members, generations, currentMemberId, type, currentGenerationId, allSelectedIds, currentGender]
   );
 
   const handleAdd = () => {

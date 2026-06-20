@@ -6,6 +6,7 @@ import { successResponse, listResponse, errorResponse, parsePagination } from '@
 import { createMemberSchema } from '@/validations/member.schema';
 import { getErrorMessage } from '@/utils/helpers';
 import { RelationshipEngine } from '@/lib/relationship-engine';
+import { isSpouseEligible } from '@/utils/relationship';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -183,8 +184,8 @@ export async function POST(request: NextRequest) {
               return errorResponse('VALIDATION_ERROR', 'Child must belong to a younger generation.', 400);
             }
           } else if (rel.type === 'SPOUSE') {
-            if (relGenOrder !== targetGenOrder) {
-              return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation.', 400);
+            if (relGenOrder !== targetGenOrder || !isSpouseEligible(rest.gender as string | null | undefined, relative.gender)) {
+              return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation and satisfy spouse eligibility rules.', 400);
             }
           } else if (rel.type === 'SIBLING') {
             if (relGenOrder !== targetGenOrder) {

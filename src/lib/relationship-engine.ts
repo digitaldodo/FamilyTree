@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma';
 import { Member, Relationship, RelationshipType, Generation } from '@/generated/prisma/client';
+import { isSpouseEligible } from '@/utils/relationship';
 
 export type MemberWithRelations = Member & {
   generation: Generation;
@@ -98,7 +99,17 @@ export class RelationshipEngine {
 
     if (type === 'SPOUSE' || type === 'SIBLING') {
       if (fromGen !== toGen) {
-        throw new Error(`${type === 'SPOUSE' ? 'Spouse' : 'Sibling'} must belong to the same generation.`);
+        if (type === 'SPOUSE') {
+          throw new Error('Spouse must belong to the same generation and satisfy spouse eligibility rules.');
+        } else {
+          throw new Error('Sibling must belong to the same generation.');
+        }
+      }
+      
+      if (type === 'SPOUSE') {
+        if (!isSpouseEligible(fromMember.gender, toMember.gender)) {
+          throw new Error('Spouse must belong to the same generation and satisfy spouse eligibility rules.');
+        }
       }
     } else if (type === 'PARENT') {
       if (fromGen !== toGen - 1) {

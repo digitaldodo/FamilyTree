@@ -6,6 +6,7 @@ import { successResponse, errorResponse } from '@/lib/utils';
 import { updateMemberSchema } from '@/validations/member.schema';
 import { getErrorMessage } from '@/utils/helpers';
 import { RelationshipEngine } from '@/lib/relationship-engine';
+import { isSpouseEligible } from '@/utils/relationship';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -147,7 +148,12 @@ export async function PUT(request: NextRequest, { params }: Params) {
           const relative = relatives.find(r => r.id === rel.id);
           if (!relative) continue;
 
-          if (rel.type === 'SPOUSE' || rel.type === 'SIBLING') {
+          if (rel.type === 'SPOUSE') {
+            const memberGender = body.gender !== undefined ? body.gender : existing.gender;
+            if (relative.generation.orderIndex !== newGeneration.orderIndex || !isSpouseEligible(memberGender, relative.gender)) {
+               return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation and satisfy spouse eligibility rules.', 400);
+            }
+          } else if (rel.type === 'SIBLING') {
             if (relative.generation.orderIndex !== newGeneration.orderIndex) {
                return errorResponse('VALIDATION_ERROR', `Cannot move member. Spouses and siblings must belong to the same generation. Conflicts with relative's generation.`, 400);
             }
@@ -171,7 +177,13 @@ export async function PUT(request: NextRequest, { params }: Params) {
         });
 
         for (const rel of existingRelations) {
-          if (rel.type === 'SPOUSE' || rel.type === 'SIBLING') {
+          if (rel.type === 'SPOUSE') {
+            const relative = rel.fromId === id ? rel.to : rel.from;
+            const memberGender = body.gender !== undefined ? body.gender : existing.gender;
+            if (relative.generation.orderIndex !== newGeneration.orderIndex || !isSpouseEligible(memberGender, relative.gender)) {
+               return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation and satisfy spouse eligibility rules.', 400);
+            }
+          } else if (rel.type === 'SIBLING') {
             const relative = rel.fromId === id ? rel.to : rel.from;
             if (relative.generation.orderIndex !== newGeneration.orderIndex) {
                return errorResponse('VALIDATION_ERROR', `Cannot move member. Spouses and siblings must belong to the same generation. Conflicts with ${relative.firstName}.`, 400);

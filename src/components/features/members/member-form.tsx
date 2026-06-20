@@ -381,6 +381,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
           <RelationshipSelector
             currentMemberId={member?.id}
             currentGenerationId={watch('generationId')}
+            currentGender={watch('gender')}
             type="SPOUSE"
             label="Spouse(s)"
             existingRelations={relations.filter(r => r.type === 'SPOUSE').map(r => r.id)}
