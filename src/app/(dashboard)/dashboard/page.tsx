@@ -28,7 +28,8 @@ import { DashboardSkeleton } from '@/components/ui/dashboard-skeleton';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 function DashboardContent() {
-  const { activeTreeId, userTrees } = useAppStore();
+  const activeTreeId = useAppStore(s => s.activeTreeId);
+  const userTrees = useAppStore(s => s.userTrees);
 
   const { data, isLoading } = useQuery({
     queryKey: ['tree', activeTreeId],

@@ -21,11 +21,16 @@ import { useState, useEffect } from 'react';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 function MembersContent() {
-  const { activeTreeId, userRole, selectedGenerationIds } = useAppStore();
+  const activeTreeId = useAppStore(s => s.activeTreeId);
+  const userRole = useAppStore(s => s.userRole);
+  const selectedGenerationIds = useAppStore(s => s.selectedGenerationIds);
+  const setIsMemberModalOpen = useAppStore(s => s.setIsMemberModalOpen);
+  const setSelectedMemberId = useAppStore(s => s.setSelectedMemberId);
+  const setIsEditingMember = useAppStore(s => s.setIsEditingMember);
+  const setDefaultGenerationForNewMember = useAppStore(s => s.setDefaultGenerationForNewMember);
   const { isLoading: membersLoading, fetchMembers } = useMembers();
   const { generations, isLoading: gensLoading, createGeneration, renameGeneration, deleteGeneration, moveGeneration } = useGenerations();
   const { filteredMembers } = useSearchMembers();
-  const { setIsMemberModalOpen, setSelectedMemberId, setIsEditingMember, setDefaultGenerationForNewMember } = useAppStore();
 
   const allGenerations = [...generations].sort((a, b) => a.orderIndex - b.orderIndex);
   const sortedGenerations = useFilteredGenerations(allGenerations, selectedGenerationIds);

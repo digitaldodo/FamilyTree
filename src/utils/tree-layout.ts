@@ -37,7 +37,7 @@ export function generateTreeLayout(
   const safeMembers1 = Array.isArray(members) ? members : [];
   safeMembers1.forEach(m => {
     const safeFrom = Array.isArray(m.relationsFrom) ? m.relationsFrom : [];
-    safeFrom.filter(r => r.type === 'SPOUSE').forEach(r => {
+    safeFrom.filter(r => r.type === 'SPOUSE' || r.type === 'SIBLING').forEach(r => {
       union(m.id, r.toId);
     });
   });

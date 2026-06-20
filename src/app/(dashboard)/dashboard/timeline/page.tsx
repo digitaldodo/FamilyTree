@@ -9,7 +9,7 @@ import { Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 export default function TimelinePage() {
-  const { activeTreeId } = useAppStore();
+  const activeTreeId = useAppStore(s => s.activeTreeId);
 
   const { data: events, isLoading } = useQuery({
     queryKey: ['tree', activeTreeId],

@@ -38,7 +38,7 @@ const edgeTypes = {
 };
 
 function FamilyTreeCanvas() {
-  const { activeTreeId } = useAppStore();
+  const activeTreeId = useAppStore(s => s.activeTreeId);
   const { initialNodes, initialEdges, isLoading, error } = useFamilyTree(activeTreeId || undefined);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);

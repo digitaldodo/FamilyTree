@@ -35,7 +35,6 @@ export async function GET(_request: NextRequest, { params }: Params) {
                 },
               },
             },
-            media: true,
           },
         },
         _count: { select: { members: true } },
@@ -46,7 +45,18 @@ export async function GET(_request: NextRequest, { params }: Params) {
       return errorResponse('NOT_FOUND', 'Tree not found or is not public', 404);
     }
 
-    return successResponse(tree, 'Public tree retrieved successfully');
+    // Strip sensitive information
+    const sanitizedMembers = tree.members.map(member => {
+      const { email, phone, ...safeMember } = member;
+      return safeMember;
+    });
+
+    const safeTree = {
+      ...tree,
+      members: sanitizedMembers,
+    };
+
+    return successResponse(safeTree, 'Public tree retrieved successfully');
   } catch (error) {
     console.error('[PUBLIC_TREE_FETCH_ERROR]', error);
     return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
