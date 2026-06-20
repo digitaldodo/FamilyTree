@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 import { Camera, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 import { ImageCropper } from '@/components/ui/image-cropper';
 
 interface ImageUploadProps {
@@ -75,7 +76,7 @@ export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', i
       <div className="relative group w-full flex justify-center">
         {value ? (
           <div className={`relative ${isCover ? 'w-full h-32 md:h-48' : 'w-24 h-24'} rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800`}>
-            <img src={value} alt="Uploaded" className="w-full h-full object-cover" />
+            <Image src={value} alt="Uploaded" fill className="w-full h-full object-cover" unoptimized />
             <Button
               type="button"
               variant="destructive"

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { updateMemberSchema } from '@/validations/member.schema';
@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { getMemberDefaultValues } from '@/utils/form-helpers';
-import { MemberWithRelations, UpdateMemberInput, CreateMemberInput } from '@/types/member';
+import { MemberWithRelations } from '@/types/member';
 import { Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { ImageUpload } from './image-upload';
 import { RelationshipSelector } from './relationship-selector';
@@ -56,8 +56,9 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
     },
   });
 
-  const imageUrl = watch('imageUrl');
-  const coverImage = watch('coverImage');
+  const imageUrl = useWatch({ control, name: 'imageUrl' });
+  const generationIdWatch = useWatch({ control, name: 'generationId' });
+  const genderWatch = useWatch({ control, name: 'gender' });
 
   // Relationships state
   const [relations, setRelations] = React.useState<{type: 'PARENT' | 'CHILD' | 'SPOUSE', id: string}[]>(() => {
@@ -240,7 +241,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
                   </Select>
                 )}
               />
-              {!watch('generationId') && !errors.generationId && (
+              {!generationIdWatch && !errors.generationId && (
                 <span className="text-xs text-muted-foreground mt-1 block">Please select a generation.</span>
               )}
             </>
@@ -362,7 +363,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
         <div className="grid grid-cols-1 gap-4">
           <RelationshipSelector
             currentMemberId={member?.id}
-            currentGenerationId={watch('generationId')}
+            currentGenerationId={generationIdWatch}
             type="PARENT"
             label="Parents"
             existingRelations={relations.filter(r => r.type === 'PARENT').map(r => r.id)}
@@ -372,7 +373,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
           />
           <RelationshipSelector
             currentMemberId={member?.id}
-            currentGenerationId={watch('generationId')}
+            currentGenerationId={generationIdWatch}
             type="CHILD"
             label="Children"
             existingRelations={relations.filter(r => r.type === 'CHILD').map(r => r.id)}
@@ -382,8 +383,8 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
           />
           <RelationshipSelector
             currentMemberId={member?.id}
-            currentGenerationId={watch('generationId')}
-            currentGender={watch('gender')}
+            currentGenerationId={generationIdWatch}
+            currentGender={genderWatch}
             type="SPOUSE"
             label="Spouse(s)"
             existingRelations={relations.filter(r => r.type === 'SPOUSE').map(r => r.id)}
@@ -399,7 +400,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
         <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
           Cancel
         </Button>
-        <Button type="submit" disabled={isSubmitting || !watch('generationId')}>
+        <Button type="submit" disabled={isSubmitting || !generationIdWatch}>
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {member ? 'Save Changes' : 'Create Member'}
         </Button>

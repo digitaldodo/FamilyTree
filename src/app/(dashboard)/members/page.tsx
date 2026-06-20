@@ -1,6 +1,7 @@
 'use client';
 
 import { useAppStore } from '@/store/use-app-store';
+import { useUserTrees } from '@/hooks/use-user-trees';
 import { useMembers } from '@/hooks/use-members';
 import { useGenerations } from '@/hooks/use-generations';
 import { useSearchMembers } from '@/hooks/use-search-members';
@@ -22,7 +23,9 @@ import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 function MembersContent() {
   const activeTreeId = useAppStore(s => s.activeTreeId);
-  const userRole = useAppStore(s => s.userRole);
+  const { userTrees } = useUserTrees();
+  const activeTree = userTrees.find(t => t.id === activeTreeId);
+  const userRole = activeTree?.role || null;
   const selectedGenerationIds = useAppStore(s => s.selectedGenerationIds);
   const setIsMemberModalOpen = useAppStore(s => s.setIsMemberModalOpen);
   const setSelectedMemberId = useAppStore(s => s.setSelectedMemberId);

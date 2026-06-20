@@ -4,6 +4,7 @@ import * as React from 'react';
 import { ChevronDown, TreePine, Plus, Crown, Edit3, Eye } from 'lucide-react';
 import { useAppStore } from '@/store/use-app-store';
 import { cn } from '@/lib/utils';
+import { useUserTrees } from '@/hooks/use-user-trees';
 import type { TreeSummary, TreePermission } from '@/types/tree';
 
 interface TreeSelectorProps {
@@ -20,7 +21,8 @@ const roleConfig: Record<string, { label: string; icon: React.ElementType; class
 export function TreeSelector({ onCreateTree }: TreeSelectorProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
-  const { activeTreeId, setActiveTreeId, setUserRole, userTrees } = useAppStore();
+  const { activeTreeId, setActiveTreeId } = useAppStore();
+  const { userTrees } = useUserTrees();
 
   const activeTree = userTrees.find((t) => t.id === activeTreeId);
 
@@ -36,7 +38,6 @@ export function TreeSelector({ onCreateTree }: TreeSelectorProps) {
 
   const handleSelect = (tree: TreeSummary) => {
     setActiveTreeId(tree.id);
-    setUserRole(tree.role);
     setIsOpen(false);
   };
 

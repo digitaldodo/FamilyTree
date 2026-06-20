@@ -6,6 +6,7 @@ import { Search, Sun, Moon, Bell, LogOut, User, Settings as SettingsIcon } from 
 import { Button } from '../ui/button';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function Navbar() {
   const { theme, setTheme } = useTheme();
@@ -38,7 +39,7 @@ export function Navbar() {
         onClick={() => setDropdownOpen(!dropdownOpen)}
       >
         <div className="h-full w-full rounded-full bg-background flex items-center justify-center overflow-hidden">
-          <img src={avatarUrl} alt="User" className="h-full w-full object-cover" />
+          <Image src={avatarUrl} alt="User" width={32} height={32} className="h-full w-full object-cover" unoptimized />
         </div>
       </div>
 

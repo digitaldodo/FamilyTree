@@ -38,25 +38,14 @@ export type FamilyGraph = {
   };
 };
 
-const graphCache = new Map<string, FamilyGraph>();
-
 export type BuildGraphPayload = {
   treeId: string;
   versionId?: string | null;
   members: MemberWithRelations[];
 };
 
-/**
- * Pure functions to derive family structures from raw database relationships.
- */
 export const GenealogyEngine = {
   buildFamilyGraph(payload: BuildGraphPayload): FamilyGraph {
-    const cacheKey = `${payload.treeId}-${payload.versionId || 'latest'}`;
-    
-    if (graphCache.has(cacheKey)) {
-      return graphCache.get(cacheKey)!;
-    }
-
     const { members } = payload;
     const nodesMap = new Map<string, FamilyGraphNode>();
     const edges: FamilyGraphEdge[] = [];
@@ -128,6 +117,79 @@ export const GenealogyEngine = {
       generationsRec[node.generation].push(node.id);
     }
 
+    // 6. Compute Layout (X/Y coordinates)
+    const LEVEL_HEIGHT = 450;
+    const NODE_WIDTH = 220;
+    const GAP = 80;
+
+    const nodePositions = new Map<string, { x: number, y: number }>();
+    const levels = Object.keys(generationsRec).map(Number).sort((a, b) => a - b);
+    const levelRightEdge = new Map<number, number>();
+
+    for (const level of levels) {
+      const nodeIds = generationsRec[level] || [];
+      let currentX = levelRightEdge.get(level) || 0;
+      
+      nodeIds.sort((a, b) => {
+        const aParents = derivedRelationships[a]?.parents || [];
+        const bParents = derivedRelationships[b]?.parents || [];
+        const aParentX = aParents.length > 0 ? (nodePositions.get(aParents[0])?.x || 0) : 0;
+        const bParentX = bParents.length > 0 ? (nodePositions.get(bParents[0])?.x || 0) : 0;
+        return aParentX - bParentX;
+      });
+
+      const levelGroups = new Set<string>();
+      const groupedNodes: string[][] = [];
+      
+      for (const id of nodeIds) {
+        const node = nodesMap.get(id)!;
+        const spouseGroup = node.layoutHints.spouseGroupId;
+        if (spouseGroup) {
+          if (!levelGroups.has(spouseGroup)) {
+            levelGroups.add(spouseGroup);
+            const membersInGroup = nodes
+              .filter(n => n.layoutHints.spouseGroupId === spouseGroup && n.generation === level)
+              .map(n => n.id);
+            groupedNodes.push(membersInGroup);
+          }
+        } else {
+          groupedNodes.push([id]);
+        }
+      }
+
+      for (const group of groupedNodes) {
+        let parentAvgX = 0;
+        let parentCount = 0;
+        
+        for (const id of group) {
+          const parents = derivedRelationships[id]?.parents || [];
+          for (const p of parents) {
+            const pPos = nodePositions.get(p);
+            if (pPos) {
+              parentAvgX += pPos.x;
+              parentCount++;
+            }
+          }
+        }
+        
+        if (parentCount > 0) {
+          const desiredCenterX = parentAvgX / parentCount;
+          const startXForGroup = desiredCenterX - ((group.length * (NODE_WIDTH + GAP)) / 2) + (NODE_WIDTH / 2);
+          currentX = Math.max(currentX, startXForGroup);
+        }
+
+        for (let i = 0; i < group.length; i++) {
+          const id = group[i];
+          nodePositions.set(id, { x: currentX, y: level * LEVEL_HEIGHT });
+          const node = nodesMap.get(id)!;
+          node.layoutHints.x = currentX;
+          node.layoutHints.y = level * LEVEL_HEIGHT;
+          currentX += NODE_WIDTH + GAP;
+        }
+      }
+      levelRightEdge.set(level, currentX);
+    }
+
     const graph: FamilyGraph = {
       nodes,
       edges: allEdges,
@@ -139,7 +201,6 @@ export const GenealogyEngine = {
       }
     };
 
-    graphCache.set(cacheKey, graph);
     return graph;
   },
 
@@ -314,7 +375,7 @@ export const GenealogyEngine = {
     }
 
     const groups: Record<string, string[]> = {};
-    for (const [k, v] of parent.entries()) {
+    for (const k of parent.keys()) {
       const root = find(k);
       if (!groups[root]) groups[root] = [];
       groups[root].push(k);

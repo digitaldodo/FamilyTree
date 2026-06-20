@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CldImage } from 'next-cloudinary';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, Calendar, Tag, Maximize2 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -53,9 +54,11 @@ export function MemoryCard({ memory, onDelete, compact, onClick }: MemoryCardPro
           className={cn("w-full object-cover transition-transform duration-500 group-hover:scale-105", compact ? "h-full" : "h-auto")}
         />
       ) : (
-        <img
+        <Image
           src={memory.url}
           alt={memory.caption || 'Family memory'}
+          width={600}
+          height={600}
           className={cn("w-full object-cover transition-transform duration-500 group-hover:scale-105", compact ? "h-full" : "h-auto")}
           loading="lazy"
         />

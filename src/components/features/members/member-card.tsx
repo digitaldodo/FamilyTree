@@ -10,6 +10,8 @@ import { MemberAvatar } from './member-avatar';
 import { Dropdown } from '@/components/ui/dropdown';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useMutation } from '@tanstack/react-query';
+import { useMembers } from '@/hooks/use-members';
 
 interface MemberCardProps {
   member: MemberWithRelations;
@@ -37,26 +39,33 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
   const relationsTo = Array.isArray(member.relationsTo) ? member.relationsTo : [];
   const relationCount = relationsFrom.length + relationsTo.length;
 
-  const handleDelete = async (e: React.MouseEvent) => {
+  const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     let warning = `Are you sure you want to delete ${member.firstName} ${member.lastName}?`;
     if (relationCount > 0) {
       warning = `Deleting ${member.firstName} ${member.lastName} will remove spouse, sibling and parent-child links. Are you sure?`;
     }
     if (confirm(warning)) {
-      try {
-        const res = await fetch(`/api/members/${member.id}`, { method: 'DELETE' });
-        if (res.ok) {
-          toast.success('Member deleted successfully');
-          window.dispatchEvent(new Event('refresh-members'));
-        } else {
-          toast.error('Failed to delete member');
-        }
-      } catch (e) {
-        toast.error('An error occurred');
-      }
+      deleteMutation.mutate();
     }
   };
+
+  const { fetchMembers } = useMembers();
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/members/${member.id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete member');
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success('Member deleted successfully');
+      fetchMembers();
+    },
+    onError: () => {
+      toast.error('Failed to delete member');
+    }
+  });
 
   const genName = generations.find(g => g.id === member.generationId)?.name || (calculatedGeneration !== undefined ? `Gen ${calculatedGeneration + 1}` : 'Unknown Gen');
 

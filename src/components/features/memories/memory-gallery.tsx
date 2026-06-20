@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MemoryCard } from './memory-card';
 import { UploadMemoryModal } from './upload-memory-modal';
 import { Plus, Camera, LayoutGrid, Folders, Clock, X } from 'lucide-react';
-import { staggerContainer, fadeUp } from '@/utils/animations';
 import { CldImage } from 'next-cloudinary';
+import Image from 'next/image';
 
 export interface Memory {
   id: string;
@@ -26,7 +26,7 @@ interface MemoryGalleryProps {
 
 type Tab = 'gallery' | 'albums' | 'timeline';
 
-export function MemoryGallery({ memberId, memories, onUpload, onDelete }: MemoryGalleryProps) {
+export function MemoryGallery({ memories, onUpload, onDelete }: MemoryGalleryProps) {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('gallery');
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
@@ -191,7 +191,7 @@ export function MemoryGallery({ memberId, memories, onUpload, onDelete }: Memory
                 exit={{ opacity: 0, y: -10 }}
                 className="relative pl-6 space-y-12 before:absolute before:inset-y-0 before:left-[11px] before:w-0.5 before:bg-border"
               >
-                {timelineMemories.map((memory, index) => (
+                {timelineMemories.map((memory) => (
                   <div key={memory.id} className="relative">
                     <div className="absolute -left-6 w-6 h-6 flex items-center justify-center">
                       <div className="w-2.5 h-2.5 rounded-full bg-purple-500 ring-4 ring-background" />
@@ -252,9 +252,11 @@ export function MemoryGallery({ memberId, memories, onUpload, onDelete }: Memory
                   className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
                 />
               ) : (
-                <img
+                <Image
                   src={selectedMemory.url}
                   alt={selectedMemory.caption || 'Memory'}
+                  width={1920}
+                  height={1080}
                   className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
                 />
               )}

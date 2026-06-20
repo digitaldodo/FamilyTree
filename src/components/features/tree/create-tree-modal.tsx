@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2, TreePine } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/use-app-store';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { createTree } from '@/services/tree.service';
 
 interface CreateTreeModalProps {
@@ -19,49 +20,39 @@ export function CreateTreeModal({ isOpen, onClose }: CreateTreeModalProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const { setActiveTreeId, setUserRole, userTrees, setUserTrees } = useAppStore();
+  const { setActiveTreeId } = useAppStore();
+  const queryClient = useQueryClient();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-
-    setIsLoading(true);
-    try {
-      const response = await createTree({
-        name: name.trim(),
-        description: description.trim() || undefined,
-        isPublic,
-      });
-
-      const newTree = response.data;
-
-      const treeSummary = {
-        id: newTree.id,
-        name: newTree.name,
-        description: newTree.description,
-        isPublic: newTree.isPublic,
-        role: 'OWNER' as const,
-        _count: { members: 0 },
-        createdAt: newTree.createdAt,
-      };
-
-      setUserTrees([...userTrees, treeSummary]);
+  const createMutation = useMutation({
+    mutationFn: async (data: { name: string; description?: string; isPublic: boolean }) => {
+      const response = await createTree(data);
+      return response.data;
+    },
+    onSuccess: (newTree) => {
+      queryClient.invalidateQueries({ queryKey: ['userTrees'] });
       setActiveTreeId(newTree.id);
-      setUserRole('OWNER');
-
       toast.success(`"${newTree.name}" created successfully!`);
 
       setName('');
       setDescription('');
       setIsPublic(false);
       onClose();
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast.error(error.message || 'Failed to create tree. Please try again.');
-    } finally {
-      setIsLoading(false);
     }
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+
+    createMutation.mutate({
+      name: name.trim(),
+      description: description.trim() || undefined,
+      isPublic,
+    });
   };
 
   return (
@@ -127,8 +118,8 @@ export function CreateTreeModal({ isOpen, onClose }: CreateTreeModalProps) {
             </button>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading || !name.trim()}>
-            {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+          <Button type="submit" className="w-full" disabled={createMutation.isPending || !name.trim()}>
+            {createMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             Create Tree
           </Button>
         </form>

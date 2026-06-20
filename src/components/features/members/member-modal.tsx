@@ -5,14 +5,8 @@ import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { useAppStore } from '@/store/use-app-store';
 import { useMembers } from '@/hooks/use-members';
 import {
-  User2,
-  Calendar,
   Edit2,
   Trash2,
-  MapPin,
-  Briefcase,
-  Heart,
-  Users,
   Camera,
   X
 } from 'lucide-react';
@@ -21,7 +15,6 @@ import { MemberDeleteDialog } from './member-delete-dialog';
 import { useMemberMutations } from '@/hooks/use-member-mutations';
 import { MemoryGallery, Memory } from '../memories/memory-gallery';
 import { getGenerationLabel } from '@/utils/date';
-import { RelationshipSelector } from './relationship-selector';
 import { MemberDetails } from './member-details';
 import { MemberRelationships } from './member-relationships';
 import Image from 'next/image';
@@ -68,7 +61,6 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
     : undefined;
   
   const memberGenIndex = memberGeneration ? generations.findIndex(g => g.id === memberGeneration.id) : 0;
-  const totalGenerations = generations.length;
 
   const handleClose = () => {
     setIsMemberModalOpen(false);
@@ -158,10 +150,12 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
               {/* ── Premium Cover & Header ── */}
               <div className="relative h-48 md:h-64 shrink-0 bg-gradient-to-br from-primary/30 via-purple-500/20 to-rose-500/10 overflow-hidden">
                 {member?.imageUrl && (
-                  <img
+                  <Image
                     src={member.imageUrl}
                     alt=""
+                    fill
                     className="w-full h-full object-cover opacity-60 blur-md scale-110"
+                    unoptimized
                   />
                 )}
                 {/* Dark gradient overlay for text contrast */}
@@ -299,8 +293,8 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                               <h3 className="text-lg font-bold mb-4">Memories</h3>
                               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                 {memories.slice(0, 6).map((m: any) => (
-                                  <div key={m.id} className="aspect-square rounded-2xl overflow-hidden bg-muted shadow-sm">
-                                    <img src={m.url} alt={m.caption || ''} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                                  <div key={m.id} className="relative aspect-square rounded-2xl overflow-hidden bg-muted shadow-sm">
+                                    <Image src={m.url} alt={m.caption || ''} fill className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" unoptimized />
                                   </div>
                                 ))}
                               </div>
@@ -320,10 +314,10 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                           <MemoryGallery
                             memberId={member.id}
                             memories={memories}
-                            onUpload={async (url, publicId, caption, eventTag) => {
+                            onUpload={async (_url, _publicId, _caption, _eventTag) => {
                               toast.info('Memory uploading is coming soon!', { icon: '📸' });
                             }}
-                            onDelete={async (id) => {
+                            onDelete={async (_id) => {
                               toast.info('Memory deletion is coming soon!', { icon: '🗑️' });
                             }}
                           />

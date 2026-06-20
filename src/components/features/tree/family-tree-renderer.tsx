@@ -22,85 +22,12 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
       return { nodes: rfNodes, edges: rfEdges };
     }
 
-    const nodePositions = new Map<string, { x: number, y: number }>();
     let minGlobalX = 0;
     let maxGlobalX = 0;
 
-    // 1. Calculate Positions Level by Level
-    const levels = Object.keys(familyGraph.generations).map(Number).sort((a, b) => a - b);
-    
-    // Map to keep track of right-most X per level to prevent overlaps
-    const levelRightEdge = new Map<number, number>();
-
-    for (const level of levels) {
-      const nodeIds = familyGraph.generations[level] || [];
-      let currentX = levelRightEdge.get(level) || 0;
-      
-      // Sort to roughly keep siblings together by their shared parent X
-      nodeIds.sort((a, b) => {
-        const aParents = familyGraph.derivedRelationships[a]?.parents || [];
-        const bParents = familyGraph.derivedRelationships[b]?.parents || [];
-        const aParentX = aParents.length > 0 ? (nodePositions.get(aParents[0])?.x || 0) : 0;
-        const bParentX = bParents.length > 0 ? (nodePositions.get(bParents[0])?.x || 0) : 0;
-        return aParentX - bParentX;
-      });
-
-      // Group spouses
-      const levelGroups = new Set<string>();
-      const groupedNodes: string[][] = [];
-      
-      for (const id of nodeIds) {
-        const node = familyGraph.nodes.find(n => n.id === id);
-        const spouseGroup = node?.layoutHints?.spouseGroupId;
-        if (spouseGroup) {
-          if (!levelGroups.has(spouseGroup)) {
-            levelGroups.add(spouseGroup);
-            const membersInGroup = familyGraph.nodes
-              .filter(n => n.layoutHints?.spouseGroupId === spouseGroup && n.generation === level)
-              .map(n => n.id);
-            groupedNodes.push(membersInGroup);
-          }
-        } else {
-          groupedNodes.push([id]);
-        }
-      }
-
-      for (const group of groupedNodes) {
-        let parentAvgX = 0;
-        let parentCount = 0;
-        
-        for (const id of group) {
-          const parents = familyGraph.derivedRelationships[id]?.parents || [];
-          for (const p of parents) {
-            const pPos = nodePositions.get(p);
-            if (pPos) {
-              parentAvgX += pPos.x;
-              parentCount++;
-            }
-          }
-        }
-        
-        // Attempt to center under parents
-        if (parentCount > 0) {
-          const desiredCenterX = parentAvgX / parentCount;
-          const startXForGroup = desiredCenterX - ((group.length * (NODE_WIDTH + GAP)) / 2) + (NODE_WIDTH / 2);
-          currentX = Math.max(currentX, startXForGroup);
-        }
-
-        // Place group members
-        for (let i = 0; i < group.length; i++) {
-          const id = group[i];
-          nodePositions.set(id, { x: currentX, y: level * LEVEL_HEIGHT });
-          currentX += NODE_WIDTH + GAP;
-        }
-      }
-      
-      levelRightEdge.set(level, currentX);
-    }
-
     // 2. Generate React Flow Nodes for Members
     for (const node of familyGraph.nodes) {
-      const pos = nodePositions.get(node.id) || { x: 0, y: 0 };
+      const pos = { x: node.layoutHints?.x || 0, y: node.layoutHints?.y || 0 };
       
       minGlobalX = Math.min(minGlobalX, pos.x);
       maxGlobalX = Math.max(maxGlobalX, pos.x + NODE_WIDTH);
@@ -186,7 +113,8 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
       let sumX = 0;
       let maxY = 0;
       parents.forEach(pId => {
-        const pos = nodePositions.get(pId);
+        const pNode = familyGraph.nodes.find(n => n.id === pId);
+        const pos = pNode ? { x: pNode.layoutHints?.x || 0, y: pNode.layoutHints?.y || 0 } : undefined;
         if (pos) {
           sumX += pos.x + (NODE_WIDTH / 2);
           maxY = Math.max(maxY, pos.y);

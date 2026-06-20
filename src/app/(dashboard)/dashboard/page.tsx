@@ -24,12 +24,13 @@ interface DashboardData {
 }
 
 import { useQuery } from '@tanstack/react-query';
+import { useUserTrees } from '@/hooks/use-user-trees';
 import { DashboardSkeleton } from '@/components/ui/dashboard-skeleton';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 function DashboardContent() {
   const activeTreeId = useAppStore(s => s.activeTreeId);
-  const userTrees = useAppStore(s => s.userTrees);
+  const { userTrees, isLoading: isUserTreesLoading } = useUserTrees();
 
   const { data, isLoading } = useQuery({
     queryKey: ['tree', activeTreeId],
@@ -96,7 +97,7 @@ function DashboardContent() {
   });
 
   // No active tree selected
-  if (!isLoading && !activeTreeId) {
+  if (!isLoading && !isUserTreesLoading && !activeTreeId) {
     if (userTrees.length === 0) {
       return (
         <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh]">

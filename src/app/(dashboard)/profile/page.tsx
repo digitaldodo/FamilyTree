@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Camera, Mail, User as UserIcon, Calendar, Activity } from "lucide-react";
 import { format } from "date-fns";
+import Image from "next/image";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -36,7 +37,7 @@ export default async function ProfilePage() {
             <div className="relative w-32 h-32 mx-auto mb-4 group cursor-pointer">
               <div className="w-full h-full rounded-full overflow-hidden bg-primary/10 flex items-center justify-center">
                 {user.avatar ? (
-                  <img src={user.avatar} alt={user.name || 'User avatar'} className="w-full h-full object-cover" />
+                  <Image src={user.avatar} alt={user.name || 'User avatar'} fill className="w-full h-full object-cover" unoptimized />
                 ) : (
                   <span className="text-4xl text-primary">{user.name?.[0] || user.email[0].toUpperCase()}</span>
                 )}

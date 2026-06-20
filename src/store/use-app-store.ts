@@ -1,7 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { MemberWithRelations, Generation } from '@/types/member';
-import { TreeSummary, TreePermission } from '@/types/tree';
 import { ChangeEvent } from '@/domain/collaboration/change-events';
 
 interface AppState {
@@ -32,10 +30,6 @@ interface AppState {
   setIsInitializingTrees: (isInit: boolean) => void;
   selectedTreeVersionId: string | null;
   setSelectedTreeVersionId: (id: string | null) => void;
-  userTrees: TreeSummary[];
-  setUserTrees: (trees: TreeSummary[]) => void;
-  userRole: TreePermission;
-  setUserRole: (role: TreePermission) => void;
 
   // Collaboration
   pendingChanges: ChangeEvent[];
@@ -79,10 +73,6 @@ export const useAppStore = create<AppState>()(
   setIsInitializingTrees: (isInit) => set({ isInitializingTrees: isInit }),
   selectedTreeVersionId: null,
   setSelectedTreeVersionId: (id) => set({ selectedTreeVersionId: id }),
-  userTrees: [],
-  setUserTrees: (trees) => set({ userTrees: trees }),
-  userRole: null,
-  setUserRole: (role) => set({ userRole: role }),
 
   // Collaboration
   pendingChanges: [],

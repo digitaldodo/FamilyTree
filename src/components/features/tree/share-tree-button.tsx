@@ -5,6 +5,7 @@ import { Share2, Link2, Check, Globe, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface ShareTreeButtonProps {
   treeId: string;
@@ -16,33 +17,37 @@ export function ShareTreeButton({ treeId, isPublic: initialPublic, onTogglePubli
   const [isOpen, setIsOpen] = React.useState(false);
   const [isPublic, setIsPublic] = React.useState(initialPublic);
   const [copied, setCopied] = React.useState(false);
-  const [toggling, setToggling] = React.useState(false);
+  const queryClient = useQueryClient();
 
   const shareUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/public/tree/${treeId}`
     : `/public/tree/${treeId}`;
 
-  const handleToggle = async () => {
-    setToggling(true);
-    try {
+  const toggleMutation = useMutation({
+    mutationFn: async (newIsPublic: boolean) => {
       const res = await fetch(`/api/trees/${treeId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isPublic: !isPublic }),
+        body: JSON.stringify({ isPublic: newIsPublic }),
       });
       const data = await res.json();
-      if (data.success) {
-        setIsPublic(!isPublic);
-        onTogglePublic?.(!isPublic);
-        toast.success(isPublic ? 'Tree is now private' : 'Tree is now public!');
-      } else {
-        toast.error('Failed to update sharing settings');
-      }
-    } catch {
+      if (!data.success) throw new Error('Failed to update sharing settings');
+      return newIsPublic;
+    },
+    onSuccess: (newIsPublic) => {
+      setIsPublic(newIsPublic);
+      onTogglePublic?.(newIsPublic);
+      toast.success(newIsPublic ? 'Tree is now public!' : 'Tree is now private');
+      queryClient.invalidateQueries({ queryKey: ['tree', treeId] });
+      queryClient.invalidateQueries({ queryKey: ['userTrees'] });
+    },
+    onError: () => {
       toast.error('Failed to update sharing settings');
-    } finally {
-      setToggling(false);
     }
+  });
+
+  const handleToggle = () => {
+    toggleMutation.mutate(!isPublic);
   };
 
   const handleCopy = async () => {
@@ -91,10 +96,10 @@ export function ShareTreeButton({ treeId, isPublic: initialPublic, onTogglePubli
             </div>
             <button
               onClick={handleToggle}
-              disabled={toggling}
+              disabled={toggleMutation.isPending}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 isPublic ? 'bg-emerald-500' : 'bg-zinc-300 dark:bg-zinc-600'
-              } ${toggling ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              } ${toggleMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               role="switch"
               aria-checked={isPublic}
               aria-label="Toggle public sharing"

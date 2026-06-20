@@ -5,13 +5,9 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   ReactFlow,
-  Background,
   useNodesState,
   useEdgesState,
   ReactFlowProvider,
-  Node,
-  Edge,
-  MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { MemberNode } from '@/components/features/tree/member-node';
@@ -21,8 +17,9 @@ import { FamilyJunctionNode } from '@/components/features/tree/family-junction-n
 import { TreeBackground } from '@/components/features/tree/tree-background';
 import { Loader2, TreePine, Eye, LogIn } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
-import { User2, Calendar, MapPin, Briefcase, Heart, Users } from 'lucide-react';
+import { Calendar, MapPin, Briefcase, Heart, Users } from 'lucide-react';
 import { MemberAvatar } from '@/components/features/members/member-avatar';
+import Image from 'next/image';
 import { GenealogyEngine } from '@/domain/inference/genealogy-engine';
 import { useFamilyTreeRenderer } from '@/components/features/tree/family-tree-renderer';
 
@@ -55,7 +52,7 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
       {/* Compact Cover */}
       <div className="h-24 sm:h-28 bg-gradient-to-br from-primary/30 via-purple-500/20 to-rose-500/10 relative overflow-hidden">
         {member.coverImage && (
-          <img src={member.coverImage} alt="" className="w-full h-full object-cover" />
+          <Image src={member.coverImage} alt="" fill className="w-full h-full object-cover" unoptimized />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
         <div className="absolute bottom-3 left-4 right-4 flex items-end gap-3">
@@ -187,8 +184,8 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">Memories</h4>
             <div className="grid grid-cols-3 gap-2">
               {memories.slice(0, 6).map((m: any) => (
-                <div key={m.id} className="aspect-square rounded-xl overflow-hidden bg-muted">
-                  <img src={m.url} alt={m.caption || ''} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                <div key={m.id} className="relative aspect-square rounded-xl overflow-hidden bg-muted">
+                  <Image src={m.url} alt={m.caption || ''} fill className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" unoptimized />
                 </div>
               ))}
             </div>
@@ -200,14 +197,6 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
 }
 
 function PublicTreeCanvas({ treeData }: { treeData: any }) {
-  const [isMobile, setIsMobile] = React.useState(false);
-
-  React.useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const familyGraph = React.useMemo(() => {
     return GenealogyEngine.buildFamilyGraph(treeData.members || []);

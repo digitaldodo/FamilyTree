@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mail, Link as LinkIcon, Check, Copy, Loader2, Users } from "lucide-react";
 import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
 
 interface InviteModalProps {
   isOpen: boolean;
@@ -21,45 +22,55 @@ export function InviteModal({ isOpen, onClose, treeId, treeName }: InviteModalPr
   const [isLoading, setIsLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
-  const handleInvite = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-
-    setIsLoading(true);
-    try {
+  const inviteMutation = useMutation({
+    mutationFn: async (emailData: { treeId: string; role: string; email: string }) => {
       const res = await fetch('/api/invites', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ treeId, role, email })
+        body: JSON.stringify(emailData)
       });
       if (!res.ok) throw new Error("Failed to send invite");
-      toast.success(`Invite sent to ${email} as ${role.toLowerCase()}`);
+      return emailData.email;
+    },
+    onSuccess: (emailStr) => {
+      toast.success(`Invite sent to ${emailStr} as ${role.toLowerCase()}`);
       setEmail("");
-    } catch (error) {
+    },
+    onError: () => {
       toast.error("Failed to send invite");
-    } finally {
-      setIsLoading(false);
     }
+  });
+
+  const handleInvite = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    inviteMutation.mutate({ treeId, role, email });
   };
 
-  const copyLink = async () => {
-    try {
+  const copyMutation = useMutation({
+    mutationFn: async (linkData: { treeId: string; role: string }) => {
       const res = await fetch('/api/invites', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ treeId, role }) // No email = persistent link
+        body: JSON.stringify(linkData) // No email = persistent link
       });
       if (!res.ok) throw new Error("Failed to generate link");
-      const data = await res.json();
-      
+      return res.json();
+    },
+    onSuccess: async (data) => {
       const link = `${window.location.origin}/invite/${data.token}`;
       await navigator.clipboard.writeText(link);
       setIsCopied(true);
       toast.success("Invite link copied to clipboard!");
       setTimeout(() => setIsCopied(false), 2000);
-    } catch (error) {
+    },
+    onError: () => {
       toast.error("Failed to generate link");
     }
+  });
+
+  const copyLink = () => {
+    copyMutation.mutate({ treeId, role });
   };
 
   return (

@@ -3,12 +3,9 @@
 import * as React from 'react';
 import {
   ReactFlow,
-  Background,
-  Controls,
   useNodesState,
   useEdgesState,
   ReactFlowProvider,
-  BackgroundVariant,
   Panel,
   MiniMap,
 } from '@xyflow/react';

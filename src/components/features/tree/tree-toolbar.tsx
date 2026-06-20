@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/store/use-app-store';
 import { ShareTreeButton } from './share-tree-button';
 import { GenerationFilter } from '@/components/features/generations/generation-filter';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 interface TreeToolbarProps {
   readOnly?: boolean;
@@ -16,7 +18,7 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
   const { zoomIn, zoomOut, fitView } = useReactFlow();
   const { setIsMemberModalOpen, setSelectedMemberId, setIsEditingMember, activeTreeId } = useAppStore();
   const resolvedTreeId = treeId || activeTreeId || '';
-  const [isRepairing, setIsRepairing] = React.useState(false);
+  const queryClient = useQueryClient();
 
   const handleAdd = () => {
     setSelectedMemberId(null);
@@ -24,27 +26,30 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
     setIsMemberModalOpen(true);
   };
 
-  const handleRepair = async () => {
+  const repairMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/trees/${resolvedTreeId}/repair`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Unknown error');
+      return data.data;
+    },
+    onSuccess: (data) => {
+      alert(`Repaired ${data?.repaired || 0} relationships! Please reload the page to see changes.`);
+      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
+    },
+    onError: (error: any) => {
+      console.error(error);
+      alert(`Repair failed: ${error.message}`);
+    }
+  });
+
+  const handleRepair = () => {
     alert("Repair function is temporarily disabled during the architecture freeze.");
     return;
     if (!resolvedTreeId) return;
     if (!window.confirm("Run tree relationship repair? This will automatically link children to both spouses where links are missing.")) return;
     
-    try {
-      setIsRepairing(true);
-      const res = await fetch(`/api/trees/${resolvedTreeId}/repair`, { method: 'POST' });
-      const data = await res.json();
-      if (res.ok) {
-        alert(`Repaired ${data.data?.repaired || 0} relationships! Please reload the page to see changes.`);
-      } else {
-        alert(`Repair failed: ${data.message || 'Unknown error'}`);
-      }
-    } catch (error) {
-      console.error(error);
-      alert('Repair failed due to network error.');
-    } finally {
-      setIsRepairing(false);
-    }
+    repairMutation.mutate();
   };
 
   return (
@@ -59,8 +64,8 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
             <Plus className="h-4 w-4" />
           </Button>
           <ShareTreeButton treeId={resolvedTreeId} isPublic={isPublic} />
-          <Button variant="ghost" size="icon" className="rounded-xl hover:bg-amber-500/10 hover:text-amber-500" onClick={handleRepair} disabled={isRepairing} title="Repair Relationships">
-            {isRepairing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wrench className="h-4 w-4" />}
+          <Button variant="ghost" size="icon" className="rounded-xl hover:bg-amber-500/10 hover:text-amber-500" onClick={handleRepair} disabled={repairMutation.isPending} title="Repair Relationships">
+            {repairMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wrench className="h-4 w-4" />}
           </Button>
           <div className="h-6 w-px bg-border/50 mx-1" />
         </>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAppStore } from '@/store/use-app-store';
+import { useUserTrees } from '@/hooks/use-user-trees';
 import { CollaboratorManager } from '@/components/features/tree/collaborator-manager';
 import { InviteModal } from '@/components/features/invite/invite-modal';
 import { Button } from '@/components/ui/button';
@@ -9,12 +10,40 @@ import { Trash2, Users, Shield, AlertTriangle } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function AdminPage() {
-  const { activeTreeId, userTrees, userRole, setActiveTreeId, setUserTrees } = useAppStore();
+  const { activeTreeId, setActiveTreeId } = useAppStore();
+  const { userTrees } = useUserTrees();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const activeTree = userTrees.find(t => t.id === activeTreeId);
+  const userRole = activeTree?.role || null;
+  const hasManageAccess = userRole === 'OWNER' || userRole === 'ADMIN';
+  const hasDeleteAccess = userRole === 'OWNER';
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/trees/${activeTreeId}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error('Failed to delete tree');
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success('Tree deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['userTrees'] });
+      
+      const newTrees = userTrees.filter(t => t.id !== activeTreeId);
+      setActiveTreeId(newTrees.length > 0 ? newTrees[0].id : null);
+      router.push('/dashboard');
+    },
+    onError: () => {
+      toast.error('Failed to delete tree');
+    }
+  });
 
   if (!activeTreeId) {
     return (
@@ -27,35 +56,6 @@ export default function AdminPage() {
       </div>
     );
   }
-
-  const activeTree = userTrees.find(t => t.id === activeTreeId);
-  const hasManageAccess = userRole === 'OWNER' || userRole === 'ADMIN';
-  const hasDeleteAccess = userRole === 'OWNER';
-
-  const handleDeleteTree = async () => {
-    if (!confirm('Are you absolutely sure you want to delete this tree? This action cannot be undone and will delete all members, relationships, and memories associated with it.')) {
-      return;
-    }
-
-    setIsDeleting(true);
-    try {
-      const res = await fetch(`/api/trees/${activeTreeId}`, {
-        method: 'DELETE',
-      });
-
-      if (!res.ok) throw new Error('Failed to delete tree');
-
-      toast.success('Tree deleted successfully');
-      
-      const newTrees = userTrees.filter(t => t.id !== activeTreeId);
-      setUserTrees(newTrees);
-      setActiveTreeId(newTrees.length > 0 ? newTrees[0].id : null);
-      router.push('/dashboard');
-    } catch (error) {
-      toast.error('Failed to delete tree');
-      setIsDeleting(false);
-    }
-  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
@@ -99,11 +99,15 @@ export default function AdminPage() {
             <Button 
               variant="outline" 
               className="w-full sm:w-auto text-red-500 border-red-200 hover:bg-red-50 dark:hover:bg-red-950/30"
-              onClick={handleDeleteTree}
-              disabled={isDeleting}
+              onClick={() => {
+                if (confirm('Are you absolutely sure you want to delete this tree? This action cannot be undone and will delete all members, relationships, and memories associated with it.')) {
+                  deleteMutation.mutate();
+                }
+              }}
+              disabled={deleteMutation.isPending}
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              {isDeleting ? 'Deleting...' : 'Delete Tree'}
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete Tree'}
             </Button>
           </div>
         </section>

@@ -7,6 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { TreeCollaborator, TreeRole } from '@/types/tree';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Image from 'next/image';
 
 interface CollaboratorManagerProps {
   treeId: string;
@@ -19,44 +21,44 @@ const roleBadgeStyles: Record<TreeRole, string> = {
 };
 
 export function CollaboratorManager({ treeId }: CollaboratorManagerProps) {
-  const [collaborators, setCollaborators] = useState<TreeCollaborator[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchCollaborators = useCallback(async () => {
-    setIsLoading(true);
-    try {
+  const { data: collaborators = [], isLoading } = useQuery({
+    queryKey: ['collaborators', treeId],
+    queryFn: async () => {
       const res = await fetch(`/api/trees/${treeId}/collaborators`);
       if (!res.ok) throw new Error('Failed to fetch collaborators');
-      const data = await res.json();
-      setCollaborators(data);
-    } catch {
-      toast.error('Failed to load collaborators');
-    } finally {
-      setIsLoading(false);
+      return res.json() as Promise<TreeCollaborator[]>;
     }
-  }, [treeId]);
+  });
 
-  useEffect(() => {
-    fetchCollaborators();
-  }, [fetchCollaborators]);
-
-  const handleRemove = async (userId: string, userName: string | null) => {
-    setRemovingId(userId);
-    try {
+  const removeMutation = useMutation({
+    mutationFn: async (userId: string) => {
       const res = await fetch(`/api/trees/${treeId}/collaborators`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId }),
       });
       if (!res.ok) throw new Error('Failed to remove collaborator');
-      setCollaborators((prev) => prev.filter((c) => c.userId !== userId));
-      toast.success(`${userName || 'Collaborator'} has been removed`);
-    } catch {
+      return userId;
+    },
+    onMutate: (userId) => {
+      setRemovingId(userId);
+    },
+    onSuccess: (userId, originalUserId) => {
+      queryClient.invalidateQueries({ queryKey: ['collaborators', treeId] });
+      toast.success('Collaborator has been removed');
+      setRemovingId(null);
+    },
+    onError: () => {
       toast.error('Failed to remove collaborator');
-    } finally {
       setRemovingId(null);
     }
+  });
+
+  const handleRemove = (userId: string) => {
+    removeMutation.mutate(userId);
   };
 
   const getInitials = (name: string | null, email: string) => {
@@ -113,8 +115,8 @@ export function CollaboratorManager({ treeId }: CollaboratorManagerProps) {
             key={collab.id}
             className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors group"
           >
-            <div className="w-10 h-10 rounded-full overflow-hidden bg-muted shrink-0">
-              <img src={avatarUrl} alt={collab.user.name || collab.user.email} className="w-full h-full object-cover" />
+            <div className="w-10 h-10 rounded-full overflow-hidden bg-muted shrink-0 relative">
+              <Image src={avatarUrl} alt={collab.user.name || collab.user.email} fill className="object-cover" unoptimized />
             </div>
 
             <div className="flex-1 min-w-0">
@@ -134,8 +136,8 @@ export function CollaboratorManager({ treeId }: CollaboratorManagerProps) {
               variant="ghost"
               size="icon"
               className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-              onClick={() => handleRemove(collab.userId, collab.user.name)}
-              disabled={removingId === collab.userId}
+              onClick={() => handleRemove(collab.userId)}
+              disabled={removingId === collab.userId || removeMutation.isPending}
             >
               <X className="h-4 w-4" />
             </Button>
