@@ -185,11 +185,11 @@ export function generateTreeLayout(
         curr.x = minX;
       }
     }
-    // Update dagre nodes
+    // Update dagre nodes strictly to level computed Y
     families.forEach(f => {
       const dn = g.node(f.root);
       dn.x = f.x;
-      dn.y = f.y;
+      dn.y = level * LEVEL_HEIGHT; // Strictly enforce vertical hierarchy
     });
   });
 
@@ -289,7 +289,7 @@ export function generateTreeLayout(
       type: 'generationLane',
       position: { x: laneX, y: level * LEVEL_HEIGHT - 60 },
       data: {
-        label: gen.name || 'Unnamed Generation',
+        label: gen.name && gen.name.trim() !== '' ? gen.name : 'Unnamed Generation',
         width: laneWidth,
         height: LEVEL_HEIGHT + 100,
         isEven: level % 2 === 0,

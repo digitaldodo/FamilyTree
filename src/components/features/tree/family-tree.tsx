@@ -10,6 +10,7 @@ import {
   ReactFlowProvider,
   BackgroundVariant,
   Panel,
+  MiniMap,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -142,6 +143,18 @@ function FamilyTreeCanvas() {
               </div>
             </div>
           </>
+        )}
+        
+        {nodes.length > 10 && (
+          <MiniMap 
+            position="bottom-left" 
+            zoomable 
+            pannable 
+            className="!bg-card !border-border !rounded-xl !shadow-lg"
+            maskColor="var(--color-primary)"
+            maskStrokeColor="transparent"
+            nodeColor="var(--color-muted-foreground)"
+          />
         )}
 
         {showDiagnostics && (

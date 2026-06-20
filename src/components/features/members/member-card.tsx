@@ -31,8 +31,9 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
     setIsMemberModalOpen(true);
   };
 
-  const relationCount =
-    member.relationsFrom.length + member.relationsTo.length;
+  const relationsFrom = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
+  const relationsTo = Array.isArray(member.relationsTo) ? member.relationsTo : [];
+  const relationCount = relationsFrom.length + relationsTo.length;
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();

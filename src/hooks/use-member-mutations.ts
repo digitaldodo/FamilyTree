@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useAppStore } from '@/store/use-app-store';
 import { CreateMemberInput, UpdateMemberInput, MemberWithRelations } from '@/types/member';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function useMemberMutations() {
+  const queryClient = useQueryClient();
   const { setMembers, setIsMemberModalOpen, setIsEditingMember, activeTreeId } = useAppStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -45,6 +47,7 @@ export function useMemberMutations() {
 
       await refreshTree();
       window.dispatchEvent(new Event('refresh-members'));
+      queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
       toast.success('Member added successfully');
       setIsEditingMember(false);
       setIsMemberModalOpen(false);
@@ -83,8 +86,7 @@ export function useMemberMutations() {
       window.dispatchEvent(new Event('refresh-members'));
       
       // Cache Audit / Invalidation equivalent
-      // In a real scenario we'd invalidate react-query caches or Next router cache here
-      // But we bypassed the cache on fetch calls above.
+      queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
       
       toast.success('Member updated successfully');
       setIsEditingMember(false);
@@ -110,6 +112,7 @@ export function useMemberMutations() {
 
       await refreshTree();
       window.dispatchEvent(new Event('refresh-members'));
+      queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
       toast.success('Member removed successfully');
       setIsEditingMember(false);
       setIsMemberModalOpen(false);

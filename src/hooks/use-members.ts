@@ -6,7 +6,7 @@ import { MemberWithRelations } from '@/types/member';
 import { useEffect } from 'react';
 
 export function useMembers(treeId?: string) {
-  const { activeTreeId, setMembers } = useAppStore();
+  const { activeTreeId, setMembers, setGenerations } = useAppStore();
   const resolvedTreeId = treeId || activeTreeId;
 
   const { data, isLoading, error, refetch } = useQuery({
@@ -29,12 +29,17 @@ export function useMembers(treeId?: string) {
     relationsTo: Array.isArray(m.relationsTo) ? m.relationsTo : [],
   }));
 
+  const generations = Array.isArray(data?.generations) ? data.generations : [];
+
   // Sync to zustand for components using getState() or direct store access
   useEffect(() => {
     if (members.length >= 0) {
       setMembers(members);
     }
-  }, [members, setMembers]);
+    if (generations.length > 0 || (data && data.generations)) {
+      setGenerations(generations);
+    }
+  }, [members, generations, setMembers, setGenerations, data]);
 
   // Handle manual refresh
   useEffect(() => {

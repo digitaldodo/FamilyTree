@@ -34,17 +34,20 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
   const deathYear = member.deathDate ? new Date(member.deathDate).getFullYear() : 'Present';
   const displayDates = member.birthDate ? `${birthYear} - ${deathYear}` : '';
 
-  const childrenCount = member.relationsFrom.filter(r => r.type === 'PARENT').length;
-  const spouseCount = member.relationsFrom.filter(r => r.type === 'SPOUSE').length + member.relationsTo.filter(r => r.type === 'SPOUSE').length;
-  const siblingCount = member.relationsFrom.filter(r => r.type === 'SIBLING').length + member.relationsTo.filter(r => r.type === 'SIBLING').length;
+  const safeRelsFrom = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
+  const safeRelsTo = Array.isArray(member.relationsTo) ? member.relationsTo : [];
+  
+  const childrenCount = safeRelsFrom.filter(r => r.type === 'PARENT').length;
+  const spouseCount = safeRelsFrom.filter(r => r.type === 'SPOUSE').length + safeRelsTo.filter(r => r.type === 'SPOUSE').length;
+  const siblingCount = safeRelsFrom.filter(r => r.type === 'SIBLING').length + safeRelsTo.filter(r => r.type === 'SIBLING').length;
 
   console.log({
     memberId: member.id,
     imageUrl: member.imageUrl,
     generationId: member.generationId,
-    parents: member.relationsTo.filter(r => r.type === 'PARENT'),
-    children: member.relationsFrom.filter(r => r.type === 'PARENT'),
-    spouse: [...member.relationsFrom.filter(r => r.type === 'SPOUSE'), ...member.relationsTo.filter(r => r.type === 'SPOUSE')]
+    parents: safeRelsTo.filter(r => r.type === 'PARENT'),
+    children: safeRelsFrom.filter(r => r.type === 'PARENT'),
+    spouse: [...safeRelsFrom.filter(r => r.type === 'SPOUSE'), ...safeRelsTo.filter(r => r.type === 'SPOUSE')]
   });
 
   return (
@@ -89,7 +92,7 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
 
       {/* Info Area (Middle & Bottom) */}
       <div className="h-[90px] shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-3 flex flex-col justify-center border-t border-white/20 dark:border-white/5 relative z-10">
-        <h3 className="font-bold text-[17px] text-foreground truncate leading-tight tracking-tight">
+        <h3 className="font-bold text-[17px] text-foreground line-clamp-2 leading-tight tracking-tight break-words">
           {member.firstName} {member.lastName}
         </h3>
         

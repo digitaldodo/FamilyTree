@@ -26,37 +26,49 @@ export async function GET(_request: NextRequest, { params }: Params) {
       return errorResponse('FORBIDDEN', 'You do not have access to this tree', 403);
     }
 
-    const tree = await prisma.tree.findUnique({
-      where: { id },
-      include: {
-        owner: { select: { id: true, name: true, email: true } },
-        generations: { orderBy: { orderIndex: 'asc' } },
-        members: {
-          orderBy: [{ firstName: 'asc' }],
-          include: {
-            generation: { select: { id: true, name: true, orderIndex: true } },
-            relationsFrom: {
-              select: {
-                id: true, type: true, fromId: true, toId: true,
-                to: { select: { id: true, firstName: true, lastName: true, imageUrl: true } }
-              }
-            },
-            relationsTo: {
-              select: {
-                id: true, type: true, fromId: true, toId: true,
-                from: { select: { id: true, firstName: true, lastName: true, imageUrl: true } }
-              }
-            },
-            media: { select: { id: true, url: true, type: true } },
-          },
+    const [treeData, generations, members] = await Promise.all([
+      prisma.tree.findUnique({
+        where: { id },
+        include: {
+          owner: { select: { id: true, name: true, email: true } },
+          _count: { select: { members: true } },
         },
-        _count: { select: { members: true } },
-      },
-    });
+      }),
+      prisma.generation.findMany({
+        where: { treeId: id },
+        orderBy: { orderIndex: 'asc' },
+      }),
+      prisma.member.findMany({
+        where: { treeId: id },
+        orderBy: [{ firstName: 'asc' }],
+        include: {
+          generation: { select: { id: true, name: true, orderIndex: true } },
+          relationsFrom: {
+            select: {
+              id: true, type: true, fromId: true, toId: true,
+              to: { select: { id: true, firstName: true, lastName: true, imageUrl: true } }
+            }
+          },
+          relationsTo: {
+            select: {
+              id: true, type: true, fromId: true, toId: true,
+              from: { select: { id: true, firstName: true, lastName: true, imageUrl: true } }
+            }
+          },
+          media: { select: { id: true, url: true, type: true } },
+        },
+      }),
+    ]);
 
-    if (!tree) {
+    if (!treeData) {
       return errorResponse('NOT_FOUND', 'Tree not found', 404);
     }
+
+    const tree = {
+      ...treeData,
+      generations,
+      members,
+    };
 
     return successResponse(tree, 'Tree retrieved successfully');
   } catch (error) {
