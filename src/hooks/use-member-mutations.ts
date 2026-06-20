@@ -6,7 +6,10 @@ import { useQueryClient } from '@tanstack/react-query';
 
 export function useMemberMutations() {
   const queryClient = useQueryClient();
-  const { setMembers, setIsMemberModalOpen, setIsEditingMember, activeTreeId } = useAppStore();
+  const setMembers = useAppStore(s => s.setMembers);
+  const setIsMemberModalOpen = useAppStore(s => s.setIsMemberModalOpen);
+  const setIsEditingMember = useAppStore(s => s.setIsEditingMember);
+  const activeTreeId = useAppStore(s => s.activeTreeId);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const refreshTree = async () => {

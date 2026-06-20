@@ -3,10 +3,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppStore } from '@/store/use-app-store';
 import { MemberWithRelations } from '@/types/member';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 export function useMembers(treeId?: string) {
-  const { activeTreeId, setMembers, setGenerations } = useAppStore();
+  const activeTreeId = useAppStore(s => s.activeTreeId);
+  const setMembers = useAppStore(s => s.setMembers);
+  const setGenerations = useAppStore(s => s.setGenerations);
   const resolvedTreeId = treeId || activeTreeId;
 
   const { data, isLoading, error, refetch } = useQuery({
@@ -22,14 +24,18 @@ export function useMembers(treeId?: string) {
     enabled: !!resolvedTreeId,
   });
 
-  const safeMembers = Array.isArray(data?.members) ? data.members : [];
-  const members: MemberWithRelations[] = safeMembers.map((m: any) => ({
-    ...m,
-    relationsFrom: Array.isArray(m.relationsFrom) ? m.relationsFrom : [],
-    relationsTo: Array.isArray(m.relationsTo) ? m.relationsTo : [],
-  }));
+  const members: MemberWithRelations[] = useMemo(() => {
+    const safeMembers = Array.isArray(data?.members) ? data.members : [];
+    return safeMembers.map((m: any) => ({
+      ...m,
+      relationsFrom: Array.isArray(m.relationsFrom) ? m.relationsFrom : [],
+      relationsTo: Array.isArray(m.relationsTo) ? m.relationsTo : [],
+    }));
+  }, [data]);
 
-  const generations = Array.isArray(data?.generations) ? data.generations : [];
+  const generations = useMemo(() => {
+    return Array.isArray(data?.generations) ? data.generations : [];
+  }, [data]);
 
   // Sync to zustand for components using getState() or direct store access
   useEffect(() => {

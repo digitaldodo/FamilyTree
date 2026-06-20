@@ -9,7 +9,7 @@ export const runtime = 'nodejs';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ treeId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -17,7 +17,7 @@ export async function POST(
       return errorResponse('UNAUTHORIZED', 'Authentication required', 401);
     }
 
-    const { treeId } = await params;
+    const { id: treeId } = await params;
 
     const permission = await getTreePermission(session.user.id, treeId);
     if (!canEdit(permission)) {

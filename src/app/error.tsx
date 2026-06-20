@@ -20,7 +20,7 @@ export default function Error({
   return (
     <div className="p-8 text-red-500 font-mono">
       <h2 className="text-2xl mb-4 font-bold">Something went wrong</h2>
-      <p className="mb-2 text-gray-700 dark:text-gray-300">We've encountered an unexpected error. Our team has been notified.</p>
+      <p className="mb-2 text-gray-700 dark:text-gray-300">We&apos;ve encountered an unexpected error. Our team has been notified.</p>
       
       {isDev && (
         <div className="mt-6 border-t pt-4">
