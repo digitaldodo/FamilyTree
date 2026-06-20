@@ -2,19 +2,25 @@ import { useMemo } from 'react';
 import { useAppStore } from '@/store/use-app-store';
 import { MemberWithRelations } from '@/types/member';
 import { useMembers } from './use-members';
+import { useGenerations } from './use-generations';
 
 export function useSearchMembers() {
   const { searchQuery, selectedGenerationIds } = useAppStore();
   const { members: rawMembers } = useMembers();
+  const { generations } = useGenerations();
 
   const filteredMembers = useMemo(() => {
     let filtered = Array.isArray(rawMembers) ? rawMembers : [];
     
-    if (selectedGenerationIds.length > 0) {
-      filtered = filtered.filter(m => selectedGenerationIds.includes(m.generationId));
-    } else {
-      filtered = []; // If no generations selected, no members match.
-    }
+    const allGenerationIds = generations.map(g => g.id);
+    const effectiveGenerations =
+      selectedGenerationIds?.length > 0
+        ? selectedGenerationIds
+        : allGenerationIds;
+
+    filtered = filtered.filter(m =>
+      effectiveGenerations.includes(m.generationId)
+    );
     
     if (searchQuery.trim()) {
       const lowerQuery = searchQuery.toLowerCase();

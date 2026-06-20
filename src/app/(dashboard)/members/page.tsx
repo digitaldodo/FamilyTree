@@ -34,6 +34,18 @@ function MembersContent() {
   const { isLoading: membersLoading, fetchMembers } = useMembers();
   const { generations, isLoading: gensLoading, createGeneration, renameGeneration, deleteGeneration, moveGeneration } = useGenerations();
   const { filteredMembers } = useSearchMembers();
+  const setSelectedGenerationIds = useAppStore(s => s.setSelectedGenerationIds);
+  const [hasHydratedGenerations, setHasHydratedGenerations] = useState(false);
+
+  useEffect(() => {
+    if (activeTreeId && !gensLoading && generations) {
+      if (generations.length > 0 && selectedGenerationIds.length === 0 && !hasHydratedGenerations) {
+        setSelectedGenerationIds(generations.map(g => g.id));
+      }
+      setHasHydratedGenerations(true);
+    }
+  }, [activeTreeId, gensLoading, generations, selectedGenerationIds.length, hasHydratedGenerations, setSelectedGenerationIds]);
+
 
   const allGenerations = [...generations].sort((a, b) => a.orderIndex - b.orderIndex);
   const sortedGenerations = useFilteredGenerations(allGenerations, selectedGenerationIds);
@@ -93,9 +105,9 @@ function MembersContent() {
     fetchMembers(); // refresh members because some might have been moved or deleted
   };
 
-  const isLoading = membersLoading || gensLoading;
+  const isLoading = membersLoading || gensLoading || !hasHydratedGenerations;
 
-  if (!activeTreeId || isLoading || !generations || !filteredMembers) {
+  if (!activeTreeId || isLoading) {
     return (
       <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh] pt-12 w-full h-full">
         <MembersSkeleton />

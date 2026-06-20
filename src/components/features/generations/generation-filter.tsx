@@ -14,7 +14,12 @@ export function GenerationFilter() {
 
   const handleToggle = (id: string) => {
     if (selectedGenerationIds.includes(id)) {
-      setSelectedGenerationIds(selectedGenerationIds.filter(f => f !== id));
+      const newIds = selectedGenerationIds.filter(f => f !== id);
+      if (newIds.length === 0) {
+        setSelectedGenerationIds(generations.map(g => g.id));
+      } else {
+        setSelectedGenerationIds(newIds);
+      }
     } else {
       setSelectedGenerationIds([...selectedGenerationIds, id]);
     }
@@ -47,9 +52,7 @@ export function GenerationFilter() {
         <DropdownMenuCheckboxItem
           checked={isAllSelected}
           onCheckedChange={() => {
-            if (isAllSelected) {
-              setSelectedGenerationIds([]);
-            } else {
+            if (!isAllSelected) {
               setSelectedGenerationIds(generations.map(g => g.id));
             }
           }}
