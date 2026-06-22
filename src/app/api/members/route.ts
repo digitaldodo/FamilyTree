@@ -281,6 +281,27 @@ export async function POST(request: NextRequest) {
           // Continue creating other relationships even if one fails
         }
       }
+
+      // After all relationships are created, ensure children are linked to the spouse
+      const spouses = await prisma.relationship.findMany({
+        where: { type: 'SPOUSE', OR: [{ fromId: newMember.id }, { toId: newMember.id }] }
+      });
+      if (spouses.length > 0) {
+        const spouseId = spouses[0].fromId === newMember.id ? spouses[0].toId : spouses[0].fromId;
+        const children = await prisma.relationship.findMany({
+          where: { type: 'PARENT', fromId: newMember.id }
+        });
+        for (const childRel of children) {
+          const spouseIsParent = await prisma.relationship.findFirst({
+            where: { type: 'PARENT', fromId: spouseId, toId: childRel.toId }
+          });
+          if (!spouseIsParent) {
+            await prisma.relationship.create({
+              data: { type: 'PARENT', fromId: spouseId, toId: childRel.toId }
+            });
+          }
+        }
+      }
     }
 
     console.log('[API Debug] POST /api/members success', {

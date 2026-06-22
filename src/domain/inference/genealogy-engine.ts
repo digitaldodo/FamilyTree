@@ -1,5 +1,6 @@
 import { MemberWithRelations } from '@/types/member';
 import { EMPTY_GRAPH } from '@/lib/safe-helpers';
+import dagre from 'dagre';
 
 export type FamilyGraphNode = {
   id: string;
@@ -45,23 +46,26 @@ export type BuildGraphPayload = {
   treeId: string;
   versionId?: string | null;
   members: MemberWithRelations[];
+  generations?: any[];
 };
 
 export const GenealogyEngine = {
   buildFamilyGraph(payload: BuildGraphPayload): FamilyGraph {
     try {
-      let { members } = payload;
+      let { members, generations } = payload;
       members = Array.isArray(members) ? members : [];
+      generations = Array.isArray(generations) ? generations : [];
       
       const nodesMap = new Map<string, FamilyGraphNode>();
       const edges: FamilyGraphEdge[] = [];
       
       // 1. Initialize nodes
       for (const m of members) {
+        const orderIndex = generations.find(g => g.id === m.generationId)?.orderIndex ?? 0;
         nodesMap.set(m.id, {
           id: m.id,
           member: structuredClone(m),
-          generation: 0,
+          generation: orderIndex,
           layoutHints: {}
         });
       }
@@ -87,7 +91,7 @@ export const GenealogyEngine = {
       const uniqueEdges = this.deduplicateSpouseEdges(edges);
 
       // 2. Derive Generational levels
-      this.inferGenerations(nodes, uniqueEdges);
+      // No longer needed, using DB orderIndex directly.
 
       // 3. Derive Siblings
       const siblingEdges = this.inferSiblings(nodes, uniqueEdges);
@@ -173,78 +177,30 @@ export const GenealogyEngine = {
       const NODE_WIDTH = 220;
       const GAP = 80;
 
-      const nodePositions = new Map<string, { x: number, y: number }>();
-      const levels = Object.keys(generationsRec).map(Number).sort((a, b) => a - b);
-      const levelRightEdge = new Map<number, number>();
+      const g = new dagre.graphlib.Graph({ compound: true });
+      g.setGraph({ rankdir: 'TB', nodesep: GAP, edgesep: 40, ranksep: LEVEL_HEIGHT - 300 });
+      g.setDefaultEdgeLabel(() => ({}));
 
-      for (const level of levels) {
-        const nodeIds = generationsRec[level] || [];
-        let currentX = levelRightEdge.get(level) || 0;
-        
-        // Group nodes by their primary parent (or no parent)
-        const groups = new Map<string, string[]>();
-        for (const id of nodeIds) {
-          const parents = derivedRelationships[id]?.parents || [];
-          const primaryParent = parents.length > 0 ? parents[0] : 'root';
-          if (!groups.has(primaryParent)) groups.set(primaryParent, []);
-          groups.get(primaryParent)!.push(id);
+      for (const node of finalNodes) {
+        const isCouple = node.type === 'COUPLE_CONTAINER';
+        const nodeWidth = isCouple ? NODE_WIDTH * 2 + GAP : NODE_WIDTH;
+        g.setNode(node.id, { width: nodeWidth, height: 300 });
+      }
+
+      for (const e of finalEdges) {
+        if (e.type === 'PARENT') {
+          g.setEdge(e.source, e.target);
         }
+      }
 
-        // Sort groups by parent X position
-        const sortedGroups = Array.from(groups.entries()).sort((a, b) => {
-          if (a[0] === 'root' && b[0] !== 'root') return -1;
-          if (a[0] !== 'root' && b[0] === 'root') return 1;
-          const aParentX = nodePositions.get(a[0])?.x || 0;
-          const bParentX = nodePositions.get(b[0])?.x || 0;
-          return aParentX - bParentX;
-        });
+      dagre.layout(g);
 
-        for (const [parentId, groupNodeIds] of sortedGroups) {
-          // Sort nodes within group by ID for stability
-          groupNodeIds.sort((a, b) => a.localeCompare(b));
-
-          // Calculate total width of this group
-          let totalGroupWidth = 0;
-          for (let i = 0; i < groupNodeIds.length; i++) {
-            const id = groupNodeIds[i];
-            const node = nodesMap.get(id)!;
-            const isCouple = node.type === 'COUPLE_CONTAINER';
-            const nodeWidth = isCouple ? NODE_WIDTH * 2 + GAP : NODE_WIDTH;
-            totalGroupWidth += nodeWidth;
-            if (i < groupNodeIds.length - 1) {
-              totalGroupWidth += GAP;
-            }
-          }
-
-          let startX = currentX;
-          if (parentId !== 'root') {
-            const parentPos = nodePositions.get(parentId);
-            if (parentPos) {
-              const parentNode = nodesMap.get(parentId)!;
-              const parentIsCouple = parentNode.type === 'COUPLE_CONTAINER';
-              const parentWidth = parentIsCouple ? NODE_WIDTH * 2 + GAP : NODE_WIDTH;
-              const parentCenterX = parentPos.x + parentWidth / 2;
-              
-              const desiredStartX = parentCenterX - totalGroupWidth / 2;
-              startX = Math.max(currentX, desiredStartX);
-            }
-          }
-
-          let nodeX = startX;
-          for (const id of groupNodeIds) {
-            nodePositions.set(id, { x: nodeX, y: level * LEVEL_HEIGHT });
-            const node = nodesMap.get(id)!;
-            node.layoutHints.x = nodeX;
-            node.layoutHints.y = level * LEVEL_HEIGHT;
-            
-            const isCouple = node.type === 'COUPLE_CONTAINER';
-            const nodeWidth = isCouple ? NODE_WIDTH * 2 + GAP : NODE_WIDTH;
-            
-            nodeX += nodeWidth + GAP;
-          }
-          currentX = nodeX;
+      for (const node of finalNodes) {
+        const n = g.node(node.id);
+        if (n) {
+          node.layoutHints.x = n.x - n.width / 2;
+          node.layoutHints.y = node.generation * LEVEL_HEIGHT;
         }
-        levelRightEdge.set(level, currentX);
       }
 
       const graph: FamilyGraph = {
@@ -276,104 +232,7 @@ export const GenealogyEngine = {
     });
   },
 
-  inferGenerations(nodes: FamilyGraphNode[], edges: FamilyGraphEdge[]) {
-    const parentEdges = edges.filter(e => e.type === 'PARENT');
-    
-    const parentsOf = new Map<string, string[]>();
-    for (const e of parentEdges) {
-      if (!parentsOf.has(e.target)) parentsOf.set(e.target, []);
-      parentsOf.get(e.target)!.push(e.source);
-    }
 
-    // 1. Identify roots (nodes with no parents)
-    const roots = nodes.filter(n => !parentsOf.has(n.id) || parentsOf.get(n.id)!.length === 0);
-
-    const genMap = new Map<string, number>();
-    const visited = new Set<string>();
-    const queue: { id: string, gen: number }[] = [];
-    
-    // Sort roots for stable initialization
-    roots.sort((a, b) => a.id.localeCompare(b.id));
-
-    const childrenOf = new Map<string, string[]>();
-    const spousesOf = new Map<string, string[]>();
-    for (const e of edges) {
-      if (e.type === 'PARENT') {
-        if (!childrenOf.has(e.source)) childrenOf.set(e.source, []);
-        childrenOf.get(e.source)!.push(e.target);
-      } else if (e.type === 'SPOUSE') {
-        if (!spousesOf.has(e.source)) spousesOf.set(e.source, []);
-        if (!spousesOf.has(e.target)) spousesOf.set(e.target, []);
-        spousesOf.get(e.source)!.push(e.target);
-        spousesOf.get(e.target)!.push(e.source);
-      }
-    }
-
-    const runBFS = (startId: string, startGen: number) => {
-      queue.push({ id: startId, gen: startGen });
-      genMap.set(startId, startGen);
-      visited.add(startId);
-
-      while (queue.length > 0) {
-        const { id: curr, gen: currGen } = queue.shift()!;
-        
-        const spouses = spousesOf.get(curr) || [];
-        spouses.sort(); // Stable
-        for (const sp of spouses) {
-          if (!visited.has(sp)) {
-            visited.add(sp);
-            genMap.set(sp, currGen);
-            queue.push({ id: sp, gen: currGen });
-          } else {
-            // If spouse already visited, ensure they share the minimum generation
-            const existingGen = genMap.get(sp)!;
-            if (currGen < existingGen) {
-               genMap.set(sp, currGen);
-               queue.push({ id: sp, gen: currGen });
-            }
-          }
-        }
-
-        const children = childrenOf.get(curr) || [];
-        children.sort(); // Stable
-        for (const child of children) {
-          if (!visited.has(child)) {
-            visited.add(child);
-            genMap.set(child, currGen + 1);
-            queue.push({ id: child, gen: currGen + 1 });
-          } else {
-            // Ensure child is strictly below parent (DAG safety)
-            if (genMap.get(child)! <= currGen) {
-               genMap.set(child, currGen + 1);
-               queue.push({ id: child, gen: currGen + 1 });
-            }
-          }
-        }
-      }
-    };
-
-    // 1. Traverse from all known roots
-    for (const root of roots) {
-      if (!visited.has(root.id)) {
-        runBFS(root.id, 0);
-      }
-    }
-
-    // 2. Global BFS: Traverse any remaining disconnected nodes
-    for (const node of nodes) {
-      if (!visited.has(node.id)) {
-        runBFS(node.id, 0);
-      }
-    }
-
-    for (const n of nodes) {
-      let gen = genMap.get(n.id);
-      if (gen === undefined || gen === null || isNaN(gen)) {
-        gen = 0; // Fallback for orphans not caught by BFS roots
-      }
-      n.generation = gen;
-    }
-  },
 
   inferSiblings(nodes: FamilyGraphNode[], edges: FamilyGraphEdge[]): FamilyGraphEdge[] {
     const parentMap = new Map<string, Set<string>>();

@@ -33,11 +33,16 @@ export function useMemberMutations() {
         body: JSON.stringify({ ...input, treeId: input.treeId || activeTreeId }),
       });
       let data;
-    try {
-      data = await res.json();
-    } catch {
-      throw new Error("Server returned invalid response");
-    }
+      const contentType = res.headers.get('content-type');
+      try {
+        if (contentType && contentType.includes('application/json')) {
+          data = await res.json();
+        } else {
+          data = { success: false, message: "Server returned a non-JSON response" };
+        }
+      } catch {
+        throw new Error("Server returned invalid response");
+      }
       if (!res.ok || !data.success) throw new Error(data.message || 'Failed to create member');
       return data.data;
     },
@@ -60,11 +65,16 @@ export function useMemberMutations() {
         body: JSON.stringify(input),
       });
       let data;
-    try {
-      data = await res.json();
-    } catch {
-      throw new Error("Server returned invalid response");
-    }
+      const contentType = res.headers.get('content-type');
+      try {
+        if (contentType && contentType.includes('application/json')) {
+          data = await res.json();
+        } else {
+          data = { success: false, message: "Server returned a non-JSON response" };
+        }
+      } catch {
+        throw new Error("Server returned invalid response");
+      }
       if (!res.ok || !data.success) throw new Error(data.message || 'Failed to update member');
       return data.data;
     },
@@ -84,11 +94,16 @@ export function useMemberMutations() {
         method: 'DELETE',
       });
       let data;
-    try {
-      data = await res.json();
-    } catch {
-      throw new Error("Server returned invalid response");
-    }
+      const contentType = res.headers.get('content-type');
+      try {
+        if (contentType && contentType.includes('application/json')) {
+          data = await res.json();
+        } else {
+          data = { success: false, message: "Server returned a non-JSON response" };
+        }
+      } catch {
+        throw new Error("Server returned invalid response");
+      }
       if (!res.ok || !data.success) throw new Error(data.message || 'Failed to delete member');
       return data.data;
     },

@@ -110,38 +110,18 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
                           selectedParent.relationsTo.find(r => r.type === 'SPOUSE');
         if (spouseRel) {
           const spouseId = spouseRel.fromId === id ? spouseRel.toId : spouseRel.fromId;
-          // Don't prompt if already in relations
+          // Automatically link child to both parents if they have a spouse
           if (!relations.some(r => r.id === spouseId && r.type === 'PARENT')) {
-            if (window.confirm("This member has a spouse. Should the child be linked to both parents?")) {
-              setRelations(prev => [...prev, { id, type }, { id: spouseId, type }]);
-              return;
-            }
+            setRelations(prev => [...prev, { id, type }, { id: spouseId, type }]);
+            return;
           }
         }
       }
     }
     if (type === 'CHILD') {
       // If we are adding a child to the current member, check if current member has a spouse
-      const currentSpouse = relations.find(r => r.type === 'SPOUSE');
-      if (currentSpouse) {
-        if (window.confirm("This member has a spouse. Should the child be linked to both parents?")) {
-          // In member-form, if the user agrees, the backend will automatically do it via smart rules
-          // We don't need to add the child to the spouse in the UI because the UI is only for the current member.
-          // Wait, if we are editing member A, we can't edit member B's relations directly here, but the backend will sync it!
-        } else {
-          // User said NO. We need a way to pass preventPropagation. For now, the backend automatically syncs.
-          // Since the instruction says "unless explicitly prevented", we will alert that this might be enforced.
-          // If we had time, we would pass preventPropagation: true.
-        }
-      } else if (member) {
-         // Existing member might have a spouse in DB
-         const spouseRel = member.relationsFrom.find(r => r.type === 'SPOUSE') || member.relationsTo.find(r => r.type === 'SPOUSE');
-         if (spouseRel) {
-           if (window.confirm("This member has a spouse. Should the child be linked to both parents?")) {
-             // Backend will handle it
-           }
-         }
-      }
+      // The backend automatically links the child to both parents if we link the child to this member.
+      // No extra UI logic needed here since the backend handles it.
     }
 
     setRelations(prev => [...prev, { id, type }]);

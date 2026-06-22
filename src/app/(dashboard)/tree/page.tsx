@@ -70,33 +70,43 @@ export default function TreePage() {
         <div className="absolute top-4 right-4 z-50">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 bg-background/80 backdrop-blur-md px-3 py-2 rounded-lg border shadow-sm text-sm hover:bg-accent hover:text-accent-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <button className="flex items-center gap-2 bg-background/90 backdrop-blur-md px-4 py-2.5 rounded-xl border border-border/50 shadow-sm text-sm hover:bg-accent/50 hover:text-accent-foreground transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <History className="w-4 h-4 text-muted-foreground" />
-                <span className="font-medium">
-                  {selectedTreeVersionId 
-                    ? versions.find((v: any) => v.id === selectedTreeVersionId)?.name || 'Historical Version'
-                    : 'Latest (Active)'}
-                </span>
-                <ChevronDown className="w-4 h-4 text-muted-foreground ml-1 opacity-50" />
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className="font-semibold leading-none">
+                    {selectedTreeVersionId 
+                      ? versions.find((v: any) => v.id === selectedTreeVersionId)?.name || 'Historical Version'
+                      : 'Latest (Active)'}
+                  </span>
+                  {selectedTreeVersionId && (
+                    <span className="text-[10px] text-muted-foreground leading-none">
+                      {new Date(versions.find((v: any) => v.id === selectedTreeVersionId)?.createdAt).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
+                <ChevronDown className="w-4 h-4 text-muted-foreground ml-2 opacity-50" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[240px]">
               <DropdownMenuItem 
                 onClick={() => setSelectedTreeVersionId(null)}
-                className="flex items-center justify-between cursor-pointer py-2"
+                className="flex items-center justify-between cursor-pointer py-2.5 px-3 rounded-md focus:bg-accent/50 transition-colors"
               >
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">Latest (Active)</span>
-                  <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] uppercase font-bold tracking-wider">Active</span>
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Latest (Active)</span>
+                    <span className="px-1.5 py-0.5 rounded-md bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] uppercase font-bold tracking-wider">Active</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">Current working version</span>
                 </div>
-                {!selectedTreeVersionId && <Check className="w-4 h-4 text-primary" />}
+                {!selectedTreeVersionId && <Check className="w-4 h-4 text-green-600 dark:text-green-400" />}
               </DropdownMenuItem>
-              <div className="h-px bg-border my-1" />
+              <div className="h-px bg-border/50 my-1.5 mx-2" />
               {versions.map((v: any) => (
                 <DropdownMenuItem 
                   key={v.id} 
                   onClick={() => setSelectedTreeVersionId(v.id)}
-                  className="flex items-center justify-between cursor-pointer py-2"
+                  className="flex items-center justify-between cursor-pointer py-2.5 px-3 rounded-md focus:bg-accent/50 transition-colors"
                 >
                   <div className="flex flex-col gap-0.5">
                     <span className="font-medium">{v.name || 'Snapshot'}</span>

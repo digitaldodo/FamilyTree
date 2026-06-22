@@ -290,6 +290,22 @@ export async function PUT(request: NextRequest, { params }: Params) {
               await tx.relationship.create({
                 data: { type: 'PARENT', fromId: id, toId: rel.id },
               });
+              
+              // Automatically link child to the current member's spouse
+              const spouses = await tx.relationship.findMany({
+                where: { type: 'SPOUSE', OR: [{ fromId: id }, { toId: id }] }
+              });
+              if (spouses.length > 0) {
+                const spouseId = spouses[0].fromId === id ? spouses[0].toId : spouses[0].fromId;
+                const spouseIsParent = await tx.relationship.findFirst({
+                  where: { type: 'PARENT', fromId: spouseId, toId: rel.id }
+                });
+                if (!spouseIsParent) {
+                  await tx.relationship.create({
+                    data: { type: 'PARENT', fromId: spouseId, toId: rel.id }
+                  });
+                }
+              }
             } else {
               const [id1, id2] = [id, rel.id].sort();
               await tx.relationship.create({

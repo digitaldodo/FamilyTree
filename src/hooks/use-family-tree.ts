@@ -24,7 +24,8 @@ export function useFamilyTree(treeId?: string) {
     const rawGraph = GenealogyEngine.buildFamilyGraph({
       treeId: treeId || activeTreeId || '',
       versionId: selectedTreeVersionId,
-      members: safeMembers
+      members: safeMembers,
+      generations: generations
     });
     return safeGraph(rawGraph);
   }, [rawMembers, treeId, activeTreeId, selectedTreeVersionId]);
