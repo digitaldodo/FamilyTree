@@ -34,13 +34,9 @@ export function useMemberMutations() {
       });
       let data;
     try {
-      try {
-        data = await res.json();
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
-    } catch (e) {
-      throw new Error("Invalid JSON response from server");
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
     }
       if (!res.ok || !data.success) throw new Error(data.message || 'Failed to create member');
       return data.data;
@@ -65,13 +61,9 @@ export function useMemberMutations() {
       });
       let data;
     try {
-      try {
-        data = await res.json();
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
-    } catch (e) {
-      throw new Error("Invalid JSON response from server");
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
     }
       if (!res.ok || !data.success) throw new Error(data.message || 'Failed to update member');
       return data.data;
@@ -93,13 +85,9 @@ export function useMemberMutations() {
       });
       let data;
     try {
-      try {
-        data = await res.json();
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
-    } catch (e) {
-      throw new Error("Invalid JSON response from server");
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
     }
       if (!res.ok || !data.success) throw new Error(data.message || 'Failed to delete member');
       return data.data;

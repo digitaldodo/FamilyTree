@@ -295,18 +295,6 @@ export const GenealogyEngine = {
     // Sort roots for stable initialization
     roots.sort((a, b) => a.id.localeCompare(b.id));
 
-    for (const root of roots) {
-      queue.push({ id: root.id, gen: 0 });
-      genMap.set(root.id, 0);
-      visited.add(root.id);
-    }
-
-    if (roots.length === 0 && nodes.length > 0) {
-      queue.push({ id: nodes[0].id, gen: 0 });
-      genMap.set(nodes[0].id, 0);
-      visited.add(nodes[0].id);
-    }
-
     const childrenOf = new Map<string, string[]>();
     const spousesOf = new Map<string, string[]>();
     for (const e of edges) {
@@ -321,40 +309,60 @@ export const GenealogyEngine = {
       }
     }
 
-    while (queue.length > 0) {
-      const { id: curr, gen: currGen } = queue.shift()!;
-      
-      const spouses = spousesOf.get(curr) || [];
-      spouses.sort(); // Stable
-      for (const sp of spouses) {
-        if (!visited.has(sp)) {
-          visited.add(sp);
-          genMap.set(sp, currGen);
-          queue.push({ id: sp, gen: currGen });
-        } else {
-          // If spouse already visited, ensure they share the minimum generation
-          const existingGen = genMap.get(sp)!;
-          if (currGen < existingGen) {
-             genMap.set(sp, currGen);
-             queue.push({ id: sp, gen: currGen });
+    const runBFS = (startId: string, startGen: number) => {
+      queue.push({ id: startId, gen: startGen });
+      genMap.set(startId, startGen);
+      visited.add(startId);
+
+      while (queue.length > 0) {
+        const { id: curr, gen: currGen } = queue.shift()!;
+        
+        const spouses = spousesOf.get(curr) || [];
+        spouses.sort(); // Stable
+        for (const sp of spouses) {
+          if (!visited.has(sp)) {
+            visited.add(sp);
+            genMap.set(sp, currGen);
+            queue.push({ id: sp, gen: currGen });
+          } else {
+            // If spouse already visited, ensure they share the minimum generation
+            const existingGen = genMap.get(sp)!;
+            if (currGen < existingGen) {
+               genMap.set(sp, currGen);
+               queue.push({ id: sp, gen: currGen });
+            }
+          }
+        }
+
+        const children = childrenOf.get(curr) || [];
+        children.sort(); // Stable
+        for (const child of children) {
+          if (!visited.has(child)) {
+            visited.add(child);
+            genMap.set(child, currGen + 1);
+            queue.push({ id: child, gen: currGen + 1 });
+          } else {
+            // Ensure child is strictly below parent (DAG safety)
+            if (genMap.get(child)! <= currGen) {
+               genMap.set(child, currGen + 1);
+               queue.push({ id: child, gen: currGen + 1 });
+            }
           }
         }
       }
+    };
 
-      const children = childrenOf.get(curr) || [];
-      children.sort(); // Stable
-      for (const child of children) {
-        if (!visited.has(child)) {
-          visited.add(child);
-          genMap.set(child, currGen + 1);
-          queue.push({ id: child, gen: currGen + 1 });
-        } else {
-          // Ensure child is strictly below parent (DAG safety)
-          if (genMap.get(child)! <= currGen) {
-             genMap.set(child, currGen + 1);
-             queue.push({ id: child, gen: currGen + 1 });
-          }
-        }
+    // 1. Traverse from all known roots
+    for (const root of roots) {
+      if (!visited.has(root.id)) {
+        runBFS(root.id, 0);
+      }
+    }
+
+    // 2. Global BFS: Traverse any remaining disconnected nodes
+    for (const node of nodes) {
+      if (!visited.has(node.id)) {
+        runBFS(node.id, 0);
       }
     }
 

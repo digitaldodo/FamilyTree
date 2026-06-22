@@ -6,15 +6,11 @@ export function useUserTrees() {
     queryKey: ['userTrees'],
     queryFn: async () => {
       const res = await fetch('/api/trees');
-      let json = null;
+      let json;
     try {
-      try {
-        json = await res.json();
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
-    } catch (e) {
-      throw new Error("Invalid server response");
+      json = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
     }
       if (!res.ok || !json.success) throw new Error(json.message);
       return json.data as TreeSummary[];

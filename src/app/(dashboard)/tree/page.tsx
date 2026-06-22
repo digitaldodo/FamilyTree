@@ -30,14 +30,10 @@ export default function TreePage() {
       const res = await fetch(`/api/trees/${activeTreeId}/versions`);
       let data;
       try {
-        try {
-          data = await res.json();
-        } catch (e) {
-          throw new Error("Invalid JSON response from server");
-        }
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
+    }
       return data;
     },
     enabled: !!activeTreeId,

@@ -23,14 +23,10 @@ export async function getMembers(
   if (!res.ok) throw new Error('Failed to fetch members');
   let data;
       try {
-        try {
-          data = await res.json();
-        } catch (e) {
-          throw new Error("Invalid JSON response from server");
-        }
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
+    }
       return data;
 }
 
@@ -42,14 +38,10 @@ export async function getMemberById(
   if (!res.ok) throw new Error('Failed to fetch member');
   let data;
       try {
-        try {
-          data = await res.json();
-        } catch (e) {
-          throw new Error("Invalid JSON response from server");
-        }
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
+    }
       return data;
 }
 
@@ -63,24 +55,20 @@ export async function createMember(
     body: JSON.stringify(input),
   });
   if (!res.ok) {
-    let err = null;
+    let err;
     try {
       err = await res.json();
-    } catch (e) {
-      throw new Error("Invalid server response");
+    } catch {
+      throw new Error("Server returned invalid response");
     }
     throw new Error(err.message || 'Failed to create member');
   }
   let data;
       try {
-        try {
-          data = await res.json();
-        } catch (e) {
-          throw new Error("Invalid JSON response from server");
-        }
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
+    }
       return data;
 }
 
@@ -95,24 +83,20 @@ export async function updateMember(
     body: JSON.stringify(input),
   });
   if (!res.ok) {
-    let err = null;
+    let err;
     try {
       err = await res.json();
-    } catch (e) {
-      throw new Error("Invalid server response");
+    } catch {
+      throw new Error("Server returned invalid response");
     }
     throw new Error(err.message || 'Failed to update member');
   }
   let data;
       try {
-        try {
-          data = await res.json();
-        } catch (e) {
-          throw new Error("Invalid JSON response from server");
-        }
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
+    }
       return data;
 }
 

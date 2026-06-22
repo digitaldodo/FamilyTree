@@ -26,26 +26,18 @@ export default function InviteAcceptPage({ params }: { params: Promise<{ token: 
         if (!res.ok) {
           let data: any = {};
           try {
-            try {
-              data = await res.json();
-            } catch (e) {
-              throw new Error("Invalid JSON response from server");
-            }
-          } catch (e) {
-            // ignore
-          }
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
+    }
           throw new Error(data.error || 'Invalid or expired invite link');
         }
 
         let data;
     try {
-      try {
-        data = await res.json();
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
-    } catch (e) {
-      throw new Error("Invalid JSON response from server");
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
     }
         setTreeName(data.treeName || 'Family Tree');
         setStatus('success');

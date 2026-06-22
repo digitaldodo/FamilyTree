@@ -32,13 +32,9 @@ export function ShareTreeButton({ treeId, isPublic: initialPublic, onTogglePubli
       });
       let data;
     try {
-      try {
-        data = await res.json();
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
-    } catch (e) {
-      throw new Error("Invalid JSON response from server");
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
     }
       if (!data.success) throw new Error('Failed to update sharing settings');
       return newIsPublic;

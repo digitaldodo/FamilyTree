@@ -58,14 +58,10 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
       if (!res.ok) throw new Error('Failed to delete member');
       let data;
       try {
-        try {
-          data = await res.json();
-        } catch (e) {
-          throw new Error("Invalid JSON response from server");
-        }
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
+    }
       return data;
     },
     onSuccess: () => {

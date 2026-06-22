@@ -19,15 +19,11 @@ export function useGenerations(treeId?: string) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, insertAt }),
       });
-      let json = null;
+      let json;
     try {
-      try {
-        json = await res.json();
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
-    } catch (e) {
-      throw new Error("Invalid server response");
+      json = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
     }
       if (!res.ok || !json.success) throw new Error(json.message || 'Failed to create generation');
       return json.data;
@@ -48,15 +44,11 @@ export function useGenerations(treeId?: string) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name }),
       });
-      let json = null;
+      let json;
     try {
-      try {
-        json = await res.json();
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
-    } catch (e) {
-      throw new Error("Invalid server response");
+      json = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
     }
       if (!res.ok || !json.success) throw new Error(json.message || 'Failed to rename generation');
       return json.data;
@@ -81,15 +73,11 @@ export function useGenerations(treeId?: string) {
       const res = await fetch(`/api/generations/${id}${queryString}`, {
         method: 'DELETE',
       });
-      let json = null;
+      let json;
     try {
-      try {
-        json = await res.json();
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
-    } catch (e) {
-      throw new Error("Invalid server response");
+      json = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
     }
       if (!res.ok || !json.success) throw new Error(json.message || 'Failed to delete generation');
       return json.data;
@@ -110,15 +98,11 @@ export function useGenerations(treeId?: string) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ direction }),
       });
-      let json = null;
+      let json;
     try {
-      try {
-        json = await res.json();
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
-    } catch (e) {
-      throw new Error("Invalid server response");
+      json = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
     }
       if (!res.ok || !json.success) throw new Error(json.message || 'Failed to move generation');
       return json.data;

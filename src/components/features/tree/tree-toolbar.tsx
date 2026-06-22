@@ -31,13 +31,9 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
       const res = await fetch(`/api/trees/${resolvedTreeId}/repair`, { method: 'POST' });
       let data;
     try {
-      try {
-        data = await res.json();
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
-    } catch (e) {
-      throw new Error("Invalid JSON response from server");
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
     }
       if (!res.ok) throw new Error(data.message || 'Unknown error');
       return data.data;

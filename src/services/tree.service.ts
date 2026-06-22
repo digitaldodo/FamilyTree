@@ -23,14 +23,10 @@ export async function getTrees(
   if (!res.ok) throw new Error('Failed to fetch trees');
   let data;
       try {
-        try {
-          data = await res.json();
-        } catch (e) {
-          throw new Error("Invalid JSON response from server");
-        }
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
+    }
       return data;
 }
 
@@ -42,14 +38,10 @@ export async function getTreeById(
   if (!res.ok) throw new Error('Failed to fetch tree');
   let data;
       try {
-        try {
-          data = await res.json();
-        } catch (e) {
-          throw new Error("Invalid JSON response from server");
-        }
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
+    }
       return data;
 }
 
@@ -63,24 +55,20 @@ export async function createTree(
     body: JSON.stringify(input),
   });
   if (!res.ok) {
-    let err = null;
+    let err;
     try {
       err = await res.json();
-    } catch (e) {
-      throw new Error("Invalid server response");
+    } catch {
+      throw new Error("Server returned invalid response");
     }
     throw new Error(err.message || 'Failed to create tree');
   }
   let data;
       try {
-        try {
-          data = await res.json();
-        } catch (e) {
-          throw new Error("Invalid JSON response from server");
-        }
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
+    }
       return data;
 }
 
@@ -95,24 +83,20 @@ export async function updateTree(
     body: JSON.stringify(input),
   });
   if (!res.ok) {
-    let err = null;
+    let err;
     try {
       err = await res.json();
-    } catch (e) {
-      throw new Error("Invalid server response");
+    } catch {
+      throw new Error("Server returned invalid response");
     }
     throw new Error(err.message || 'Failed to update tree');
   }
   let data;
       try {
-        try {
-          data = await res.json();
-        } catch (e) {
-          throw new Error("Invalid JSON response from server");
-        }
-      } catch (e) {
-        throw new Error("Invalid JSON response from server");
-      }
+      data = await res.json();
+    } catch {
+      throw new Error("Server returned invalid response");
+    }
       return data;
 }
 

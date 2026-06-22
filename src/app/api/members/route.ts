@@ -100,14 +100,10 @@ export async function POST(request: NextRequest) {
         payload: body,
       });
 
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Validation failed',
-          errors: validation.error.flatten(),
-          payload: body,
-        },
-        { status: 400 }
+      return errorResponse(
+        'VALIDATION_ERROR',
+        `Validation failed: ${Object.values(validation.error.flatten().fieldErrors).flat().join(', ')}`,
+        400
       );
     }
 

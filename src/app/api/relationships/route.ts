@@ -25,9 +25,10 @@ export async function POST(request: NextRequest) {
     const validation = createRelationshipSchema.safeParse(body);
 
     if (!validation.success) {
-      return NextResponse.json(
-        { success: false, message: 'Validation failed', errors: validation.error.flatten() },
-        { status: 400 }
+      return errorResponse(
+        'VALIDATION_ERROR',
+        `Validation failed: ${Object.values(validation.error.flatten().fieldErrors).flat().join(', ')}`,
+        400
       );
     }
 
