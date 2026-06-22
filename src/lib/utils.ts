@@ -9,8 +9,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+import { NextResponse } from 'next/server';
+
 export function successResponse(data: any, message = 'Operation successful', status = 200) {
-  return Response.json({ success: true, data, message }, { status });
+  return NextResponse.json({ success: true, data, message }, { status });
 }
 
 export function constructMetadata({
@@ -50,12 +52,12 @@ export function errorResponse(messageOrCode: string = 'Unknown error', detailsOr
     status = detailsOrMessage;
   }
 
-  return Response.json({ success: false, error }, { status });
+  return NextResponse.json({ success: false, message: error, error }, { status });
 }
 
 export function listResponse(data: any[], totalOrMeta?: number | any, page?: number, limit?: number) {
   const meta = typeof totalOrMeta === 'number' ? { total: totalOrMeta, page, limit } : totalOrMeta;
-  return Response.json({ success: true, data, meta }, { status: 200 });
+  return NextResponse.json({ success: true, data, meta }, { status: 200 });
 }
 
 export function parsePagination(searchParams: URLSearchParams) {
