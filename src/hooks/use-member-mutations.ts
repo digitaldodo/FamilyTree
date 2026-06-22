@@ -67,20 +67,20 @@ export function useMemberMutations() {
       let data;
       try {
         const text = await res.text();
-        data = text ? JSON.parse(text) : {};
+        data = text ? JSON.parse(text) : { success: false, message: "Empty response" };
       } catch (err) {
         throw new Error("Invalid JSON response from server");
       }
-      if (!res.ok) throw new Error(data?.message || 'Failed to update member');
+      if (!res.ok) throw new Error(data?.message || "Update failed");
       return data;
     },
     onSuccess: (data) => {
       if (!data?.success) {
-        toast.error(data?.message || 'Failed to update member');
+        toast.error(data?.message || "Update failed");
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
-      toast.success(data.message || 'Member updated successfully');
+      toast.success(data.message || "Member updated successfully");
       setIsEditingMember(false);
     },
     onError: (error: any) => {

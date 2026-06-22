@@ -361,13 +361,25 @@ export async function PUT(request: NextRequest, { params }: Params) {
     }
 
     if (!freshMember) {
-      return errorResponse('FETCH_ERROR', 'No data returned', 500);
+      return NextResponse.json({
+        success: false,
+        message: "No data returned",
+        error: "FETCH_ERROR"
+      }, { status: 500 });
     }
 
-    return successResponse(freshMember, 'Member updated successfully');
-  } catch (error) {
+    return NextResponse.json({
+      success: true,
+      message: "Member updated successfully",
+      data: freshMember
+    }, { status: 200 });
+  } catch (error: any) {
     console.error('[MEMBER_UPDATE_ERROR]', error);
-    return errorResponse('UPDATE_ERROR', getErrorMessage(error), 500);
+    return NextResponse.json({
+      success: false,
+      message: error.message || "Update failed",
+      error: error.toString()
+    }, { status: 500 });
   }
 }
 
