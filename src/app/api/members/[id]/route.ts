@@ -337,11 +337,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
       console.log("UPDATE NEVER OCCURRED");
     }
 
-    // POST-SAVE VERIFICATION
-    const verifyMember = await prisma.member.findUnique({ where: { id } });
-    if (!verifyMember || verifyMember.firstName !== body.firstName) { // simple check
-      return errorResponse('UPDATE_FAILED', 'Database update confirmed failed', 500);
-    }
 
     RelationshipEngine.invalidateCache(existing.treeId, [id]);
 

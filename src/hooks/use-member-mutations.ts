@@ -39,17 +39,21 @@ export function useMemberMutations() {
       } catch (err) {
         throw new Error("Invalid JSON response from server");
       }
-      if (!res.ok || !data.success) throw new Error(data?.message || 'Failed to create member');
-      return data.data;
+      if (!res.ok) throw new Error(data?.message || 'Failed to create member');
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (!data?.success) {
+        toast.error(data?.message || 'Failed to create member');
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
-      toast.success('Member created successfully');
+      toast.success(data.message || 'Member created successfully');
       setIsEditingMember(false);
       setIsMemberModalOpen(false);
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to create member');
+      toast.error(error.message || 'Network error occurred');
     }
   });
 
@@ -67,16 +71,20 @@ export function useMemberMutations() {
       } catch (err) {
         throw new Error("Invalid JSON response from server");
       }
-      if (!res.ok || !data.success) throw new Error(data?.message || 'Failed to update member');
-      return data.data;
+      if (!res.ok) throw new Error(data?.message || 'Failed to update member');
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (!data?.success) {
+        toast.error(data?.message || 'Failed to update member');
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
-      toast.success('Member updated successfully');
+      toast.success(data.message || 'Member updated successfully');
       setIsEditingMember(false);
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to update member');
+      toast.error(error.message || 'Network error occurred');
     }
   });
 
@@ -92,17 +100,21 @@ export function useMemberMutations() {
       } catch (err) {
         throw new Error("Invalid JSON response from server");
       }
-      if (!res.ok || !data.success) throw new Error(data?.message || 'Failed to delete member');
-      return data.data;
+      if (!res.ok) throw new Error(data?.message || 'Failed to delete member');
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (!data?.success) {
+        toast.error(data?.message || 'Failed to delete member');
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
-      toast.success('Member deleted successfully');
+      toast.success(data.message || 'Member deleted successfully');
       setIsEditingMember(false);
       setIsMemberModalOpen(false);
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to delete member');
+      toast.error(error.message || 'Network error occurred');
     }
   });
 
