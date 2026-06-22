@@ -92,8 +92,9 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
 
   const handleAddRelation = (id: string, type: 'PARENT' | 'CHILD' | 'SPOUSE') => {
     if (type === 'SPOUSE') {
-      // Replace existing spouse to enforce single spouse rule
-      setRelations(prev => [...prev.filter(r => r.type !== 'SPOUSE'), { id, type }]);
+      const spouseCount = relations.filter(r => r.type === 'SPOUSE').length;
+      if (spouseCount >= 1) return;
+      setRelations(prev => [...prev, { id, type }]);
       return;
     }
     if (type === 'PARENT') {

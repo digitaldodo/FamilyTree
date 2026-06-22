@@ -35,11 +35,12 @@ export function useMemberMutations() {
       let data;
       try {
         const text = await res.text();
-        data = text ? JSON.parse(text) : {};
+        if (!text) throw new Error("Empty response from server");
+        data = JSON.parse(text);
       } catch (err) {
         throw new Error("Invalid JSON response from server");
       }
-      if (!res.ok) throw new Error(data?.message || 'Failed to create member');
+      if (!res.ok || !data?.success) throw new Error(data?.message || 'Failed to create member');
       return data;
     },
     onSuccess: (data) => {
@@ -67,11 +68,15 @@ export function useMemberMutations() {
       let data;
       try {
         const text = await res.text();
-        data = text ? JSON.parse(text) : { success: false, message: "Empty response" };
+        if (!text) throw new Error("Empty response from server");
+        data = JSON.parse(text);
       } catch (err) {
         throw new Error("Invalid JSON response from server");
       }
-      if (!res.ok) throw new Error(data?.message || "Update failed");
+      if (!res.ok || !data?.success) throw new Error(data?.message || "Update failed");
+      
+      // If it's a success, compare before and after?
+      // It's handled by server returning success: false if validation fails.
       return data;
     },
     onSuccess: (data) => {
@@ -96,11 +101,12 @@ export function useMemberMutations() {
       let data;
       try {
         const text = await res.text();
-        data = text ? JSON.parse(text) : {};
+        if (!text) throw new Error("Empty response from server");
+        data = JSON.parse(text);
       } catch (err) {
         throw new Error("Invalid JSON response from server");
       }
-      if (!res.ok) throw new Error(data?.message || 'Failed to delete member');
+      if (!res.ok || !data?.success) throw new Error(data?.message || 'Failed to delete member');
       return data;
     },
     onSuccess: (data) => {

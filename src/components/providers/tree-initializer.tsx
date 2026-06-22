@@ -8,20 +8,11 @@ export function TreeInitializer() {
   const { activeTreeId, setActiveTreeId, setIsInitializingTrees } = useAppStore();
   const { userTrees, isLoading } = useUserTrees();
   const hasInitialized = useRef(false);
-  const [initialized, setInitialized] = useState(false);
 
-  // 1. Single-run initialization for the layout loop fix
   useEffect(() => {
-    if (initialized) return;
-    setIsInitializingTrees(true);
-    setInitialized(true);
-    console.count("init-loop"); // Temporary log per prompt
-  }, [initialized, setIsInitializingTrees]);
-
-  // 2. Separate effect for handling userTrees data loading
-  useEffect(() => {
-    // Only process trees when loading is complete
-    if (!isLoading) {
+    if (isLoading) {
+      setIsInitializingTrees(true);
+    } else {
       setIsInitializingTrees(false);
       
       if (userTrees && !hasInitialized.current) {

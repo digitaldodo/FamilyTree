@@ -49,22 +49,11 @@ function FamilyTreeCanvas() {
   
   const [nodes, setNodes, onNodesChange] = useNodesState(rendererNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(rendererEdges);
-  const [showDiagnostics, setShowDiagnostics] = React.useState(false);
 
   React.useEffect(() => {
     setNodes(rendererNodes);
     setEdges(rendererEdges);
   }, [rendererNodes, rendererEdges, setNodes, setEdges]);
-
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '`' && !e.ctrlKey && !e.metaKey) {
-        setShowDiagnostics(prev => !prev);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => {
@@ -180,43 +169,6 @@ function FamilyTreeCanvas() {
           </>
         )}
         
-
-
-        {showDiagnostics && (
-          <Panel position="top-left" className="bg-black/80 backdrop-blur-md p-4 rounded-xl text-white font-mono text-xs z-50 min-w-[200px] max-w-sm max-h-[80vh] overflow-y-auto border border-white/20 shadow-2xl">
-            <div className="flex items-center gap-2 mb-3 border-b border-white/20 pb-2">
-              <Activity className="w-4 h-4 text-emerald-400" />
-              <strong className="text-sm">Tree Diagnostics</strong>
-            </div>
-            <div className="flex flex-col gap-2">
-              <div className="flex justify-between"><span>Members:</span> <span>{treeMembers.length}</span></div>
-              <div className="flex justify-between"><span>Generations:</span> <span>{generations.length}</span></div>
-              <div className="flex justify-between"><span>Nodes:</span> <span>{nodes.length}</span></div>
-              <div className="flex justify-between"><span>Edges:</span> <span>{edges.length}</span></div>
-              <div className="flex justify-between"><span>Relationships:</span> <span>{treeMembers.reduce((acc, m) => acc + m.relationsFrom.length + m.relationsTo.length, 0) / 2}</span></div>
-              <div className="flex justify-between"><span>Photos Loaded:</span> <span className={treeMembers.some(m => m.imageUrl) ? 'text-emerald-400' : 'text-amber-400'}>{treeMembers.filter(m => m.imageUrl).length}</span></div>
-            </div>
-            {(() => {
-              const { errors: warnings } = GenealogyEngine.validateFamilyGraph(familyGraph);
-              if (warnings.length > 0) {
-                return (
-                  <div className="mt-4 border-t border-rose-500/50 pt-2">
-                    <strong className="text-rose-400 block mb-2">Graph Warnings ({warnings.length}):</strong>
-                    <ul className="text-rose-300 space-y-1 list-disc pl-4 text-[10px]">
-                      {warnings.map((w: string, i: number) => <li key={i}>{w}</li>)}
-                    </ul>
-                  </div>
-                );
-              }
-              return (
-                <div className="mt-4 border-t border-emerald-500/50 pt-2 text-emerald-400">
-                  <strong>Graph Valid</strong>
-                </div>
-              );
-            })()}
-            <div className="mt-3 text-[10px] text-white/50 text-center pt-2 border-t border-white/20">Press ` to hide</div>
-          </Panel>
-        )}
       </ReactFlow>
     </div>
   );

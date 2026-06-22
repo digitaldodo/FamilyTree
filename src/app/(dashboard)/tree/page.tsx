@@ -78,11 +78,11 @@ export default function TreePage() {
                       ? versions.find((v: any) => v.id === selectedTreeVersionId)?.name || 'Historical Version'
                       : 'Latest (Active)'}
                   </span>
-                  {selectedTreeVersionId && (
-                    <span className="text-[10px] text-muted-foreground leading-none">
-                      {new Date(versions.find((v: any) => v.id === selectedTreeVersionId)?.createdAt).toLocaleDateString()}
-                    </span>
-                  )}
+                  <span className="text-[10px] text-muted-foreground leading-none">
+                    {selectedTreeVersionId 
+                      ? new Date(versions.find((v: any) => v.id === selectedTreeVersionId)?.createdAt).toLocaleDateString()
+                      : 'Current Working State'}
+                  </span>
                 </div>
                 <ChevronDown className="w-4 h-4 text-muted-foreground ml-2 opacity-50" />
               </button>

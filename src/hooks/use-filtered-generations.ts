@@ -4,9 +4,11 @@ import { Generation } from '@/types/member';
 export function useFilteredGenerations(generations: Generation[], selectedGenerationIds: string[]) {
   return useMemo(() => {
     const allGenerationIds = generations.map(g => g.id);
+    const validSelectedIds = selectedGenerationIds?.filter(id => allGenerationIds.includes(id)) || [];
+    
     const effectiveGenerations =
-      selectedGenerationIds?.length > 0
-        ? selectedGenerationIds
+      validSelectedIds.length > 0
+        ? validSelectedIds
         : allGenerationIds;
 
     return generations.filter(gen => effectiveGenerations.includes(gen.id));
