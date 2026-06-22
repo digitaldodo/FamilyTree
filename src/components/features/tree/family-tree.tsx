@@ -6,7 +6,6 @@ import {
   useNodesState,
   useEdgesState,
   ReactFlowProvider,
-  Panel,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -51,8 +50,16 @@ function FamilyTreeCanvas() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(rendererEdges);
 
   React.useEffect(() => {
-    setNodes(rendererNodes);
-    setEdges(rendererEdges);
+    setNodes((prevNodes) => {
+      if (prevNodes.length !== rendererNodes.length) return rendererNodes;
+      const isSame = prevNodes.every((n, i) => n.id === rendererNodes[i]?.id && n.position.x === rendererNodes[i]?.position.x && n.position.y === rendererNodes[i]?.position.y);
+      return isSame ? prevNodes : rendererNodes;
+    });
+    setEdges((prevEdges) => {
+      if (prevEdges.length !== rendererEdges.length) return rendererEdges;
+      const isSame = prevEdges.every((e, i) => e.id === rendererEdges[i]?.id);
+      return isSame ? prevEdges : rendererEdges;
+    });
   }, [rendererNodes, rendererEdges, setNodes, setEdges]);
 
   const [mounted, setMounted] = React.useState(false);
@@ -81,8 +88,7 @@ function FamilyTreeCanvas() {
     );
   }
 
-  const memberNodes = nodes.filter(n => n.type === 'member');
-  const isEmpty = memberNodes.length === 0;
+  const isEmpty = treeMembers.length === 0;
 
   return (
     <div className="w-full h-full relative">
@@ -140,7 +146,7 @@ function FamilyTreeCanvas() {
           <>
             <div className="absolute top-4 inset-x-4 z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pointer-events-none">
               <div className="pointer-events-auto w-full md:w-auto">
-                <FloatingFamilyStats totalMembers={memberNodes.length} generations={generations.length} />
+                <FloatingFamilyStats totalMembers={treeMembers.length} generations={generations.length} />
               </div>
               <div className="pointer-events-auto w-full md:w-auto flex justify-start md:justify-end overflow-x-hidden">
                 <div className="flex items-center gap-2 mr-4">

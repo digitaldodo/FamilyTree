@@ -18,12 +18,13 @@ export function useMembers(treeId?: string) {
         : `/api/trees/${resolvedTreeId}`;
         
       const res = await fetch(endpoint);
+      const text = await res.text();
       let json;
-    try {
-      json = await res.json();
-    } catch {
-      throw new Error("Server returned invalid response");
-    }
+      try {
+        json = JSON.parse(text);
+      } catch {
+        throw new Error("Invalid JSON response from server");
+      }
       if (!res.ok || !json.success) {
         throw new Error(json.message || 'Failed to load tree data');
       }

@@ -28,12 +28,13 @@ export default function TreePage() {
     queryKey: ['tree-versions', activeTreeId],
     queryFn: async () => {
       const res = await fetch(`/api/trees/${activeTreeId}/versions`);
+      const text = await res.text();
       let data;
       try {
-      data = await res.json();
-    } catch {
-      throw new Error("Server returned invalid response");
-    }
+        data = JSON.parse(text);
+      } catch {
+        throw new Error("Invalid JSON response from server");
+      }
       return data;
     },
     enabled: !!activeTreeId,
@@ -109,8 +110,7 @@ export default function TreePage() {
                   className="flex items-center justify-between cursor-pointer py-2.5 px-3 rounded-md focus:bg-accent/50 transition-colors"
                 >
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-medium">{v.name || 'Snapshot'}</span>
-                    <span className="text-xs text-muted-foreground">{new Date(v.createdAt).toLocaleDateString()}</span>
+                    <span className="font-medium">{`${v.name || 'Snapshot'} - ${new Date(v.createdAt).toISOString().split('T')[0]}`}</span>
                   </div>
                   {selectedTreeVersionId === v.id && <Check className="w-4 h-4 text-primary" />}
                 </DropdownMenuItem>

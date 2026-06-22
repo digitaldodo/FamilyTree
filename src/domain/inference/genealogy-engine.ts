@@ -56,23 +56,7 @@ export const GenealogyEngine = {
       members = Array.isArray(members) ? members : [];
       generations = Array.isArray(generations) ? generations : [];
       
-      const nodesMap = new Map<string, FamilyGraphNode>();
       const edges: FamilyGraphEdge[] = [];
-      
-      // 1. Initialize nodes
-      for (const m of members) {
-        const orderIndex = generations.find(g => g.id === m.generationId)?.orderIndex ?? 0;
-        nodesMap.set(m.id, {
-          id: m.id,
-          member: structuredClone(m),
-          generation: orderIndex,
-          layoutHints: {}
-        });
-      }
-
-      const nodes = Array.from(nodesMap.values());
-
-      // Extract basic edges (filter out any legacy SIBLING edges from DB)
       for (const m of members) {
         if (!m.relationsFrom) continue;
         for (const rel of m.relationsFrom) {
@@ -87,11 +71,66 @@ export const GenealogyEngine = {
         }
       }
 
-      // De-duplicate spouse edges
       const uniqueEdges = this.deduplicateSpouseEdges(edges);
+      
+      // BFS Generation Assignment
+      const parentEdges = uniqueEdges.filter(e => e.type === 'PARENT');
+      const inDegree = new Map<string, number>();
+      const childrenMap = new Map<string, string[]>();
+      
+      for (const m of members) {
+        inDegree.set(m.id, 0);
+        childrenMap.set(m.id, []);
+      }
+      
+      for (const e of parentEdges) {
+        childrenMap.get(e.source)?.push(e.target);
+        inDegree.set(e.target, (inDegree.get(e.target) || 0) + 1);
+      }
+      
+      const nodeGen = new Map<string, number>();
+      const queue: string[] = [];
+      
+      for (const m of members) {
+        if (inDegree.get(m.id) === 0) {
+          nodeGen.set(m.id, 0);
+          queue.push(m.id);
+        }
+      }
+      
+      while (queue.length > 0) {
+        const u = queue.shift()!;
+        const currentGen = nodeGen.get(u)!;
+        const children = childrenMap.get(u) || [];
+        for (const v of children) {
+          const nextGen = currentGen + 1;
+          if (!nodeGen.has(v)) {
+            nodeGen.set(v, nextGen);
+            queue.push(v);
+          } else {
+            nodeGen.set(v, Math.min(nodeGen.get(v)!, nextGen));
+          }
+        }
+      }
+      
+      for (const m of members) {
+        if (!nodeGen.has(m.id)) {
+           nodeGen.set(m.id, 0);
+        }
+      }
 
-      // 2. Derive Generational levels
-      // No longer needed, using DB orderIndex directly.
+      const nodesMap = new Map<string, FamilyGraphNode>();
+      // 1. Initialize nodes
+      for (const m of members) {
+        nodesMap.set(m.id, {
+          id: m.id,
+          member: structuredClone(m),
+          generation: nodeGen.get(m.id) || 0,
+          layoutHints: {}
+        });
+      }
+
+      const nodes = Array.from(nodesMap.values());
 
       // 3. Derive Siblings
       const siblingEdges = this.inferSiblings(nodes, uniqueEdges);
@@ -294,6 +333,21 @@ export const GenealogyEngine = {
     for (const e of edges) {
       if (e.type === 'SPOUSE') {
         union(e.source, e.target);
+      }
+    }
+
+    const parentMap = new Map<string, string[]>();
+    for (const e of edges) {
+      if (e.type === 'PARENT') {
+        if (!parentMap.has(e.target)) parentMap.set(e.target, []);
+        parentMap.get(e.target)!.push(e.source);
+      }
+    }
+    for (const parents of parentMap.values()) {
+      if (parents.length > 1) {
+        for (let i = 1; i < parents.length; i++) {
+          union(parents[0], parents[i]);
+        }
       }
     }
 
