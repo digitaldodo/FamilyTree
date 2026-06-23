@@ -68,9 +68,9 @@ export const useAppStore = create<AppState>()(
 
   // Multi-tree support
   activeTreeId: null,
-  setActiveTreeId: (id) => set({ activeTreeId: id }),
+  setActiveTreeId: (id) => set((state) => state.activeTreeId === id ? state : { activeTreeId: id }),
   isInitializingTrees: true,
-  setIsInitializingTrees: (isInit) => set({ isInitializingTrees: isInit }),
+  setIsInitializingTrees: (isInit) => set((state) => state.isInitializingTrees === isInit ? state : { isInitializingTrees: isInit }),
   selectedTreeVersionId: null,
   setSelectedTreeVersionId: (id) => set({ selectedTreeVersionId: id }),
 
