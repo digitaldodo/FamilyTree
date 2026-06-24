@@ -316,7 +316,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
         for (const rel of spouseAdds) {
           try {
-            await tx.relationship.create({ data: { type: rel.type, fromId: rel.fromId, toId: rel.toId } });
+            await tx.relationship.create({ data: { type: rel.type, fromId: rel.fromId, toId: rel.toId, treeId: existing.treeId } });
           } catch (e) {
             console.error('Spouse relationship create error', e);
           }
@@ -324,7 +324,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
         for (const rel of parentAdds) {
           try {
-            await tx.relationship.create({ data: { type: rel.type, fromId: rel.fromId, toId: rel.toId } });
+            await tx.relationship.create({ data: { type: rel.type, fromId: rel.fromId, toId: rel.toId, treeId: existing.treeId } });
 
             // Auto-link child to spouse if member is the parent
             if (rel.fromId === id) {
@@ -338,7 +338,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
                 });
                 if (!spouseIsParent) {
                   await tx.relationship.create({
-                    data: { type: 'PARENT', fromId: spouseId, toId: rel.toId }
+                    data: { type: 'PARENT', fromId: spouseId, toId: rel.toId, treeId: existing.treeId }
                   });
                 }
               }
@@ -368,9 +368,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
       console.log("UPDATE NEVER OCCURRED");
     }
 
-
-    RelationshipEngine.invalidateCache(existing.treeId, [id]);
-
+    // Cache invalidation removed
     // Re-fetch the member with full relations so the response has the complete updated state
     const freshMember = await prisma.member.findUnique({
       where: { id },
@@ -385,11 +383,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
       },
     });
 
-    try {
-      await createTreeSnapshot(existing.treeId, session.user.id, `Updated member ${freshMember?.firstName || id}`);
-    } catch (e) {
-      console.error('Failed to create tree snapshot', e);
-    }
+    // Auto snapshot removed
 
     if (!freshMember) {
       return NextResponse.json({
@@ -443,13 +437,8 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
       prisma.member.delete({ where: { id } }),
     ]);
 
-    RelationshipEngine.invalidateCache(existing.treeId, [id]);
-
-    try {
-      await createTreeSnapshot(existing.treeId, session.user.id, `Deleted member ${existing.firstName}`);
-    } catch (e) {
-      console.error('Failed to create tree snapshot', e);
-    }
+    // Cache invalidation removed
+    // Auto snapshot removed
 
     return successResponse({ id }, 'Member deleted successfully');
   } catch (error) {

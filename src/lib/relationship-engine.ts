@@ -9,13 +9,7 @@ export type MemberWithRelations = Member & {
 };
 
 export class RelationshipEngine {
-  /**
-   * Invalidates cached relationships using dependency paths.
-   */
-  static invalidateCache(treeId: string, changedMemberIds?: string[]) {
-    // Cache invalidation was previously used for inference cache.
-    // It's a no-op now as inference is purely client-side/in-memory on fetch.
-  }
+  // Cache invalidation is handled by React Query on the client side.
 
   /**
    * Conflict Matrix Validation

@@ -10,8 +10,7 @@ import { MemberAvatar } from './member-avatar';
 import { Dropdown } from '@/components/ui/dropdown';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { useMutation } from '@tanstack/react-query';
-import { useMembers } from '@/hooks/use-members';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface MemberCardProps {
   member: MemberWithRelations;
@@ -50,7 +49,7 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
     }
   };
 
-  const { fetchMembers } = useMembers();
+  const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -66,7 +65,7 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
     },
     onSuccess: () => {
       toast.success('Member deleted successfully');
-      fetchMembers();
+      queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
     },
     onError: () => {
       toast.error('Failed to delete member');
@@ -101,9 +100,6 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
             </button>
             <button className="flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={handleEdit}>
               <Pencil className="w-4 h-4 mr-2" /> Edit
-            </button>
-            <button className="flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={handleEdit}>
-              <ArrowRightLeft className="w-4 h-4 mr-2" /> Move Gen
             </button>
             <button className="flex items-center w-full px-4 py-2 text-left text-destructive hover:bg-muted" onClick={handleDelete}>
               <Trash2 className="w-4 h-4 mr-2" /> Delete

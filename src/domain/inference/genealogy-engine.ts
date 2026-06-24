@@ -178,7 +178,7 @@ export const GenealogyEngine = {
       for (const m of members) {
         nodesMap.set(m.id, {
           id: m.id,
-          member: structuredClone(m),
+          member: m,
           generation: nodeGen.get(m.id) || 0,
           layoutHints: {}
         });

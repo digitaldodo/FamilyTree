@@ -2,7 +2,7 @@ import prisma from './prisma';
 
 export async function createTreeSnapshot(treeId: string, userId: string, name?: string) {
   // Fetch current state
-  const [generations, members] = await Promise.all([
+  const [generations, members, relationships] = await Promise.all([
     prisma.generation.findMany({
       where: { treeId },
       orderBy: { orderIndex: 'asc' },
@@ -21,6 +21,9 @@ export async function createTreeSnapshot(treeId: string, userId: string, name?: 
         media: { select: { id: true, url: true, type: true } },
       },
     }),
+    prisma.relationship.findMany({
+      where: { treeId }
+    })
   ]);
 
   const membersWithRelations = members.map((m: any) => ({
@@ -34,7 +37,7 @@ export async function createTreeSnapshot(treeId: string, userId: string, name?: 
       treeId,
       name: name || null,
       membersData: JSON.stringify(membersWithRelations),
-      relationsData: JSON.stringify([]),
+      relationsData: JSON.stringify(relationships),
       gensData: JSON.stringify(generations),
       createdBy: userId,
     },

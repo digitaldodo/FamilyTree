@@ -106,11 +106,12 @@ model Relationship {
   type      RelationshipType
   fromId    String
   toId      String
-  treeId    String?
+  treeId    String
   createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
   from      Member           @relation("from", fields: [fromId], references: [id], onDelete: Cascade)
   to        Member           @relation("to", fields: [toId], references: [id], onDelete: Cascade)
-  tree      Tree?            @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  tree      Tree             @relation(fields: [treeId], references: [id], onDelete: Cascade)
 
   @@unique([fromId, toId, type])
   @@index([fromId])

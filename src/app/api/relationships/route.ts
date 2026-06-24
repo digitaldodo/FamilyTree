@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     }
 
     const newRel = await prisma.relationship.create({
-      data: { type, fromId, toId }
+      data: { type, fromId, toId, treeId: fromMember.treeId }
     });
 
     if (!newRel) {

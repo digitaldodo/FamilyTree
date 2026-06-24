@@ -249,6 +249,7 @@ export async function POST(request: NextRequest) {
                 type: 'PARENT',
                 fromId: rel.id,
                 toId: newMember.id,
+                treeId: treeId,
               },
             });
           } else if (rel.type === 'CHILD') {
@@ -257,6 +258,7 @@ export async function POST(request: NextRequest) {
                 type: 'PARENT',
                 fromId: newMember.id,
                 toId: rel.id,
+                treeId: treeId,
               },
             });
           } else {
@@ -266,6 +268,7 @@ export async function POST(request: NextRequest) {
                 type: rel.type,
                 fromId: id1,
                 toId: id2,
+                treeId: treeId,
               },
             });
           }
@@ -297,7 +300,7 @@ export async function POST(request: NextRequest) {
           });
           if (!spouseIsParent) {
             await prisma.relationship.create({
-              data: { type: 'PARENT', fromId: spouseId, toId: childRel.toId }
+              data: { type: 'PARENT', fromId: spouseId, toId: childRel.toId, treeId: treeId }
             });
           }
         }
@@ -313,11 +316,7 @@ export async function POST(request: NextRequest) {
       userId: session.user.id,
     });
 
-    try {
-      await createTreeSnapshot(treeId, session.user.id, `Added member ${newMember.firstName}`);
-    } catch (e) {
-      console.error('Failed to create tree snapshot', e);
-    }
+    // Auto snapshot removed
 
     if (!newMember) {
       return errorResponse('FETCH_ERROR', 'No data returned', 500);

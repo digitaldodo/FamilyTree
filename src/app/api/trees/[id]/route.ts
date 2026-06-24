@@ -72,20 +72,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
       })) : [],
     };
 
-    // Auto-wrap into v1 if no versions exist
-    const versionsCount = await prisma.treeVersion.count({ where: { treeId: id } });
-    if (versionsCount === 0) {
-      await prisma.treeVersion.create({
-        data: {
-          treeId: id,
-          name: "v1",
-          membersData: JSON.stringify(tree.members),
-          relationsData: JSON.stringify([]),
-          gensData: JSON.stringify(tree.generations),
-          createdBy: session.user.id
-        }
-      });
-    }
+    // Auto-create of version v1 removed as it violates GET idempotency and causes unnecessary writes.
 
     if (!tree) {
       return errorResponse('FETCH_ERROR', 'No data returned', 500);

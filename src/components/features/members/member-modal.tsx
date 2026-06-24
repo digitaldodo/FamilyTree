@@ -311,16 +311,13 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                             </div>
                           )
                         ) : (
-                          <MemoryGallery
-                            memberId={member.id}
-                            memories={memories}
-                            onUpload={async (_url, _publicId, _caption, _eventTag) => {
-                              toast.info('Memory uploading is coming soon!', { icon: '📸' });
-                            }}
-                            onDelete={async (_id) => {
-                              toast.info('Memory deletion is coming soon!', { icon: '🗑️' });
-                            }}
-                          />
+                          <div className="text-center py-8 bg-muted/30 rounded-xl border border-dashed border-border/50">
+                            <Camera className="w-8 h-8 text-muted-foreground/30 mx-auto mb-3" />
+                            <h4 className="text-sm font-medium text-foreground">Memory Uploads</h4>
+                            <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
+                              The memory upload feature is currently under construction. Check back soon!
+                            </p>
+                          </div>
                         )}
                       </div>
                     </div>

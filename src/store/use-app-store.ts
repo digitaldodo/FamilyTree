@@ -69,7 +69,7 @@ export const useAppStore = create<AppState>()(
   // Multi-tree support
   activeTreeId: null,
   setActiveTreeId: (id) => set((state) => state.activeTreeId === id ? state : { activeTreeId: id }),
-  isInitializingTrees: true,
+  isInitializingTrees: false,
   setIsInitializingTrees: (isInit) => set((state) => state.isInitializingTrees === isInit ? state : { isInitializingTrees: isInit }),
   selectedTreeVersionId: null,
   setSelectedTreeVersionId: (id) => set({ selectedTreeVersionId: id }),
@@ -83,7 +83,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'family-tree-storage',
-      partialize: (state) => ({ activeTreeId: state.activeTreeId, sidebarOpen: state.sidebarOpen }),
+      partialize: (state) => ({ sidebarOpen: state.sidebarOpen }),
     }
   )
 );

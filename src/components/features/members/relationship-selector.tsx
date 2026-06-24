@@ -61,9 +61,14 @@ export function RelationshipSelector({
   const isParentLimitReached = type === 'PARENT' && existingRelations.length >= 2;
   const isLimitReached = isParentLimitReached || isSpouseLimitReached;
 
-  // If no candidates exist and no existing relations, hide completely
+  // If no candidates exist and no existing relations, show disabled message
   if (existingRelations.length === 0 && validCandidates.length === 0) {
-    return null;
+    return (
+      <div className="space-y-2 border border-border p-3 rounded-lg bg-card text-card-foreground">
+        <h4 className="text-sm font-semibold">{label}</h4>
+        <p className="text-sm text-muted-foreground italic">No eligible {label.toLowerCase()} available.</p>
+      </div>
+    );
   }
 
   return (

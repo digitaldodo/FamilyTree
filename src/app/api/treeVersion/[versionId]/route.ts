@@ -39,9 +39,9 @@ export async function GET(_request: NextRequest, { params }: Params) {
     // Parse JSON data before returning
     const parsedVersion = {
       ...version,
-      membersData: typeof version.membersData === 'string' ? JSON.parse(version.membersData) : version.membersData,
-      relationsData: typeof version.relationsData === 'string' ? JSON.parse(version.relationsData) : version.relationsData,
-      gensData: typeof version.gensData === 'string' ? JSON.parse(version.gensData) : version.gensData,
+      members: typeof version.membersData === 'string' ? JSON.parse(version.membersData) : version.membersData,
+      relations: typeof version.relationsData === 'string' ? JSON.parse(version.relationsData) : version.relationsData,
+      generations: typeof version.gensData === 'string' ? JSON.parse(version.gensData) : version.gensData,
     };
 
     return successResponse(parsedVersion, 'Tree version retrieved successfully');

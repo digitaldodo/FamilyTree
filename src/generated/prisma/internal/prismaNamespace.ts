@@ -1573,7 +1573,8 @@ export const RelationshipScalarFieldEnum = {
   fromId: 'fromId',
   toId: 'toId',
   treeId: 'treeId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type RelationshipScalarFieldEnum = (typeof RelationshipScalarFieldEnum)[keyof typeof RelationshipScalarFieldEnum]

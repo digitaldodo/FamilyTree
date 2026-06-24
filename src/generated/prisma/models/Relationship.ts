@@ -31,6 +31,7 @@ export type RelationshipMinAggregateOutputType = {
   toId: string | null
   treeId: string | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type RelationshipMaxAggregateOutputType = {
@@ -40,6 +41,7 @@ export type RelationshipMaxAggregateOutputType = {
   toId: string | null
   treeId: string | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type RelationshipCountAggregateOutputType = {
@@ -49,6 +51,7 @@ export type RelationshipCountAggregateOutputType = {
   toId: number
   treeId: number
   createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -60,6 +63,7 @@ export type RelationshipMinAggregateInputType = {
   toId?: true
   treeId?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type RelationshipMaxAggregateInputType = {
@@ -69,6 +73,7 @@ export type RelationshipMaxAggregateInputType = {
   toId?: true
   treeId?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type RelationshipCountAggregateInputType = {
@@ -78,6 +83,7 @@ export type RelationshipCountAggregateInputType = {
   toId?: true
   treeId?: true
   createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -158,8 +164,9 @@ export type RelationshipGroupByOutputType = {
   type: $Enums.RelationshipType
   fromId: string
   toId: string
-  treeId: string | null
+  treeId: string
   createdAt: Date
+  updatedAt: Date
   _count: RelationshipCountAggregateOutputType | null
   _min: RelationshipMinAggregateOutputType | null
   _max: RelationshipMaxAggregateOutputType | null
@@ -188,11 +195,12 @@ export type RelationshipWhereInput = {
   type?: Prisma.EnumRelationshipTypeFilter<"Relationship"> | $Enums.RelationshipType
   fromId?: Prisma.StringFilter<"Relationship"> | string
   toId?: Prisma.StringFilter<"Relationship"> | string
-  treeId?: Prisma.StringNullableFilter<"Relationship"> | string | null
+  treeId?: Prisma.StringFilter<"Relationship"> | string
   createdAt?: Prisma.DateTimeFilter<"Relationship"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Relationship"> | Date | string
   from?: Prisma.XOR<Prisma.MemberScalarRelationFilter, Prisma.MemberWhereInput>
   to?: Prisma.XOR<Prisma.MemberScalarRelationFilter, Prisma.MemberWhereInput>
-  tree?: Prisma.XOR<Prisma.TreeNullableScalarRelationFilter, Prisma.TreeWhereInput> | null
+  tree?: Prisma.XOR<Prisma.TreeScalarRelationFilter, Prisma.TreeWhereInput>
 }
 
 export type RelationshipOrderByWithRelationInput = {
@@ -200,8 +208,9 @@ export type RelationshipOrderByWithRelationInput = {
   type?: Prisma.SortOrder
   fromId?: Prisma.SortOrder
   toId?: Prisma.SortOrder
-  treeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   from?: Prisma.MemberOrderByWithRelationInput
   to?: Prisma.MemberOrderByWithRelationInput
   tree?: Prisma.TreeOrderByWithRelationInput
@@ -216,11 +225,12 @@ export type RelationshipWhereUniqueInput = Prisma.AtLeast<{
   type?: Prisma.EnumRelationshipTypeFilter<"Relationship"> | $Enums.RelationshipType
   fromId?: Prisma.StringFilter<"Relationship"> | string
   toId?: Prisma.StringFilter<"Relationship"> | string
-  treeId?: Prisma.StringNullableFilter<"Relationship"> | string | null
+  treeId?: Prisma.StringFilter<"Relationship"> | string
   createdAt?: Prisma.DateTimeFilter<"Relationship"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Relationship"> | Date | string
   from?: Prisma.XOR<Prisma.MemberScalarRelationFilter, Prisma.MemberWhereInput>
   to?: Prisma.XOR<Prisma.MemberScalarRelationFilter, Prisma.MemberWhereInput>
-  tree?: Prisma.XOR<Prisma.TreeNullableScalarRelationFilter, Prisma.TreeWhereInput> | null
+  tree?: Prisma.XOR<Prisma.TreeScalarRelationFilter, Prisma.TreeWhereInput>
 }, "id" | "fromId_toId_type">
 
 export type RelationshipOrderByWithAggregationInput = {
@@ -228,8 +238,9 @@ export type RelationshipOrderByWithAggregationInput = {
   type?: Prisma.SortOrder
   fromId?: Prisma.SortOrder
   toId?: Prisma.SortOrder
-  treeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.RelationshipCountOrderByAggregateInput
   _max?: Prisma.RelationshipMaxOrderByAggregateInput
   _min?: Prisma.RelationshipMinOrderByAggregateInput
@@ -243,17 +254,19 @@ export type RelationshipScalarWhereWithAggregatesInput = {
   type?: Prisma.EnumRelationshipTypeWithAggregatesFilter<"Relationship"> | $Enums.RelationshipType
   fromId?: Prisma.StringWithAggregatesFilter<"Relationship"> | string
   toId?: Prisma.StringWithAggregatesFilter<"Relationship"> | string
-  treeId?: Prisma.StringNullableWithAggregatesFilter<"Relationship"> | string | null
+  treeId?: Prisma.StringWithAggregatesFilter<"Relationship"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Relationship"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Relationship"> | Date | string
 }
 
 export type RelationshipCreateInput = {
   id?: string
   type: $Enums.RelationshipType
   createdAt?: Date | string
+  updatedAt?: Date | string
   from: Prisma.MemberCreateNestedOneWithoutRelationsFromInput
   to: Prisma.MemberCreateNestedOneWithoutRelationsToInput
-  tree?: Prisma.TreeCreateNestedOneWithoutRelationshipsInput
+  tree: Prisma.TreeCreateNestedOneWithoutRelationshipsInput
 }
 
 export type RelationshipUncheckedCreateInput = {
@@ -261,17 +274,19 @@ export type RelationshipUncheckedCreateInput = {
   type: $Enums.RelationshipType
   fromId: string
   toId: string
-  treeId?: string | null
+  treeId: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RelationshipUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumRelationshipTypeFieldUpdateOperationsInput | $Enums.RelationshipType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   from?: Prisma.MemberUpdateOneRequiredWithoutRelationsFromNestedInput
   to?: Prisma.MemberUpdateOneRequiredWithoutRelationsToNestedInput
-  tree?: Prisma.TreeUpdateOneWithoutRelationshipsNestedInput
+  tree?: Prisma.TreeUpdateOneRequiredWithoutRelationshipsNestedInput
 }
 
 export type RelationshipUncheckedUpdateInput = {
@@ -279,8 +294,9 @@ export type RelationshipUncheckedUpdateInput = {
   type?: Prisma.EnumRelationshipTypeFieldUpdateOperationsInput | $Enums.RelationshipType
   fromId?: Prisma.StringFieldUpdateOperationsInput | string
   toId?: Prisma.StringFieldUpdateOperationsInput | string
-  treeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RelationshipCreateManyInput = {
@@ -288,14 +304,16 @@ export type RelationshipCreateManyInput = {
   type: $Enums.RelationshipType
   fromId: string
   toId: string
-  treeId?: string | null
+  treeId: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RelationshipUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumRelationshipTypeFieldUpdateOperationsInput | $Enums.RelationshipType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RelationshipUncheckedUpdateManyInput = {
@@ -303,8 +321,9 @@ export type RelationshipUncheckedUpdateManyInput = {
   type?: Prisma.EnumRelationshipTypeFieldUpdateOperationsInput | $Enums.RelationshipType
   fromId?: Prisma.StringFieldUpdateOperationsInput | string
   toId?: Prisma.StringFieldUpdateOperationsInput | string
-  treeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RelationshipListRelationFilter = {
@@ -330,6 +349,7 @@ export type RelationshipCountOrderByAggregateInput = {
   toId?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type RelationshipMaxOrderByAggregateInput = {
@@ -339,6 +359,7 @@ export type RelationshipMaxOrderByAggregateInput = {
   toId?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type RelationshipMinOrderByAggregateInput = {
@@ -348,6 +369,7 @@ export type RelationshipMinOrderByAggregateInput = {
   toId?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type RelationshipCreateNestedManyWithoutTreeInput = {
@@ -484,6 +506,7 @@ export type RelationshipCreateWithoutTreeInput = {
   id?: string
   type: $Enums.RelationshipType
   createdAt?: Date | string
+  updatedAt?: Date | string
   from: Prisma.MemberCreateNestedOneWithoutRelationsFromInput
   to: Prisma.MemberCreateNestedOneWithoutRelationsToInput
 }
@@ -494,6 +517,7 @@ export type RelationshipUncheckedCreateWithoutTreeInput = {
   fromId: string
   toId: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RelationshipCreateOrConnectWithoutTreeInput = {
@@ -530,24 +554,27 @@ export type RelationshipScalarWhereInput = {
   type?: Prisma.EnumRelationshipTypeFilter<"Relationship"> | $Enums.RelationshipType
   fromId?: Prisma.StringFilter<"Relationship"> | string
   toId?: Prisma.StringFilter<"Relationship"> | string
-  treeId?: Prisma.StringNullableFilter<"Relationship"> | string | null
+  treeId?: Prisma.StringFilter<"Relationship"> | string
   createdAt?: Prisma.DateTimeFilter<"Relationship"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Relationship"> | Date | string
 }
 
 export type RelationshipCreateWithoutFromInput = {
   id?: string
   type: $Enums.RelationshipType
   createdAt?: Date | string
+  updatedAt?: Date | string
   to: Prisma.MemberCreateNestedOneWithoutRelationsToInput
-  tree?: Prisma.TreeCreateNestedOneWithoutRelationshipsInput
+  tree: Prisma.TreeCreateNestedOneWithoutRelationshipsInput
 }
 
 export type RelationshipUncheckedCreateWithoutFromInput = {
   id?: string
   type: $Enums.RelationshipType
   toId: string
-  treeId?: string | null
+  treeId: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RelationshipCreateOrConnectWithoutFromInput = {
@@ -564,16 +591,18 @@ export type RelationshipCreateWithoutToInput = {
   id?: string
   type: $Enums.RelationshipType
   createdAt?: Date | string
+  updatedAt?: Date | string
   from: Prisma.MemberCreateNestedOneWithoutRelationsFromInput
-  tree?: Prisma.TreeCreateNestedOneWithoutRelationshipsInput
+  tree: Prisma.TreeCreateNestedOneWithoutRelationshipsInput
 }
 
 export type RelationshipUncheckedCreateWithoutToInput = {
   id?: string
   type: $Enums.RelationshipType
   fromId: string
-  treeId?: string | null
+  treeId: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RelationshipCreateOrConnectWithoutToInput = {
@@ -624,12 +653,14 @@ export type RelationshipCreateManyTreeInput = {
   fromId: string
   toId: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RelationshipUpdateWithoutTreeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumRelationshipTypeFieldUpdateOperationsInput | $Enums.RelationshipType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   from?: Prisma.MemberUpdateOneRequiredWithoutRelationsFromNestedInput
   to?: Prisma.MemberUpdateOneRequiredWithoutRelationsToNestedInput
 }
@@ -640,6 +671,7 @@ export type RelationshipUncheckedUpdateWithoutTreeInput = {
   fromId?: Prisma.StringFieldUpdateOperationsInput | string
   toId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RelationshipUncheckedUpdateManyWithoutTreeInput = {
@@ -648,70 +680,79 @@ export type RelationshipUncheckedUpdateManyWithoutTreeInput = {
   fromId?: Prisma.StringFieldUpdateOperationsInput | string
   toId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RelationshipCreateManyFromInput = {
   id?: string
   type: $Enums.RelationshipType
   toId: string
-  treeId?: string | null
+  treeId: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RelationshipCreateManyToInput = {
   id?: string
   type: $Enums.RelationshipType
   fromId: string
-  treeId?: string | null
+  treeId: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RelationshipUpdateWithoutFromInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumRelationshipTypeFieldUpdateOperationsInput | $Enums.RelationshipType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   to?: Prisma.MemberUpdateOneRequiredWithoutRelationsToNestedInput
-  tree?: Prisma.TreeUpdateOneWithoutRelationshipsNestedInput
+  tree?: Prisma.TreeUpdateOneRequiredWithoutRelationshipsNestedInput
 }
 
 export type RelationshipUncheckedUpdateWithoutFromInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumRelationshipTypeFieldUpdateOperationsInput | $Enums.RelationshipType
   toId?: Prisma.StringFieldUpdateOperationsInput | string
-  treeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RelationshipUncheckedUpdateManyWithoutFromInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumRelationshipTypeFieldUpdateOperationsInput | $Enums.RelationshipType
   toId?: Prisma.StringFieldUpdateOperationsInput | string
-  treeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RelationshipUpdateWithoutToInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumRelationshipTypeFieldUpdateOperationsInput | $Enums.RelationshipType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   from?: Prisma.MemberUpdateOneRequiredWithoutRelationsFromNestedInput
-  tree?: Prisma.TreeUpdateOneWithoutRelationshipsNestedInput
+  tree?: Prisma.TreeUpdateOneRequiredWithoutRelationshipsNestedInput
 }
 
 export type RelationshipUncheckedUpdateWithoutToInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumRelationshipTypeFieldUpdateOperationsInput | $Enums.RelationshipType
   fromId?: Prisma.StringFieldUpdateOperationsInput | string
-  treeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RelationshipUncheckedUpdateManyWithoutToInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumRelationshipTypeFieldUpdateOperationsInput | $Enums.RelationshipType
   fromId?: Prisma.StringFieldUpdateOperationsInput | string
-  treeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -723,9 +764,10 @@ export type RelationshipSelect<ExtArgs extends runtime.Types.Extensions.Internal
   toId?: boolean
   treeId?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   from?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
   to?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-  tree?: boolean | Prisma.Relationship$treeArgs<ExtArgs>
+  tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["relationship"]>
 
 export type RelationshipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -735,9 +777,10 @@ export type RelationshipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   toId?: boolean
   treeId?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   from?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
   to?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-  tree?: boolean | Prisma.Relationship$treeArgs<ExtArgs>
+  tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["relationship"]>
 
 export type RelationshipSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -747,9 +790,10 @@ export type RelationshipSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   toId?: boolean
   treeId?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   from?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
   to?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-  tree?: boolean | Prisma.Relationship$treeArgs<ExtArgs>
+  tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["relationship"]>
 
 export type RelationshipSelectScalar = {
@@ -759,23 +803,24 @@ export type RelationshipSelectScalar = {
   toId?: boolean
   treeId?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type RelationshipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "fromId" | "toId" | "treeId" | "createdAt", ExtArgs["result"]["relationship"]>
+export type RelationshipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "fromId" | "toId" | "treeId" | "createdAt" | "updatedAt", ExtArgs["result"]["relationship"]>
 export type RelationshipInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   from?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
   to?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-  tree?: boolean | Prisma.Relationship$treeArgs<ExtArgs>
+  tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
 }
 export type RelationshipIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   from?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
   to?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-  tree?: boolean | Prisma.Relationship$treeArgs<ExtArgs>
+  tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
 }
 export type RelationshipIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   from?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
   to?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-  tree?: boolean | Prisma.Relationship$treeArgs<ExtArgs>
+  tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
 }
 
 export type $RelationshipPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -783,15 +828,16 @@ export type $RelationshipPayload<ExtArgs extends runtime.Types.Extensions.Intern
   objects: {
     from: Prisma.$MemberPayload<ExtArgs>
     to: Prisma.$MemberPayload<ExtArgs>
-    tree: Prisma.$TreePayload<ExtArgs> | null
+    tree: Prisma.$TreePayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     type: $Enums.RelationshipType
     fromId: string
     toId: string
-    treeId: string | null
+    treeId: string
     createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["relationship"]>
   composites: {}
 }
@@ -1188,7 +1234,7 @@ export interface Prisma__RelationshipClient<T, Null = never, ExtArgs extends run
   readonly [Symbol.toStringTag]: "PrismaPromise"
   from<T extends Prisma.MemberDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MemberDefaultArgs<ExtArgs>>): Prisma.Prisma__MemberClient<runtime.Types.Result.GetResult<Prisma.$MemberPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   to<T extends Prisma.MemberDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MemberDefaultArgs<ExtArgs>>): Prisma.Prisma__MemberClient<runtime.Types.Result.GetResult<Prisma.$MemberPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  tree<T extends Prisma.Relationship$treeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Relationship$treeArgs<ExtArgs>>): Prisma.Prisma__TreeClient<runtime.Types.Result.GetResult<Prisma.$TreePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  tree<T extends Prisma.TreeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TreeDefaultArgs<ExtArgs>>): Prisma.Prisma__TreeClient<runtime.Types.Result.GetResult<Prisma.$TreePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1224,6 +1270,7 @@ export interface RelationshipFieldRefs {
   readonly toId: Prisma.FieldRef<"Relationship", 'String'>
   readonly treeId: Prisma.FieldRef<"Relationship", 'String'>
   readonly createdAt: Prisma.FieldRef<"Relationship", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"Relationship", 'DateTime'>
 }
     
 
@@ -1622,25 +1669,6 @@ export type RelationshipDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many Relationships to delete.
    */
   limit?: number
-}
-
-/**
- * Relationship.tree
- */
-export type Relationship$treeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Tree
-   */
-  select?: Prisma.TreeSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Tree
-   */
-  omit?: Prisma.TreeOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.TreeInclude<ExtArgs> | null
-  where?: Prisma.TreeWhereInput
 }
 
 /**

@@ -408,11 +408,6 @@ export type TreeScalarRelationFilter = {
   isNot?: Prisma.TreeWhereInput
 }
 
-export type TreeNullableScalarRelationFilter = {
-  is?: Prisma.TreeWhereInput | null
-  isNot?: Prisma.TreeWhereInput | null
-}
-
 export type TreeCreateNestedManyWithoutOwnerInput = {
   create?: Prisma.XOR<Prisma.TreeCreateWithoutOwnerInput, Prisma.TreeUncheckedCreateWithoutOwnerInput> | Prisma.TreeCreateWithoutOwnerInput[] | Prisma.TreeUncheckedCreateWithoutOwnerInput[]
   connectOrCreate?: Prisma.TreeCreateOrConnectWithoutOwnerInput | Prisma.TreeCreateOrConnectWithoutOwnerInput[]
@@ -507,12 +502,10 @@ export type TreeCreateNestedOneWithoutRelationshipsInput = {
   connect?: Prisma.TreeWhereUniqueInput
 }
 
-export type TreeUpdateOneWithoutRelationshipsNestedInput = {
+export type TreeUpdateOneRequiredWithoutRelationshipsNestedInput = {
   create?: Prisma.XOR<Prisma.TreeCreateWithoutRelationshipsInput, Prisma.TreeUncheckedCreateWithoutRelationshipsInput>
   connectOrCreate?: Prisma.TreeCreateOrConnectWithoutRelationshipsInput
   upsert?: Prisma.TreeUpsertWithoutRelationshipsInput
-  disconnect?: Prisma.TreeWhereInput | boolean
-  delete?: Prisma.TreeWhereInput | boolean
   connect?: Prisma.TreeWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.TreeUpdateToOneWithWhereWithoutRelationshipsInput, Prisma.TreeUpdateWithoutRelationshipsInput>, Prisma.TreeUncheckedUpdateWithoutRelationshipsInput>
 }

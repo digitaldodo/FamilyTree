@@ -123,7 +123,15 @@ function FamilyTreeCanvas() {
               <div className="flex flex-col gap-3">
                 <button 
                   onClick={() => {
-                    // Implement generation creation logic or open modal
+                    const name = prompt('Enter first generation name (e.g. Founders):');
+                    if (name) {
+                      // We don't have useGenerations directly imported here, but we can do a fetch
+                      fetch('/api/generations', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ treeId: activeTreeId, name })
+                      }).then(() => window.location.reload());
+                    }
                   }}
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 rounded-xl font-medium transition-colors"
                 >

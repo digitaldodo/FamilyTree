@@ -11,7 +11,7 @@ export function useMembers(treeId?: string) {
   const resolvedTreeId = treeId || activeTreeId;
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['tree', activeTreeId],
+    queryKey: ['tree', activeTreeId, selectedTreeVersionId || 'live'],
     queryFn: async () => {
       const endpoint = selectedTreeVersionId 
         ? `/api/treeVersion/${selectedTreeVersionId}` 
@@ -34,7 +34,7 @@ export function useMembers(treeId?: string) {
   });
 
   const members: MemberWithRelations[] = useMemo(() => {
-    const safeMembers = Array.isArray(data?.members) ? data.members : (Array.isArray(data?.membersData) ? data.membersData : []);
+    const safeMembers = Array.isArray(data?.members) ? data.members : [];
     return safeMembers.map((m: any) => ({
       ...m,
       relationsFrom: Array.isArray(m.relationsFrom) ? m.relationsFrom : [],
@@ -43,7 +43,7 @@ export function useMembers(treeId?: string) {
   }, [data]);
 
   const generations: Generation[] = useMemo(() => {
-    return Array.isArray(data?.generations) ? data.generations : (Array.isArray(data?.gensData) ? data.gensData : []);
+    return Array.isArray(data?.generations) ? data.generations : [];
   }, [data]);
 
   // Handled entirely by React Query now. No duplicate state in Zustand.

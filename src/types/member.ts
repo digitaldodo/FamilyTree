@@ -65,7 +65,7 @@ export interface UpdateMemberInput {
 /** Relationship between two members */
 export interface Relationship {
   id: string;
-  type: 'PARENT' | 'SPOUSE' | 'SIBLING';
+  type: 'PARENT' | 'SPOUSE';
   fromId: string;
   toId: string;
   createdAt: string;

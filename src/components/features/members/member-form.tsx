@@ -276,8 +276,8 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
               maxLength={10}
               {...register('birthDate')} 
               onChange={(e) => {
-                e.target.value = applyDateMask(e.target.value);
-                register('birthDate').onChange(e);
+                const masked = applyDateMask(e.target.value);
+                setValue('birthDate', masked, { shouldValidate: true, shouldDirty: true });
               }}
               className={errors.birthDate ? 'border-destructive pr-10' : 'pr-10'} 
             />
@@ -308,8 +308,8 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
                 maxLength={10}
                 {...register('deathDate')} 
                 onChange={(e) => {
-                  e.target.value = applyDateMask(e.target.value);
-                  register('deathDate').onChange(e);
+                  const masked = applyDateMask(e.target.value);
+                  setValue('deathDate', masked, { shouldValidate: true, shouldDirty: true });
                 }}
                 className={errors.deathDate ? 'border-destructive pr-10' : 'pr-10'} 
               />
