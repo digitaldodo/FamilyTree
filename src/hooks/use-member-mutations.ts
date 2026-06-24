@@ -3,6 +3,7 @@ import { useAppStore } from '@/store/use-app-store';
 import { CreateMemberInput, UpdateMemberInput } from '@/types/member';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTreeCollaboration } from './use-tree-collaboration';
 
 export function useMemberMutations(treeId?: string) {
   const setIsMemberModalOpen = useAppStore(s => s.setIsMemberModalOpen);
@@ -11,6 +12,9 @@ export function useMemberMutations(treeId?: string) {
   const resolvedTreeId = treeId || activeTreeId;
   const hasConflict = useAppStore(s => s.hasConflict);
   const isReadOnly = useAppStore(s => s.isReadOnly);
+  const selectedTreeVersionId = useAppStore(s => s.selectedTreeVersionId);
+  const addChangeEvent = useAppStore(s => s.addChangeEvent);
+  const { syncChanges } = useTreeCollaboration(resolvedTreeId, selectedTreeVersionId);
   
   const queryClient = useQueryClient();
 
@@ -44,12 +48,25 @@ export function useMemberMutations(treeId?: string) {
       if (!res.ok || !data?.success) throw new Error(data?.message || 'Failed to create member');
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (!data?.success) {
         toast.error(data?.message || 'Failed to create member');
         return;
       }
-      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
+      if (data.data) {
+        addChangeEvent({
+          id: crypto.randomUUID(),
+          treeId: resolvedTreeId || '',
+          versionId: selectedTreeVersionId || 'live',
+          userId: 'local',
+          timestamp: new Date().toISOString(),
+          type: 'ADD_MEMBER',
+          payload: { member: data.data, temporaryId: data.data.id }
+        } as any);
+        const synced = await syncChanges();
+        if (!synced) return;
+      }
+      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId, selectedTreeVersionId || 'live'] });
       toast.success(data.message || 'Member created successfully');
       setIsEditingMember(false);
       setIsMemberModalOpen(false);
@@ -80,12 +97,25 @@ export function useMemberMutations(treeId?: string) {
       // It's handled by server returning success: false if validation fails.
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (!data?.success) {
         toast.error(data?.message || "Update failed");
         return;
       }
-      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
+      if (data.data) {
+        addChangeEvent({
+          id: crypto.randomUUID(),
+          treeId: resolvedTreeId || '',
+          versionId: selectedTreeVersionId || 'live',
+          userId: 'local',
+          timestamp: new Date().toISOString(),
+          type: 'UPDATE_MEMBER',
+          payload: { memberId: data.data.id, changes: data.data }
+        } as any);
+        const synced = await syncChanges();
+        if (!synced) return;
+      }
+      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId, selectedTreeVersionId || 'live'] });
       toast.success(data.message || "Member updated successfully");
       setIsEditingMember(false);
     },
@@ -110,12 +140,23 @@ export function useMemberMutations(treeId?: string) {
       if (!res.ok || !data?.success) throw new Error(data?.message || 'Failed to delete member');
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data, id) => {
       if (!data?.success) {
         toast.error(data?.message || 'Failed to delete member');
         return;
       }
-      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
+      addChangeEvent({
+        id: crypto.randomUUID(),
+        treeId: resolvedTreeId || '',
+        versionId: selectedTreeVersionId || 'live',
+        userId: 'local',
+        timestamp: new Date().toISOString(),
+        type: 'DELETE_MEMBER',
+        payload: { memberId: id }
+      } as any);
+      const synced = await syncChanges();
+      if (!synced) return;
+      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId, selectedTreeVersionId || 'live'] });
       toast.success(data.message || 'Member deleted successfully');
       setIsEditingMember(false);
       setIsMemberModalOpen(false);

@@ -12,13 +12,13 @@ export function useTreeCollaboration(treeId: string | null, versionId: string | 
   const [isSyncing, setIsSyncing] = useState(false);
 
   const syncChanges = useCallback(async () => {
-    if (pendingChanges.length === 0 || isSyncing || hasConflict || !treeId) return;
+    if (pendingChanges.length === 0 || isSyncing || hasConflict || !treeId) return true;
 
     const validEvents = pendingChanges.filter(e => e && typeof e === 'object' && e.type && e.payload);
     
     if (validEvents.length === 0) {
       if (pendingChanges.length > 0) clearPendingChanges();
-      return;
+      return true;
     }
 
     setIsSyncing(true);
@@ -44,14 +44,17 @@ export function useTreeCollaboration(treeId: string | null, versionId: string | 
            setHasConflict(true);
            toast.error('Conflict detected with another user. Please refresh.');
         } else {
-           throw new Error(data.message || 'Sync failed');
+           toast.error(data.message || 'Sync failed');
         }
+        return false;
       } else {
         clearPendingChanges();
         queryClient.invalidateQueries({ queryKey: ['tree', treeId] });
+        return true;
       }
     } catch (error: any) {
       toast.error(error.message || 'Failed to sync changes');
+      return false;
     } finally {
       setIsSyncing(false);
     }

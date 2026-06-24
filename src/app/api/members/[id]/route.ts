@@ -51,9 +51,9 @@ export async function GET(_request: NextRequest, { params }: Params) {
     }
 
     return successResponse({ ...member }, 'Member retrieved successfully');
-  } catch (error) {
+  } catch (error: any) {
     console.error('[MEMBER_GET_ERROR]', error);
-    return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
+    return NextResponse.json({ success: false, message: error.message || 'Fetch failed' }, { status: 500 });
   }
 }
 
@@ -388,8 +388,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     if (!freshMember) {
       return NextResponse.json({
         success: false,
-        message: "No data returned",
-        error: "FETCH_ERROR"
+        message: "No data returned"
       }, { status: 500 });
     }
 
@@ -402,8 +401,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     console.error('[MEMBER_UPDATE_ERROR]', error);
     return NextResponse.json({
       success: false,
-      message: error.message || "Update failed",
-      error: error.toString()
+      message: error.message || "Update failed"
     }, { status: 500 });
   }
 }
@@ -441,8 +439,8 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     // Auto snapshot removed
 
     return successResponse({ id }, 'Member deleted successfully');
-  } catch (error) {
+  } catch (error: any) {
     console.error('[MEMBER_DELETE_ERROR]', error);
-    return errorResponse('DELETE_ERROR', getErrorMessage(error), 500);
+    return NextResponse.json({ success: false, message: error.message || "Delete failed" }, { status: 500 });
   }
 }

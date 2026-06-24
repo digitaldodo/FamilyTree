@@ -7,6 +7,7 @@ import { ChangeEvent } from '@/domain/collaboration/change-events';
 import { ConflictEngine } from '@/domain/collaboration/conflict-engine';
 import { MergeEngine } from '@/domain/collaboration/merge-engine';
 import { MemberWithRelations } from '@/types/member';
+import { createTreeSnapshot } from '@/lib/versioning';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -122,16 +123,14 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
 
     // Create New Version
-    const newVersion = await prisma.treeVersion.create({
-      data: {
-        treeId: id,
-        membersData: mergeResult.mergedMembers as any,
-        relationsData: mergedRelations as any,
-        gensData: baseGenerations as any,
-        createdBy: session.user.id,
-        name: `Merged ${safeEvents.length} change(s)`
-      }
-    });
+    const newVersion = await createTreeSnapshot(
+      id,
+      session.user.id,
+      `Merged ${safeEvents.length} change(s)`,
+      mergeResult.mergedMembers,
+      mergedRelations,
+      baseGenerations
+    );
 
     // Also update main tree updatedAt to trigger cache invalidations if needed
     await prisma.tree.update({

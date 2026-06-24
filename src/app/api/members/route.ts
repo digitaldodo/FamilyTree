@@ -51,17 +51,17 @@ export async function GET(request: NextRequest) {
     }
 
     return listResponse(members, total, page, limit);
-  } catch (error) {
+  } catch (error: any) {
      
     console.log('[API Debug] GET /api/members', {
       method: 'GET',
       url: request.url,
       status: 500,
       queryParams: Object.fromEntries(request.nextUrl.searchParams),
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
+      error: error.message || String(error),
+      stack: error.stack,
     });
-    return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
+    return NextResponse.json({ success: false, message: error.message || 'Fetch failed' }, { status: 500 });
   }
 }
 
@@ -312,15 +312,15 @@ export async function POST(request: NextRequest) {
     }
 
     return successResponse(newMember, 'Member created successfully', 201);
-  } catch (error) {
+  } catch (error: any) {
      
     console.log('[API Debug] POST /api/members error', {
       method: 'POST',
       url: request.url,
       status: 500,
-      error: error instanceof Error ? error.message : error,
-      stack: error instanceof Error ? error.stack : undefined,
+      error: error.message || error,
+      stack: error.stack,
     });
-    return errorResponse('CREATE_ERROR', getErrorMessage(error), 500);
+    return NextResponse.json({ success: false, message: error.message || 'Create failed' }, { status: 500 });
   }
 }
