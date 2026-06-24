@@ -55,7 +55,12 @@ export const GenealogyEngine = {
       let { members, generations } = payload;
       members = Array.isArray(members) ? members : [];
       generations = Array.isArray(generations) ? generations : [];
-      
+
+      const genMap = new Map<string, number>();
+      for (const g of generations) {
+        genMap.set(g.id, g.orderIndex);
+      }
+
       const edges: FamilyGraphEdge[] = [];
       for (const m of members) {
         if (!m.relationsFrom) continue;
@@ -73,54 +78,103 @@ export const GenealogyEngine = {
 
       const uniqueEdges = this.deduplicateSpouseEdges(edges);
       
-      // BFS Generation Assignment
+      // Assign generations using explicit DB generation first, then BFS for unassigned
       const parentEdges = uniqueEdges.filter(e => e.type === 'PARENT');
-      const inDegree = new Map<string, number>();
       const childrenMap = new Map<string, string[]>();
-      
-      for (const m of members) {
-        inDegree.set(m.id, 0);
-        childrenMap.set(m.id, []);
-      }
+      const parentMap = new Map<string, string[]>();
       
       for (const e of parentEdges) {
-        childrenMap.get(e.source)?.push(e.target);
-        inDegree.set(e.target, (inDegree.get(e.target) || 0) + 1);
+        childrenMap.get(e.source)?.push(e.target) ?? childrenMap.set(e.source, [e.target]);
+        parentMap.get(e.target)?.push(e.source) ?? parentMap.set(e.target, [e.source]);
       }
-      
+
       const nodeGen = new Map<string, number>();
-      const queue: string[] = [];
-      
+      const assigned = new Set<string>();
+
+      // Step 1: Assign explicit generations from database
       for (const m of members) {
-        if (inDegree.get(m.id) === 0) {
-          nodeGen.set(m.id, 0);
-          queue.push(m.id);
+        const explicitGen = m.generationId ? genMap.get(m.generationId) : undefined;
+        if (explicitGen !== undefined) {
+          nodeGen.set(m.id, explicitGen);
+          assigned.add(m.id);
         }
       }
-      
+
+      // Step 2: BFS from explicitly assigned nodes to propagate constraints
+      const queue: string[] = [...assigned];
+      const visited = new Set<string>();
+
       while (queue.length > 0) {
         const u = queue.shift()!;
+        if (visited.has(u)) continue;
+        visited.add(u);
+
         const currentGen = nodeGen.get(u)!;
         const children = childrenMap.get(u) || [];
+        const parents = parentMap.get(u) || [];
+
+        // Propagate to children (child = parent + 1)
         for (const v of children) {
-          const nextGen = currentGen + 1;
+          const expectedGen = currentGen + 1;
           if (!nodeGen.has(v)) {
-            nodeGen.set(v, nextGen);
+            nodeGen.set(v, expectedGen);
             queue.push(v);
-          } else {
-            nodeGen.set(v, Math.min(nodeGen.get(v)!, nextGen));
+          } else if (!assigned.has(v)) {
+            nodeGen.set(v, Math.max(nodeGen.get(v)!, expectedGen));
+            queue.push(v);
+          }
+        }
+
+        // Propagate to parents (parent = child - 1)
+        for (const v of parents) {
+          const expectedGen = currentGen - 1;
+          if (!nodeGen.has(v)) {
+            nodeGen.set(v, expectedGen);
+            queue.push(v);
+          } else if (!assigned.has(v)) {
+            nodeGen.set(v, Math.min(nodeGen.get(v)!, expectedGen));
+            queue.push(v);
           }
         }
       }
-      
+
+      // Step 3: Handle disconnected components - find roots (no parents) and assign gen 0
       for (const m of members) {
         if (!nodeGen.has(m.id)) {
-           nodeGen.set(m.id, 0);
+          const parents = parentMap.get(m.id) || [];
+          if (parents.length === 0) {
+            nodeGen.set(m.id, 0);
+            queue.push(m.id);
+          }
+        }
+      }
+
+      // Propagate from new roots
+      while (queue.length > 0) {
+        const u = queue.shift()!;
+        if (visited.has(u)) continue;
+        visited.add(u);
+
+        const currentGen = nodeGen.get(u)!;
+        const children = childrenMap.get(u) || [];
+        for (const v of children) {
+          const expectedGen = currentGen + 1;
+          if (!nodeGen.has(v)) {
+            nodeGen.set(v, expectedGen);
+            queue.push(v);
+          }
+        }
+      }
+
+      // Step 4: Final fallback for any remaining unassigned
+      for (const m of members) {
+        if (!nodeGen.has(m.id)) {
+          nodeGen.set(m.id, 0);
         }
       }
 
       const nodesMap = new Map<string, FamilyGraphNode>();
-      // 1. Initialize nodes
+      // 1. Initialize nodes with assigned generations
       for (const m of members) {
         nodesMap.set(m.id, {
           id: m.id,

@@ -14,7 +14,67 @@ export function alreadyRelated(memberA: MemberWithRelations, memberB: MemberWith
   const isSpouse = memberA.relationsFrom.some(r => r.toId === memberB.id && r.type === 'SPOUSE') ||
                    memberA.relationsTo.some(r => r.fromId === memberB.id && r.type === 'SPOUSE');
                    
-  return isParent || isChild || isSpouse;
+  const isSibling = memberA.relationsTo.some(rA => rA.type === 'PARENT' && 
+                    memberB.relationsTo.some(rB => rB.type === 'PARENT' && rB.fromId === rA.fromId));
+
+  return isParent || isChild || isSpouse || isSibling;
+}
+
+export function isSpouseEligible(genderA?: string | null, genderB?: string | null): boolean {
+  if (!genderA || !genderB) return true;
+  if (genderA === 'OTHER' || genderB === 'OTHER') return true;
+  if (genderA === 'MALE' && genderB !== 'FEMALE') return false;
+  if (genderA === 'FEMALE' && genderB !== 'MALE') return false;
+  return true;
+}
+
+export function validateRelationshipCore(
+  fromMember: MemberWithRelations,
+  toMember: MemberWithRelations,
+  type: 'PARENT' | 'SPOUSE',
+  fromGenOrder: number,
+  toGenOrder: number
+): { valid: boolean; error?: string } {
+  if (fromMember.id === toMember.id) {
+    return { valid: false, error: 'A member cannot be related to themselves.' };
+  }
+
+  if (fromMember.treeId !== toMember.treeId) {
+    return { valid: false, error: 'Members must belong to the same tree.' };
+  }
+
+  if (alreadyRelated(fromMember, toMember)) {
+    return { valid: false, error: 'Members already have an incompatible relationship or are siblings.' };
+  }
+
+  if (type === 'SPOUSE') {
+    if (fromGenOrder !== toGenOrder) {
+      return { valid: false, error: 'Spouse must belong to the same generation.' };
+    }
+    if (!isSpouseEligible(fromMember.gender, toMember.gender)) {
+      return { valid: false, error: 'Spouse eligibility rules not met based on gender configurations.' };
+    }
+
+    const fromSpouses = fromMember.relationsFrom.filter(r => r.type === 'SPOUSE').length +
+                        fromMember.relationsTo.filter(r => r.type === 'SPOUSE').length;
+    if (fromSpouses >= 1) return { valid: false, error: 'Maximum 1 spouse allowed for ' + fromMember.firstName };
+
+    const toSpouses = toMember.relationsFrom.filter(r => r.type === 'SPOUSE').length +
+                      toMember.relationsTo.filter(r => r.type === 'SPOUSE').length;
+    if (toSpouses >= 1) return { valid: false, error: 'Maximum 1 spouse allowed for ' + toMember.firstName };
+
+  } else if (type === 'PARENT') {
+    if (fromGenOrder !== toGenOrder - 1) {
+      return { valid: false, error: 'Parent must belong exactly to the generation immediately above the child.' };
+    }
+
+    const existingParents = toMember.relationsTo.filter(r => r.type === 'PARENT').length;
+    if (existingParents >= 2) {
+      return { valid: false, error: 'Maximum two parents allowed.' };
+    }
+  }
+
+  return { valid: true };
 }
 
 export function wouldCreateConflict(
@@ -25,11 +85,6 @@ export function wouldCreateConflict(
   generations: Generation[],
   memberAGenerationId?: string
 ): boolean {
-  const getGenerationOrder = (genId: string) => {
-    const gen = generations.find(g => g.id === genId);
-    return gen ? gen.orderIndex : 0;
-  };
-
   const memberA = members.find(m => m.id === memberAId);
   const memberB = members.find(m => m.id === memberBId);
   if (!memberB) return true;
@@ -37,18 +92,29 @@ export function wouldCreateConflict(
   const effectiveGenIdA = memberAGenerationId || memberA?.generationId;
   if (!effectiveGenIdA) return true;
 
-  const genOrderA = getGenerationOrder(effectiveGenIdA);
-  const genOrderB = getGenerationOrder(memberB.generationId);
+  const getGenOrder = (genId: string) => generations.find(g => g.id === genId)?.orderIndex ?? 0;
+  
+  const genOrderA = getGenOrder(effectiveGenIdA);
+  const genOrderB = getGenOrder(memberB.generationId);
+
+  // Map frontend relationType to backend logic
+  // 'PARENT': memberB is parent of memberA (memberA is child)
+  // 'CHILD': memberA is parent of memberB (memberB is child)
+  // 'SPOUSE': memberA and memberB are spouses
+  
+  // Dummy memberA if it's new
+  const safeMemberA = memberA || { 
+    id: memberAId, treeId: memberB.treeId, gender: null, firstName: 'New', 
+    generationId: effectiveGenIdA, relationsFrom: [], relationsTo: [] 
+  } as unknown as MemberWithRelations;
 
   if (relationType === 'PARENT') {
-    if (genOrderB !== genOrderA - 1) return true;
+    return !validateRelationshipCore(memberB, safeMemberA, 'PARENT', genOrderB, genOrderA).valid;
   } else if (relationType === 'CHILD') {
-    if (genOrderB !== genOrderA + 1) return true;
-  } else if (relationType === 'SPOUSE') {
-    if (genOrderB !== genOrderA) return true;
+    return !validateRelationshipCore(safeMemberA, memberB, 'PARENT', genOrderA, genOrderB).valid;
+  } else {
+    return !validateRelationshipCore(safeMemberA, memberB, 'SPOUSE', genOrderA, genOrderB).valid;
   }
-
-  return false;
 }
 
 function getEligibleMembersBase(
@@ -102,14 +168,6 @@ export function getEligibleParents(members: MemberWithRelations[], generations: 
   return getEligibleMembersBase(members, generations, currentMemberId, 'PARENT', currentGenerationId);
 }
 
-export function isSpouseEligible(genderA?: string | null, genderB?: string | null): boolean {
-  if (genderA === 'MALE' && genderB !== 'FEMALE') return false;
-  if (genderA === 'FEMALE' && genderB !== 'MALE') return false;
-  if (genderB === 'MALE' && genderA !== 'FEMALE') return false;
-  if (genderB === 'FEMALE' && genderA !== 'MALE') return false;
-  return true;
-}
-
 export function getEligibleSpouses(
   members: MemberWithRelations[], 
   generations: Generation[], 
@@ -128,3 +186,4 @@ export function getEligibleSpouses(
 export function getEligibleChildren(members: MemberWithRelations[], generations: Generation[], currentMemberId: string | undefined, currentGenerationId?: string) {
   return getEligibleMembersBase(members, generations, currentMemberId, 'CHILD', currentGenerationId);
 }
+

@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma';
 import { Member, Relationship, RelationshipType, Generation } from '@/generated/prisma/client';
-import { isSpouseEligible } from '@/utils/relationship';
+import { isSpouseEligible, validateRelationshipCore } from '@/utils/relationship';
 
 export type MemberWithRelations = Member & {
   generation: Generation;
@@ -33,7 +33,6 @@ export class RelationshipEngine {
       throw new Error('Members must belong to the same tree.');
     }
 
-    // Load existing relationships between these two
     const existingOverlaps = await prisma.relationship.findMany({
       where: {
         OR: [
@@ -51,47 +50,28 @@ export class RelationshipEngine {
       throw new Error(`Members already have an incompatible relationship: ${types.join(', ')}.`);
     }
 
-    // 2. Chronological/Generation Validation
+    // 2. Synchronous Validations (Generation, Gender, Limits, Duplicate)
     const fromGen = fromMember.generation.orderIndex;
     const toGen = toMember.generation.orderIndex;
+    
+    const coreValidation = validateRelationshipCore(
+      fromMember as any,
+      toMember as any,
+      type,
+      fromGen,
+      toGen
+    );
 
-    if (type === 'SPOUSE') {
-      if (fromGen !== toGen) {
-        throw new Error(`Spouse must belong to the same generation.`);
-      }
-      if (!isSpouseEligible(fromMember.gender, toMember.gender)) {
-        throw new Error('Spouse eligibility rules not met based on gender configurations.');
-      }
-    } else if (type === 'PARENT') {
-      // fromId is PARENT of toId
-      if (fromGen !== toGen - 1) {
-        throw new Error('Parent must belong exactly to the generation immediately above the child.');
-      }
+    if (!coreValidation.valid) {
+      throw new Error(coreValidation.error);
     }
 
-    // 3. Limit Validations & Exclusivity
-    if (type === 'SPOUSE') {
-      // Spouse Exclusivity
-      const existingFromSpouses = await prisma.relationship.count({
-        where: { type: 'SPOUSE', OR: [{ fromId }, { toId: fromId }] }
-      });
-      if (existingFromSpouses >= 1) throw new Error('Maximum 1 spouse allowed for ' + fromMember.firstName);
-
-      const existingToSpouses = await prisma.relationship.count({
-        where: { type: 'SPOUSE', OR: [{ fromId: toId }, { toId }] }
-      });
-      if (existingToSpouses >= 1) throw new Error('Maximum 1 spouse allowed for ' + toMember.firstName);
-    } else if (type === 'PARENT') {
-      // Parent Exclusivity
+    // 3. Child Ownership Rules (Deep DB Check)
+    if (type === 'PARENT') {
       const existingParents = await prisma.relationship.findMany({
         where: { type: 'PARENT', toId: toId }
       });
-      
-      if (existingParents.length >= 2) {
-        throw new Error('Maximum two parents allowed.');
-      }
 
-      // Child Ownership Rules: Prevent Child duplication across unrelated families.
       if (existingParents.length === 1) {
         const firstParentId = existingParents[0].fromId;
         const firstParentSpouses = await prisma.relationship.findMany({
