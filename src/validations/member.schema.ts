@@ -115,6 +115,9 @@ export const createRelationshipSchema = z.object({
   fromId: z.string().min(1, 'Source member ID is required'),
   toId: z.string().min(1, 'Target member ID is required'),
   preventPropagation: z.boolean().optional(),
+}).refine(data => data.fromId !== data.toId, {
+  message: 'A member cannot be related to themselves.',
+  path: ['toId'],
 });
 
 /** Inferred types from schemas */

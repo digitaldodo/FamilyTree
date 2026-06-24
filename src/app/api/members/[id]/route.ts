@@ -259,16 +259,32 @@ export async function PUT(request: NextRequest, { params }: Params) {
       });
 
       if (relations !== undefined && Array.isArray(relations)) {
-        // Delete existing relationships where member is involved, but wait,
-        // The form only submits relationships where member is child, spouse, or sibling.
-        // It does NOT submit relationships where member is the PARENT (i.e., we don't pick children from the member form, we pick parents).
-        // So we should only delete relations that the form manages!
-        // Form manages:
-        // PARENT: where member is child (toId = id)
-        // CHILD (form logic): where member is parent (fromId = id)
-        // SPOUSE: all
-        // SIBLING: all
-        await tx.relationship.deleteMany({
+        // ── Diff-based relationship update ──────────────────────────────
+        // Instead of deleting all relationships and recreating, we compute
+        // the difference between existing and desired states, then only
+        // add/remove what actually changed. This prevents data destruction
+        // when relationships aren't explicitly modified by the user.
+
+        // Step 1: Normalize incoming relations to canonical DB format
+        type CanonicalRel = { type: 'PARENT' | 'SPOUSE'; fromId: string; toId: string };
+
+        const desiredRels: CanonicalRel[] = [];
+        for (const rel of relations) {
+          if (!rel.id || !rel.type) continue;
+          if (rel.type === 'PARENT') {
+            // Form: rel is a parent of member → fromId=rel.id, toId=member
+            desiredRels.push({ type: 'PARENT', fromId: rel.id, toId: id });
+          } else if (rel.type === 'CHILD') {
+            // Form: rel is a child of member → fromId=member, toId=rel.id
+            desiredRels.push({ type: 'PARENT', fromId: id, toId: rel.id });
+          } else if (rel.type === 'SPOUSE') {
+            const [id1, id2] = [id, rel.id].sort();
+            desiredRels.push({ type: 'SPOUSE', fromId: id1, toId: id2 });
+          }
+        }
+
+        // Step 2: Fetch existing relationships from DB
+        const existingRels = await tx.relationship.findMany({
           where: {
             OR: [
               { type: 'PARENT', toId: id },
@@ -279,41 +295,56 @@ export async function PUT(request: NextRequest, { params }: Params) {
           }
         });
 
-        for (const rel of relations) {
-          if (!rel.id || !rel.type) continue;
+        // Step 3: Compute diff using composite keys
+        const relKey = (r: CanonicalRel) => `${r.type}:${r.fromId}:${r.toId}`;
+        const existingKeys = new Set(existingRels.map(r => relKey({ type: r.type as 'PARENT' | 'SPOUSE', fromId: r.fromId, toId: r.toId })));
+        const desiredKeys = new Set(desiredRels.map(r => relKey(r)));
+
+        const toRemove = existingRels.filter(r =>
+          !desiredKeys.has(relKey({ type: r.type as 'PARENT' | 'SPOUSE', fromId: r.fromId, toId: r.toId }))
+        );
+        const toAdd = desiredRels.filter(r => !existingKeys.has(relKey(r)));
+
+        // Step 4: Delete only removed relationships
+        for (const rel of toRemove) {
+          await tx.relationship.delete({ where: { id: rel.id } });
+        }
+
+        // Step 5: Create new relationships (SPOUSE first so auto-linking works)
+        const spouseAdds = toAdd.filter(r => r.type === 'SPOUSE');
+        const parentAdds = toAdd.filter(r => r.type === 'PARENT');
+
+        for (const rel of spouseAdds) {
           try {
-            if (rel.type === 'PARENT') {
-              await tx.relationship.create({
-                data: { type: 'PARENT', fromId: rel.id, toId: id },
-              });
-            } else if (rel.type === 'CHILD') {
-              await tx.relationship.create({
-                data: { type: 'PARENT', fromId: id, toId: rel.id },
-              });
-              
-              // Automatically link child to the current member's spouse
+            await tx.relationship.create({ data: { type: rel.type, fromId: rel.fromId, toId: rel.toId } });
+          } catch (e) {
+            console.error('Spouse relationship create error', e);
+          }
+        }
+
+        for (const rel of parentAdds) {
+          try {
+            await tx.relationship.create({ data: { type: rel.type, fromId: rel.fromId, toId: rel.toId } });
+
+            // Auto-link child to spouse if member is the parent
+            if (rel.fromId === id) {
               const spouses = await tx.relationship.findMany({
                 where: { type: 'SPOUSE', OR: [{ fromId: id }, { toId: id }] }
               });
               if (spouses.length > 0) {
                 const spouseId = spouses[0].fromId === id ? spouses[0].toId : spouses[0].fromId;
                 const spouseIsParent = await tx.relationship.findFirst({
-                  where: { type: 'PARENT', fromId: spouseId, toId: rel.id }
+                  where: { type: 'PARENT', fromId: spouseId, toId: rel.toId }
                 });
                 if (!spouseIsParent) {
                   await tx.relationship.create({
-                    data: { type: 'PARENT', fromId: spouseId, toId: rel.id }
+                    data: { type: 'PARENT', fromId: spouseId, toId: rel.toId }
                   });
                 }
               }
-            } else {
-              const [id1, id2] = [id, rel.id].sort();
-              await tx.relationship.create({
-                data: { type: rel.type, fromId: id1, toId: id2 },
-              });
             }
           } catch (e) {
-            console.error('Relationship create error', e);
+            console.error('Parent relationship create error', e);
           }
         }
       }

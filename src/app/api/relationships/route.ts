@@ -5,6 +5,7 @@ import { getTreePermission, canEdit } from '@/lib/permissions';
 import { successResponse, errorResponse } from '@/lib/utils';
 import { createRelationshipSchema } from '@/validations/member.schema';
 import { getErrorMessage } from '@/utils/helpers';
+import { RelationshipEngine } from '@/lib/relationship-engine';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -55,6 +56,17 @@ export async function POST(request: NextRequest) {
     const permission = await getTreePermission(session.user.id, fromMember.treeId);
     if (!canEdit(permission)) {
       return errorResponse('FORBIDDEN', 'You do not have permission to edit this tree', 403);
+    }
+
+    // Validate relationship using the engine (self-ref, generation, limits, cycles)
+    try {
+      await RelationshipEngine.validateRelationship(fromMember, toMember, type);
+    } catch (validationError) {
+      return errorResponse(
+        'VALIDATION_ERROR',
+        getErrorMessage(validationError),
+        400
+      );
     }
 
     const newRel = await prisma.relationship.create({
