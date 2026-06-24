@@ -98,12 +98,35 @@ export async function POST(req: NextRequest, { params }: Params) {
       });
     }
 
+    // Extract unique relationships from merged members
+    const mergedRelations: any[] = [];
+    const seenRels = new Set<string>();
+    
+    for (const m of mergeResult.mergedMembers) {
+      if (m.relationsFrom) {
+        for (const r of m.relationsFrom) {
+          if (!seenRels.has(r.id)) {
+            seenRels.add(r.id);
+            mergedRelations.push(r);
+          }
+        }
+      }
+      if (m.relationsTo) {
+        for (const r of m.relationsTo) {
+          if (!seenRels.has(r.id)) {
+            seenRels.add(r.id);
+            mergedRelations.push(r);
+          }
+        }
+      }
+    }
+
     // Create New Version
     const newVersion = await prisma.treeVersion.create({
       data: {
         treeId: id,
         membersData: mergeResult.mergedMembers as any,
-        relationsData: [],
+        relationsData: mergedRelations as any,
         gensData: baseGenerations as any,
         createdBy: session.user.id,
         name: `Merged ${safeEvents.length} change(s)`

@@ -11,7 +11,7 @@ export function useMembers(treeId?: string) {
   const resolvedTreeId = treeId || activeTreeId;
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['tree', activeTreeId, selectedTreeVersionId || 'live'],
+    queryKey: ['tree', resolvedTreeId, selectedTreeVersionId || 'live'],
     queryFn: async () => {
       const endpoint = selectedTreeVersionId 
         ? `/api/treeVersion/${selectedTreeVersionId}` 

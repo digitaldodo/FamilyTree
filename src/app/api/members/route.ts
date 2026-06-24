@@ -220,50 +220,47 @@ export async function POST(request: NextRequest) {
       relationCount: relations.length,
     });
 
-    // Create the member first, then add relationships
-    const newMember = await prisma.member.create({
-      data: {
-        firstName: rest.firstName,
-        lastName: rest.lastName,
-        ...cleanData(rest),
-        birthDate: birthDate ? new Date(birthDate) : null,
-        deathDate: deathDate ? new Date(deathDate) : null,
-        tree: { connect: { id: treeId } },
-        generation: { connect: { id: finalGenerationId } },
-      } as any,
-    });
+    // Use transaction for atomic creation
+    const newMember = await prisma.$transaction(async (tx) => {
+      // Create the member first
+      const member = await tx.member.create({
+        data: {
+          firstName: rest.firstName,
+          lastName: rest.lastName,
+          ...cleanData(rest),
+          birthDate: birthDate ? new Date(birthDate) : null,
+          deathDate: deathDate ? new Date(deathDate) : null,
+          tree: { connect: { id: treeId } },
+          generation: { connect: { id: finalGenerationId } },
+        } as any,
+      });
 
-    // Create relationships if any
-    if (relations && Array.isArray(relations) && relations.length > 0) {
-      for (const rel of relations) {
-        if (!rel.id || !rel.type) continue;
-
-        try {
-          // Constraints check
-          // Handled by Database triggers, but we can also pre-validate
-          // Let's rely on DB triggers for max limits during member creation to simplify code
+      // Create relationships if any
+      if (relations && Array.isArray(relations) && relations.length > 0) {
+        for (const rel of relations) {
+          if (!rel.id || !rel.type) continue;
 
           if (rel.type === 'PARENT') {
-            await prisma.relationship.create({
+            await tx.relationship.create({
               data: {
                 type: 'PARENT',
                 fromId: rel.id,
-                toId: newMember.id,
+                toId: member.id,
                 treeId: treeId,
               },
             });
           } else if (rel.type === 'CHILD') {
-            await prisma.relationship.create({
+            await tx.relationship.create({
               data: {
                 type: 'PARENT',
-                fromId: newMember.id,
+                fromId: member.id,
                 toId: rel.id,
                 treeId: treeId,
               },
             });
           } else {
-            const [id1, id2] = [newMember.id, rel.id].sort();
-            await prisma.relationship.create({
+            const [id1, id2] = [member.id, rel.id].sort();
+            await tx.relationship.create({
               data: {
                 type: rel.type,
                 fromId: id1,
@@ -272,40 +269,32 @@ export async function POST(request: NextRequest) {
               },
             });
           }
-        } catch (relError) {
-           
-          console.log('[API Debug] POST /api/members relationship error', {
-            method: 'POST',
-            url: request.url,
-            memberId: newMember.id,
-            relation: rel,
-            error: getErrorMessage(relError),
-          });
-          // Continue creating other relationships even if one fails
         }
-      }
 
-      // After all relationships are created, ensure children are linked to the spouse
-      const spouses = await prisma.relationship.findMany({
-        where: { type: 'SPOUSE', OR: [{ fromId: newMember.id }, { toId: newMember.id }] }
-      });
-      if (spouses.length > 0) {
-        const spouseId = spouses[0].fromId === newMember.id ? spouses[0].toId : spouses[0].fromId;
-        const children = await prisma.relationship.findMany({
-          where: { type: 'PARENT', fromId: newMember.id }
+        // After all relationships are created, ensure children are linked to the spouse
+        const spouses = await tx.relationship.findMany({
+          where: { type: 'SPOUSE', OR: [{ fromId: member.id }, { toId: member.id }] }
         });
-        for (const childRel of children) {
-          const spouseIsParent = await prisma.relationship.findFirst({
-            where: { type: 'PARENT', fromId: spouseId, toId: childRel.toId }
+        if (spouses.length > 0) {
+          const spouseId = spouses[0].fromId === member.id ? spouses[0].toId : spouses[0].fromId;
+          const children = await tx.relationship.findMany({
+            where: { type: 'PARENT', fromId: member.id }
           });
-          if (!spouseIsParent) {
-            await prisma.relationship.create({
-              data: { type: 'PARENT', fromId: spouseId, toId: childRel.toId, treeId: treeId }
+          for (const childRel of children) {
+            const spouseIsParent = await tx.relationship.findFirst({
+              where: { type: 'PARENT', fromId: spouseId, toId: childRel.toId }
             });
+            if (!spouseIsParent) {
+              await tx.relationship.create({
+                data: { type: 'PARENT', fromId: spouseId, toId: childRel.toId, treeId: treeId }
+              });
+            }
           }
         }
       }
-    }
+
+      return member;
+    });
 
     console.log('[API Debug] POST /api/members success', {
       method: 'POST',

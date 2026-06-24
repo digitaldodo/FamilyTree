@@ -38,7 +38,7 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
   
   const childrenCount = safeRelsFrom.filter(r => r.type === 'PARENT').length;
   const spouseCount = safeRelsFrom.filter(r => r.type === 'SPOUSE').length + safeRelsTo.filter(r => r.type === 'SPOUSE').length;
-  const siblingCount = safeRelsFrom.filter(r => r.type === 'SIBLING').length + safeRelsTo.filter(r => r.type === 'SIBLING').length;
+  const siblingCount = safeRelsFrom.filter(r => (r.type as string) === 'SIBLING').length + safeRelsTo.filter(r => (r.type as string) === 'SIBLING').length;
 
   return (
     <div

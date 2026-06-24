@@ -9,6 +9,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useAppStore } from '@/store/use-app-store';
 import { useFamilyTree } from '@/hooks/use-family-tree';
 import { useTreeCollaboration } from '@/hooks/use-tree-collaboration';
@@ -39,6 +40,7 @@ const edgeTypes = {
 function FamilyTreeCanvas() {
   const activeTreeId = useAppStore(s => s.activeTreeId);
   const selectedTreeVersionId = useAppStore(s => s.selectedTreeVersionId);
+  const queryClient = useQueryClient();
   
   const { isSyncing, hasConflict, pendingChanges } = useTreeCollaboration(activeTreeId, selectedTreeVersionId);
   
@@ -130,7 +132,9 @@ function FamilyTreeCanvas() {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ treeId: activeTreeId, name })
-                      }).then(() => window.location.reload());
+                      }).then(() => {
+                        queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
+                      });
                     }
                   }}
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 rounded-xl font-medium transition-colors"

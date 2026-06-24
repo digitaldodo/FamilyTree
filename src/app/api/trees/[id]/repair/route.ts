@@ -139,7 +139,7 @@ export async function POST(
           const parentCount = finalRelationships.filter(r => r.type === 'PARENT' && r.toId === childId).length;
           if (parentCount < 2) {
             await prisma.relationship.create({
-              data: { type: 'PARENT', fromId: spouseB, toId: childId }
+              data: { type: 'PARENT', fromId: spouseB, toId: childId, treeId }
             });
             finalRelationships.push({ id: 'temp', type: 'PARENT', fromId: spouseB, toId: childId } as any);
             repairedCount++;
@@ -151,7 +151,7 @@ export async function POST(
           const parentCount = finalRelationships.filter(r => r.type === 'PARENT' && r.toId === childId).length;
           if (parentCount < 2) {
             await prisma.relationship.create({
-              data: { type: 'PARENT', fromId: spouseA, toId: childId }
+              data: { type: 'PARENT', fromId: spouseA, toId: childId, treeId }
             });
             finalRelationships.push({ id: 'temp', type: 'PARENT', fromId: spouseA, toId: childId } as any);
             repairedCount++;

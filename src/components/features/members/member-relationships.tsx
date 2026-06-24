@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Users } from 'lucide-react';
 import { MemberWithRelations } from '@/types/member';
 import { MemberAvatar } from './member-avatar';
-import { GenealogyEngine } from '@/domain/inference/genealogy-engine';
+import { useFamilyTree } from '@/hooks/use-family-tree';
 
 interface MemberRelationshipsProps {
   member: MemberWithRelations;
@@ -19,13 +19,7 @@ export function MemberRelationships({ member, members, onNavigateToMember, readO
     return ids.map(id => safeMembersForFind.find(m => m.id === id)).filter(Boolean) as MemberWithRelations[];
   };
 
-  const familyGraph = useMemo(() => {
-    return GenealogyEngine.buildFamilyGraph({
-      treeId: member.treeId,
-      versionId: null, // UI components that use this locally can default to null or pull from store if needed
-      members: safeMembersForFind
-    });
-  }, [safeMembersForFind, member.treeId]);
+  const { familyGraph } = useFamilyTree(member.treeId);
 
   const derived = familyGraph.derivedRelationships[member.id] || {
     parents: [],

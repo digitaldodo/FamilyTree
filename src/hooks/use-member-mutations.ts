@@ -4,10 +4,11 @@ import { CreateMemberInput, UpdateMemberInput } from '@/types/member';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-export function useMemberMutations() {
+export function useMemberMutations(treeId?: string) {
   const setIsMemberModalOpen = useAppStore(s => s.setIsMemberModalOpen);
   const setIsEditingMember = useAppStore(s => s.setIsEditingMember);
   const activeTreeId = useAppStore(s => s.activeTreeId);
+  const resolvedTreeId = treeId || activeTreeId;
   const hasConflict = useAppStore(s => s.hasConflict);
   const isReadOnly = useAppStore(s => s.isReadOnly);
   
@@ -48,7 +49,7 @@ export function useMemberMutations() {
         toast.error(data?.message || 'Failed to create member');
         return;
       }
-      queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
+      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
       toast.success(data.message || 'Member created successfully');
       setIsEditingMember(false);
       setIsMemberModalOpen(false);
@@ -84,7 +85,7 @@ export function useMemberMutations() {
         toast.error(data?.message || "Update failed");
         return;
       }
-      queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
+      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
       toast.success(data.message || "Member updated successfully");
       setIsEditingMember(false);
     },
@@ -114,7 +115,7 @@ export function useMemberMutations() {
         toast.error(data?.message || 'Failed to delete member');
         return;
       }
-      queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
+      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
       toast.success(data.message || 'Member deleted successfully');
       setIsEditingMember(false);
       setIsMemberModalOpen(false);

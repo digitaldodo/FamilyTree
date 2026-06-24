@@ -39,18 +39,16 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
       return data.data;
     },
     onSuccess: (data) => {
-      alert(`Repaired ${data?.repaired || 0} relationships! Please reload the page to see changes.`);
+      toast.success(`Repaired ${data?.repaired || 0} relationships! Please reload the page to see changes.`);
       queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
     },
     onError: (error: any) => {
       console.error(error);
-      alert(`Repair failed: ${error.message}`);
+      toast.error(`Repair failed: ${error.message}`);
     }
   });
 
   const handleRepair = () => {
-    alert("Repair function is temporarily disabled during the architecture freeze.");
-    return;
     if (!resolvedTreeId) return;
     if (!window.confirm("Run tree relationship repair? This will automatically link children to both spouses where links are missing.")) return;
     

@@ -174,8 +174,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
             }
           } else if (rel.type === 'PARENT') {
              // Form says "Parents" - meaning the relative is the Parent, member is the Child.
-             if (newGeneration.orderIndex <= relative.generation.orderIndex) {
-               return errorResponse('VALIDATION_ERROR', `Cannot move member. Children must belong to a younger generation (higher order) than parents.`, 400);
+             if (newGeneration.orderIndex !== relative.generation.orderIndex + 1) {
+               return errorResponse('VALIDATION_ERROR', `Parent must belong exactly to the generation immediately above the child.`, 400);
              }
              // Since member is the child, we must ensure member doesn't exceed 2 parents in total after this update
              const parentsInPayload = relations.filter((r: any) => r.type === 'PARENT');
@@ -184,8 +184,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
              }
           } else if (rel.type === 'CHILD') {
              // Form says "Children" - meaning the relative is the Child, member is the Parent.
-             if (newGeneration.orderIndex >= relative.generation.orderIndex) {
-               return errorResponse('VALIDATION_ERROR', `Cannot move member. Parents must belong to an older generation (lower order) than children.`, 400);
+             if (newGeneration.orderIndex + 1 !== relative.generation.orderIndex) {
+               return errorResponse('VALIDATION_ERROR', `Parent must belong exactly to the generation immediately above the child.`, 400);
              }
              const relativeParentCount = await prisma.relationship.count({
                where: {
@@ -220,8 +220,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
              const parentOrder = rel.fromId === id ? newGeneration.orderIndex : rel.from.generation.orderIndex;
              const childOrder = rel.toId === id ? newGeneration.orderIndex : rel.to.generation.orderIndex;
 
-             if (childOrder <= parentOrder) {
-               return errorResponse('VALIDATION_ERROR', `Cannot move member. Parents must belong to an older generation than children.`, 400);
+             if (childOrder !== parentOrder + 1) {
+               return errorResponse('VALIDATION_ERROR', `Parent must belong exactly to the generation immediately above the child.`, 400);
              }
           }
         }

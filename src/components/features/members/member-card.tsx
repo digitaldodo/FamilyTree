@@ -18,7 +18,7 @@ interface MemberCardProps {
 }
 
 export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
-  const { setSelectedMemberId, setIsMemberModalOpen, setIsEditingMember } = useAppStore();
+  const { setSelectedMemberId, setIsMemberModalOpen, setIsEditingMember, activeTreeId } = useAppStore();
   const { generations } = useGenerations();
 
   const handleClick = () => {

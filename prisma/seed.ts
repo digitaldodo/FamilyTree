@@ -393,16 +393,16 @@ async function main() {
 
   // Grandparent spouse relationship
   await prisma.relationship.create({
-    data: { type: RelationshipType.SPOUSE, fromId: vinod.id, toId: rp.id },
+    data: { type: RelationshipType.SPOUSE, fromId: vinod.id, toId: rp.id, treeId: guptaTree.id },
   });
 
   // Parent-child: Vinod & RP → all 5 sons
   for (const son of allSons) {
     await prisma.relationship.create({
-      data: { type: RelationshipType.PARENT, fromId: vinod.id, toId: son.id },
+      data: { type: RelationshipType.PARENT, fromId: vinod.id, toId: son.id, treeId: guptaTree.id },
     });
     await prisma.relationship.create({
-      data: { type: RelationshipType.PARENT, fromId: rp.id, toId: son.id },
+      data: { type: RelationshipType.PARENT, fromId: rp.id, toId: son.id, treeId: guptaTree.id },
     });
   }
 
@@ -410,56 +410,56 @@ async function main() {
 
   // Family 1: Harsh & Shashi → Garima, Ankur
   await prisma.relationship.create({
-    data: { type: RelationshipType.SPOUSE, fromId: harsh.id, toId: shashi.id },
+    data: { type: RelationshipType.SPOUSE, fromId: harsh.id, toId: shashi.id, treeId: guptaTree.id },
   });
   for (const child of [garima, ankur]) {
     await prisma.relationship.create({
-      data: { type: RelationshipType.PARENT, fromId: harsh.id, toId: child.id },
+      data: { type: RelationshipType.PARENT, fromId: harsh.id, toId: child.id, treeId: guptaTree.id },
     });
     await prisma.relationship.create({
-      data: { type: RelationshipType.PARENT, fromId: shashi.id, toId: child.id },
+      data: { type: RelationshipType.PARENT, fromId: shashi.id, toId: child.id, treeId: guptaTree.id },
     });
   }
   // Siblings inferred automatically
 
   // Family 2: Rajesh & Bhavna → Swaza, Tanay
   await prisma.relationship.create({
-    data: { type: RelationshipType.SPOUSE, fromId: rajesh.id, toId: bhavna.id },
+    data: { type: RelationshipType.SPOUSE, fromId: rajesh.id, toId: bhavna.id, treeId: guptaTree.id },
   });
   for (const child of [swaza, tanay]) {
     await prisma.relationship.create({
-      data: { type: RelationshipType.PARENT, fromId: rajesh.id, toId: child.id },
+      data: { type: RelationshipType.PARENT, fromId: rajesh.id, toId: child.id, treeId: guptaTree.id },
     });
     await prisma.relationship.create({
-      data: { type: RelationshipType.PARENT, fromId: bhavna.id, toId: child.id },
+      data: { type: RelationshipType.PARENT, fromId: bhavna.id, toId: child.id, treeId: guptaTree.id },
     });
   }
   // Siblings inferred automatically
 
   // Family 3: Parag & Savita → Sparsh, Tanishq
   await prisma.relationship.create({
-    data: { type: RelationshipType.SPOUSE, fromId: parag.id, toId: savita.id },
+    data: { type: RelationshipType.SPOUSE, fromId: parag.id, toId: savita.id, treeId: guptaTree.id },
   });
   for (const child of [sparsh, tanishq]) {
     await prisma.relationship.create({
-      data: { type: RelationshipType.PARENT, fromId: parag.id, toId: child.id },
+      data: { type: RelationshipType.PARENT, fromId: parag.id, toId: child.id, treeId: guptaTree.id },
     });
     await prisma.relationship.create({
-      data: { type: RelationshipType.PARENT, fromId: savita.id, toId: child.id },
+      data: { type: RelationshipType.PARENT, fromId: savita.id, toId: child.id, treeId: guptaTree.id },
     });
   }
   // Siblings inferred automatically
 
   // Family 4: Vikash & Amita → Ansh, Avni
   await prisma.relationship.create({
-    data: { type: RelationshipType.SPOUSE, fromId: vikash.id, toId: amita.id },
+    data: { type: RelationshipType.SPOUSE, fromId: vikash.id, toId: amita.id, treeId: guptaTree.id },
   });
   for (const child of [ansh, avni]) {
     await prisma.relationship.create({
-      data: { type: RelationshipType.PARENT, fromId: vikash.id, toId: child.id },
+      data: { type: RelationshipType.PARENT, fromId: vikash.id, toId: child.id, treeId: guptaTree.id },
     });
     await prisma.relationship.create({
-      data: { type: RelationshipType.PARENT, fromId: amita.id, toId: child.id },
+      data: { type: RelationshipType.PARENT, fromId: amita.id, toId: child.id, treeId: guptaTree.id },
     });
   }
   // Siblings inferred automatically
