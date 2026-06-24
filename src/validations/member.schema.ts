@@ -10,20 +10,20 @@ const genderEnum = z.enum(['MALE', 'FEMALE', 'OTHER']);
 const relationshipTypeEnum = z.enum(['PARENT', 'SPOUSE']);
 
 /**
- * Coerce empty strings to undefined so optional validators work correctly.
+ * Coerce empty strings to null so optional validators work correctly and Prisma clears the field.
  * This prevents empty form fields from failing .url() or .email() checks.
  */
-const emptyToUndefined = z.literal('').transform(() => undefined);
+const emptyToNull = z.literal('').transform(() => null);
 
-/** Optional URL: accepts a valid URL, empty string (→ undefined), or undefined */
-const optionalUrl = z.string().url('Must be a valid URL').optional().or(emptyToUndefined);
+/** Optional URL: accepts a valid URL, empty string (→ null), or undefined */
+const optionalUrl = z.string().url('Must be a valid URL').optional().or(emptyToNull);
 
-/** Optional email: accepts a valid email, empty string (→ undefined), or undefined */
-const optionalEmail = z.string().email('Invalid email address').optional().or(emptyToUndefined);
+/** Optional email: accepts a valid email, empty string (→ null), or undefined */
+const optionalEmail = z.string().email('Invalid email address').optional().or(emptyToNull);
 
-/** Optional trimmed string: accepts a non-empty string, empty string (→ undefined), or undefined */
+/** Optional trimmed string: accepts a non-empty string, empty string (→ null), or undefined */
 const optionalString = (maxLen: number) =>
-  z.string().max(maxLen).trim().optional().or(emptyToUndefined);
+  z.string().max(maxLen).trim().optional().or(emptyToNull);
 
 /**
  * Date string schema — accepts DD-MM-YYYY or ISO 8601 format.
@@ -67,8 +67,8 @@ export const createMemberSchema = z.object({
     .max(100, 'Last name must be at most 100 characters')
     .trim(),
   middleName: optionalString(100),
-  birthDate: dateStringSchema.optional().or(emptyToUndefined),
-  deathDate: dateStringSchema.optional().or(emptyToUndefined),
+  birthDate: dateStringSchema.optional().or(emptyToNull),
+  deathDate: dateStringSchema.optional().or(emptyToNull),
   gender: genderEnum.optional(),
   bio: optionalString(2000),
   imageUrl: optionalUrl,
@@ -96,8 +96,8 @@ export const updateMemberSchema = z.object({
     .trim()
     .optional(),
   middleName: optionalString(100).nullable(),
-  birthDate: dateStringSchema.optional().nullable().or(emptyToUndefined),
-  deathDate: dateStringSchema.optional().nullable().or(emptyToUndefined),
+  birthDate: dateStringSchema.optional().nullable().or(emptyToNull),
+  deathDate: dateStringSchema.optional().nullable().or(emptyToNull),
   gender: genderEnum.optional().nullable(),
   bio: optionalString(2000).nullable(),
   imageUrl: optionalUrl.nullable(),

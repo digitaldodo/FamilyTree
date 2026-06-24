@@ -12,12 +12,15 @@ export function useTreeCollaboration(treeId: string | null, versionId: string | 
   const [isSyncing, setIsSyncing] = useState(false);
 
   const syncChanges = useCallback(async () => {
-    if (pendingChanges.length === 0 || isSyncing || hasConflict || !treeId) return true;
+    const currentPendingChanges = useAppStore.getState().pendingChanges;
+    const currentHasConflict = useAppStore.getState().hasConflict;
 
-    const validEvents = pendingChanges.filter(e => e && typeof e === 'object' && e.type && e.payload);
+    if (currentPendingChanges.length === 0 || isSyncing || currentHasConflict || !treeId) return true;
+
+    const validEvents = currentPendingChanges.filter(e => e && typeof e === 'object' && e.type && e.payload);
     
     if (validEvents.length === 0) {
-      if (pendingChanges.length > 0) clearPendingChanges();
+      if (currentPendingChanges.length > 0) clearPendingChanges();
       return true;
     }
 

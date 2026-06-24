@@ -296,7 +296,13 @@ export async function PUT(request: NextRequest, { params }: Params) {
         });
 
         // Step 3: Compute diff using composite keys
-        const relKey = (r: CanonicalRel) => `${r.type}:${r.fromId}:${r.toId}`;
+        const relKey = (r: CanonicalRel) => {
+          if (r.type === 'SPOUSE') {
+            const [id1, id2] = [r.fromId, r.toId].sort();
+            return `SPOUSE:${id1}:${id2}`;
+          }
+          return `${r.type}:${r.fromId}:${r.toId}`;
+        };
         const existingKeys = new Set(existingRels.map(r => relKey({ type: r.type as 'PARENT' | 'SPOUSE', fromId: r.fromId, toId: r.toId })));
         const desiredKeys = new Set(desiredRels.map(r => relKey(r)));
 

@@ -141,8 +141,8 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
     // Zod schema already transforms DD-MM-YYYY to ISO strings
     const formattedData = {
       ...data,
-      birthDate: data.birthDate || undefined,
-      deathDate: status === 'Alive' ? undefined : (data.deathDate || undefined),
+      birthDate: data.birthDate !== undefined ? data.birthDate : undefined,
+      deathDate: status === 'Alive' ? null : (data.deathDate !== undefined ? data.deathDate : undefined),
       treeId: activeTreeId || undefined,
       generationId: data.generationId || member?.generationId || defaultGenerationForNewMember || undefined,
       relations
