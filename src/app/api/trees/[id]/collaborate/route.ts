@@ -92,6 +92,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const mergeResult = MergeEngine.merge(baseMembers, safeEvents);
     
     if (!mergeResult.success) {
+      console.error('[MERGE_VALIDATION_FAILED]', mergeResult.errors);
       return NextResponse.json({
         success: false,
         message: 'Merge validation failed',

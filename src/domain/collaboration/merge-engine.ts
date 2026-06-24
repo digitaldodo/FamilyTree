@@ -62,8 +62,40 @@ export const MergeEngine = {
           const targetId = getRealId(e.payload.memberId);
           const member = memberMap.get(targetId);
           if (member) {
+             // 1. Remove all old reciprocal relationships involving this member from other members
+             for (const m of memberMap.values()) {
+               if (m.id === targetId) continue;
+               if (m.relationsFrom) {
+                 m.relationsFrom = m.relationsFrom.filter(r => r.toId !== targetId && r.fromId !== targetId);
+               }
+               if (m.relationsTo) {
+                 m.relationsTo = m.relationsTo.filter(r => r.toId !== targetId && r.fromId !== targetId);
+               }
+             }
+
+             // 2. Apply the new member state
              Object.assign(member, e.payload.changes);
              (member as any).updatedAt = new Date().toISOString();
+
+             // 3. Inject the new reciprocal relationships into other members
+             if (member.relationsFrom) {
+               for (const rel of member.relationsFrom) {
+                 const other = memberMap.get(rel.toId);
+                 if (other) {
+                   if (!other.relationsTo) other.relationsTo = [];
+                   other.relationsTo.push(rel);
+                 }
+               }
+             }
+             if (member.relationsTo) {
+               for (const rel of member.relationsTo) {
+                 const other = memberMap.get(rel.fromId);
+                 if (other) {
+                   if (!other.relationsFrom) other.relationsFrom = [];
+                   other.relationsFrom.push(rel);
+                 }
+               }
+             }
           }
           break;
         }
