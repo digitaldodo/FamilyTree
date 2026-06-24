@@ -4,7 +4,6 @@ import { ZoomIn, ZoomOut, Maximize, Plus, Wrench, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/store/use-app-store';
 import { ShareTreeButton } from './share-tree-button';
-import { GenerationFilter } from '@/components/features/generations/generation-filter';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -56,33 +55,46 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-800/50 rounded-2xl shadow-xl w-full md:w-auto">
-      <div className="mr-1">
-        <GenerationFilter />
-      </div>
-      <div className="h-6 w-px bg-border/50 mx-1" />
+    <div className="flex flex-wrap items-center gap-2">
       {!readOnly && (
         <>
-          <Button variant="ghost" size="icon" className="rounded-xl hover:bg-primary/10 hover:text-primary" onClick={handleAdd} title="Add Member">
-            <Plus className="h-4 w-4" />
+          <Button 
+            className="rounded-xl shadow-sm h-10 px-4" 
+            onClick={handleAdd} 
+            title="Add Member"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Add Member</span>
           </Button>
+          
           <ShareTreeButton treeId={resolvedTreeId} isPublic={isPublic} />
-          <Button variant="ghost" size="icon" className="rounded-xl hover:bg-amber-500/10 hover:text-amber-500" onClick={handleRepair} disabled={repairMutation.isPending} title="Repair Relationships">
-            {repairMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wrench className="h-4 w-4" />}
+          
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="rounded-xl h-10 w-10 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md" 
+            onClick={handleRepair} 
+            disabled={repairMutation.isPending} 
+            title="Settings / Repair Relationships"
+          >
+            {repairMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wrench className="h-4 w-4 text-slate-600 dark:text-slate-300" />}
           </Button>
-          <div className="h-6 w-px bg-border/50 mx-1" />
+          <div className="h-6 w-px bg-border/50 mx-1 hidden sm:block" />
         </>
       )}
-      <Button variant="ghost" size="icon" className="rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => zoomIn({ duration: 300 })} title="Zoom In">
-        <ZoomIn className="h-4 w-4 text-slate-600 dark:text-slate-300" />
-      </Button>
-      <Button variant="ghost" size="icon" className="rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => zoomOut({ duration: 300 })} title="Zoom Out">
-        <ZoomOut className="h-4 w-4 text-slate-600 dark:text-slate-300" />
-      </Button>
-      <div className="h-6 w-px bg-border/50 mx-1" />
-      <Button variant="ghost" size="icon" className="rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => fitView({ duration: 500, padding: 0.2, maxZoom: 1 })} title="Fit View">
-        <Maximize className="h-4 w-4 text-slate-600 dark:text-slate-300" />
-      </Button>
+      
+      <div className="flex items-center gap-1 p-1 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-800/50 rounded-2xl shadow-sm">
+        <Button variant="ghost" size="icon" className="rounded-xl h-8 w-8 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => zoomIn({ duration: 300 })} title="Zoom In">
+          <ZoomIn className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+        </Button>
+        <Button variant="ghost" size="icon" className="rounded-xl h-8 w-8 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => zoomOut({ duration: 300 })} title="Zoom Out">
+          <ZoomOut className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+        </Button>
+        <div className="h-4 w-px bg-border/50 mx-0.5" />
+        <Button variant="ghost" size="icon" className="rounded-xl h-8 w-8 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => fitView({ duration: 500, padding: 0.2, maxZoom: 1 })} title="Fit View">
+          <Maximize className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+        </Button>
+      </div>
     </div>
   );
 }
