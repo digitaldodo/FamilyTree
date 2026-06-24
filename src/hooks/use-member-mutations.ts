@@ -1,9 +1,7 @@
-import { useState } from 'react';
 import { useAppStore } from '@/store/use-app-store';
 import { CreateMemberInput, UpdateMemberInput } from '@/types/member';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useTreeCollaboration } from './use-tree-collaboration';
 
 export function useMemberMutations(treeId?: string) {
   const setIsMemberModalOpen = useAppStore(s => s.setIsMemberModalOpen);
@@ -12,11 +10,19 @@ export function useMemberMutations(treeId?: string) {
   const resolvedTreeId = treeId || activeTreeId;
   const hasConflict = useAppStore(s => s.hasConflict);
   const isReadOnly = useAppStore(s => s.isReadOnly);
-  const selectedTreeVersionId = useAppStore(s => s.selectedTreeVersionId);
-  const addChangeEvent = useAppStore(s => s.addChangeEvent);
-  const { syncChanges } = useTreeCollaboration(resolvedTreeId, selectedTreeVersionId);
   
   const queryClient = useQueryClient();
+
+  const refreshTreeQueries = async () => {
+    if (!resolvedTreeId) return;
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] }),
+      queryClient.invalidateQueries({ queryKey: ['tree-versions', resolvedTreeId] }),
+      queryClient.invalidateQueries({ queryKey: ['members', resolvedTreeId] }),
+      queryClient.invalidateQueries({ queryKey: ['search-members', resolvedTreeId] }),
+    ]);
+    await queryClient.refetchQueries({ queryKey: ['tree', resolvedTreeId], type: 'active' });
+  };
 
   const checkCanEdit = () => {
     if (isReadOnly) {
@@ -53,20 +59,7 @@ export function useMemberMutations(treeId?: string) {
         toast.error(data?.message || 'Failed to create member');
         return;
       }
-      if (data.data) {
-        addChangeEvent({
-          id: crypto.randomUUID(),
-          treeId: resolvedTreeId || '',
-          versionId: selectedTreeVersionId || 'live',
-          userId: 'local',
-          timestamp: new Date().toISOString(),
-          type: 'ADD_MEMBER',
-          payload: { member: data.data, temporaryId: data.data.id }
-        } as any);
-        const synced = await syncChanges();
-        if (!synced) return;
-      }
-      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId, selectedTreeVersionId || 'live'] });
+      await refreshTreeQueries();
       toast.success(data.message || 'Member created successfully');
       setIsEditingMember(false);
       setIsMemberModalOpen(false);
@@ -102,20 +95,7 @@ export function useMemberMutations(treeId?: string) {
         toast.error(data?.message || "Update failed");
         return;
       }
-      if (data.data) {
-        addChangeEvent({
-          id: crypto.randomUUID(),
-          treeId: resolvedTreeId || '',
-          versionId: selectedTreeVersionId || 'live',
-          userId: 'local',
-          timestamp: new Date().toISOString(),
-          type: 'UPDATE_MEMBER',
-          payload: { memberId: data.data.id, changes: data.data }
-        } as any);
-        const synced = await syncChanges();
-        if (!synced) return;
-      }
-      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId, selectedTreeVersionId || 'live'] });
+      await refreshTreeQueries();
       toast.success(data.message || "Member updated successfully");
       setIsEditingMember(false);
     },
@@ -145,18 +125,7 @@ export function useMemberMutations(treeId?: string) {
         toast.error(data?.message || 'Failed to delete member');
         return;
       }
-      addChangeEvent({
-        id: crypto.randomUUID(),
-        treeId: resolvedTreeId || '',
-        versionId: selectedTreeVersionId || 'live',
-        userId: 'local',
-        timestamp: new Date().toISOString(),
-        type: 'DELETE_MEMBER',
-        payload: { memberId: id }
-      } as any);
-      const synced = await syncChanges();
-      if (!synced) return;
-      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId, selectedTreeVersionId || 'live'] });
+      await refreshTreeQueries();
       toast.success(data.message || 'Member deleted successfully');
       setIsEditingMember(false);
       setIsMemberModalOpen(false);

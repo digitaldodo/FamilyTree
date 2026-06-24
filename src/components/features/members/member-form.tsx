@@ -45,11 +45,11 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
     handleSubmit,
     control,
     setValue,
-    watch,
+    reset,
     setError,
     formState: { errors }
   } = useForm<MemberFormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       ...(getMemberDefaultValues(member) as any),
       generationId: member?.generationId || defaultGenerationForNewMember || "",
@@ -61,14 +61,12 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
   const genderWatch = useWatch({ control, name: 'gender' });
 
   // Relationships state
-  const [relations, setRelations] = React.useState<{type: 'PARENT' | 'CHILD' | 'SPOUSE', id: string}[]>(() => {
-    if (!member) return [];
-    // Initialize with existing relationships
+  const buildInitialRelations = React.useCallback((sourceMember?: MemberWithRelations) => {
+    if (!sourceMember) return [];
+    
     const existing: {type: 'PARENT' | 'CHILD' | 'SPOUSE', id: string}[] = [];
     
-    // member.relationsFrom means member is the 'from' in the relationship.
-    // If PARENT, member is Parent -> toId is Child.
-    member.relationsFrom.forEach(r => {
+    sourceMember.relationsFrom.forEach(r => {
       if (r.type === 'PARENT') {
         existing.push({ type: 'CHILD', id: r.toId });
       } else if (r.type === 'SPOUSE') {
@@ -76,7 +74,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       }
     });
 
-    member.relationsTo.forEach(r => {
+    sourceMember.relationsTo.forEach(r => {
       if (r.type === 'PARENT') {
         existing.push({ type: 'PARENT', id: r.fromId });
       } else if (r.type === 'SPOUSE') {
@@ -84,9 +82,22 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       }
     });
     
-    // Remove duplicates strictly by member ID to ensure a member only has ONE relationship with the current member.
     return existing.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
+  }, []);
+
+  const [relations, setRelations] = React.useState<{type: 'PARENT' | 'CHILD' | 'SPOUSE', id: string}[]>(() => {
+    if (!member) return [];
+    return buildInitialRelations(member);
   });
+
+  React.useEffect(() => {
+    reset({
+      ...(getMemberDefaultValues(member) as any),
+      generationId: member?.generationId || defaultGenerationForNewMember || "",
+    });
+    setStatus(member?.deathDate ? 'Deceased' : 'Alive');
+    setRelations(buildInitialRelations(member));
+  }, [member?.id, member?.updatedAt, defaultGenerationForNewMember, reset, buildInitialRelations]);
 
   const allSelectedIds = relations.map(r => r.id);
 
@@ -171,7 +182,7 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
         <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">Profile Photo</label>
         <ImageUpload 
           value={imageUrl} 
-          onChange={(val) => setValue('imageUrl', val || undefined)} 
+          onChange={(val) => setValue('imageUrl', val || null, { shouldDirty: true })} 
           folder="family-tree/avatars"
         />
       </div>
@@ -186,6 +197,17 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
           <label className="text-sm font-medium mb-1 block">Last Name</label>
           <Input {...register('lastName')} placeholder="Last name" className={errors.lastName ? 'border-destructive' : ''} />
           {errors.lastName && <span className="text-xs text-destructive">{errors.lastName.message}</span>}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-sm font-medium mb-1 block">Middle Name</label>
+          <Input {...register('middleName')} placeholder="Middle name" />
+        </div>
+        <div>
+          <label className="text-sm font-medium mb-1 block">Occupation</label>
+          <Input {...register('occupation')} placeholder="Occupation" />
         </div>
       </div>
 
@@ -331,6 +353,23 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
             {errors.deathDate && <span className="text-xs text-destructive">{errors.deathDate.message}</span>}
           </div>
         )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-sm font-medium mb-1 block">Email</label>
+          <Input type="email" {...register('email')} placeholder="Email" className={errors.email ? 'border-destructive' : ''} />
+          {errors.email && <span className="text-xs text-destructive">{errors.email.message}</span>}
+        </div>
+        <div>
+          <label className="text-sm font-medium mb-1 block">Phone</label>
+          <Input {...register('phone')} placeholder="Phone" />
+        </div>
+      </div>
+
+      <div>
+        <label className="text-sm font-medium mb-1 block">Address</label>
+        <Input {...register('address')} placeholder="Address" />
       </div>
 
       <div>

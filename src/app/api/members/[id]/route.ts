@@ -4,8 +4,6 @@ import prisma from '@/lib/prisma';
 import { getTreePermission, canEdit, canView } from '@/lib/permissions';
 import { successResponse, errorResponse } from '@/lib/utils';
 import { updateMemberSchema } from '@/validations/member.schema';
-import { getErrorMessage } from '@/utils/helpers';
-import { RelationshipEngine } from '@/lib/relationship-engine';
 import { isSpouseEligible } from '@/utils/relationship';
 import { createTreeSnapshot } from '@/lib/versioning';
 
@@ -13,6 +11,15 @@ type Params = { params: Promise<{ id: string }> };
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+function normalizeNullableFields<T extends Record<string, unknown>>(data: T) {
+  return Object.fromEntries(
+    Object.entries(data).filter(([, value]) => value !== undefined).map(([key, value]) => [
+      key,
+      typeof value === 'string' && value.trim() === '' ? null : value,
+    ])
+  );
+}
 
 /** GET /api/members/:id — Get a single member with relationships */
 export async function GET(_request: NextRequest, { params }: Params) {
@@ -84,9 +91,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
     } catch (e) {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
-    console.log('[MEMBER_UPDATE_REQUEST]', JSON.stringify(body, null, 2));
-    console.log("REQUEST BODY", body);
-
     const validation = updateMemberSchema.safeParse(body);
 
     if (!validation.success) {
@@ -108,6 +112,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     }
 
     const { birthDate, deathDate, generationId, ...rest } = validation.data;
+    const memberData = normalizeNullableFields(rest);
     const relations = body.relations;
 
     if (relations && Array.isArray(relations)) {
@@ -121,11 +126,12 @@ export async function PUT(request: NextRequest, { params }: Params) {
       }
     }
 
-    // Validate Chronology if generation is changing or relations are being updated
     const finalGenerationId = generationId || existing.generationId;
+    const relationPayloadProvided = relations !== undefined && Array.isArray(relations);
+    const generationChanged = generationId !== undefined && generationId !== existing.generationId;
 
-    if (generationId !== undefined && generationId !== existing.generationId) {
-      const newGeneration = await prisma.generation.findUnique({ where: { id: generationId } });
+    if (generationChanged || relationPayloadProvided) {
+      const newGeneration = await prisma.generation.findUnique({ where: { id: finalGenerationId } });
       if (!newGeneration) return errorResponse('NOT_FOUND', 'Generation not found', 404);
 
       // We only validate against existing relations if we aren't completely replacing them.
@@ -140,7 +146,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
       })));
 
       // If we are given relations from body, we need to fetch their generations to validate
-      if (relations !== undefined && Array.isArray(relations)) {
+      if (relationPayloadProvided) {
         const relativeIds = relations.map((r: any) => r.id).filter(Boolean);
         const spousesInPayload = relations.filter((r: any) => r.type === 'SPOUSE');
         if (spousesInPayload.length > 1) {
@@ -158,7 +164,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
           if (!relative) continue;
 
           if (rel.type === 'SPOUSE') {
-            const memberGender = body.gender !== undefined ? body.gender : existing.gender;
+            const memberGender = memberData.gender !== undefined ? memberData.gender as any : existing.gender;
             if (relative.generation.orderIndex !== newGeneration.orderIndex || !isSpouseEligible(memberGender, relative.gender)) {
                return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation and satisfy spouse eligibility rules.', 400);
             }
@@ -212,7 +218,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
         for (const rel of existingRelations) {
           if (rel.type === 'SPOUSE') {
             const relative = rel.fromId === id ? rel.to : rel.from;
-            const memberGender = body.gender !== undefined ? body.gender : existing.gender;
+            const memberGender = memberData.gender !== undefined ? memberData.gender as any : existing.gender;
             if (relative.generation.orderIndex !== newGeneration.orderIndex || !isSpouseEligible(memberGender, relative.gender)) {
                return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation and satisfy spouse eligibility rules.', 400);
             }
@@ -228,24 +234,12 @@ export async function PUT(request: NextRequest, { params }: Params) {
       }
     }
 
-    // DATABASE Before update
-    const before = await prisma.member.findUnique({ where: { id }, include: { relationsFrom: true, relationsTo: true } });
-    console.log("BEFORE", JSON.stringify(before, null, 2));
-
-    // RELATIONSHIP TABLES Before update
-    const existingSpousesBefore = await prisma.relationship.findMany({ where: { type: 'SPOUSE', OR: [{ fromId: id }, { toId: id }] } });
-    const existingParentsBefore = await prisma.relationship.findMany({ where: { type: 'PARENT', toId: id } });
-    const existingChildrenBefore = await prisma.relationship.findMany({ where: { type: 'PARENT', fromId: id } });
-    console.log("EXISTING SPOUSES BEFORE", existingSpousesBefore);
-    console.log("EXISTING PARENTS BEFORE", existingParentsBefore);
-    console.log("EXISTING CHILDREN BEFORE", existingChildrenBefore);
-
     // Use transaction to update member and replace relationships if provided
-    const member = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       const updatedMember = await tx.member.update({
         where: { id },
         data: {
-          ...rest,
+          ...memberData,
           ...(generationId !== undefined && {
             generation: { connect: { id: generationId } },
           }),
@@ -258,7 +252,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
         },
       });
 
-      if (relations !== undefined && Array.isArray(relations)) {
+      if (relationPayloadProvided) {
         // ── Diff-based relationship update ──────────────────────────────
         // Instead of deleting all relationships and recreating, we compute
         // the difference between existing and desired states, then only
@@ -321,36 +315,55 @@ export async function PUT(request: NextRequest, { params }: Params) {
         const parentAdds = toAdd.filter(r => r.type === 'PARENT');
 
         for (const rel of spouseAdds) {
-          try {
-            await tx.relationship.create({ data: { type: rel.type, fromId: rel.fromId, toId: rel.toId, treeId: existing.treeId } });
-          } catch (e) {
-            console.error('Spouse relationship create error', e);
-          }
+          await tx.relationship.upsert({
+            where: { fromId_toId_type: { fromId: rel.fromId, toId: rel.toId, type: rel.type } },
+            update: {},
+            create: { type: rel.type, fromId: rel.fromId, toId: rel.toId, treeId: existing.treeId },
+          });
         }
 
         for (const rel of parentAdds) {
-          try {
-            await tx.relationship.create({ data: { type: rel.type, fromId: rel.fromId, toId: rel.toId, treeId: existing.treeId } });
+          await tx.relationship.upsert({
+            where: { fromId_toId_type: { fromId: rel.fromId, toId: rel.toId, type: rel.type } },
+            update: {},
+            create: { type: rel.type, fromId: rel.fromId, toId: rel.toId, treeId: existing.treeId },
+          });
 
-            // Auto-link child to spouse if member is the parent
-            if (rel.fromId === id) {
-              const spouses = await tx.relationship.findMany({
-                where: { type: 'SPOUSE', OR: [{ fromId: id }, { toId: id }] }
+          // Auto-link child to spouse if member is the parent.
+          if (rel.fromId === id) {
+            const spouses = await tx.relationship.findMany({
+              where: { type: 'SPOUSE', OR: [{ fromId: id }, { toId: id }] }
+            });
+            if (spouses.length > 0) {
+              const spouseId = spouses[0].fromId === id ? spouses[0].toId : spouses[0].fromId;
+              await tx.relationship.upsert({
+                where: { fromId_toId_type: { fromId: spouseId, toId: rel.toId, type: 'PARENT' } },
+                update: {},
+                create: { type: 'PARENT', fromId: spouseId, toId: rel.toId, treeId: existing.treeId },
               });
-              if (spouses.length > 0) {
-                const spouseId = spouses[0].fromId === id ? spouses[0].toId : spouses[0].fromId;
-                const spouseIsParent = await tx.relationship.findFirst({
-                  where: { type: 'PARENT', fromId: spouseId, toId: rel.toId }
+            }
+          }
+
+        }
+
+        const removedChildren = toRemove.filter(r => r.type === 'PARENT' && r.fromId === id);
+        if (removedChildren.length > 0) {
+          const currentSpouses = await tx.relationship.findMany({
+            where: { type: 'SPOUSE', OR: [{ fromId: id }, { toId: id }] }
+          });
+
+          for (const removed of removedChildren) {
+            for (const spouse of currentSpouses) {
+              const spouseId = spouse.fromId === id ? spouse.toId : spouse.fromId;
+              const spouseStillDesired = desiredRels.some(
+                r => r.type === 'PARENT' && r.fromId === spouseId && r.toId === removed.toId
+              );
+              if (!spouseStillDesired) {
+                await tx.relationship.deleteMany({
+                  where: { type: 'PARENT', fromId: spouseId, toId: removed.toId }
                 });
-                if (!spouseIsParent) {
-                  await tx.relationship.create({
-                    data: { type: 'PARENT', fromId: spouseId, toId: rel.toId, treeId: existing.treeId }
-                  });
-                }
               }
             }
-          } catch (e) {
-            console.error('Parent relationship create error', e);
           }
         }
       }
@@ -358,23 +371,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
       return updatedMember;
     });
 
-    // DATABASE After update
-    const after = await prisma.member.findUnique({ where: { id }, include: { relationsFrom: true, relationsTo: true } });
-    console.log("AFTER", JSON.stringify(after, null, 2));
-
-    // RELATIONSHIP TABLES After update
-    const existingSpousesAfter = await prisma.relationship.findMany({ where: { type: 'SPOUSE', OR: [{ fromId: id }, { toId: id }] } });
-    const existingParentsAfter = await prisma.relationship.findMany({ where: { type: 'PARENT', toId: id } });
-    const existingChildrenAfter = await prisma.relationship.findMany({ where: { type: 'PARENT', fromId: id } });
-    console.log("EXISTING SPOUSES AFTER", existingSpousesAfter);
-    console.log("EXISTING PARENTS AFTER", existingParentsAfter);
-    console.log("EXISTING CHILDREN AFTER", existingChildrenAfter);
-
-    if (JSON.stringify(before) === JSON.stringify(after)) {
-      console.log("UPDATE NEVER OCCURRED");
-    }
-
-    // Cache invalidation removed
     // Re-fetch the member with full relations so the response has the complete updated state
     const freshMember = await prisma.member.findUnique({
       where: { id },
@@ -389,14 +385,14 @@ export async function PUT(request: NextRequest, { params }: Params) {
       },
     });
 
-    // Auto snapshot removed
-
     if (!freshMember) {
       return NextResponse.json({
         success: false,
         message: "No data returned"
       }, { status: 500 });
     }
+
+    await createTreeSnapshot(existing.treeId, session.user.id, `Updated ${freshMember.firstName} ${freshMember.lastName}`);
 
     return NextResponse.json({
       success: true,
@@ -441,8 +437,7 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
       prisma.member.delete({ where: { id } }),
     ]);
 
-    // Cache invalidation removed
-    // Auto snapshot removed
+    await createTreeSnapshot(existing.treeId, session.user.id, `Deleted ${existing.firstName} ${existing.lastName}`);
 
     return successResponse({ id }, 'Member deleted successfully');
   } catch (error: any) {

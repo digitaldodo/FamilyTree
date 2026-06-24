@@ -63,9 +63,12 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
     }
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Member deleted successfully');
-      queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] }),
+        queryClient.invalidateQueries({ queryKey: ['tree-versions', activeTreeId] }),
+      ]);
     },
     onError: () => {
       toast.error('Failed to delete member');

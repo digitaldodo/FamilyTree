@@ -305,11 +305,11 @@ export async function POST(request: NextRequest) {
       userId: session.user.id,
     });
 
-    // Auto snapshot removed
-
     if (!newMember) {
       return errorResponse('FETCH_ERROR', 'No data returned', 500);
     }
+
+    await createTreeSnapshot(treeId, session.user.id, `Created ${newMember.firstName} ${newMember.lastName}`);
 
     return successResponse(newMember, 'Member created successfully', 201);
   } catch (error: any) {

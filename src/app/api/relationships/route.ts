@@ -6,6 +6,7 @@ import { successResponse, errorResponse } from '@/lib/utils';
 import { createRelationshipSchema } from '@/validations/member.schema';
 import { getErrorMessage } from '@/utils/helpers';
 import { RelationshipEngine } from '@/lib/relationship-engine';
+import { createTreeSnapshot } from '@/lib/versioning';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { type, fromId, toId, preventPropagation } = validation.data;
+    const { type, fromId, toId } = validation.data;
 
     // Check tree permissions
     const fromMember = await prisma.member.findUnique({ 
@@ -58,6 +59,20 @@ export async function POST(request: NextRequest) {
       return errorResponse('FORBIDDEN', 'You do not have permission to edit this tree', 403);
     }
 
+    const existingRelationship = await prisma.relationship.findFirst({
+      where: {
+        type,
+        OR: [
+          { fromId, toId },
+          ...(type === 'SPOUSE' ? [{ fromId: toId, toId: fromId }] : []),
+        ],
+      },
+    });
+
+    if (existingRelationship) {
+      return successResponse(existingRelationship, 'Relationship already exists');
+    }
+
     // Validate relationship using the engine (self-ref, generation, limits, cycles)
     try {
       await RelationshipEngine.validateRelationship(fromMember, toMember, type);
@@ -69,13 +84,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const newRel = await prisma.relationship.create({
-      data: { type, fromId, toId, treeId: fromMember.treeId }
+    const [canonicalFromId, canonicalToId] =
+      type === 'SPOUSE' ? [fromId, toId].sort() : [fromId, toId];
+
+    const newRel = await prisma.relationship.upsert({
+      where: {
+        fromId_toId_type: {
+          fromId: canonicalFromId,
+          toId: canonicalToId,
+          type,
+        },
+      },
+      update: {},
+      create: { type, fromId: canonicalFromId, toId: canonicalToId, treeId: fromMember.treeId }
     });
 
     if (!newRel) {
       return errorResponse('FETCH_ERROR', 'No data returned', 500);
     }
+
+    await createTreeSnapshot(fromMember.treeId, session.user.id, 'Updated relationships');
 
     return successResponse(newRel, 'Relationship created successfully', 201);
   } catch (error) {

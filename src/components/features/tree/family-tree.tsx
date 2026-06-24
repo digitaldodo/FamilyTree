@@ -47,7 +47,7 @@ function FamilyTreeCanvas() {
   
   const { isSyncing, hasConflict, pendingChanges } = useTreeCollaboration(activeTreeId, selectedTreeVersionId);
   
-  const { members: treeMembers, familyGraph, generations, isLoading, error } = useFamilyTree(activeTreeId || undefined);
+  const { members: treeMembers, allMembers, familyGraph, generations, isLoading, error } = useFamilyTree(activeTreeId || undefined);
   
   const { nodes: rendererNodes, edges: rendererEdges } = useFamilyTreeRenderer(familyGraph, generations);
   
@@ -55,16 +55,8 @@ function FamilyTreeCanvas() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(rendererEdges);
 
   React.useEffect(() => {
-    setNodes((prevNodes) => {
-      if (prevNodes.length !== rendererNodes.length) return rendererNodes;
-      const isSame = prevNodes.every((n, i) => n.id === rendererNodes[i]?.id && n.position.x === rendererNodes[i]?.position.x && n.position.y === rendererNodes[i]?.position.y);
-      return isSame ? prevNodes : rendererNodes;
-    });
-    setEdges((prevEdges) => {
-      if (prevEdges.length !== rendererEdges.length) return rendererEdges;
-      const isSame = prevEdges.every((e, i) => e.id === rendererEdges[i]?.id);
-      return isSame ? prevEdges : rendererEdges;
-    });
+    setNodes(rendererNodes);
+    setEdges(rendererEdges);
   }, [rendererNodes, rendererEdges, setNodes, setEdges]);
 
   const [mounted, setMounted] = React.useState(false);
@@ -93,25 +85,26 @@ function FamilyTreeCanvas() {
     );
   }
 
-  const isEmpty = treeMembers.length === 0;
+  const isTreeEmpty = allMembers.length === 0;
+  const isFilteredEmpty = !isTreeEmpty && treeMembers.length === 0;
 
   return (
     <div className="w-full h-full flex flex-col relative overflow-hidden bg-background">
-      {!isEmpty && (
-        <div className="w-full z-10 p-4 pb-0 flex flex-col gap-4 pointer-events-none">
+      {!isTreeEmpty && (
+        <div className="w-full z-10 p-4 pb-0 flex flex-col gap-3 pointer-events-none">
           {/* Main Toolbar */}
-          <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between w-full gap-4 pointer-events-auto">
+          <div className="flex flex-col 2xl:flex-row items-stretch 2xl:items-center justify-between w-full gap-3 pointer-events-auto">
             {/* Left Section */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full xl:w-auto bg-white/70 dark:bg-slate-900/70 backdrop-blur-md p-1.5 rounded-2xl border border-white/20 dark:border-slate-800/50 shadow-sm">
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 w-full 2xl:w-auto bg-white/85 dark:bg-slate-900/85 backdrop-blur-md p-2 rounded-xl border border-white/20 dark:border-slate-800/50 shadow-sm">
               <MemberSearch />
               <GenerationFilter />
-              <div className="hidden sm:block h-6 w-px bg-border/50" />
+              <div className="hidden lg:block h-6 w-px bg-border/50" />
               <FloatingFamilyStats totalMembers={treeMembers.length} generations={generations.length} />
             </div>
 
             {/* Right Section */}
-            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 w-full xl:w-auto justify-start xl:justify-end pointer-events-auto">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 w-full 2xl:w-auto justify-start 2xl:justify-end pointer-events-auto">
+              <div className="flex flex-wrap items-center gap-2">
                 {hasConflict && (
                   <div className="flex items-center gap-1.5 px-3 py-1.5 bg-destructive/10 text-destructive text-sm font-medium rounded-full border border-destructive/20 shadow-sm">
                     <AlertTriangle className="w-4 h-4" />
@@ -136,13 +129,13 @@ function FamilyTreeCanvas() {
           </div>
 
           {/* Version Selector (docked right below toolbar) */}
-          <div className="flex justify-end w-full pointer-events-auto">
+          <div className="flex justify-start 2xl:justify-end w-full pointer-events-auto">
             <TreeVersionsDropdown />
           </div>
         </div>
       )}
 
-      <div className={`flex-1 relative w-full h-full ${!isEmpty ? 'mt-6' : ''}`}>
+      <div className={`flex-1 relative w-full h-full ${!isTreeEmpty ? 'mt-8' : ''}`}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -160,7 +153,7 @@ function FamilyTreeCanvas() {
         >
           <TreeBackground />
           
-          {isEmpty && (
+          {isTreeEmpty && (
             <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/50 backdrop-blur-sm pointer-events-none">
               <div className="bg-card/80 backdrop-blur-xl border border-border shadow-2xl rounded-3xl p-8 max-w-md w-full text-center pointer-events-auto">
                 <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-6">
@@ -200,6 +193,14 @@ function FamilyTreeCanvas() {
                     Add First Member
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+          {isFilteredEmpty && (
+            <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none">
+              <div className="bg-card/90 backdrop-blur-xl border border-border shadow-lg rounded-xl px-5 py-4 text-center">
+                <h2 className="text-base font-semibold">No members in selected generations</h2>
+                <p className="text-sm text-muted-foreground mt-1">Adjust the generation filter to show more of the tree.</p>
               </div>
             </div>
           )}

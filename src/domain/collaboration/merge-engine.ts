@@ -10,7 +10,7 @@ export interface MergeResult {
 }
 
 export const MergeEngine = {
-  merge(baseMembers: MemberWithRelations[], events: ChangeEvent[]): MergeResult {
+  merge(baseMembers: MemberWithRelations[], events: ChangeEvent[], generations: any[] = []): MergeResult {
     const safeBaseMembers = Array.isArray(baseMembers) ? baseMembers : [];
     const members: MemberWithRelations[] = JSON.parse(JSON.stringify(safeBaseMembers));
     const memberMap = new Map<string, MemberWithRelations>();
@@ -28,7 +28,8 @@ export const MergeEngine = {
       if (!e || typeof e !== 'object' || !e.type || !e.payload) continue;
       switch (e.type) {
         case 'ADD_MEMBER': {
-          const newId = `merged-${crypto.randomUUID()}`;
+          const persistedId = (e.payload.member as any).id;
+          const newId = persistedId || `merged-${crypto.randomUUID()}`;
           tempIdMap.set(e.payload.temporaryId, newId);
           
           const newMember: any = {
@@ -167,10 +168,14 @@ export const MergeEngine = {
       }
     }
 
-    const finalMembers = Array.from(memberMap.values());
+    const finalMembers = Array.from(memberMap.values()).map(member => ({
+      ...member,
+      relationsFrom: dedupeRelations(member.relationsFrom || []),
+      relationsTo: dedupeRelations(member.relationsTo || []),
+    }));
 
     // Validate using Inference Engine
-    const graphPayload = { treeId: 'validation', members: finalMembers };
+    const graphPayload = { treeId: 'validation', members: finalMembers, generations };
     const rawGraph = GenealogyEngine.buildFamilyGraph(graphPayload);
     const graph = safeGraph(rawGraph);
     const validation = GenealogyEngine.validateFamilyGraph(graph);
@@ -182,3 +187,14 @@ export const MergeEngine = {
     };
   }
 };
+
+function dedupeRelations(relations: any[]) {
+  const seen = new Set<string>();
+  return relations.filter(rel => {
+    if (!rel) return false;
+    const key = rel.id || `${rel.type}:${rel.fromId}:${rel.toId}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}

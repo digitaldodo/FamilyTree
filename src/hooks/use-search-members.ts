@@ -33,7 +33,7 @@ export function useSearchMembers() {
     }
 
     return filtered;
-  }, [searchQuery, rawMembers, selectedGenerationIds]);
+  }, [searchQuery, rawMembers, selectedGenerationIds, generations]);
 
   return {
     filteredMembers,

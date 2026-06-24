@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, MapPin, Briefcase } from 'lucide-react';
+import { Calendar, MapPin, Briefcase, Mail, Phone } from 'lucide-react';
 import { MemberWithRelations } from '@/types/member';
 
 interface MemberDetailsProps {
@@ -54,6 +54,28 @@ export function MemberDetails({ member }: MemberDetailsProps) {
           <div className="flex flex-col min-w-0">
             <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Occupation</span>
             <span className="text-sm font-semibold truncate">{member.occupation}</span>
+          </div>
+        </div>
+      )}
+      {member.email && (
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0">
+            <Mail className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Email</span>
+            <span className="text-sm font-semibold truncate">{member.email}</span>
+          </div>
+        </div>
+      )}
+      {member.phone && (
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-teal-500/10 flex items-center justify-center shrink-0">
+            <Phone className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Phone</span>
+            <span className="text-sm font-semibold truncate">{member.phone}</span>
           </div>
         </div>
       )}

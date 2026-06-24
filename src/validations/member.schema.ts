@@ -9,21 +9,29 @@ const genderEnum = z.enum(['MALE', 'FEMALE', 'OTHER']);
 /** Relationship type enum values */
 const relationshipTypeEnum = z.enum(['PARENT', 'SPOUSE']);
 
-/**
- * Coerce empty strings to null so optional validators work correctly and Prisma clears the field.
- * This prevents empty form fields from failing .url() or .email() checks.
- */
-const emptyToNull = z.literal('').transform(() => null);
+const nullWhenBlank = (value: unknown) => {
+  if (typeof value === 'string' && value.trim() === '') return null;
+  return value;
+};
 
-/** Optional URL: accepts a valid URL, empty string (→ null), or undefined */
-const optionalUrl = z.string().url('Must be a valid URL').optional().or(emptyToNull);
+/** Optional URL: accepts a valid URL, blank string (→ null), null, or undefined */
+const optionalUrl = z.preprocess(
+  nullWhenBlank,
+  z.string().url('Must be a valid URL').nullable().optional()
+);
 
-/** Optional email: accepts a valid email, empty string (→ null), or undefined */
-const optionalEmail = z.string().email('Invalid email address').optional().or(emptyToNull);
+/** Optional email: accepts a valid email, blank string (→ null), null, or undefined */
+const optionalEmail = z.preprocess(
+  nullWhenBlank,
+  z.string().email('Invalid email address').nullable().optional()
+);
 
-/** Optional trimmed string: accepts a non-empty string, empty string (→ null), or undefined */
+/** Optional trimmed string: accepts text, blank string (→ null), null, or undefined */
 const optionalString = (maxLen: number) =>
-  z.string().max(maxLen).trim().optional().or(emptyToNull);
+  z.preprocess(
+    nullWhenBlank,
+    z.string().max(maxLen).trim().nullable().optional()
+  );
 
 /**
  * Date string schema — accepts DD-MM-YYYY or ISO 8601 format.
@@ -33,13 +41,12 @@ const optionalString = (maxLen: number) =>
  * - DD-MM-YYYY comes from form inputs
  * - ISO strings can come from client-side pre-processing
  */
-const dateStringSchema = z.string().trim().transform((val) => {
-  if (!val) return undefined;
+const dateStringSchema = z.preprocess(nullWhenBlank, z.string().trim().transform((val) => {
 
   // Already an ISO date string (e.g., from form-level Zod transform)
   if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
     const d = new Date(val);
-    if (isNaN(d.getTime())) return undefined;
+    if (isNaN(d.getTime())) return null;
     return d.toISOString();
   }
 
@@ -47,12 +54,12 @@ const dateStringSchema = z.string().trim().transform((val) => {
   if (/^\d{2}-\d{2}-\d{4}$/.test(val)) {
     const [d, m, y] = val.split('-');
     const date = new Date(`${y}-${m}-${d}T00:00:00.000Z`);
-    if (isNaN(date.getTime())) return undefined;
+    if (isNaN(date.getTime())) return null;
     return date.toISOString();
   }
 
-  return undefined;
-});
+  return null;
+}).nullable().optional());
 
 /** Schema for creating a new member */
 export const createMemberSchema = z.object({
@@ -67,8 +74,8 @@ export const createMemberSchema = z.object({
     .max(100, 'Last name must be at most 100 characters')
     .trim(),
   middleName: optionalString(100),
-  birthDate: dateStringSchema.optional().or(emptyToNull),
-  deathDate: dateStringSchema.optional().or(emptyToNull),
+  birthDate: dateStringSchema,
+  deathDate: dateStringSchema,
   gender: genderEnum.optional(),
   bio: optionalString(2000),
   imageUrl: optionalUrl,
@@ -96,8 +103,8 @@ export const updateMemberSchema = z.object({
     .trim()
     .optional(),
   middleName: optionalString(100).nullable(),
-  birthDate: dateStringSchema.optional().nullable().or(emptyToNull),
-  deathDate: dateStringSchema.optional().nullable().or(emptyToNull),
+  birthDate: dateStringSchema,
+  deathDate: dateStringSchema,
   gender: genderEnum.optional().nullable(),
   bio: optionalString(2000).nullable(),
   imageUrl: optionalUrl.nullable(),

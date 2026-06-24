@@ -29,37 +29,37 @@ export interface Member {
 export interface CreateMemberInput {
   firstName: string;
   lastName: string;
-  middleName?: string;
-  birthDate?: string;
-  deathDate?: string;
+  middleName?: string | null;
+  birthDate?: string | null;
+  deathDate?: string | null;
   gender?: Gender;
-  bio?: string;
-  imageUrl?: string;
-  coverImage?: string;
-  phone?: string;
-  email?: string;
-  address?: string;
-  occupation?: string;
+  bio?: string | null;
+  imageUrl?: string | null;
+  coverImage?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  occupation?: string | null;
   generationId: string;
   treeId: string;
 }
 
 /** Input for updating an existing member */
 export interface UpdateMemberInput {
-  firstName?: string;
-  lastName?: string;
-  middleName?: string;
-  birthDate?: string;
-  deathDate?: string;
-  gender?: Gender;
-  bio?: string;
-  imageUrl?: string;
-  coverImage?: string;
-  phone?: string;
-  email?: string;
-  address?: string;
-  occupation?: string;
-  generationId?: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  middleName?: string | null;
+  birthDate?: string | null;
+  deathDate?: string | null;
+  gender?: Gender | null;
+  bio?: string | null;
+  imageUrl?: string | null;
+  coverImage?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  occupation?: string | null;
+  generationId?: string | null;
 }
 
 /** Relationship between two members */

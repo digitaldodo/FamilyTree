@@ -89,7 +89,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
 
     // MergeEngine
-    const mergeResult = MergeEngine.merge(baseMembers, safeEvents);
+    const mergeResult = MergeEngine.merge(baseMembers, safeEvents, baseGenerations);
     
     if (!mergeResult.success) {
       console.error('[MERGE_VALIDATION_FAILED]', mergeResult.errors);

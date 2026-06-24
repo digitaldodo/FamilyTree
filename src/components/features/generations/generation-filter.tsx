@@ -5,38 +5,39 @@ import { useGenerations } from '@/hooks/use-generations';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Filter } from 'lucide-react';
-import { useMemo } from 'react';
 
 export function GenerationFilter() {
   const { selectedGenerationIds, setSelectedGenerationIds } = useAppStore();
   const { generations = [] } = useGenerations();
   const sortedGenerations = [...generations].sort((a, b) => a.orderIndex - b.orderIndex);
 
-  const handleToggle = (id: string) => {
-    if (selectedGenerationIds.includes(id)) {
-      const newIds = selectedGenerationIds.filter(f => f !== id);
-      if (newIds.length === 0) {
-        setSelectedGenerationIds(generations.map(g => g.id));
-      } else {
-        setSelectedGenerationIds(newIds);
-      }
-    } else {
-      setSelectedGenerationIds([...selectedGenerationIds, id]);
-    }
+  const allGenerationIds = sortedGenerations.map(g => g.id);
+  const selectedIds = selectedGenerationIds.filter(id => allGenerationIds.includes(id));
+  const isAllSelected = selectedIds.length === 0 || selectedIds.length === allGenerationIds.length;
+
+  const commitSelectedIds = (ids: string[]) => {
+    const uniqueIds = Array.from(new Set(ids)).filter(id => allGenerationIds.includes(id));
+    setSelectedGenerationIds(uniqueIds.length === allGenerationIds.length ? [] : uniqueIds);
   };
 
-  const displayText = useMemo(() => {
-    if (selectedGenerationIds.length === generations.length) {
+  const handleToggle = (id: string, checked: boolean) => {
+    const currentIds = isAllSelected ? allGenerationIds : selectedIds;
+    const nextIds = checked
+      ? [...currentIds, id]
+      : currentIds.filter(selectedId => selectedId !== id);
+    commitSelectedIds(nextIds);
+  };
+
+  const displayText = (() => {
+    if (isAllSelected) {
       return "All Generations";
     }
-    if (selectedGenerationIds.length === 1) {
-      const gen = generations.find(g => g.id === selectedGenerationIds[0]);
+    if (selectedIds.length === 1) {
+      const gen = generations.find(g => g.id === selectedIds[0]);
       return gen ? gen.name : "1 Generation";
     }
-    return `${selectedGenerationIds.length} Generations Selected`;
-  }, [selectedGenerationIds, generations]);
-
-  const isAllSelected = selectedGenerationIds.length === generations.length;
+    return `${selectedIds.length} Generations Selected`;
+  })();
 
   return (
     <DropdownMenu>
@@ -52,9 +53,7 @@ export function GenerationFilter() {
         <DropdownMenuCheckboxItem
           checked={isAllSelected}
           onCheckedChange={() => {
-            if (!isAllSelected) {
-              setSelectedGenerationIds(generations.map(g => g.id));
-            }
+            setSelectedGenerationIds([]);
           }}
         >
           All Generations
@@ -62,8 +61,8 @@ export function GenerationFilter() {
         {sortedGenerations.map(gen => (
           <DropdownMenuCheckboxItem
             key={gen.id}
-            checked={selectedGenerationIds.includes(gen.id)}
-            onCheckedChange={() => handleToggle(gen.id)}
+            checked={isAllSelected || selectedIds.includes(gen.id)}
+            onCheckedChange={(checked) => handleToggle(gen.id, Boolean(checked))}
           >
             {gen.name}
           </DropdownMenuCheckboxItem>
