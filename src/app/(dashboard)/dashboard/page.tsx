@@ -7,8 +7,7 @@ import { ActivityFeed } from '@/components/features/dashboard/activity-feed';
 import { BirthdayWidget } from '@/components/features/dashboard/birthday-widget';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
-import { PageLoader } from '@/components/ui/page-loader';
-import { TreePine, Plus, ArrowRight } from 'lucide-react';
+import { TreePine, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 interface DashboardData {
@@ -40,7 +39,17 @@ function DashboardContent() {
   }
 
   if (!activeTreeId) {
-    return null;
+    return (
+      <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh]">
+        <EmptyState
+          icon={TreePine}
+          title="Create your first family tree"
+          description="Start with one tree, then add generations and members as you go."
+          actionLabel="Create Family Tree"
+          onAction={() => window.dispatchEvent(new Event('open-create-tree-modal'))}
+        />
+      </div>
+    );
   }
 
   if (!members || !generations) {

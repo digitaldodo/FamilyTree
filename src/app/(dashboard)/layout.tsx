@@ -3,6 +3,7 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { Navbar } from '@/components/layout/navbar';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { TreeInitializer } from '@/components/providers/tree-initializer';
+import { CreateTreeModalHost } from '@/components/providers/create-tree-modal-host';
 
 export default function DashboardLayout({
   children,
@@ -12,6 +13,7 @@ export default function DashboardLayout({
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <TreeInitializer />
+      <CreateTreeModalHost />
       <div className="hidden md:flex">
         <Sidebar />
       </div>

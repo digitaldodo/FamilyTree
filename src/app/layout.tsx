@@ -13,6 +13,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: 'Family Legacy — Preserve generations beautifully.',
   description: 'Create beautiful interactive family trees with memories, relationships, and generations connected forever.',
   applicationName: 'Family Legacy',

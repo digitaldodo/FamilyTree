@@ -5,12 +5,12 @@ import { getTreePermission, canView } from '@/lib/permissions';
 import { successResponse, errorResponse } from '@/lib/utils';
 import { getErrorMessage } from '@/utils/helpers';
 
-type Params = { params: Promise<{ treeId: string }> };
+type Params = { params: Promise<{ id: string }> };
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-/** GET /api/trees/:treeId/versions — Get all versions for a tree */
+/** GET /api/trees/:id/versions - Get all versions for a tree */
 export async function GET(_request: NextRequest, { params }: Params) {
   try {
     const session = await auth();
@@ -18,7 +18,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
       return errorResponse('UNAUTHORIZED', 'Authentication required', 401);
     }
 
-    const { treeId } = await params;
+    const { id: treeId } = await params;
 
     const permission = await getTreePermission(session.user.id, treeId);
     if (!canView(permission)) {
@@ -33,7 +33,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
         name: true,
         createdBy: true,
         createdAt: true,
-        user: { select: { id: true, name: true, email: true } }
+        user: { select: { id: true, name: true, email: true } },
       },
       orderBy: { createdAt: 'desc' },
     });

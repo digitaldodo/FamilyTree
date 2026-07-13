@@ -9,7 +9,6 @@ import { useAppStore } from '@/store/use-app-store';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { TreeSelector } from '../features/tree/tree-selector';
-import { CreateTreeModal } from '../features/tree/create-tree-modal';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
@@ -21,13 +20,9 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const { sidebarOpen, toggleSidebar } = useAppStore();
-  const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    const handleOpenModal = () => setIsCreateModalOpen(true);
-    window.addEventListener('open-create-tree-modal', handleOpenModal as EventListener);
-    return () => window.removeEventListener('open-create-tree-modal', handleOpenModal as EventListener);
-  }, []);
+  const openCreateTreeModal = () => {
+    window.dispatchEvent(new Event('open-create-tree-modal'));
+  };
 
   return (
     <>
@@ -58,7 +53,7 @@ export function Sidebar() {
         </div>
 
         <div className="pt-4 px-2">
-          {sidebarOpen && <TreeSelector onCreateTree={() => setIsCreateModalOpen(true)} />}
+          {sidebarOpen && <TreeSelector onCreateTree={openCreateTreeModal} />}
         </div>
 
         <div className="flex-1 py-4 flex flex-col gap-2 px-3 overflow-y-auto custom-scrollbar">
@@ -114,10 +109,6 @@ export function Sidebar() {
         </div>
       </motion.aside>
 
-      <CreateTreeModal 
-        isOpen={isCreateModalOpen} 
-        onClose={() => setIsCreateModalOpen(false)} 
-      />
     </>
   );
 }

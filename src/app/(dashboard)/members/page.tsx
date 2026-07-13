@@ -23,7 +23,8 @@ import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 function MembersContent() {
   const activeTreeId = useAppStore(s => s.activeTreeId);
-  const { userTrees } = useUserTrees();
+  const { userTrees, isLoading: treesLoading } = useUserTrees();
+  const isInitializingTrees = useAppStore(s => s.isInitializingTrees);
   const activeTree = userTrees.find(t => t.id === activeTreeId);
   const userRole = activeTree?.role || null;
   const selectedGenerationIds = useAppStore(s => s.selectedGenerationIds);
@@ -105,6 +106,20 @@ function MembersContent() {
     fetchMembers(); // refresh members because some might have been moved or deleted
   };
 
+  if (!activeTreeId && !treesLoading && !isInitializingTrees) {
+    return (
+      <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh] pt-12 w-full h-full">
+        <EmptyState
+          icon={TreePine}
+          title="Create your first family tree"
+          description="Create a tree before adding generations and family members."
+          actionLabel="Create Family Tree"
+          onAction={() => window.dispatchEvent(new Event('open-create-tree-modal'))}
+        />
+      </div>
+    );
+  }
+
   const isLoading = membersLoading || gensLoading || !hasHydratedGenerations;
 
   if (!activeTreeId || isLoading) {
@@ -126,8 +141,7 @@ function MembersContent() {
           <>
             <Button className="hidden md:flex shrink-0" onClick={() => {
               if (allGenerations.length === 0) {
-                const name = prompt('Enter first generation name (e.g. Founders):');
-                if (name) createGeneration(name);
+                openFormModal('createFirst');
               } else {
                 handleAddMember();
               }

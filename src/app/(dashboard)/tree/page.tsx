@@ -5,6 +5,7 @@ import { useAppStore } from '@/store/use-app-store';
 import { FamilyTree } from '@/components/features/tree/family-tree';
 import { MemberModal } from '@/components/features/members/member-modal';
 import { PageLoader } from '@/components/ui/page-loader';
+import { TreeListEmpty } from '@/components/features/tree/tree-list-empty';
 
 export default function TreePage() {
   const { activeTreeId, isInitializingTrees, selectedTreeVersionId, setSelectedTreeVersionId, setIsReadOnly } = useAppStore();
@@ -33,7 +34,13 @@ export default function TreePage() {
   }
 
   if (!activeTreeId) {
-    return null;
+    return (
+      <div className="min-h-full flex items-center justify-center">
+        <TreeListEmpty
+          onCreateTree={() => window.dispatchEvent(new Event('open-create-tree-modal'))}
+        />
+      </div>
+    );
   }
 
   return (
@@ -49,4 +56,3 @@ export default function TreePage() {
     </div>
   );
 }
-

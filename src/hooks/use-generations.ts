@@ -1,7 +1,5 @@
-import { useCallback } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAppStore } from '@/store/use-app-store';
-import { Generation } from '@/types/member';
 import { toast } from 'sonner';
 import { useMembers } from './use-members';
 
@@ -11,6 +9,12 @@ export function useGenerations(treeId?: string) {
   const resolvedTreeId = treeId || activeTreeId;
 
   const { generations, isLoading, fetchMembers } = useMembers(resolvedTreeId || undefined);
+
+  const refreshTree = async () => {
+    if (!resolvedTreeId) return;
+    await queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
+    await queryClient.refetchQueries({ queryKey: ['tree', resolvedTreeId], type: 'active' });
+  };
 
   const createMutation = useMutation({
     mutationFn: async ({ name, insertAt }: { name: string; insertAt?: number }) => {
@@ -28,9 +32,9 @@ export function useGenerations(treeId?: string) {
       if (!res.ok || !json.success) throw new Error(json.message || 'Failed to create generation');
       return json.data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Generation created successfully');
-      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
+      await refreshTree();
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to create generation');
@@ -53,9 +57,9 @@ export function useGenerations(treeId?: string) {
       if (!res.ok || !json.success) throw new Error(json.message || 'Failed to rename generation');
       return json.data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Generation renamed successfully');
-      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
+      await refreshTree();
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to rename generation');
@@ -82,9 +86,9 @@ export function useGenerations(treeId?: string) {
       if (!res.ok || !json.success) throw new Error(json.message || 'Failed to delete generation');
       return json.data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Generation deleted successfully');
-      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
+      await refreshTree();
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to delete generation');
@@ -107,9 +111,9 @@ export function useGenerations(treeId?: string) {
       if (!res.ok || !json.success) throw new Error(json.message || 'Failed to move generation');
       return json.data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Generation moved successfully');
-      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
+      await refreshTree();
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to move generation');
