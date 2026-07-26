@@ -1,2 +1,3 @@
-ALTER TABLE "Member"
-ADD COLUMN IF NOT EXISTS "revision" INTEGER NOT NULL DEFAULT 1;
+-- Baseline placeholder.
+-- Member.revision was added manually before migration history was baselined.
+-- The current schema is represented by 20260726010000_baseline_current_schema.
