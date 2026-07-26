@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
-import { getTreePermission, canEdit, canDelete, canView } from '@/lib/permissions';
+import { getTreePermission, canEdit, canDelete } from '@/lib/permissions';
 import { successResponse, errorResponse } from '@/lib/utils';
 import { updateTreeSchema } from '@/validations/tree.schema';
 import { getErrorMessage } from '@/utils/helpers';
@@ -11,34 +11,131 @@ type Params = { params: Promise<{ id: string }> };
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+function isValidTreeId(id: unknown): id is string {
+  return typeof id === 'string' && /^[a-z0-9_-]{10,128}$/i.test(id);
+}
+
+function isLikelyJsonError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return /json|deserialize|parse/i.test(message);
+}
+
+function databaseReadError(error: unknown, fallbackMessage: string) {
+  console.error('[TREE_GET_DATABASE_ERROR]', error);
+
+  if (isLikelyJsonError(error)) {
+    return errorResponse(
+      'TREE_DATA_INVALID',
+      'Tree data contains invalid JSON and could not be read safely.',
+      422
+    );
+  }
+
+  return errorResponse('TREE_FETCH_ERROR', fallbackMessage, 500);
+}
+
+function safeJsonArray<T>(value: unknown, context: string): T[] {
+  if (Array.isArray(value)) return value as T[];
+  if (value == null) return [];
+
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return parsed as T[];
+    } catch (error) {
+      console.warn(`[TREE_GET_INVALID_JSON_ARRAY] ${context}`, error);
+      return [];
+    }
+  }
+
+  console.warn(`[TREE_GET_INVALID_ARRAY] ${context}`, { receivedType: typeof value });
+  return [];
+}
+
+function normalizeMember(member: any) {
+  return {
+    ...member,
+    relationsFrom: safeJsonArray(member?.relationsFrom, `member:${member?.id}:relationsFrom`),
+    relationsTo: safeJsonArray(member?.relationsTo, `member:${member?.id}:relationsTo`),
+    media: safeJsonArray(member?.media, `member:${member?.id}:media`),
+  };
+}
+
 /** GET /api/trees/:id — Get a tree with all members and relationships */
 export async function GET(_request: NextRequest, { params }: Params) {
   try {
-    const session = await auth();
+    let session;
+    try {
+      session = await auth();
+    } catch (error) {
+      console.error('[TREE_GET_AUTH_ERROR]', error);
+      return errorResponse('AUTH_ERROR', 'Could not verify your session. Please sign in again.', 401);
+    }
+
     if (!session?.user?.id) {
       return errorResponse('UNAUTHORIZED', 'Authentication required', 401);
     }
 
-    const { id } = await params;
-
-    const permission = await getTreePermission(session.user.id, id);
-    if (!canView(permission)) {
-      return errorResponse('FORBIDDEN', 'You do not have access to this tree', 403);
+    let id: string;
+    try {
+      const resolvedParams = await params;
+      id = resolvedParams.id;
+    } catch (error) {
+      console.error('[TREE_GET_PARAMS_ERROR]', error);
+      return errorResponse('VALIDATION_ERROR', 'Invalid tree request parameters.', 400);
     }
 
-    const [treeData, generations, members] = await Promise.all([
-      prisma.tree.findUnique({
+    if (!isValidTreeId(id)) {
+      return errorResponse('VALIDATION_ERROR', 'Invalid tree id.', 400);
+    }
+
+    let treeData;
+    try {
+      treeData = await prisma.tree.findUnique({
         where: { id },
         include: {
           owner: { select: { id: true, name: true, email: true } },
           _count: { select: { members: true } },
         },
-      }),
-      prisma.generation.findMany({
+      });
+    } catch (error) {
+      return databaseReadError(error, 'Unable to load tree metadata.');
+    }
+
+    if (!treeData) {
+      return errorResponse('NOT_FOUND', 'Tree not found', 404);
+    }
+
+    let hasAccess = treeData.ownerId === session.user.id;
+    if (!hasAccess) {
+      try {
+        const collaborator = await prisma.treeCollaborator.findUnique({
+          where: { userId_treeId: { userId: session.user.id, treeId: id } },
+          select: { role: true },
+        });
+        hasAccess = Boolean(collaborator);
+      } catch (error) {
+        return databaseReadError(error, 'Unable to verify tree permissions.');
+      }
+    }
+
+    if (!hasAccess) {
+      return errorResponse('FORBIDDEN', 'You do not have access to this tree', 403);
+    }
+
+    let generations;
+    try {
+      generations = await prisma.generation.findMany({
         where: { treeId: id },
         orderBy: { orderIndex: 'asc' },
-      }),
-      prisma.member.findMany({
+      });
+    } catch (error) {
+      return databaseReadError(error, 'Unable to load tree generations.');
+    }
+
+    let members;
+    try {
+      members = await prisma.member.findMany({
         where: { treeId: id },
         orderBy: [{ firstName: 'asc' }],
         include: {
@@ -55,33 +152,23 @@ export async function GET(_request: NextRequest, { params }: Params) {
           },
           media: { select: { id: true, url: true, type: true } },
         },
-      }),
-    ]);
-
-    if (!treeData) {
-      return errorResponse('NOT_FOUND', 'Tree not found', 404);
+      });
+    } catch (error) {
+      return databaseReadError(error, 'Unable to load tree members.');
     }
 
     const tree = {
       ...treeData,
-      generations: Array.isArray(generations) ? generations : [],
-      members: Array.isArray(members) ? members.map((m: any) => ({
-        ...m,
-        relationsFrom: Array.isArray(m.relationsFrom) ? m.relationsFrom : [],
-        relationsTo: Array.isArray(m.relationsTo) ? m.relationsTo : []
-      })) : [],
+      generations: safeJsonArray(generations, `tree:${id}:generations`),
+      members: safeJsonArray<any>(members, `tree:${id}:members`).map(normalizeMember),
     };
 
     // Auto-create of version v1 removed as it violates GET idempotency and causes unnecessary writes.
 
-    if (!tree) {
-      return errorResponse('FETCH_ERROR', 'No data returned', 500);
-    }
-
     return successResponse(tree, 'Tree retrieved successfully');
   } catch (error) {
     console.error('[TREE_GET_ERROR]', error);
-    return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
+    return errorResponse('FETCH_ERROR', 'Unable to load this tree right now.', 500);
   }
 }
 
@@ -103,7 +190,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     let body = null;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const validation = updateTreeSchema.safeParse(body);

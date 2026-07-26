@@ -20,7 +20,7 @@ import { GenerationLaneNode } from './generation-lane-node';
 import { FamilyJunctionNode } from './family-junction-node';
 import { RelationshipEdgeMemo } from './relationship-edge';
 import { TreeToolbar } from './tree-toolbar';
-import { Loader2, SaveAll, AlertTriangle } from 'lucide-react';
+import { Loader2, SaveAll, AlertTriangle, RefreshCw } from 'lucide-react';
 import { TreeBackground } from './tree-background';
 import { FloatingFamilyStats } from './floating-family-stats';
 import { TreeSkeleton } from '@/components/ui/tree-skeleton';
@@ -51,7 +51,7 @@ function FamilyTreeCanvas() {
   
   const { isSyncing, hasConflict, pendingChanges } = useTreeCollaboration(activeTreeId, selectedTreeVersionId);
   
-  const { members: treeMembers, allMembers, familyGraph, generations, isLoading, error } = useFamilyTree(activeTreeId || undefined);
+  const { members: treeMembers, allMembers, familyGraph, generations, isLoading, error, errorStatus, refetch } = useFamilyTree(activeTreeId || undefined);
   
   const { nodes: rendererNodes, edges: rendererEdges } = useFamilyTreeRenderer(familyGraph, generations);
   
@@ -104,9 +104,20 @@ function FamilyTreeCanvas() {
   if (error) {
     return (
       <div className="w-full h-full flex items-center justify-center">
-        <div className="p-6 glass-card rounded-2xl text-center">
+        <div className="p-6 glass-card rounded-2xl text-center max-w-md">
           <h3 className="text-lg font-semibold text-destructive mb-2">Error Loading Tree</h3>
           <p className="text-muted-foreground">{error}</p>
+          {errorStatus ? (
+            <p className="mt-2 text-xs text-muted-foreground">Status {errorStatus}</p>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="mt-5 inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Try again
+          </button>
         </div>
       </div>
     );

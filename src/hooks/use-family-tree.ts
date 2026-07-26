@@ -8,7 +8,15 @@ import { MemberWithRelations } from '@/types/member';
 
 
 export function useFamilyTree(treeId?: string) {
-  const { members: rawMembers, generations, isLoading, error: fetchError } = useMembers(treeId);
+  const {
+    members: rawMembers,
+    generations,
+    isLoading,
+    isError,
+    error: fetchError,
+    errorStatus,
+    fetchMembers,
+  } = useMembers(treeId);
 
   const selectedGenerationIds = useAppStore(s => s.selectedGenerationIds);
 
@@ -42,6 +50,9 @@ export function useFamilyTree(treeId?: string) {
     generations: visibleGenerations, // return visible ones specifically
     allGenerations: generations, // raw DB generations
     isLoading,
+    isError,
     error: fetchError,
+    errorStatus,
+    refetch: fetchMembers,
   };
 }

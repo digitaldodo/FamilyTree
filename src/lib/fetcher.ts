@@ -1,3 +1,30 @@
+export class ApiError extends Error {
+  status: number;
+  body: unknown;
+
+  constructor(message: string, status: number, body?: unknown) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.body = body;
+  }
+}
+
+export function isApiError(error: unknown): error is ApiError {
+  return error instanceof ApiError || (
+    typeof error === 'object' &&
+    error !== null &&
+    'status' in error &&
+    typeof (error as { status?: unknown }).status === 'number'
+  );
+}
+
+export function getApiErrorMessage(error: unknown, fallback = 'Something went wrong') {
+  if (isApiError(error)) return error.message || fallback;
+  if (error instanceof Error) return error.message || fallback;
+  return fallback;
+}
+
 export async function fetchJson(input: RequestInfo, init?: RequestInit) {
   const res = await fetch(input, { ...init });
   const contentType = res.headers.get('content-type') || '';
@@ -14,22 +41,27 @@ export async function fetchJson(input: RequestInfo, init?: RequestInit) {
     } else {
       const text = await res.text();
       try {
-        body = JSON.parse(text);
+        body = text ? JSON.parse(text) : null;
       } catch {
-        throw new Error('Invalid JSON response from server');
+        body = {
+          message: res.ok
+            ? 'Invalid JSON response from server'
+            : `Server returned ${res.status}${res.statusText ? ` ${res.statusText}` : ''}`,
+          raw: text,
+        };
       }
     }
   } catch (err: any) {
-    // Re-throw with a clear message
-    throw new Error(err?.message || 'Failed to parse response');
+    throw new ApiError(err?.message || 'Failed to parse response', res.status || 0);
   }
 
   if (!res.ok) {
     const message = body?.message || body?.error || `HTTP ${res.status}`;
-    const error: any = new Error(message);
-    error.status = res.status;
-    error.body = body;
-    throw error;
+    throw new ApiError(message, res.status, body);
+  }
+
+  if (!contentType.includes('application/json') && body?.message === 'Invalid JSON response from server') {
+    throw new ApiError(body.message, res.status, body);
   }
 
   return body;
