@@ -1,4 +1,7 @@
-import { memo } from 'react';
+'use client';
+
+import { memo, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { Handle, Position } from '@xyflow/react';
 import { MemberWithRelations } from '@/types/member';
 import { useAppStore } from '@/store/use-app-store';
@@ -36,12 +39,16 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
   const safeRelsFrom = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
   const safeRelsTo = Array.isArray(member.relationsTo) ? member.relationsTo : [];
   
-  const childrenCount = safeRelsFrom.filter(r => r.type === 'PARENT').length;
-  const spouseCount = safeRelsFrom.filter(r => r.type === 'SPOUSE').length + safeRelsTo.filter(r => r.type === 'SPOUSE').length;
-  const siblingCount = safeRelsFrom.filter(r => (r.type as string) === 'SIBLING').length + safeRelsTo.filter(r => (r.type as string) === 'SIBLING').length;
+  const childrenCount = useMemo(() => safeRelsFrom.filter(r => r.type === 'PARENT').length, [safeRelsFrom]);
+  const spouseCount = useMemo(() => safeRelsFrom.filter(r => r.type === 'SPOUSE').length + safeRelsTo.filter(r => r.type === 'SPOUSE').length, [safeRelsFrom, safeRelsTo]);
+  const siblingCount = useMemo(() => safeRelsFrom.filter(r => (r.type as string) === 'SIBLING').length + safeRelsTo.filter(r => (r.type as string) === 'SIBLING').length, [safeRelsFrom, safeRelsTo]);
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
       className={cn(
         'group relative flex flex-col w-[220px] h-[300px] rounded-[24px] overflow-hidden bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2 hover:scale-[1.03]',
         isSelected ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-transparent' : '',
@@ -105,7 +112,7 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
       <Handle type="source" position={Position.Bottom} id="parent-source" className="w-3 h-3 bg-purple-500 border-background" />
       <Handle type="source" position={Position.Right} id="spouse" className="w-3 h-3 top-1/2 bg-rose-500 border-background" />
       <Handle type="target" position={Position.Left} id="spouse-target" className="w-3 h-3 top-1/2 bg-rose-500 border-background" />
-    </div>
+    </motion.div>
   );
 }
 

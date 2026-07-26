@@ -1,9 +1,18 @@
+'use client';
+
 import { memo } from 'react';
+import { motion } from 'framer-motion';
 import { Handle, Position } from '@xyflow/react';
 
 function FamilyJunctionNodeComponent() {
   return (
-    <div className="relative flex items-center justify-center w-3 h-3">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.8 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+      className="relative flex items-center justify-center w-4 h-4"
+    >
       {/* Target handle for incoming parent connections */}
       <Handle 
         type="target" 
@@ -22,7 +31,7 @@ function FamilyJunctionNodeComponent() {
         id="junction-source"
         className="opacity-0 w-1 h-1 pointer-events-none" 
       />
-    </div>
+    </motion.div>
   );
 }
 

@@ -92,7 +92,7 @@ export function useMemberMutations(treeId?: string) {
       return data;
     },
 
-    onSuccess: async (data, id) => {
+    onSuccess: async (data) => {
       if (!data?.success) {
         toast.error(data?.message || 'Failed to delete member');
         return;

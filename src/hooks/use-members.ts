@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAppStore } from '@/store/use-app-store';
 import { MemberWithRelations, Generation } from '@/types/member';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 
 export function useMembers(treeId?: string) {
   const activeTreeId = useAppStore(s => s.activeTreeId);

@@ -9,6 +9,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
+import { motion, AnimatePresence } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAppStore } from '@/store/use-app-store';
 import { useFamilyTree } from '@/hooks/use-family-tree';
@@ -19,15 +20,15 @@ import { GenerationLaneNode } from './generation-lane-node';
 import { FamilyJunctionNode } from './family-junction-node';
 import { RelationshipEdgeMemo } from './relationship-edge';
 import { TreeToolbar } from './tree-toolbar';
-import { Loader2, Activity, SaveAll, AlertTriangle } from 'lucide-react';
+import { Loader2, SaveAll, AlertTriangle } from 'lucide-react';
 import { TreeBackground } from './tree-background';
 import { FloatingFamilyStats } from './floating-family-stats';
-import { GenealogyEngine } from '@/domain/inference/genealogy-engine';
 import { TreeSkeleton } from '@/components/ui/tree-skeleton';
 import { useFamilyTreeRenderer } from './family-tree-renderer';
 import { MemberSearch } from '@/components/features/members/member-search';
 import { GenerationFilter } from '@/components/features/generations/generation-filter';
 import { TreeVersionsDropdown } from './tree-versions-dropdown';
+import { fetchJson } from '@/lib/fetcher';
 
 const nodeTypes = {
   member: MemberNode,
@@ -43,6 +44,9 @@ const edgeTypes = {
 function FamilyTreeCanvas() {
   const activeTreeId = useAppStore(s => s.activeTreeId);
   const selectedTreeVersionId = useAppStore(s => s.selectedTreeVersionId);
+  const setSelectedMemberId = useAppStore(s => s.setSelectedMemberId);
+  const setIsMemberModalOpen = useAppStore(s => s.setIsMemberModalOpen);
+  const setIsEditingMember = useAppStore(s => s.setIsEditingMember);
   const queryClient = useQueryClient();
   
   const { isSyncing, hasConflict, pendingChanges } = useTreeCollaboration(activeTreeId, selectedTreeVersionId);
@@ -63,6 +67,29 @@ function FamilyTreeCanvas() {
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleAddFirstMember = () => {
+    setSelectedMemberId(null);
+    setIsEditingMember(true);
+    setIsMemberModalOpen(true);
+  };
+
+  const handleCreateGeneration = async () => {
+    if (!activeTreeId) return;
+    const name = prompt('Enter first generation name (e.g. Founders):');
+    if (!name) return;
+
+    try {
+      await fetchJson('/api/generations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ treeId: activeTreeId, name }),
+      });
+      await queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
+    } catch (error) {
+      console.error('Failed to create generation', error);
+    }
+  };
 
   if (!mounted || !activeTreeId) return null;
 
@@ -153,57 +180,56 @@ function FamilyTreeCanvas() {
         >
           <TreeBackground />
           
-          {isTreeEmpty && (
-            <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/50 backdrop-blur-sm pointer-events-none">
-              <div className="bg-card/80 backdrop-blur-xl border border-border shadow-2xl rounded-3xl p-8 max-w-md w-full text-center pointer-events-auto">
-                <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                  <svg className="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold mb-3 tracking-tight">Your family tree is empty</h2>
-                <p className="text-muted-foreground mb-8">Start building your family legacy by adding the first member or setting up a generation.</p>
-                
-                <div className="flex flex-col gap-3">
-                  <button 
-                    onClick={() => {
-                      const name = prompt('Enter first generation name (e.g. Founders):');
-                      if (name) {
-                        fetch('/api/generations', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ treeId: activeTreeId, name })
-                        }).then(() => {
-                          queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
-                        });
-                      }
-                    }}
-                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 rounded-xl font-medium transition-colors"
-                  >
-                    Create Generation
-                  </button>
-                  <button 
-                    onClick={() => {
-                      useAppStore.getState().setSelectedMemberId(null);
-                      useAppStore.getState().setIsEditingMember(true);
-                      useAppStore.getState().setIsMemberModalOpen(true);
-                    }}
-                    className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 rounded-xl font-medium transition-colors"
-                  >
-                    Add First Member
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-          {isFilteredEmpty && (
-            <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none">
-              <div className="bg-card/90 backdrop-blur-xl border border-border shadow-lg rounded-xl px-5 py-4 text-center">
-                <h2 className="text-base font-semibold">No members in selected generations</h2>
-                <p className="text-sm text-muted-foreground mt-1">Adjust the generation filter to show more of the tree.</p>
-              </div>
-            </div>
-          )}
+            <AnimatePresence>
+              {isTreeEmpty && (
+                <motion.div
+                  key="tree-empty-state"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm pointer-events-none"
+                >
+                  <div className="bg-card/90 backdrop-blur-xl border border-border shadow-2xl rounded-3xl p-8 max-w-md w-full text-center pointer-events-auto">
+                    <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                      <svg className="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold mb-3 tracking-tight">Your family tree is empty</h2>
+                    <p className="text-muted-foreground mb-8">Start building your family legacy by adding the first member or setting up a generation.</p>
+                    <div className="flex flex-col gap-3">
+                      <button
+                        onClick={handleCreateGeneration}
+                        className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 rounded-xl font-medium transition-colors"
+                      >
+                        Create Generation
+                      </button>
+                      <button
+                        onClick={handleAddFirstMember}
+                        className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 rounded-xl font-medium transition-colors"
+                      >
+                        Add First Member
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {isFilteredEmpty && (
+                <motion.div
+                  key="tree-filter-empty"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none"
+                >
+                  <div className="bg-card/90 backdrop-blur-xl border border-border shadow-lg rounded-xl px-5 py-4 text-center">
+                    <h2 className="text-base font-semibold">No members in selected generations</h2>
+                    <p className="text-sm text-muted-foreground mt-1">Adjust the generation filter to show more of the tree.</p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
         </ReactFlow>
       </div>
     </div>

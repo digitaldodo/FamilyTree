@@ -88,7 +88,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     let body = null;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const validation = updateMemberSchema.safeParse(body);
@@ -133,17 +133,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
     if (generationChanged || relationPayloadProvided) {
       const newGeneration = await prisma.generation.findUnique({ where: { id: finalGenerationId } });
       if (!newGeneration) return errorResponse('NOT_FOUND', 'Generation not found', 404);
-
-      // We only validate against existing relations if we aren't completely replacing them.
-      // But actually, if we are replacing them, we should validate against the NEW ones.
-      const relationsToValidate = relations !== undefined ? relations : await prisma.relationship.findMany({
-        where: { OR: [{ fromId: id }, { toId: id }] },
-      }).then(rels => rels.map(r => ({
-        id: r.fromId === id ? r.toId : r.fromId,
-        type: r.type,
-        isParentWhereMemberIsChild: r.type === 'PARENT' && r.toId === id,
-        isParentWhereMemberIsParent: r.type === 'PARENT' && r.fromId === id
-      })));
 
       // If we are given relations from body, we need to fetch their generations to validate
       if (relationPayloadProvided) {

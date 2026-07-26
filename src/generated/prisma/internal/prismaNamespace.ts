@@ -1561,7 +1561,8 @@ export const MemberScalarFieldEnum = {
   generationId: 'generationId',
   treeId: 'treeId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  revision: 'revision'
 } as const
 
 export type MemberScalarFieldEnum = (typeof MemberScalarFieldEnum)[keyof typeof MemberScalarFieldEnum]
