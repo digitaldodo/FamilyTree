@@ -21,6 +21,8 @@ function getTreeErrorMessage(error: unknown) {
         return 'This tree could not be found. It may have been deleted or moved.';
       case 422:
         return 'This tree contains data that could not be read safely. Please repair the tree or contact support.';
+      case 503:
+        return 'The app is finishing a database update. Please wait a moment, then try again.';
       default:
         if (error.status >= 500) {
           return 'We could not load this tree right now. Please try again in a moment.';

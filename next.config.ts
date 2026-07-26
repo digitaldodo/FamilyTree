@@ -11,6 +11,9 @@ const withPWAConfig = withPWA({
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ['@prisma/client', 'bcryptjs'],
+  experimental: {
+    cssChunking: 'strict',
+  },
   images: {
     remotePatterns: [
       {

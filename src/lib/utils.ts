@@ -42,6 +42,7 @@ export function constructMetadata({
 }
 
 export function errorResponse(messageOrCode: string = 'Unknown error', detailsOrMessage?: any, statusOrStatus?: any) {
+  const code = messageOrCode;
   let error = messageOrCode;
   let status = 500;
 
@@ -52,7 +53,7 @@ export function errorResponse(messageOrCode: string = 'Unknown error', detailsOr
     status = detailsOrMessage;
   }
 
-  return NextResponse.json({ success: false, message: error, error }, { status });
+  return NextResponse.json({ success: false, code, message: error, error }, { status });
 }
 
 export function listResponse(data: any[], totalOrMeta?: number | any, page?: number, limit?: number) {

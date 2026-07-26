@@ -20,8 +20,22 @@ function isLikelyJsonError(error: unknown) {
   return /json|deserialize|parse/i.test(message);
 }
 
+function getPrismaErrorCode(error: unknown) {
+  return typeof error === 'object' && error !== null && 'code' in error
+    ? String((error as { code?: unknown }).code)
+    : null;
+}
+
 function databaseReadError(error: unknown, fallbackMessage: string) {
   console.error('[TREE_GET_DATABASE_ERROR]', error);
+
+  if (getPrismaErrorCode(error) === 'P2022') {
+    return errorResponse(
+      'DATABASE_SCHEMA_OUT_OF_DATE',
+      'The database schema is out of date. Please run the latest Prisma migrations.',
+      503
+    );
+  }
 
   if (isLikelyJsonError(error)) {
     return errorResponse(
@@ -138,7 +152,25 @@ export async function GET(_request: NextRequest, { params }: Params) {
       members = await prisma.member.findMany({
         where: { treeId: id },
         orderBy: [{ firstName: 'asc' }],
-        include: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          middleName: true,
+          birthDate: true,
+          deathDate: true,
+          gender: true,
+          bio: true,
+          imageUrl: true,
+          coverImage: true,
+          phone: true,
+          email: true,
+          address: true,
+          occupation: true,
+          generationId: true,
+          treeId: true,
+          createdAt: true,
+          updatedAt: true,
           generation: { select: { id: true, name: true, orderIndex: true } },
           relationsFrom: {
             select: {
