@@ -236,21 +236,32 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
     // Use transaction to update member and replace relationships if provided
     await prisma.$transaction(async (tx) => {
-      const updatedMember = await tx.member.update({
-        where: { id },
-        data: {
-          ...memberData,
-          ...(generationId !== undefined && {
-            generation: { connect: { id: generationId } },
-          }),
-          ...(birthDate !== undefined && {
-            birthDate: birthDate ? new Date(birthDate) : null,
-          }),
-          ...(deathDate !== undefined && {
-            deathDate: deathDate ? new Date(deathDate) : null,
-          }),
-        },
+      // Use optimistic concurrency by ensuring updatedAt matches the current value fetched earlier.
+      // This prevents lost updates when concurrent clients modify the same member.
+      const updateData: any = {
+        ...memberData,
+        ...(generationId !== undefined && {
+          generation: { connect: { id: generationId } },
+        }),
+        ...(birthDate !== undefined && {
+          birthDate: birthDate ? new Date(birthDate) : null,
+        }),
+        ...(deathDate !== undefined && {
+          deathDate: deathDate ? new Date(deathDate) : null,
+        }),
+      };
+
+      // Use integer revision for optimistic locking: require the revision to match, then increment it atomically.
+      const updatedCount = await tx.member.updateMany({
+        where: { id, revision: existing.revision },
+        data: { ...updateData, revision: { increment: 1 } },
       });
+
+      if (updatedCount.count === 0) {
+        throw new Error('CONFLICT: Member was modified by another user. Please refresh and retry.');
+      }
+
+      const updatedMember = await tx.member.findUnique({ where: { id } });
 
       if (relationPayloadProvided) {
         // ── Diff-based relationship update ──────────────────────────────
@@ -401,6 +412,9 @@ export async function PUT(request: NextRequest, { params }: Params) {
     }, { status: 200 });
   } catch (error: any) {
     console.error('[MEMBER_UPDATE_ERROR]', error);
+    if (typeof error?.message === 'string' && error.message.startsWith('CONFLICT:')) {
+      return NextResponse.json({ success: false, message: error.message.replace('CONFLICT:','').trim() }, { status: 409 });
+    }
     return NextResponse.json({
       success: false,
       message: error.message || "Update failed"

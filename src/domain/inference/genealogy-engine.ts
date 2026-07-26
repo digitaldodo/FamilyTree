@@ -34,7 +34,10 @@ export type DerivedRelationships = Record<string, {
 export type FamilyGraph = {
   nodes: FamilyGraphNode[];
   edges: FamilyGraphEdge[];
+  // derivedRelationships contains relationships for the graph's node ids (may include COUPLE_CONTAINER ids).
   derivedRelationships: DerivedRelationships;
+  // memberDerivedRelationships preserves the member-level relationships (pre-collapsing spouses)
+  memberDerivedRelationships?: DerivedRelationships;
   generations: Record<number, string[]>;
   layoutHints: {
     spouseGroups: Record<string, string[]>;
@@ -100,68 +103,97 @@ export const GenealogyEngine = {
         }
       }
 
-      // Step 2: BFS from explicitly assigned nodes to propagate constraints
+      // Step 2: Propagate generations using a relaxation queue (handles cycles and updates safely)
       const queue: string[] = [...assigned];
-      const visited = new Set<string>();
+      const inQueue = new Set<string>(queue);
+
+      // Build spouse adjacency to ensure spouses share generation where possible
+      const spouseAdj = new Map<string, string[]>();
+      for (const e of uniqueEdges) {
+        if (e.type === 'SPOUSE') {
+          if (!spouseAdj.has(e.source)) spouseAdj.set(e.source, []);
+          if (!spouseAdj.has(e.target)) spouseAdj.set(e.target, []);
+          spouseAdj.get(e.source)!.push(e.target);
+          spouseAdj.get(e.target)!.push(e.source);
+        }
+      }
 
       while (queue.length > 0) {
         const u = queue.shift()!;
-        if (visited.has(u)) continue;
-        visited.add(u);
+        inQueue.delete(u);
 
         const currentGen = nodeGen.get(u)!;
         const children = childrenMap.get(u) || [];
         const parents = parentMap.get(u) || [];
 
-        // Propagate to children (child = parent + 1)
+        // Propagate to children (child >= parent + 1)
         for (const v of children) {
           const expectedGen = currentGen + 1;
-          if (!nodeGen.has(v)) {
-            nodeGen.set(v, expectedGen);
-            queue.push(v);
-          } else if (!assigned.has(v)) {
-            nodeGen.set(v, Math.max(nodeGen.get(v)!, expectedGen));
-            queue.push(v);
+          const old = nodeGen.has(v) ? nodeGen.get(v)! : undefined;
+          const candidate = old === undefined ? expectedGen : Math.max(old, expectedGen);
+          if (old === undefined || candidate !== old) {
+            nodeGen.set(v, candidate);
+            if (!inQueue.has(v)) { queue.push(v); inQueue.add(v); }
           }
         }
 
-        // Propagate to parents (parent = child - 1)
+        // Propagate to parents (parent <= child - 1)
         for (const v of parents) {
           const expectedGen = currentGen - 1;
-          if (!nodeGen.has(v)) {
-            nodeGen.set(v, expectedGen);
-            queue.push(v);
-          } else if (!assigned.has(v)) {
-            nodeGen.set(v, Math.min(nodeGen.get(v)!, expectedGen));
-            queue.push(v);
+          const old = nodeGen.has(v) ? nodeGen.get(v)! : undefined;
+          const candidate = old === undefined ? expectedGen : Math.min(old, expectedGen);
+          if (old === undefined || candidate !== old) {
+            nodeGen.set(v, candidate);
+            if (!inQueue.has(v)) { queue.push(v); inQueue.add(v); }
+          }
+        }
+
+        // Propagate to spouses (should be same generation)
+        const spouses = spouseAdj.get(u) || [];
+        for (const s of spouses) {
+          const old = nodeGen.has(s) ? nodeGen.get(s)! : undefined;
+          const candidate = currentGen;
+          if (old === undefined || candidate !== old) {
+            nodeGen.set(s, candidate);
+            if (!inQueue.has(s)) { queue.push(s); inQueue.add(s); }
           }
         }
       }
 
-      // Step 3: Handle disconnected components - find roots (no parents) and assign gen 0
+      // Step 3: Handle disconnected components - assign generation 0 to root-like nodes (no parents)
       for (const m of members) {
         if (!nodeGen.has(m.id)) {
           const parents = parentMap.get(m.id) || [];
           if (parents.length === 0) {
             nodeGen.set(m.id, 0);
-            queue.push(m.id);
+            if (!inQueue.has(m.id)) { queue.push(m.id); inQueue.add(m.id); }
           }
         }
       }
 
-      // Propagate from new roots
+      // Continue propagation from any new roots until stable
       while (queue.length > 0) {
         const u = queue.shift()!;
-        if (visited.has(u)) continue;
-        visited.add(u);
-
+        inQueue.delete(u);
         const currentGen = nodeGen.get(u)!;
         const children = childrenMap.get(u) || [];
         for (const v of children) {
           const expectedGen = currentGen + 1;
-          if (!nodeGen.has(v)) {
-            nodeGen.set(v, expectedGen);
-            queue.push(v);
+          const old = nodeGen.has(v) ? nodeGen.get(v)! : undefined;
+          const candidate = old === undefined ? expectedGen : Math.max(old, expectedGen);
+          if (old === undefined || candidate !== old) {
+            nodeGen.set(v, candidate);
+            if (!inQueue.has(v)) { queue.push(v); inQueue.add(v); }
+          }
+        }
+
+        const spouses = spouseAdj.get(u) || [];
+        for (const s of spouses) {
+          const old = nodeGen.has(s) ? nodeGen.get(s)! : undefined;
+          const candidate = currentGen;
+          if (old === undefined || candidate !== old) {
+            nodeGen.set(s, candidate);
+            if (!inQueue.has(s)) { queue.push(s); inQueue.add(s); }
           }
         }
       }
@@ -185,6 +217,12 @@ export const GenealogyEngine = {
       }
 
       const nodes = Array.from(nodesMap.values());
+
+      // Compute derived relationships at the member level BEFORE we collapse spouses into COUPLE_CONTAINERs
+      // This keeps ancestry/validation accurate and prevents container nodes from interfering with ancestor inference.
+      const memberLevelDerivedRelationships = this.buildDerivedRelationships(nodes, uniqueEdges);
+      this.inferAncestors(nodes, uniqueEdges, memberLevelDerivedRelationships);
+
 
       // 3. Derive Siblings
       const siblingEdges = this.inferSiblings(nodes, uniqueEdges);
@@ -300,6 +338,8 @@ export const GenealogyEngine = {
         nodes: finalNodes,
         edges: finalEdges,
         derivedRelationships,
+        // expose member-level derived relationships (computed earlier) to allow callers to validate using original member relationships
+        memberDerivedRelationships: typeof memberLevelDerivedRelationships !== 'undefined' ? memberLevelDerivedRelationships : undefined,
         generations: generationsRec,
         layoutHints: {
           spouseGroups,

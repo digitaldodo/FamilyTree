@@ -16,18 +16,9 @@ export function useMembers(treeId?: string) {
       const endpoint = selectedTreeVersionId 
         ? `/api/treeVersion/${selectedTreeVersionId}` 
         : `/api/trees/${resolvedTreeId}`;
-        
-      const res = await fetch(endpoint);
-      const text = await res.text();
-      let json;
-      try {
-        json = JSON.parse(text);
-      } catch {
-        throw new Error("Invalid JSON response from server");
-      }
-      if (!res.ok || !json.success) {
-        throw new Error(json.message || 'Failed to load tree data');
-      }
+
+      const json = await import('@/lib/fetcher').then(m => m.fetchJson(endpoint));
+      if (!json?.success) throw new Error(json?.message || 'Failed to load tree data');
       return json.data;
     },
     enabled: !!resolvedTreeId,

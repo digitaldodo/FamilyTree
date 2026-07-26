@@ -7,6 +7,7 @@ export function useMemberMutations(treeId?: string) {
   const setIsMemberModalOpen = useAppStore(s => s.setIsMemberModalOpen);
   const setIsEditingMember = useAppStore(s => s.setIsEditingMember);
   const activeTreeId = useAppStore(s => s.activeTreeId);
+  const selectedTreeVersionId = useAppStore(s => s.selectedTreeVersionId);
   const resolvedTreeId = treeId || activeTreeId;
   const hasConflict = useAppStore(s => s.hasConflict);
   const isReadOnly = useAppStore(s => s.isReadOnly);
@@ -15,13 +16,14 @@ export function useMemberMutations(treeId?: string) {
 
   const refreshTreeQueries = async () => {
     if (!resolvedTreeId) return;
+    const versionKey = selectedTreeVersionId || 'live';
     await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] }),
+      queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId, versionKey] }),
       queryClient.invalidateQueries({ queryKey: ['tree-versions', resolvedTreeId] }),
       queryClient.invalidateQueries({ queryKey: ['members', resolvedTreeId] }),
       queryClient.invalidateQueries({ queryKey: ['search-members', resolvedTreeId] }),
     ]);
-    await queryClient.refetchQueries({ queryKey: ['tree', resolvedTreeId], type: 'active' });
+    await queryClient.refetchQueries({ queryKey: ['tree', resolvedTreeId, versionKey], type: 'active' });
   };
 
   const checkCanEdit = () => {
@@ -38,22 +40,13 @@ export function useMemberMutations(treeId?: string) {
 
   const createMutation = useMutation({
     mutationFn: async (input: CreateMemberInput) => {
-      const res = await fetch('/api/members', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...input, treeId: input.treeId || activeTreeId }),
-      });
-      let data;
-      try {
-        const text = await res.text();
-        if (!text) throw new Error("Empty response from server");
-        data = JSON.parse(text);
-      } catch (err) {
-        throw new Error("Invalid JSON response from server");
-      }
-      if (!res.ok || !data?.success) throw new Error(data?.message || 'Failed to create member');
+      const payload = { ...input, treeId: input.treeId || activeTreeId };
+      const fetcher = await import('@/lib/fetcher').then(m => m.fetchJson);
+      const data = await fetcher('/api/members', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (!data?.success) throw new Error(data?.message || 'Failed to create member');
       return data;
     },
+
     onSuccess: async (data) => {
       if (!data?.success) {
         toast.error(data?.message || 'Failed to create member');
@@ -71,25 +64,12 @@ export function useMemberMutations(treeId?: string) {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, input }: { id: string, input: UpdateMemberInput }) => {
-      const res = await fetch(`/api/members/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
-      });
-      let data;
-      try {
-        const text = await res.text();
-        if (!text) throw new Error("Empty response from server");
-        data = JSON.parse(text);
-      } catch (err) {
-        throw new Error("Invalid JSON response from server");
-      }
-      if (!res.ok || !data?.success) throw new Error(data?.message || "Update failed");
-      
-      // If it's a success, compare before and after?
-      // It's handled by server returning success: false if validation fails.
+      const fetcher = await import('@/lib/fetcher').then(m => m.fetchJson);
+      const data = await fetcher(`/api/members/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
+      if (!data?.success) throw new Error(data?.message || "Update failed");
       return data;
     },
+
     onSuccess: async (data) => {
       if (!data?.success) {
         toast.error(data?.message || "Update failed");
@@ -106,20 +86,12 @@ export function useMemberMutations(treeId?: string) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/members/${id}`, {
-        method: 'DELETE',
-      });
-      let data;
-      try {
-        const text = await res.text();
-        if (!text) throw new Error("Empty response from server");
-        data = JSON.parse(text);
-      } catch (err) {
-        throw new Error("Invalid JSON response from server");
-      }
-      if (!res.ok || !data?.success) throw new Error(data?.message || 'Failed to delete member');
+      const fetcher = await import('@/lib/fetcher').then(m => m.fetchJson);
+      const data = await fetcher(`/api/members/${id}`, { method: 'DELETE' });
+      if (!data?.success) throw new Error(data?.message || 'Failed to delete member');
       return data;
     },
+
     onSuccess: async (data, id) => {
       if (!data?.success) {
         toast.error(data?.message || 'Failed to delete member');

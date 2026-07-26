@@ -1,0 +1,6 @@
+# Ignore scripts and legacy one-off tools
+/scripts
+/scripts/**
+fix_*.js
+fix-*.js
+test-ui.mjs
