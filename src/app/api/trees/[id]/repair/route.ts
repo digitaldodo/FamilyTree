@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
 import { getTreePermission, canEdit } from '@/lib/permissions';
@@ -161,7 +161,7 @@ export async function POST(
     }
 
     return successResponse({ repaired: repairedCount }, `Successfully repaired ${repairedCount} corrupted records or relationships`, 200);
-  } catch (error) {
+  } catch {
     console.error('[API Error] POST /api/trees/[treeId]/repair', error);
     return errorResponse('REPAIR_ERROR', 'Failed to repair relationships', 500);
   }

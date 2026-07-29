@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
     }
 
     return listResponse(allTrees, total, page, limit);
-  } catch (error) {
+  } catch {
     const session = await auth().catch(() => null);
      
     console.log('[API Debug] GET /api/trees', {
@@ -102,10 +102,11 @@ export async function POST(request: NextRequest) {
     let body = null;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     // Strip ownerId from body — we always use session user
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { ownerId: _ignoredOwnerId, ...bodyWithoutOwner } = body;
 
     const validation = createTreeSchema
@@ -128,6 +129,7 @@ export async function POST(request: NextRequest) {
       return errorResponse('UNAUTHORIZED', 'Authenticated user record not found in database.', 401);
     }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { ownerId: _unused, ...rest } = validation.data;
 
     const tree = await prisma.tree.create({
@@ -145,7 +147,7 @@ export async function POST(request: NextRequest) {
     }
 
     return successResponse(tree, 'Tree created successfully', 201);
-  } catch (error) {
+  } catch {
      
     console.log('[API Debug] POST /api/trees', {
       method: 'POST',

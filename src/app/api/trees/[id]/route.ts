@@ -56,7 +56,7 @@ function safeJsonArray<T>(value: unknown, context: string): T[] {
     try {
       const parsed = JSON.parse(value);
       if (Array.isArray(parsed)) return parsed as T[];
-    } catch (error) {
+    } catch {
       console.warn(`[TREE_GET_INVALID_JSON_ARRAY] ${context}`, error);
       return [];
     }
@@ -81,7 +81,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
     let session;
     try {
       session = await auth();
-    } catch (error) {
+    } catch {
       console.error('[TREE_GET_AUTH_ERROR]', error);
       return errorResponse('AUTH_ERROR', 'Could not verify your session. Please sign in again.', 401);
     }
@@ -94,7 +94,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
     try {
       const resolvedParams = await params;
       id = resolvedParams.id;
-    } catch (error) {
+    } catch {
       console.error('[TREE_GET_PARAMS_ERROR]', error);
       return errorResponse('VALIDATION_ERROR', 'Invalid tree request parameters.', 400);
     }
@@ -112,7 +112,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
           _count: { select: { members: true } },
         },
       });
-    } catch (error) {
+    } catch {
       return databaseReadError(error, 'Unable to load tree metadata.');
     }
 
@@ -128,7 +128,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
           select: { role: true },
         });
         hasAccess = Boolean(collaborator);
-      } catch (error) {
+      } catch {
         return databaseReadError(error, 'Unable to verify tree permissions.');
       }
     }
@@ -143,7 +143,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
         where: { treeId: id },
         orderBy: { orderIndex: 'asc' },
       });
-    } catch (error) {
+    } catch {
       return databaseReadError(error, 'Unable to load tree generations.');
     }
 
@@ -185,7 +185,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
           media: { select: { id: true, url: true, type: true } },
         },
       });
-    } catch (error) {
+    } catch {
       return databaseReadError(error, 'Unable to load tree members.');
     }
 
@@ -198,7 +198,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
     // Auto-create of version v1 removed as it violates GET idempotency and causes unnecessary writes.
 
     return successResponse(tree, 'Tree retrieved successfully');
-  } catch (error) {
+  } catch {
     console.error('[TREE_GET_ERROR]', error);
     return errorResponse('FETCH_ERROR', 'Unable to load this tree right now.', 500);
   }
@@ -252,7 +252,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     }
 
     return successResponse(tree, 'Tree updated successfully');
-  } catch (error) {
+  } catch {
     console.error('[TREE_UPDATE_ERROR]', error);
     return errorResponse('UPDATE_ERROR', getErrorMessage(error), 500);
   }
@@ -297,7 +297,7 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     ]);
 
     return successResponse({ id }, 'Tree deleted successfully');
-  } catch (error) {
+  } catch {
     console.error('[TREE_DELETE_ERROR]', error);
     return errorResponse('DELETE_ERROR', getErrorMessage(error), 500);
   }

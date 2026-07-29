@@ -10,7 +10,7 @@ import { MemberCard } from '@/components/features/members/member-card';
 import { MemberModal } from '@/components/features/members/member-modal';
 import { MemberSearch } from '@/components/features/members/member-search';
 import { MemberFilter } from '@/components/features/members/member-filter';
-import { ArrowUpToLine, ArrowDownToLine, ArrowUp, ArrowDown, UserPlus, Plus, UsersRound, TreePine, Pencil, Trash2, MoreVertical } from 'lucide-react';
+import { ArrowUpToLine, ArrowDownToLine, UserPlus, Plus, UsersRound, TreePine, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MembersSkeleton } from '@/components/ui/members-skeleton';

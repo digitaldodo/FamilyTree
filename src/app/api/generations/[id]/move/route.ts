@@ -117,7 +117,7 @@ export async function PATCH(
     ]);
 
     return successResponse(null, 'Generation moved successfully');
-  } catch (error) {
+  } catch {
     console.error('[GENERATION_MOVE_ERROR]', error);
     return errorResponse('UPDATE_ERROR', getErrorMessage(error), 500);
   }

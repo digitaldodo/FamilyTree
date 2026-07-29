@@ -19,7 +19,7 @@ interface InviteModalProps {
 export function InviteModal({ isOpen, onClose, treeId, treeName }: InviteModalProps) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("VIEWER");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
   const inviteMutation = useMutation({

@@ -39,7 +39,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
     });
 
     return successResponse(versions, 'Tree versions retrieved successfully');
-  } catch (error) {
+  } catch {
     console.error('[TREE_VERSIONS_GET_ERROR]', error);
     return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
   }

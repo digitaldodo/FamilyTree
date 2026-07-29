@@ -41,7 +41,7 @@ export async function GET(
     });
 
     return successResponse(generations, 'Generations fetched successfully');
-  } catch (error) {
+  } catch {
      
     console.log('[API Debug] GET /api/trees/[id]/generations', {
       method: 'GET',
@@ -85,7 +85,7 @@ export async function POST(
     let body = null;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const validation = createGenerationSchema.safeParse(body);
@@ -144,7 +144,7 @@ export async function POST(
     });
 
     return successResponse(result, 'Generation created successfully', 201);
-  } catch (error) {
+  } catch {
      
     console.log('[API Debug] POST /api/trees/[id]/generations', {
       method: 'POST',

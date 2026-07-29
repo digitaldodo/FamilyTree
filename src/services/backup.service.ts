@@ -35,7 +35,7 @@ export const BackupService = {
       // Cleanup
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    } catch (error) {
+    } catch {
       console.error('Failed to export tree JSON:', error);
       throw error;
     }

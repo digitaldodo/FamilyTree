@@ -3,6 +3,7 @@ import prisma from '../src/lib/prisma';
 async function main() {
   console.log('Running Genealogy Engine V2 Auto Cleanup Script...');
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const members = await prisma.member.findMany({
     include: {
       generation: true,

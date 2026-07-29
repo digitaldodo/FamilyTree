@@ -34,7 +34,7 @@ export default function LoginPage() {
         router.push("/dashboard");
         router.refresh();
       }
-    } catch (error) {
+    } catch {
       toast.error("An error occurred during login.");
     } finally {
       setIsLoading(false);

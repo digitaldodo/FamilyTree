@@ -28,7 +28,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     let body = null;
     try {
       body = await req.json();
-    } catch (e) {
+    } catch {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const { versionId, events } = body as { versionId: string | null; events: ChangeEvent[] };

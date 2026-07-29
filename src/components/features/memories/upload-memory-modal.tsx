@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { CldUploadWidget } from 'next-cloudinary';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ImagePlus, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
 interface UploadMemoryModalProps {
@@ -34,7 +33,7 @@ export function UploadMemoryModal({ isOpen, onClose, onUpload }: UploadMemoryMod
       onClose();
       setCaption('');
       setEventTag('');
-    } catch (e) {
+    } catch {
       console.error(e);
     } finally {
       setIsProcessing(false);

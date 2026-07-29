@@ -1,5 +1,4 @@
 import prisma from '@/lib/prisma';
-import { RelationshipEngine } from '@/lib/relationship-engine';
 
 export type RepairReport = {
   treeId: string;

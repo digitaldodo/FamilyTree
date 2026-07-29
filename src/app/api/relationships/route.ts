@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
 import { getTreePermission, canEdit } from '@/lib/permissions';
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     let body = null;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const validation = createRelationshipSchema.safeParse(body);
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     await createTreeSnapshot(fromMember.treeId, session.user.id, 'Updated relationships');
 
     return successResponse(newRel, 'Relationship created successfully', 201);
-  } catch (error) {
+  } catch {
      
     console.log('[API Debug] POST /api/relationships', {
       method: 'POST',

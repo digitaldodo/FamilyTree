@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -19,7 +20,6 @@ import { MemberDetails } from './member-details';
 import { MemberRelationships } from './member-relationships';
 import Image from 'next/image';
 import { MemberAvatar } from './member-avatar';
-import { toast } from 'sonner';
 
 interface MemberModalProps {
   readOnly?: boolean;

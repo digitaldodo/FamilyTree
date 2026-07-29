@@ -87,8 +87,8 @@ export const GenealogyEngine = {
       const parentMap = new Map<string, string[]>();
       
       for (const e of parentEdges) {
-        childrenMap.get(e.source)?.push(e.target) ?? childrenMap.set(e.source, [e.target]);
-        parentMap.get(e.target)?.push(e.source) ?? parentMap.set(e.target, [e.source]);
+        if (childrenMap.has(e.source)) { childrenMap.get(e.source).push(e.target); } else { childrenMap.set(e.source, [e.target]); }
+        if (parentMap.has(e.target)) { parentMap.get(e.target).push(e.source); } else { parentMap.set(e.target, [e.source]); }
       }
 
       const nodeGen = new Map<string, number>();

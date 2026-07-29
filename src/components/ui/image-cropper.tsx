@@ -41,7 +41,7 @@ export function ImageCropper({
       if (croppedImage) {
         onCropComplete(croppedImage);
       }
-    } catch (e) {
+    } catch {
       console.error(e);
     }
   };

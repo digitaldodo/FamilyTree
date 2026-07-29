@@ -51,7 +51,7 @@ export async function PATCH(
     let body = null;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const validation = updateGenerationSchema.safeParse(body);
@@ -81,7 +81,7 @@ export async function PATCH(
     });
 
     return successResponse(updatedGen, 'Generation renamed successfully');
-  } catch (error) {
+  } catch {
     console.error('[GENERATION_PUT_ERROR]', error);
     return errorResponse('UPDATE_ERROR', getErrorMessage(error), 500);
   }
@@ -184,7 +184,7 @@ export async function DELETE(
     });
 
     return successResponse(null, 'Generation deleted successfully');
-  } catch (error) {
+  } catch {
     console.error('[GENERATION_DELETE_ERROR]', error);
     return errorResponse('DELETE_ERROR', getErrorMessage(error), 500);
   }

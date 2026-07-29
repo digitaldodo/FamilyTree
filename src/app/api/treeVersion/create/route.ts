@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     let body = null;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const { treeId, name, membersData, relationsData, gensData } = body;
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     });
 
     return successResponse(version, 'Tree version created successfully', 201);
-  } catch (error) {
+  } catch {
     console.error('[TREE_VERSION_CREATE_ERROR]', error);
     return errorResponse('CREATE_ERROR', getErrorMessage(error), 500);
   }

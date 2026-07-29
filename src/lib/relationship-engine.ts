@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma';
 import { Member, Relationship, RelationshipType, Generation } from '@/generated/prisma/client';
-import { isSpouseEligible, validateRelationshipCore } from '@/utils/relationship';
+import { validateRelationshipCore } from '@/utils/relationship';
 
 export type MemberWithRelations = Member & {
   generation: Generation;

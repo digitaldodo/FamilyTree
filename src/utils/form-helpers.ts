@@ -1,6 +1,6 @@
 // Form Helpers
 
-import { MemberWithRelations, CreateMemberInput, UpdateMemberInput } from "@/types/member";
+import { MemberWithRelations, UpdateMemberInput } from "@/types/member";
 
 export function getMemberDefaultValues(member?: MemberWithRelations): UpdateMemberInput {
   const formatDateToDDMMYYYY = (dateVal?: Date | string | null) => {

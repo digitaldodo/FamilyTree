@@ -1,11 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { MemberWithRelations } from '@/types/member';
 import { Card, CardContent } from '@/components/ui/card';
-import { User2, Calendar, Users, MoreVertical, Eye, Pencil, ArrowRightLeft, Trash2 } from 'lucide-react';
+import { MoreVertical, Eye, Pencil, Trash2 } from 'lucide-react';
 import { useAppStore } from '@/store/use-app-store';
 import { useGenerations } from '@/hooks/use-generations';
-import { getGenerationLabel } from '@/utils/date';
 import { format } from 'date-fns';
-import Image from 'next/image';
 import { MemberAvatar } from './member-avatar';
 import { Dropdown } from '@/components/ui/dropdown';
 import { Button } from '@/components/ui/button';

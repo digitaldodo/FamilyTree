@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAppStore } from '@/store/use-app-store';
 import { useUserTrees } from '@/hooks/use-user-trees';
 

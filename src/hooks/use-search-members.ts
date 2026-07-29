@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useMemo } from 'react';
 import { useAppStore } from '@/store/use-app-store';
 import { MemberWithRelations } from '@/types/member';

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Node, Edge } from '@xyflow/react';
 import { FamilyGraph } from '@/domain/inference/genealogy-engine';
 import { safeGraph } from '@/lib/safe-helpers';

@@ -2,7 +2,6 @@
 
 import { Panel } from '@xyflow/react';
 import { useMembers } from '@/hooks/use-members';
-import { useAppStore } from '@/store/use-app-store';
 
 const GENERATION_COLORS = [
   'bg-amber-500',

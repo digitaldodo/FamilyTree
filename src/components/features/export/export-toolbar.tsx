@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ExportService, ExportFormat } from "@/services/export.service";
 import { Button } from "@/components/ui/button";
-import { Download, FileImage, FileText, Loader2 } from "lucide-react";
+import { FileImage, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
 
@@ -24,7 +24,7 @@ export function ExportToolbar({ elementId, treeId, filename = "family-tree" }: E
       const bgColor = resolvedTheme === "dark" ? "#09090b" : "#ffffff";
       await ExportService.exportTree(elementId, format, filename, bgColor);
       toast.success(`Tree exported as ${format} successfully!`);
-    } catch (error) {
+    } catch {
       toast.error(`Failed to export tree as ${format}.`);
     } finally {
       setIsExporting(null);

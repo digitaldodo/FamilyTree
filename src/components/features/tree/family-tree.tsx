@@ -86,7 +86,7 @@ function FamilyTreeCanvas() {
         body: JSON.stringify({ treeId: activeTreeId, name }),
       });
       await queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] });
-    } catch (error) {
+    } catch {
       console.error('Failed to create generation', error);
     }
   };

@@ -26,7 +26,7 @@ export function MemoryCard({ memory, onDelete, compact, onClick }: MemoryCardPro
     setIsDeleting(true);
     try {
       await onDelete(memory.id, memory.publicId);
-    } catch (e) {
+    } catch {
       setIsDeleting(false);
     }
   };

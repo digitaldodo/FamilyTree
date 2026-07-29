@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
@@ -53,7 +54,7 @@ export async function GET(_request: NextRequest) {
     }
 
     return successResponse(tree, 'Default tree retrieved successfully');
-  } catch (error) {
+  } catch {
     console.error('[DEFAULT_TREE_FETCH_ERROR]', error);
     return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
   }

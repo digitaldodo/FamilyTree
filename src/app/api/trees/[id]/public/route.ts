@@ -47,7 +47,8 @@ export async function GET(_request: NextRequest, { params }: Params) {
 
     // Strip sensitive information
     const sanitizedMembers = tree.members.map(member => {
-      const { email, phone, ...safeMember } = member;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { email: _email, phone: _phone, ...safeMember } = member;
       return safeMember;
     });
 
@@ -57,7 +58,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
     };
 
     return successResponse(safeTree, 'Public tree retrieved successfully');
-  } catch (error) {
+  } catch {
     console.error('[PUBLIC_TREE_FETCH_ERROR]', error);
     return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
   }

@@ -32,7 +32,7 @@ export async function registerUser(formData: FormData) {
     });
 
     return { success: true };
-  } catch (error) {
+  } catch {
     return { error: "Failed to create account" };
   }
 }

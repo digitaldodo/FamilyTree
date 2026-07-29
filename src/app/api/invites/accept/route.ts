@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     let body = null;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const { token } = body;
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       },
       'Invite accepted successfully',
     );
-  } catch (error) {
+  } catch {
     console.error('[INVITE_ACCEPT_ERROR]', error);
     return errorResponse('ACCEPT_ERROR', getErrorMessage(error), 500);
   }

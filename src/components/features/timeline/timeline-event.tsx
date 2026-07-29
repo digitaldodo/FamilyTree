@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { motion } from "framer-motion";
 import { format } from "date-fns";
-import { Heart, UserPlus, FileText, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import { MemberAvatar } from "../members/member-avatar";
 
 export type TimelineEventType = "BIRTH" | "MARRIAGE" | "DEATH" | "CHILD_BORN" | "CUSTOM";

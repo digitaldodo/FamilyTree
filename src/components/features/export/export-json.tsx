@@ -19,7 +19,7 @@ export function ExportJson({ treeId, filename }: ExportJsonProps) {
       setIsExporting(true);
       await BackupService.exportTreeJson(treeId, filename);
       toast.success('Tree backup downloaded successfully!');
-    } catch (error) {
+    } catch {
       toast.error('Failed to download tree backup.');
     } finally {
       setIsExporting(false);

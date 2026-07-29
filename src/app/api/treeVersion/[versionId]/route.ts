@@ -45,7 +45,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
     };
 
     return successResponse(parsedVersion, 'Tree version retrieved successfully');
-  } catch (error) {
+  } catch {
     console.error('[TREE_VERSION_GET_ERROR]', error);
     return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
   }

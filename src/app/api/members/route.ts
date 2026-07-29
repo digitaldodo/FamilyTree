@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma';
 import { getTreePermission, canEdit, canView } from '@/lib/permissions';
 import { successResponse, listResponse, errorResponse, parsePagination } from '@/lib/utils';
 import { createMemberSchema } from '@/validations/member.schema';
-import { getErrorMessage } from '@/utils/helpers';
+import {  } from '@/utils/helpers';
 import { isSpouseEligible } from '@/utils/relationship';
 import { createTreeSnapshot } from '@/lib/versioning';
 export const dynamic = 'force-dynamic';
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     let body = null;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
 

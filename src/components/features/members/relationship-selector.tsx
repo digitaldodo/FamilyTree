@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import { useAppStore } from '@/store/use-app-store';
 import { useMembers } from '@/hooks/use-members';
 import { getEligibleParents, getEligibleSpouses, getEligibleChildren } from '@/utils/relationship';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
