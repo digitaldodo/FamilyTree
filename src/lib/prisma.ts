@@ -8,7 +8,7 @@ const globalForPrisma = globalThis as unknown as {
 
 const getPrismaClient = () => {
   const connectionString = process.env.DATABASE_URL
-  const pool = new pg.Pool({ connectionString })
+  const pool = new pg.Pool({ connectionString, max: 5 })
   const adapter = new PrismaPg(pool)
   return new PrismaClient({
     adapter,
@@ -18,8 +18,7 @@ const getPrismaClient = () => {
 
 export const prisma = globalForPrisma.prisma ?? getPrismaClient()
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma
-}
+// Cache in globalThis to reuse across hot reloads (dev) AND serverless invocations (prod)
+globalForPrisma.prisma = prisma
 
 export default prisma;

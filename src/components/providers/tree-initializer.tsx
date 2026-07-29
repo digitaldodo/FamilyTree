@@ -15,18 +15,22 @@ export function TreeInitializer() {
     } else {
       setIsInitializingTrees(false);
       
-      if (userTrees && !hasInitialized.current) {
-        hasInitialized.current = true;
+      if (userTrees) {
         if (userTrees.length > 0) {
-          if (activeTreeId) {
-            const activeTree = userTrees.find((t) => t.id === activeTreeId);
-            if (!activeTree) {
+          if (!hasInitialized.current) {
+            hasInitialized.current = true;
+            if (activeTreeId) {
+              const activeTree = userTrees.find((t) => t.id === activeTreeId);
+              if (!activeTree) {
+                setActiveTreeId(userTrees[0].id);
+              }
+            } else {
               setActiveTreeId(userTrees[0].id);
             }
-          } else {
-            setActiveTreeId(userTrees[0].id);
           }
         } else {
+          // Reset when all trees are deleted so re-initialization can occur
+          hasInitialized.current = false;
           setActiveTreeId(null);
         }
       }

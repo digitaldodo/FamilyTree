@@ -52,7 +52,7 @@ export function useTreeCollaboration(treeId: string | null, versionId: string | 
         return false;
       } else {
         clearPendingChanges();
-        queryClient.invalidateQueries({ queryKey: ['tree', treeId] });
+        await queryClient.invalidateQueries({ queryKey: ['tree', treeId] });
         return true;
       }
     } catch (error: any) {
@@ -61,7 +61,7 @@ export function useTreeCollaboration(treeId: string | null, versionId: string | 
     } finally {
       setIsSyncing(false);
     }
-  }, [pendingChanges, isSyncing, treeId, versionId, hasConflict, queryClient, clearPendingChanges, setHasConflict]);
+  }, [isSyncing, treeId, versionId, hasConflict, queryClient, clearPendingChanges, setHasConflict]);
 
   return {
     pendingChanges,

@@ -45,7 +45,6 @@ export const GENDER_LABELS: Record<string, string> = {
 export const RELATIONSHIP_LABELS: Record<string, string> = {
   PARENT: 'Parent',
   SPOUSE: 'Spouse',
-  SIBLING: 'Sibling',
 };
 
 /** Default avatar placeholder base URL */

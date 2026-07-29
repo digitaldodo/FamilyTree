@@ -12,8 +12,8 @@ export function useGenerations(treeId?: string) {
 
   const refreshTree = async () => {
     if (!resolvedTreeId) return;
-    await queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
-    await queryClient.refetchQueries({ queryKey: ['tree', resolvedTreeId], type: 'active' });
+    await queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId], exact: false });
+    await queryClient.refetchQueries({ queryKey: ['tree', resolvedTreeId], type: 'active', exact: false });
   };
 
   const createMutation = useMutation({

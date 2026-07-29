@@ -225,12 +225,10 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
     // Use transaction to update member and replace relationships if provided
     await prisma.$transaction(async (tx) => {
-      // Use optimistic concurrency by ensuring updatedAt matches the current value fetched earlier.
-      // This prevents lost updates when concurrent clients modify the same member.
       const updateData: any = {
         ...memberData,
         ...(generationId !== undefined && {
-          generation: { connect: { id: generationId } },
+          generationId,
         }),
         ...(birthDate !== undefined && {
           birthDate: birthDate ? new Date(birthDate) : null,

@@ -184,13 +184,13 @@ export type MemberAggregateArgs<ExtArgs extends runtime.Types.Extensions.Interna
   where?: Prisma.MemberWhereInput
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-   *
+   * 
    * Determine the order of Members to fetch.
    */
   orderBy?: Prisma.MemberOrderByWithRelationInput | Prisma.MemberOrderByWithRelationInput[]
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-   *
+   * 
    * Sets the start position
    */
   cursor?: Prisma.MemberWhereUniqueInput
@@ -220,13 +220,13 @@ export type MemberAggregateArgs<ExtArgs extends runtime.Types.Extensions.Interna
   _avg?: MemberAvgAggregateInputType
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   *
+   * 
    * Select which fields to sum
   **/
   _sum?: MemberSumAggregateInputType
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   *
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: MemberMinAggregateInputType

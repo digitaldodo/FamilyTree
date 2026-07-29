@@ -53,9 +53,9 @@ export async function createTreeSnapshot(
     data: {
       treeId,
       name: name || null,
-      membersData: JSON.stringify(membersWithRelations),
-      relationsData: JSON.stringify(relationships),
-      gensData: JSON.stringify(generations),
+      membersData: membersWithRelations as any,
+      relationsData: relationships as any,
+      gensData: generations as any,
       createdBy: userId,
     },
   });

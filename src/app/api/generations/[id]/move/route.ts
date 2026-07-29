@@ -38,7 +38,13 @@ export async function PATCH(
       return errorResponse('FORBIDDEN', 'Insufficient permissions', 403);
     }
 
-    const { direction } = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
+    }
+    const { direction } = body;
 
     if (direction !== 'up' && direction !== 'down') {
       return errorResponse('VALIDATION_ERROR', 'Direction must be up or down', 400);

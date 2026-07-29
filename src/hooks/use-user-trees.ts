@@ -18,6 +18,7 @@ export function useUserTrees() {
       if (!res.ok || !json.success) throw new Error(json.message);
       return json.data as TreeSummary[];
     },
+    staleTime: 2 * 60 * 1000, // 2 minutes — tree list rarely changes
   });
 
   return {

@@ -16,7 +16,7 @@ export async function getTreePermission(
   // Check if user is the owner
   const tree = await prisma.tree.findUnique({
     where: { id: treeId },
-    select: { ownerId: true },
+    select: { ownerId: true, isPublic: true },
   });
 
   if (!tree) return null;
@@ -28,19 +28,23 @@ export async function getTreePermission(
     select: { role: true },
   });
 
-  if (!collaborator) return null;
-
-  // Map TreeRole enum to permission string
-  switch (collaborator.role) {
-    case 'ADMIN':
-      return 'ADMIN';
-    case 'EDITOR':
-      return 'EDITOR';
-    case 'VIEWER':
-      return 'VIEWER';
-    default:
-      return null;
+  if (collaborator) {
+    switch (collaborator.role) {
+      case 'ADMIN':
+        return 'ADMIN';
+      case 'EDITOR':
+        return 'EDITOR';
+      case 'VIEWER':
+        return 'VIEWER';
+      default:
+        return null;
+    }
   }
+
+  // Grant read-only access to public trees
+  if (tree.isPublic) return 'VIEWER';
+
+  return null;
 }
 
 /** Check if the user can edit tree content (add/edit members, relationships) */

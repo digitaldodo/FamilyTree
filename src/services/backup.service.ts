@@ -9,6 +9,10 @@ export const BackupService = {
    */
   async exportTreeJson(treeId: string, filename?: string): Promise<void> {
     try {
+      if (typeof window === 'undefined') {
+        throw new Error('Export is only available in the browser');
+      }
+
       const response = await getTreeById(treeId);
       const treeData = response.data;
       
