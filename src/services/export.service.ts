@@ -22,7 +22,7 @@ export class ExportService {
       } else if (format === 'PDF') {
         await exportElementAsPDF(elementId, `${filename}.pdf`, backgroundColor);
       }
-    } catch {
+    } catch (error) {
       console.error(`Export to ${format} failed:`, error);
       throw error;
     }

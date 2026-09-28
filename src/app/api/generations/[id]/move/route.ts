@@ -41,7 +41,7 @@ export async function PATCH(
     let body;
     try {
       body = await request.json();
-    } catch {
+    } catch (error) {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const { direction } = body;
@@ -117,7 +117,7 @@ export async function PATCH(
     ]);
 
     return successResponse(null, 'Generation moved successfully');
-  } catch {
+  } catch (error) {
     console.error('[GENERATION_MOVE_ERROR]', error);
     return errorResponse('UPDATE_ERROR', getErrorMessage(error), 500);
   }

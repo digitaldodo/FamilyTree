@@ -6,6 +6,7 @@ import { successResponse, errorResponse } from '@/lib/utils';
 import { updateMemberSchema } from '@/validations/member.schema';
 import { isSpouseEligible } from '@/utils/relationship';
 import { createTreeSnapshot } from '@/lib/versioning';
+import { computeRelationshipDiff, normalizeRelationshipSet } from '@/lib/relationship-canonical';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -111,9 +112,9 @@ export async function PUT(request: NextRequest, { params }: Params) {
       );
     }
 
-    const { birthDate, deathDate, generationId, ...rest } = validation.data;
+    const { birthDate, deathDate, generationId, relations, ...rest } = validation.data;
     const memberData = normalizeNullableFields(rest);
-    const relations = body.relations;
+    const safeRelations = Array.isArray(relations) ? relations : [];
 
     if (relations && Array.isArray(relations)) {
       const relationIds = relations.map((r: any) => r.id).filter(Boolean);
@@ -134,10 +135,9 @@ export async function PUT(request: NextRequest, { params }: Params) {
       const newGeneration = await prisma.generation.findUnique({ where: { id: finalGenerationId } });
       if (!newGeneration) return errorResponse('NOT_FOUND', 'Generation not found', 404);
 
-      // If we are given relations from body, we need to fetch their generations to validate
       if (relationPayloadProvided) {
-        const relativeIds = relations.map((r: any) => r.id).filter(Boolean);
-        const spousesInPayload = relations.filter((r: any) => r.type === 'SPOUSE');
+        const relativeIds = safeRelations.map((r: any) => r.id).filter(Boolean);
+        const spousesInPayload = safeRelations.filter((r: any) => r.type === 'SPOUSE');
         if (spousesInPayload.length > 1) {
           return errorResponse('VALIDATION_ERROR', 'Member already has a spouse.', 400);
         }
@@ -147,7 +147,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
           include: { generation: true }
         });
 
-        for (const rel of relations) {
+        for (const rel of safeRelations) {
           if (!rel.id || !rel.type) continue;
           const relative = relatives.find(r => r.id === rel.id);
           if (!relative) continue;
@@ -155,30 +155,27 @@ export async function PUT(request: NextRequest, { params }: Params) {
           if (rel.type === 'SPOUSE') {
             const memberGender = memberData.gender !== undefined ? memberData.gender as any : existing.gender;
             if (relative.generation.orderIndex !== newGeneration.orderIndex || !isSpouseEligible(memberGender, relative.gender)) {
-               return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation and satisfy spouse eligibility rules.', 400);
+              return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation and satisfy spouse eligibility rules.', 400);
             }
             const relativeSpouseCount = await prisma.relationship.count({
-              where: {
-                type: 'SPOUSE',
-                OR: [{ fromId: rel.id }, { toId: rel.id }],
-                NOT: { OR: [{ fromId: id }, { toId: id }] }
-              }
+             where: {
+               type: 'SPOUSE',
+               OR: [{ fromId: rel.id }, { toId: rel.id }],
+               NOT: { OR: [{ fromId: id }, { toId: id }] }
+             }
             });
             if (relativeSpouseCount > 0) {
-              return errorResponse('VALIDATION_ERROR', 'Member already has a spouse.', 400);
+             return errorResponse('VALIDATION_ERROR', 'Member already has a spouse.', 400);
             }
           } else if (rel.type === 'PARENT') {
-             // Form says "Parents" - meaning the relative is the Parent, member is the Child.
              if (newGeneration.orderIndex !== relative.generation.orderIndex + 1) {
                return errorResponse('VALIDATION_ERROR', `Parent must belong exactly to the generation immediately above the child.`, 400);
              }
-             // Since member is the child, we must ensure member doesn't exceed 2 parents in total after this update
-             const parentsInPayload = relations.filter((r: any) => r.type === 'PARENT');
+             const parentsInPayload = safeRelations.filter((r: any) => r.type === 'PARENT');
              if (parentsInPayload.length > 2) {
                return errorResponse('VALIDATION_ERROR', 'A member can have at most two parents.', 400);
              }
           } else if (rel.type === 'CHILD') {
-             // Form says "Children" - meaning the relative is the Child, member is the Parent.
              if (newGeneration.orderIndex + 1 !== relative.generation.orderIndex) {
                return errorResponse('VALIDATION_ERROR', `Parent must belong exactly to the generation immediately above the child.`, 400);
              }
@@ -186,19 +183,15 @@ export async function PUT(request: NextRequest, { params }: Params) {
                where: {
                  type: 'PARENT',
                  toId: rel.id,
-                 NOT: { fromId: id } // Exclude the current member
+                 NOT: { fromId: id }
                }
              });
-             // We are adding member as a parent of rel.id. If rel.id already has 2 parents, it's an error.
-             // Wait, if member is already one of the parents, it doesn't count towards the limit, but if they have 2 OTHER parents, it's > 2.
-             // Actually, if relativeParentCount >= 2, we can't add member as a new parent.
              if (relativeParentCount >= 2) {
                return errorResponse('VALIDATION_ERROR', 'This child already has two parents.', 400);
              }
           }
         }
       } else {
-        // Validate against existing relations
         const existingRelations = await prisma.relationship.findMany({
           where: { OR: [{ fromId: id }, { toId: id }] },
           include: { from: { include: { generation: true } }, to: { include: { generation: true } } }
@@ -209,7 +202,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
             const relative = rel.fromId === id ? rel.to : rel.from;
             const memberGender = memberData.gender !== undefined ? memberData.gender as any : existing.gender;
             if (relative.generation.orderIndex !== newGeneration.orderIndex || !isSpouseEligible(memberGender, relative.gender)) {
-               return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation and satisfy spouse eligibility rules.', 400);
+              return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation and satisfy spouse eligibility rules.', 400);
             }
           } else if (rel.type === 'PARENT') {
              const parentOrder = rel.fromId === id ? newGeneration.orderIndex : rel.from.generation.orderIndex;
@@ -251,31 +244,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
       const updatedMember = await tx.member.findUnique({ where: { id } });
 
       if (relationPayloadProvided) {
-        // ── Diff-based relationship update ──────────────────────────────
-        // Instead of deleting all relationships and recreating, we compute
-        // the difference between existing and desired states, then only
-        // add/remove what actually changed. This prevents data destruction
-        // when relationships aren't explicitly modified by the user.
-
-        // Step 1: Normalize incoming relations to canonical DB format
-        type CanonicalRel = { type: 'PARENT' | 'SPOUSE'; fromId: string; toId: string };
-
-        const desiredRels: CanonicalRel[] = [];
-        for (const rel of relations) {
-          if (!rel.id || !rel.type) continue;
-          if (rel.type === 'PARENT') {
-            // Form: rel is a parent of member → fromId=rel.id, toId=member
-            desiredRels.push({ type: 'PARENT', fromId: rel.id, toId: id });
-          } else if (rel.type === 'CHILD') {
-            // Form: rel is a child of member → fromId=member, toId=rel.id
-            desiredRels.push({ type: 'PARENT', fromId: id, toId: rel.id });
-          } else if (rel.type === 'SPOUSE') {
-            const [id1, id2] = [id, rel.id].sort();
-            desiredRels.push({ type: 'SPOUSE', fromId: id1, toId: id2 });
-          }
-        }
-
-        // Step 2: Fetch existing relationships from DB
+        const desiredRels = normalizeRelationshipSet(id, safeRelations);
         const existingRels = await tx.relationship.findMany({
           where: {
             OR: [
@@ -283,86 +252,26 @@ export async function PUT(request: NextRequest, { params }: Params) {
               { type: 'PARENT', fromId: id },
               { type: 'SPOUSE', fromId: id },
               { type: 'SPOUSE', toId: id },
-            ]
-          }
+            ],
+          },
         });
 
-        // Step 3: Compute diff using composite keys
-        const relKey = (r: CanonicalRel) => {
-          if (r.type === 'SPOUSE') {
-            const [id1, id2] = [r.fromId, r.toId].sort();
-            return `SPOUSE:${id1}:${id2}`;
-          }
-          return `${r.type}:${r.fromId}:${r.toId}`;
-        };
-        const existingKeys = new Set(existingRels.map(r => relKey({ type: r.type as 'PARENT' | 'SPOUSE', fromId: r.fromId, toId: r.toId })));
-        const desiredKeys = new Set(desiredRels.map(r => relKey(r)));
+        const { toAdd, toRemove } = computeRelationshipDiff(existingRels, desiredRels);
 
-        const toRemove = existingRels.filter(r =>
-          !desiredKeys.has(relKey({ type: r.type as 'PARENT' | 'SPOUSE', fromId: r.fromId, toId: r.toId }))
-        );
-        const toAdd = desiredRels.filter(r => !existingKeys.has(relKey(r)));
-
-        // Step 4: Delete only removed relationships
         for (const rel of toRemove) {
+          if (!rel.id) continue;
           await tx.relationship.delete({ where: { id: rel.id } });
         }
 
-        // Step 5: Create new relationships (SPOUSE first so auto-linking works)
-        const spouseAdds = toAdd.filter(r => r.type === 'SPOUSE');
-        const parentAdds = toAdd.filter(r => r.type === 'PARENT');
-
-        for (const rel of spouseAdds) {
-          await tx.relationship.upsert({
-            where: { fromId_toId_type: { fromId: rel.fromId, toId: rel.toId, type: rel.type } },
-            update: {},
-            create: { type: rel.type, fromId: rel.fromId, toId: rel.toId, treeId: existing.treeId },
+        for (const rel of toAdd) {
+          await tx.relationship.create({
+            data: {
+              type: rel.type,
+              fromId: rel.fromId,
+              toId: rel.toId,
+              treeId: existing.treeId,
+            },
           });
-        }
-
-        for (const rel of parentAdds) {
-          await tx.relationship.upsert({
-            where: { fromId_toId_type: { fromId: rel.fromId, toId: rel.toId, type: rel.type } },
-            update: {},
-            create: { type: rel.type, fromId: rel.fromId, toId: rel.toId, treeId: existing.treeId },
-          });
-
-          // Auto-link child to spouse if member is the parent.
-          if (rel.fromId === id) {
-            const spouses = await tx.relationship.findMany({
-              where: { type: 'SPOUSE', OR: [{ fromId: id }, { toId: id }] }
-            });
-            if (spouses.length > 0) {
-              const spouseId = spouses[0].fromId === id ? spouses[0].toId : spouses[0].fromId;
-              await tx.relationship.upsert({
-                where: { fromId_toId_type: { fromId: spouseId, toId: rel.toId, type: 'PARENT' } },
-                update: {},
-                create: { type: 'PARENT', fromId: spouseId, toId: rel.toId, treeId: existing.treeId },
-              });
-            }
-          }
-
-        }
-
-        const removedChildren = toRemove.filter(r => r.type === 'PARENT' && r.fromId === id);
-        if (removedChildren.length > 0) {
-          const currentSpouses = await tx.relationship.findMany({
-            where: { type: 'SPOUSE', OR: [{ fromId: id }, { toId: id }] }
-          });
-
-          for (const removed of removedChildren) {
-            for (const spouse of currentSpouses) {
-              const spouseId = spouse.fromId === id ? spouse.toId : spouse.fromId;
-              const spouseStillDesired = desiredRels.some(
-                r => r.type === 'PARENT' && r.fromId === spouseId && r.toId === removed.toId
-              );
-              if (!spouseStillDesired) {
-                await tx.relationship.deleteMany({
-                  where: { type: 'PARENT', fromId: spouseId, toId: removed.toId }
-                });
-              }
-            }
-          }
         }
       }
 

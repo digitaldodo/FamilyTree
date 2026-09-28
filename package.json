@@ -7,7 +7,7 @@
     "build": "next build --webpack",
     "vercel-build": "prisma migrate deploy && next build --webpack",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint . --max-warnings 0",
     "seed": "npx tsx prisma/seed.ts",
     "cleanup": "npx tsx scripts/cleanup-relationships.ts"
   },

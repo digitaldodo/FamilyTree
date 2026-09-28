@@ -42,8 +42,7 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
       queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
     },
     onError: (error: any) => {
-      console.error(error);
-      toast.error(`Repair failed: ${error.message}`);
+      toast.error(`Repair failed: ${error.message || 'Unknown repair error'}`);
     }
   });
 

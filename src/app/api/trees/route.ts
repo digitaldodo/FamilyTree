@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
     }
 
     return listResponse(allTrees, total, page, limit);
-  } catch {
+  } catch (error) {
     const session = await auth().catch(() => null);
      
     console.log('[API Debug] GET /api/trees', {
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
     }
 
     return successResponse(tree, 'Tree created successfully', 201);
-  } catch {
+  } catch (error) {
      
     console.log('[API Debug] POST /api/trees', {
       method: 'POST',

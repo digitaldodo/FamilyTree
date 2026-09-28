@@ -33,8 +33,9 @@ export function UploadMemoryModal({ isOpen, onClose, onUpload }: UploadMemoryMod
       onClose();
       setCaption('');
       setEventTag('');
-    } catch {
-      console.error(e);
+    } catch (error) {
+      console.error('Memory upload failed', error);
+      toast.error('Image upload failed');
     } finally {
       setIsProcessing(false);
     }
@@ -82,7 +83,7 @@ export function UploadMemoryModal({ isOpen, onClose, onUpload }: UploadMemoryMod
             onSuccess={handleUploadSuccess}
             onError={(error) => {
                
-              console.log('[API Debug] Cloudinary upload failed', error);
+              // Cloudinary upload failed; surface error to the user.
               toast.error('Image upload failed');
               setIsProcessing(false);
             }}

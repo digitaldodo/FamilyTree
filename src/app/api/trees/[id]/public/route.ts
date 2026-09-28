@@ -58,7 +58,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
     };
 
     return successResponse(safeTree, 'Public tree retrieved successfully');
-  } catch {
+  } catch (error) {
     console.error('[PUBLIC_TREE_FETCH_ERROR]', error);
     return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
   }

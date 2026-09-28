@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import * as React from 'react';
 import { Node, Edge } from '@xyflow/react';
 import { FamilyGraph } from '@/domain/inference/genealogy-engine';
 import { safeGraph } from '@/lib/safe-helpers';
@@ -14,8 +15,7 @@ interface FamilyTreeRendererProps {
 }
 
 export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any[]) {
-  
-  const { nodes, edges } = useMemo(() => {
+  const { nodes, edges } = React.useMemo(() => {
     const rfNodes: Node[] = [];
     const rfEdges: Edge[] = [];
 

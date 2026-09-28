@@ -37,7 +37,7 @@ interface MemberFormProps {
 export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberFormProps) {
   const { activeTreeId, defaultGenerationForNewMember } = useAppStore();
   const { generations, createGeneration } = useGenerations();
-  const { members } = useMembers();
+  useMembers();
   const [status, setStatus] = React.useState<'Alive' | 'Deceased'>(member?.deathDate ? 'Deceased' : 'Alive');
 
   const {
@@ -108,32 +108,13 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       setRelations(prev => [...prev, { id, type }]);
       return;
     }
+
     if (type === 'PARENT') {
       const parentCount = relations.filter(r => r.type === 'PARENT').length;
       if (parentCount >= 2) {
-        alert("A member can have at most two parents.");
+        alert('A member can have at most two parents.');
         return;
       }
-      
-      // Check if the selected parent has a spouse
-      const selectedParent = members.find(m => m.id === id);
-      if (selectedParent) {
-        const spouseRel = selectedParent.relationsFrom.find(r => r.type === 'SPOUSE') || 
-                          selectedParent.relationsTo.find(r => r.type === 'SPOUSE');
-        if (spouseRel) {
-          const spouseId = spouseRel.fromId === id ? spouseRel.toId : spouseRel.fromId;
-          // Automatically link child to both parents if they have a spouse
-          if (!relations.some(r => r.id === spouseId && r.type === 'PARENT')) {
-            setRelations(prev => [...prev, { id, type }, { id: spouseId, type }]);
-            return;
-          }
-        }
-      }
-    }
-    if (type === 'CHILD') {
-      // If we are adding a child to the current member, check if current member has a spouse
-      // The backend automatically links the child to both parents if we link the child to this member.
-      // No extra UI logic needed here since the backend handles it.
     }
 
     setRelations(prev => [...prev, { id, type }]);
@@ -158,7 +139,6 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       generationId: data.generationId || member?.generationId || defaultGenerationForNewMember || undefined,
       relations
     };
-    console.log("FORM VALUES", formattedData);
     await onSubmit(formattedData);
   };
 

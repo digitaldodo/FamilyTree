@@ -41,7 +41,7 @@ export async function GET(
     });
 
     return successResponse(generations, 'Generations fetched successfully');
-  } catch {
+  } catch (error) {
      
     console.log('[API Debug] GET /api/trees/[id]/generations', {
       method: 'GET',
@@ -144,7 +144,7 @@ export async function POST(
     });
 
     return successResponse(result, 'Generation created successfully', 201);
-  } catch {
+  } catch (error) {
      
     console.log('[API Debug] POST /api/trees/[id]/generations', {
       method: 'POST',

@@ -24,6 +24,7 @@ export function useMemberMutations(treeId?: string) {
       queryClient.invalidateQueries({ queryKey: ['search-members', resolvedTreeId] }),
     ]);
     await queryClient.refetchQueries({ queryKey: ['tree', resolvedTreeId, versionKey], type: 'active' });
+    await queryClient.refetchQueries({ queryKey: ['members', resolvedTreeId], type: 'active' });
   };
 
   const checkCanEdit = () => {

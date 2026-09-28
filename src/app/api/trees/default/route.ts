@@ -54,7 +54,7 @@ export async function GET(_request: NextRequest) {
     }
 
     return successResponse(tree, 'Default tree retrieved successfully');
-  } catch {
+  } catch (error) {
     console.error('[DEFAULT_TREE_FETCH_ERROR]', error);
     return errorResponse('FETCH_ERROR', getErrorMessage(error), 500);
   }

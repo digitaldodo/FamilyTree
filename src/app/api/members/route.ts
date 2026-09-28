@@ -4,9 +4,9 @@ import prisma from '@/lib/prisma';
 import { getTreePermission, canEdit, canView } from '@/lib/permissions';
 import { successResponse, listResponse, errorResponse, parsePagination } from '@/lib/utils';
 import { createMemberSchema } from '@/validations/member.schema';
-import {  } from '@/utils/helpers';
 import { isSpouseEligible } from '@/utils/relationship';
 import { createTreeSnapshot } from '@/lib/versioning';
+import { normalizeRelationshipSet } from '@/lib/relationship-canonical';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { treeId, birthDate, deathDate, generationId, ...rest } = validation.data;
+    const { treeId, birthDate, deathDate, generationId, relations, ...rest } = validation.data;
 
     if (!treeId) {
       return errorResponse('VALIDATION_ERROR', 'treeId is required', 400);
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
       return errorResponse('NOT_FOUND', 'Tree not found', 404);
     }
 
-    const relations = body.relations || [];
+    const safeRelations = Array.isArray(relations) ? relations : [];
 
     // Clean the data: convert empty strings to null for optional fields
     const cleanData = (obj: Record<string, unknown>) => {
@@ -157,57 +157,55 @@ export async function POST(request: NextRequest) {
 
     // Phase: Relationship & Generation logic
     // Strictly validate the provided relationships against the selected generation.
-    if (relations && Array.isArray(relations) && relations.length > 0) {
-      const relativeIds = relations.map((r: any) => r.id).filter(Boolean);
-      const uniqueIds = new Set(relativeIds);
-      if (uniqueIds.size !== relativeIds.length) {
-        return errorResponse('VALIDATION_ERROR', 'Duplicate relationships are not allowed.', 400);
-      }
+    if (safeRelations.length > 0) {
+     const relativeIds = safeRelations.map((r: any) => r.id).filter(Boolean);
+     const uniqueIds = new Set(relativeIds);
+     if (uniqueIds.size !== relativeIds.length) {
+       return errorResponse('VALIDATION_ERROR', 'Duplicate relationships are not allowed.', 400);
+     }
 
-      if (relativeIds.length > 0) {
-        const relatives = await prisma.member.findMany({
-          where: { id: { in: relativeIds } },
-          include: { generation: true }
-        });
+     if (relativeIds.length > 0) {
+       const relatives = await prisma.member.findMany({
+         where: { id: { in: relativeIds } },
+         include: { generation: true }
+       });
 
-        for (const rel of relations) {
-          if (!rel.id || !rel.type) continue;
-          const relative = relatives.find(r => r.id === rel.id);
-          if (!relative) continue;
+       for (const rel of safeRelations) {
+         if (!rel.id || !rel.type) continue;
+         const relative = relatives.find(r => r.id === rel.id);
+         if (!relative) continue;
 
-          const relGenOrder = relative.generation.orderIndex;
-          const targetGenOrder = targetGen.orderIndex;
+         const relGenOrder = relative.generation.orderIndex;
+         const targetGenOrder = targetGen.orderIndex;
 
-          if (rel.type === 'PARENT') {
-            // Target member is child, relative is parent. Parent must be older (lower orderIndex).
-            if (relGenOrder >= targetGenOrder) {
-              return errorResponse('VALIDATION_ERROR', 'Parent must belong to an older generation.', 400);
-            }
-          } else if (rel.type === 'CHILD') {
-            // Target member is parent, relative is child. Child must be younger (higher orderIndex).
-            if (relGenOrder <= targetGenOrder) {
-              return errorResponse('VALIDATION_ERROR', 'Child must belong to a younger generation.', 400);
-            }
-          } else if (rel.type === 'SPOUSE') {
-            const spousesInPayload = relations.filter((r: any) => r.type === 'SPOUSE');
-            if (spousesInPayload.length > 1) {
-              return errorResponse('VALIDATION_ERROR', 'Member already has a spouse.', 400);
-            }
-            if (relGenOrder !== targetGenOrder || !isSpouseEligible(rest.gender as string | null | undefined, relative.gender)) {
-              return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation and satisfy spouse eligibility rules.', 400);
-            }
-            const relativeSpouseCount = await prisma.relationship.count({
-              where: {
-                type: 'SPOUSE',
-                OR: [{ fromId: rel.id }, { toId: rel.id }]
-              }
-            });
-            if (relativeSpouseCount > 0) {
-              return errorResponse('VALIDATION_ERROR', 'Member already has a spouse.', 400);
-            }
-          }
-        }
-      }
+         if (rel.type === 'PARENT') {
+           if (relGenOrder >= targetGenOrder) {
+             return errorResponse('VALIDATION_ERROR', 'Parent must belong to an older generation.', 400);
+           }
+         } else if (rel.type === 'CHILD') {
+           if (relGenOrder <= targetGenOrder) {
+             return errorResponse('VALIDATION_ERROR', 'Child must belong to a younger generation.', 400);
+           }
+         } else if (rel.type === 'SPOUSE') {
+           const spousesInPayload = safeRelations.filter((r: any) => r.type === 'SPOUSE');
+           if (spousesInPayload.length > 1) {
+             return errorResponse('VALIDATION_ERROR', 'Member already has a spouse.', 400);
+           }
+           if (relGenOrder !== targetGenOrder || !isSpouseEligible(rest.gender as string | null | undefined, relative.gender)) {
+             return errorResponse('VALIDATION_ERROR', 'Spouse must belong to the same generation and satisfy spouse eligibility rules.', 400);
+           }
+           const relativeSpouseCount = await prisma.relationship.count({
+             where: {
+               type: 'SPOUSE',
+               OR: [{ fromId: rel.id }, { toId: rel.id }]
+             }
+           });
+           if (relativeSpouseCount > 0) {
+             return errorResponse('VALIDATION_ERROR', 'Member already has a spouse.', 400);
+           }
+         }
+       }
+     }
     }
 
      
@@ -217,12 +215,10 @@ export async function POST(request: NextRequest) {
       generationId: finalGenerationId,
       hasBirthDate: !!birthDate,
       hasDeathDate: !!deathDate,
-      relationCount: relations.length,
+      relationCount: safeRelations.length,
     });
 
-    // Use transaction for atomic creation
     const newMember = await prisma.$transaction(async (tx) => {
-      // Create the member first
       const member = await tx.member.create({
         data: {
           firstName: rest.firstName,
@@ -235,61 +231,17 @@ export async function POST(request: NextRequest) {
         } as any,
       });
 
-      // Create relationships if any
-      if (relations && Array.isArray(relations) && relations.length > 0) {
-        for (const rel of relations) {
-          if (!rel.id || !rel.type) continue;
-
-          if (rel.type === 'PARENT') {
-            await tx.relationship.create({
-              data: {
-                type: 'PARENT',
-                fromId: rel.id,
-                toId: member.id,
-                treeId: treeId,
-              },
-            });
-          } else if (rel.type === 'CHILD') {
-            await tx.relationship.create({
-              data: {
-                type: 'PARENT',
-                fromId: member.id,
-                toId: rel.id,
-                treeId: treeId,
-              },
-            });
-          } else {
-            const [id1, id2] = [member.id, rel.id].sort();
-            await tx.relationship.create({
-              data: {
-                type: rel.type,
-                fromId: id1,
-                toId: id2,
-                treeId: treeId,
-              },
-            });
-          }
-        }
-
-        // After all relationships are created, ensure children are linked to the spouse
-        const spouses = await tx.relationship.findMany({
-          where: { type: 'SPOUSE', OR: [{ fromId: member.id }, { toId: member.id }] }
-        });
-        if (spouses.length > 0) {
-          const spouseId = spouses[0].fromId === member.id ? spouses[0].toId : spouses[0].fromId;
-          const children = await tx.relationship.findMany({
-            where: { type: 'PARENT', fromId: member.id }
+      if (safeRelations.length > 0) {
+        const normalized = normalizeRelationshipSet(member.id, safeRelations);
+        for (const relation of normalized) {
+          await tx.relationship.create({
+            data: {
+              type: relation.type,
+              fromId: relation.fromId,
+              toId: relation.toId,
+              treeId,
+            },
           });
-          for (const childRel of children) {
-            const spouseIsParent = await tx.relationship.findFirst({
-              where: { type: 'PARENT', fromId: spouseId, toId: childRel.toId }
-            });
-            if (!spouseIsParent) {
-              await tx.relationship.create({
-                data: { type: 'PARENT', fromId: spouseId, toId: childRel.toId, treeId: treeId }
-              });
-            }
-          }
         }
       }
 

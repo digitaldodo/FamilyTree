@@ -8,6 +8,26 @@ const genderEnum = z.enum(['MALE', 'FEMALE', 'OTHER']);
 
 /** Relationship type enum values */
 const relationshipTypeEnum = z.enum(['PARENT', 'SPOUSE']);
+const formRelationshipTypeEnum = z.enum(['PARENT', 'CHILD', 'SPOUSE']);
+
+export const memberRelationshipSchema = z.array(
+  z.object({
+    id: z.string().min(1, 'Relationship member ID is required'),
+    type: formRelationshipTypeEnum,
+  })
+).refine((relations) => {
+  const seen = new Set<string>();
+  for (const relation of relations) {
+    if (relation.id === '') continue;
+    if (relation.id === 'self') return false;
+    const key = `${relation.type}:${relation.id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+  }
+  return true;
+}, {
+  message: 'Duplicate or invalid relationships are not allowed.',
+});
 
 const nullWhenBlank = (value: unknown) => {
   if (typeof value === 'string' && value.trim() === '') return null;
@@ -86,6 +106,7 @@ export const createMemberSchema = z.object({
   occupation: optionalString(200),
   generationId: z.string().trim().min(1, 'Generation is required'),
   treeId: z.string().min(1, 'Tree ID is required'),
+  relations: memberRelationshipSchema.optional(),
 });
 
 /** Schema for updating a member (all fields optional, nullable where appropriate) */
@@ -114,6 +135,7 @@ export const updateMemberSchema = z.object({
   address: optionalString(500).nullable(),
   occupation: optionalString(200).nullable(),
   generationId: z.string().optional(),
+  relations: memberRelationshipSchema.optional(),
 });
 
 /** Schema for creating a relationship between members */

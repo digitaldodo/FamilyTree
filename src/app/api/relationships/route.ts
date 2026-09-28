@@ -7,6 +7,7 @@ import { createRelationshipSchema } from '@/validations/member.schema';
 import { getErrorMessage } from '@/utils/helpers';
 import { RelationshipEngine } from '@/lib/relationship-engine';
 import { createTreeSnapshot } from '@/lib/versioning';
+import { normalizePersistedRelationship } from '@/lib/relationship-canonical';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -59,12 +60,19 @@ export async function POST(request: NextRequest) {
       return errorResponse('FORBIDDEN', 'You do not have permission to edit this tree', 403);
     }
 
+    const canonicalRelationship = normalizePersistedRelationship(type, fromId, toId);
+    if (!canonicalRelationship) {
+      return errorResponse('VALIDATION_ERROR', 'Relationship direction is invalid.', 400);
+    }
+
     const existingRelationship = await prisma.relationship.findFirst({
       where: {
-        type,
+        type: canonicalRelationship.type,
         OR: [
-          { fromId, toId },
-          ...(type === 'SPOUSE' ? [{ fromId: toId, toId: fromId }] : []),
+          { fromId: canonicalRelationship.fromId, toId: canonicalRelationship.toId },
+          ...(canonicalRelationship.type === 'SPOUSE'
+            ? [{ fromId: canonicalRelationship.toId, toId: canonicalRelationship.fromId }]
+            : []),
         ],
       },
     });
@@ -75,7 +83,7 @@ export async function POST(request: NextRequest) {
 
     // Validate relationship using the engine (self-ref, generation, limits, cycles)
     try {
-      await RelationshipEngine.validateRelationship(fromMember, toMember, type);
+      await RelationshipEngine.validateRelationship(fromMember, toMember, canonicalRelationship.type);
     } catch (validationError) {
       return errorResponse(
         'VALIDATION_ERROR',
@@ -84,19 +92,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const [canonicalFromId, canonicalToId] =
-      type === 'SPOUSE' ? [fromId, toId].sort() : [fromId, toId];
-
     const newRel = await prisma.relationship.upsert({
       where: {
         fromId_toId_type: {
-          fromId: canonicalFromId,
-          toId: canonicalToId,
-          type,
+          fromId: canonicalRelationship.fromId,
+          toId: canonicalRelationship.toId,
+          type: canonicalRelationship.type,
         },
       },
       update: {},
-      create: { type, fromId: canonicalFromId, toId: canonicalToId, treeId: fromMember.treeId }
+      create: {
+        type: canonicalRelationship.type,
+        fromId: canonicalRelationship.fromId,
+        toId: canonicalRelationship.toId,
+        treeId: fromMember.treeId,
+      },
     });
 
     if (!newRel) {
@@ -106,8 +116,7 @@ export async function POST(request: NextRequest) {
     await createTreeSnapshot(fromMember.treeId, session.user.id, 'Updated relationships');
 
     return successResponse(newRel, 'Relationship created successfully', 201);
-  } catch {
-     
+  } catch (error) {
     console.log('[API Debug] POST /api/relationships', {
       method: 'POST',
       url: request.url,

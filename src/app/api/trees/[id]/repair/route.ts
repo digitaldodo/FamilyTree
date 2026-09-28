@@ -161,7 +161,7 @@ export async function POST(
     }
 
     return successResponse({ repaired: repairedCount }, `Successfully repaired ${repairedCount} corrupted records or relationships`, 200);
-  } catch {
+  } catch (error) {
     console.error('[API Error] POST /api/trees/[treeId]/repair', error);
     return errorResponse('REPAIR_ERROR', 'Failed to repair relationships', 500);
   }

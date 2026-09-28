@@ -87,8 +87,13 @@ export const GenealogyEngine = {
       const parentMap = new Map<string, string[]>();
       
       for (const e of parentEdges) {
-        if (childrenMap.has(e.source)) { childrenMap.get(e.source).push(e.target); } else { childrenMap.set(e.source, [e.target]); }
-        if (parentMap.has(e.target)) { parentMap.get(e.target).push(e.source); } else { parentMap.set(e.target, [e.source]); }
+        const children = childrenMap.get(e.source) ?? [];
+        children.push(e.target);
+        childrenMap.set(e.source, children);
+
+        const parents = parentMap.get(e.target) ?? [];
+        parents.push(e.source);
+        parentMap.set(e.target, parents);
       }
 
       const nodeGen = new Map<string, number>();
@@ -122,7 +127,8 @@ export const GenealogyEngine = {
         const u = queue.shift()!;
         inQueue.delete(u);
 
-        const currentGen = nodeGen.get(u)!;
+        const currentGen = nodeGen.get(u);
+        if (currentGen === undefined) continue;
         const children = childrenMap.get(u) || [];
         const parents = parentMap.get(u) || [];
 
@@ -173,9 +179,11 @@ export const GenealogyEngine = {
 
       // Continue propagation from any new roots until stable
       while (queue.length > 0) {
-        const u = queue.shift()!;
+        const u = queue.shift();
+        if (!u) continue;
         inQueue.delete(u);
-        const currentGen = nodeGen.get(u)!;
+        const currentGen = nodeGen.get(u);
+        if (currentGen === undefined) continue;
         const children = childrenMap.get(u) || [];
         for (const v of children) {
           const expectedGen = currentGen + 1;
