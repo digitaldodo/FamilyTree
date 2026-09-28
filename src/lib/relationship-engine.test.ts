@@ -80,4 +80,24 @@ describe('validateParentCoupleRule', () => {
     
     await assert.doesNotReject(RelationshipEngine.validateParentCoupleRule('child1', 'parentB'));
   });
+
+  it('allows saving an existing parent when the child already has 2 parents (prospective parent is one of the existing parents)', async () => {
+    (prisma.relationship.findMany as any).mock.mockImplementation(async () => [
+      { fromId: 'parentA', toId: 'child1', type: 'PARENT' },
+      { fromId: 'parentB', toId: 'child1', type: 'PARENT' }
+    ]);
+    
+    // Attempting to re-save parentA
+    await assert.doesNotReject(RelationshipEngine.validateParentCoupleRule('child1', 'parentA'));
+  });
+
+  it('allows saving the other existing parent when the child already has 2 parents (order reversed)', async () => {
+    (prisma.relationship.findMany as any).mock.mockImplementation(async () => [
+      { fromId: 'parentA', toId: 'child1', type: 'PARENT' },
+      { fromId: 'parentB', toId: 'child1', type: 'PARENT' }
+    ]);
+    
+    // Attempting to re-save parentB
+    await assert.doesNotReject(RelationshipEngine.validateParentCoupleRule('child1', 'parentB'));
+  });
 });

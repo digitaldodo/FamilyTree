@@ -7,22 +7,11 @@ import { Button } from '../ui/button';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuGroup } from '@/components/ui/dropdown-menu';
 
 export function Navbar() {
   const { theme, setTheme } = useTheme();
   const { data: session } = useSession();
-  const [dropdownOpen, setDropdownOpen] = React.useState(false);
-  const dropdownRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const getInitials = (name?: string | null, email?: string | null) => {
     if (name) return name.charAt(0).toUpperCase();
@@ -31,53 +20,56 @@ export function Navbar() {
   };
 
   const avatarUrl = session?.user?.image || `https://api.dicebear.com/7.x/initials/svg?seed=${getInitials(session?.user?.name, session?.user?.email)}`;
-
   const renderProfileDropdown = () => (
-    <div className="relative ml-2" ref={dropdownRef}>
-      <div 
-        className="h-8 w-8 rounded-full bg-gradient-to-tr from-primary to-purple-400 p-[2px] cursor-pointer"
-        onClick={() => setDropdownOpen(!dropdownOpen)}
-      >
-        <div className="h-full w-full rounded-full bg-background flex items-center justify-center overflow-hidden">
-          <Image src={avatarUrl} alt="User" width={32} height={32} className="h-full w-full object-cover" unoptimized />
-        </div>
-      </div>
-
-      {dropdownOpen && (
-        <div className="absolute right-0 mt-2 w-48 rounded-xl bg-background border border-border shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2 z-50">
-          <div className="px-4 py-3 border-b border-border">
-            <p className="text-sm font-medium">{session?.user?.name || 'User'}</p>
-            <p className="text-xs text-muted-foreground truncate">{session?.user?.email}</p>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-primary to-purple-400 p-[2px] cursor-pointer ml-2">
+          <div className="h-full w-full rounded-full bg-background flex items-center justify-center overflow-hidden">
+            <Image src={avatarUrl} alt="User" width={32} height={32} className="h-full w-full object-cover" unoptimized />
           </div>
-          <div className="py-1">
-            <button className="md:hidden w-full flex items-center justify-between px-4 py-2 text-sm hover:bg-muted transition-colors text-left">
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <div className="px-2 py-1.5 mb-1">
+          <p className="text-sm font-medium">{session?.user?.name || 'User'}</p>
+          <p className="text-xs text-muted-foreground truncate">{session?.user?.email}</p>
+        </div>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem asChild className="md:hidden">
+            <button className="w-full flex items-center justify-between cursor-pointer">
               <div className="flex items-center gap-2">
                 <Bell className="w-4 h-4 text-muted-foreground" />
                 Notifications
               </div>
               <span className="w-2 h-2 bg-primary rounded-full"></span>
             </button>
-            <Link href="/profile" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-muted transition-colors">
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/profile" className="w-full flex items-center gap-2 cursor-pointer">
               <User className="w-4 h-4 text-muted-foreground" />
               Profile
             </Link>
-            <Link href="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-muted transition-colors">
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/settings" className="w-full flex items-center gap-2 cursor-pointer">
               <SettingsIcon className="w-4 h-4 text-muted-foreground" />
               Settings
             </Link>
-          </div>
-          <div className="border-t border-border py-1">
-            <button 
-              onClick={() => signOut({ callbackUrl: '/login' })}
-              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign out
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <button 
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            className="w-full flex items-center gap-2 text-red-500 hover:text-red-600 focus:text-red-600 cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign out
+          </button>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 
   return (

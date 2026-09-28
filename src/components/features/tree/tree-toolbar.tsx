@@ -29,28 +29,33 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
     mutationFn: async () => {
       const res = await fetch(`/api/trees/${resolvedTreeId}/repair`, { method: 'POST' });
       let data;
-    try {
-      data = await res.json();
-    } catch {
-      throw new Error("Server returned invalid response");
-    }
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("Server returned invalid response");
+      }
       if (!res.ok) throw new Error(data.message || 'Unknown error');
       return data.data;
     },
     onSuccess: (data) => {
-      toast.success(`Repaired ${data?.repaired || 0} relationships! Please reload the page to see changes.`);
       queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
-    },
-    onError: (error: any) => {
-      toast.error(`Repair failed: ${error.message || 'Unknown repair error'}`);
     }
   });
 
   const handleRepair = () => {
     if (!resolvedTreeId) return;
-    if (!window.confirm("Run tree relationship repair? This will automatically link children to both spouses where links are missing.")) return;
+    if (!window.confirm("Run tree relationship repair? This will safely fix duplicates and sync parents.")) return;
     
-    repairMutation.mutate();
+    toast.promise(repairMutation.mutateAsync(), {
+      loading: 'Checking family relationships...',
+      success: (data) => {
+        if (!data?.repaired || data.repaired === 0) {
+          return 'No relationship issues found.';
+        }
+        return `Repaired ${data.repaired} relationships successfully.`;
+      },
+      error: (err) => `Unable to repair relationships: ${err.message || 'Please try again.'}`
+    });
   };
 
   return (
@@ -58,11 +63,11 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
       {!readOnly && (
         <>
           <Button 
-            className="rounded-xl shadow-sm h-10 px-4" 
+            className="rounded-xl shadow-sm h-10 px-3 sm:px-4" 
             onClick={handleAdd} 
             title="Add Member"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-0 sm:mr-2" />
             <span className="hidden sm:inline">Add Member</span>
           </Button>
           

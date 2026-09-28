@@ -69,26 +69,23 @@ export class RelationshipEngine {
     await this.detectCycle(fromId, toId, type);
   }
 
-  /**
-   * Enforces the "One Parent Couple" rule:
-   * A child can have at most 2 parents. If a child already has a parent who has a spouse,
-   * any second parent added must be that spouse.
-   * Throws an error with a specific message if violated.
-   */
   static async validateParentCoupleRule(childId: string, prospectiveParentId?: string): Promise<void> {
     const existingParents = await prisma.relationship.findMany({
       where: { type: 'PARENT', toId: childId }
     });
 
-    if (existingParents.length >= 2) {
+    const isAlreadyParent = prospectiveParentId && existingParents.some(p => p.fromId === prospectiveParentId);
+
+    if (existingParents.length >= 2 && !isAlreadyParent) {
       throw new Error('This child is already associated with another parent couple.');
     }
 
-    if (existingParents.length === 1) {
+    if (existingParents.length >= 2 && isAlreadyParent) {
+      return; // Already part of the couple
+    }
+
+    if (existingParents.length === 1 && !isAlreadyParent) {
       const firstParentId = existingParents[0].fromId;
-      if (prospectiveParentId && firstParentId === prospectiveParentId) {
-        return; // already a parent
-      }
 
       const firstParentSpouses = await prisma.relationship.findMany({
         where: { type: 'SPOUSE', OR: [{ fromId: firstParentId }, { toId: firstParentId }] }
