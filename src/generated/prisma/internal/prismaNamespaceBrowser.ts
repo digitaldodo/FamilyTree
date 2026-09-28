@@ -58,6 +58,8 @@ export const ModelName = {
   Member: 'Member',
   Relationship: 'Relationship',
   Media: 'Media',
+  Memory: 'Memory',
+  MemoryMember: 'MemoryMember',
   ActivityLog: 'ActivityLog',
   Account: 'Account',
   Session: 'Session',
@@ -180,10 +182,37 @@ export const MediaScalarFieldEnum = {
   eventTag: 'eventTag',
   type: 'type',
   memberId: 'memberId',
+  memoryId: 'memoryId',
   createdAt: 'createdAt'
 } as const
 
 export type MediaScalarFieldEnum = (typeof MediaScalarFieldEnum)[keyof typeof MediaScalarFieldEnum]
+
+
+export const MemoryScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  date: 'date',
+  type: 'type',
+  googlePhotosAlbumUrl: 'googlePhotosAlbumUrl',
+  location: 'location',
+  tags: 'tags',
+  treeId: 'treeId',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MemoryScalarFieldEnum = (typeof MemoryScalarFieldEnum)[keyof typeof MemoryScalarFieldEnum]
+
+
+export const MemoryMemberScalarFieldEnum = {
+  memoryId: 'memoryId',
+  memberId: 'memberId'
+} as const
+
+export type MemoryMemberScalarFieldEnum = (typeof MemoryMemberScalarFieldEnum)[keyof typeof MemoryMemberScalarFieldEnum]
 
 
 export const ActivityLogScalarFieldEnum = {

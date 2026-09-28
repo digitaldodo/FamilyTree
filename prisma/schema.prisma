@@ -25,6 +25,7 @@ model User {
   trees          Tree[]
   collaborations TreeCollaborator[]
   treeVersions   TreeVersion[]
+  memories       Memory[]
 }
 
 model Tree {
@@ -40,6 +41,7 @@ model Tree {
   members       Member[]
   relationships Relationship[]
   versions      TreeVersion[]
+  memories      Memory[]
   owner         User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   collaborators TreeCollaborator[]
 
@@ -93,6 +95,7 @@ model Member {
   updatedAt     DateTime       @updatedAt
   revision      Int            @default(1)
   media         Media[]
+  memoryMembers MemoryMember[]
   generation    Generation     @relation(fields: [generationId], references: [id])
   tree          Tree           @relation(fields: [treeId], references: [id], onDelete: Cascade)
   relationsFrom Relationship[] @relation("from")
@@ -127,11 +130,46 @@ model Media {
   caption   String?
   eventTag  String?
   type      String   @default("image")
-  memberId  String
+  memberId  String?
+  memoryId  String?
   createdAt DateTime @default(now())
-  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  member    Member?  @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  memory    Memory?  @relation(fields: [memoryId], references: [id], onDelete: Cascade)
 
   @@index([memberId])
+  @@index([memoryId])
+}
+
+model Memory {
+  id                   String         @id @default(cuid())
+  title                String
+  description          String?
+  date                 DateTime
+  type                 String         @default("MEMORY")
+  googlePhotosAlbumUrl String?
+  location             String?
+  tags                 String[]
+  treeId               String
+  createdById          String
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  tree                 Tree           @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  createdBy            User           @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  members              MemoryMember[]
+  media                Media[]
+
+  @@index([treeId])
+}
+
+model MemoryMember {
+  memoryId  String
+  memberId  String
+
+  memory    Memory   @relation(fields: [memoryId], references: [id], onDelete: Cascade)
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@id([memoryId, memberId])
 }
 
 model ActivityLog {

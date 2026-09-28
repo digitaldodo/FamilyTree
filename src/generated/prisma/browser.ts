@@ -53,6 +53,16 @@ export type Relationship = Prisma.RelationshipModel
  */
 export type Media = Prisma.MediaModel
 /**
+ * Model Memory
+ * 
+ */
+export type Memory = Prisma.MemoryModel
+/**
+ * Model MemoryMember
+ * 
+ */
+export type MemoryMember = Prisma.MemoryMemberModel
+/**
  * Model ActivityLog
  * 
  */

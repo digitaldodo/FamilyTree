@@ -229,6 +229,7 @@ export type UserWhereInput = {
   trees?: Prisma.TreeListRelationFilter
   collaborations?: Prisma.TreeCollaboratorListRelationFilter
   treeVersions?: Prisma.TreeVersionListRelationFilter
+  memories?: Prisma.MemoryListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -249,6 +250,7 @@ export type UserOrderByWithRelationInput = {
   trees?: Prisma.TreeOrderByRelationAggregateInput
   collaborations?: Prisma.TreeCollaboratorOrderByRelationAggregateInput
   treeVersions?: Prisma.TreeVersionOrderByRelationAggregateInput
+  memories?: Prisma.MemoryOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -272,6 +274,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   trees?: Prisma.TreeListRelationFilter
   collaborations?: Prisma.TreeCollaboratorListRelationFilter
   treeVersions?: Prisma.TreeVersionListRelationFilter
+  memories?: Prisma.MemoryListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -324,6 +327,7 @@ export type UserCreateInput = {
   trees?: Prisma.TreeCreateNestedManyWithoutOwnerInput
   collaborations?: Prisma.TreeCollaboratorCreateNestedManyWithoutUserInput
   treeVersions?: Prisma.TreeVersionCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -344,6 +348,7 @@ export type UserUncheckedCreateInput = {
   trees?: Prisma.TreeUncheckedCreateNestedManyWithoutOwnerInput
   collaborations?: Prisma.TreeCollaboratorUncheckedCreateNestedManyWithoutUserInput
   treeVersions?: Prisma.TreeVersionUncheckedCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUpdateInput = {
@@ -364,6 +369,7 @@ export type UserUpdateInput = {
   trees?: Prisma.TreeUpdateManyWithoutOwnerNestedInput
   collaborations?: Prisma.TreeCollaboratorUpdateManyWithoutUserNestedInput
   treeVersions?: Prisma.TreeVersionUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -384,6 +390,7 @@ export type UserUncheckedUpdateInput = {
   trees?: Prisma.TreeUncheckedUpdateManyWithoutOwnerNestedInput
   collaborations?: Prisma.TreeCollaboratorUncheckedUpdateManyWithoutUserNestedInput
   treeVersions?: Prisma.TreeVersionUncheckedUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -522,6 +529,20 @@ export type UserUpdateOneRequiredWithoutCollaborationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCollaborationsInput, Prisma.UserUpdateWithoutCollaborationsInput>, Prisma.UserUncheckedUpdateWithoutCollaborationsInput>
 }
 
+export type UserCreateNestedOneWithoutMemoriesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMemoriesInput, Prisma.UserUncheckedCreateWithoutMemoriesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMemoriesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutMemoriesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMemoriesInput, Prisma.UserUncheckedCreateWithoutMemoriesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMemoriesInput
+  upsert?: Prisma.UserUpsertWithoutMemoriesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMemoriesInput, Prisma.UserUpdateWithoutMemoriesInput>, Prisma.UserUncheckedUpdateWithoutMemoriesInput>
+}
+
 export type UserCreateNestedOneWithoutActivityLogsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutActivityLogsInput, Prisma.UserUncheckedCreateWithoutActivityLogsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutActivityLogsInput
@@ -611,6 +632,7 @@ export type UserCreateWithoutTreesInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   collaborations?: Prisma.TreeCollaboratorCreateNestedManyWithoutUserInput
   treeVersions?: Prisma.TreeVersionCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutTreesInput = {
@@ -630,6 +652,7 @@ export type UserUncheckedCreateWithoutTreesInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   collaborations?: Prisma.TreeCollaboratorUncheckedCreateNestedManyWithoutUserInput
   treeVersions?: Prisma.TreeVersionUncheckedCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutTreesInput = {
@@ -665,6 +688,7 @@ export type UserUpdateWithoutTreesInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   collaborations?: Prisma.TreeCollaboratorUpdateManyWithoutUserNestedInput
   treeVersions?: Prisma.TreeVersionUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTreesInput = {
@@ -684,6 +708,7 @@ export type UserUncheckedUpdateWithoutTreesInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   collaborations?: Prisma.TreeCollaboratorUncheckedUpdateManyWithoutUserNestedInput
   treeVersions?: Prisma.TreeVersionUncheckedUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutCollaborationsInput = {
@@ -703,6 +728,7 @@ export type UserCreateWithoutCollaborationsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   trees?: Prisma.TreeCreateNestedManyWithoutOwnerInput
   treeVersions?: Prisma.TreeVersionCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutCollaborationsInput = {
@@ -722,6 +748,7 @@ export type UserUncheckedCreateWithoutCollaborationsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   trees?: Prisma.TreeUncheckedCreateNestedManyWithoutOwnerInput
   treeVersions?: Prisma.TreeVersionUncheckedCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutCollaborationsInput = {
@@ -757,6 +784,7 @@ export type UserUpdateWithoutCollaborationsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   trees?: Prisma.TreeUpdateManyWithoutOwnerNestedInput
   treeVersions?: Prisma.TreeVersionUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCollaborationsInput = {
@@ -775,6 +803,103 @@ export type UserUncheckedUpdateWithoutCollaborationsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   trees?: Prisma.TreeUncheckedUpdateManyWithoutOwnerNestedInput
+  treeVersions?: Prisma.TreeVersionUncheckedUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUncheckedUpdateManyWithoutCreatedByNestedInput
+}
+
+export type UserCreateWithoutMemoriesInput = {
+  id?: string
+  email: string
+  emailVerified?: Date | string | null
+  password?: string | null
+  name?: string | null
+  avatar?: string | null
+  image?: string | null
+  role?: $Enums.Role
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  trees?: Prisma.TreeCreateNestedManyWithoutOwnerInput
+  collaborations?: Prisma.TreeCollaboratorCreateNestedManyWithoutUserInput
+  treeVersions?: Prisma.TreeVersionCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutMemoriesInput = {
+  id?: string
+  email: string
+  emailVerified?: Date | string | null
+  password?: string | null
+  name?: string | null
+  avatar?: string | null
+  image?: string | null
+  role?: $Enums.Role
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  trees?: Prisma.TreeUncheckedCreateNestedManyWithoutOwnerInput
+  collaborations?: Prisma.TreeCollaboratorUncheckedCreateNestedManyWithoutUserInput
+  treeVersions?: Prisma.TreeVersionUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutMemoriesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutMemoriesInput, Prisma.UserUncheckedCreateWithoutMemoriesInput>
+}
+
+export type UserUpsertWithoutMemoriesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutMemoriesInput, Prisma.UserUncheckedUpdateWithoutMemoriesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutMemoriesInput, Prisma.UserUncheckedCreateWithoutMemoriesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutMemoriesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutMemoriesInput, Prisma.UserUncheckedUpdateWithoutMemoriesInput>
+}
+
+export type UserUpdateWithoutMemoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  trees?: Prisma.TreeUpdateManyWithoutOwnerNestedInput
+  collaborations?: Prisma.TreeCollaboratorUpdateManyWithoutUserNestedInput
+  treeVersions?: Prisma.TreeVersionUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutMemoriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  trees?: Prisma.TreeUncheckedUpdateManyWithoutOwnerNestedInput
+  collaborations?: Prisma.TreeCollaboratorUncheckedUpdateManyWithoutUserNestedInput
   treeVersions?: Prisma.TreeVersionUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -795,6 +920,7 @@ export type UserCreateWithoutActivityLogsInput = {
   trees?: Prisma.TreeCreateNestedManyWithoutOwnerInput
   collaborations?: Prisma.TreeCollaboratorCreateNestedManyWithoutUserInput
   treeVersions?: Prisma.TreeVersionCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutActivityLogsInput = {
@@ -814,6 +940,7 @@ export type UserUncheckedCreateWithoutActivityLogsInput = {
   trees?: Prisma.TreeUncheckedCreateNestedManyWithoutOwnerInput
   collaborations?: Prisma.TreeCollaboratorUncheckedCreateNestedManyWithoutUserInput
   treeVersions?: Prisma.TreeVersionUncheckedCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutActivityLogsInput = {
@@ -849,6 +976,7 @@ export type UserUpdateWithoutActivityLogsInput = {
   trees?: Prisma.TreeUpdateManyWithoutOwnerNestedInput
   collaborations?: Prisma.TreeCollaboratorUpdateManyWithoutUserNestedInput
   treeVersions?: Prisma.TreeVersionUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutActivityLogsInput = {
@@ -868,6 +996,7 @@ export type UserUncheckedUpdateWithoutActivityLogsInput = {
   trees?: Prisma.TreeUncheckedUpdateManyWithoutOwnerNestedInput
   collaborations?: Prisma.TreeCollaboratorUncheckedUpdateManyWithoutUserNestedInput
   treeVersions?: Prisma.TreeVersionUncheckedUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -887,6 +1016,7 @@ export type UserCreateWithoutAccountsInput = {
   trees?: Prisma.TreeCreateNestedManyWithoutOwnerInput
   collaborations?: Prisma.TreeCollaboratorCreateNestedManyWithoutUserInput
   treeVersions?: Prisma.TreeVersionCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -906,6 +1036,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   trees?: Prisma.TreeUncheckedCreateNestedManyWithoutOwnerInput
   collaborations?: Prisma.TreeCollaboratorUncheckedCreateNestedManyWithoutUserInput
   treeVersions?: Prisma.TreeVersionUncheckedCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -941,6 +1072,7 @@ export type UserUpdateWithoutAccountsInput = {
   trees?: Prisma.TreeUpdateManyWithoutOwnerNestedInput
   collaborations?: Prisma.TreeCollaboratorUpdateManyWithoutUserNestedInput
   treeVersions?: Prisma.TreeVersionUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -960,6 +1092,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   trees?: Prisma.TreeUncheckedUpdateManyWithoutOwnerNestedInput
   collaborations?: Prisma.TreeCollaboratorUncheckedUpdateManyWithoutUserNestedInput
   treeVersions?: Prisma.TreeVersionUncheckedUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -979,6 +1112,7 @@ export type UserCreateWithoutSessionsInput = {
   trees?: Prisma.TreeCreateNestedManyWithoutOwnerInput
   collaborations?: Prisma.TreeCollaboratorCreateNestedManyWithoutUserInput
   treeVersions?: Prisma.TreeVersionCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -998,6 +1132,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   trees?: Prisma.TreeUncheckedCreateNestedManyWithoutOwnerInput
   collaborations?: Prisma.TreeCollaboratorUncheckedCreateNestedManyWithoutUserInput
   treeVersions?: Prisma.TreeVersionUncheckedCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -1033,6 +1168,7 @@ export type UserUpdateWithoutSessionsInput = {
   trees?: Prisma.TreeUpdateManyWithoutOwnerNestedInput
   collaborations?: Prisma.TreeCollaboratorUpdateManyWithoutUserNestedInput
   treeVersions?: Prisma.TreeVersionUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -1052,6 +1188,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   trees?: Prisma.TreeUncheckedUpdateManyWithoutOwnerNestedInput
   collaborations?: Prisma.TreeCollaboratorUncheckedUpdateManyWithoutUserNestedInput
   treeVersions?: Prisma.TreeVersionUncheckedUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -1071,6 +1208,7 @@ export type UserCreateWithoutNotificationsInput = {
   trees?: Prisma.TreeCreateNestedManyWithoutOwnerInput
   collaborations?: Prisma.TreeCollaboratorCreateNestedManyWithoutUserInput
   treeVersions?: Prisma.TreeVersionCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -1090,6 +1228,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   trees?: Prisma.TreeUncheckedCreateNestedManyWithoutOwnerInput
   collaborations?: Prisma.TreeCollaboratorUncheckedCreateNestedManyWithoutUserInput
   treeVersions?: Prisma.TreeVersionUncheckedCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -1125,6 +1264,7 @@ export type UserUpdateWithoutNotificationsInput = {
   trees?: Prisma.TreeUpdateManyWithoutOwnerNestedInput
   collaborations?: Prisma.TreeCollaboratorUpdateManyWithoutUserNestedInput
   treeVersions?: Prisma.TreeVersionUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -1144,6 +1284,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   trees?: Prisma.TreeUncheckedUpdateManyWithoutOwnerNestedInput
   collaborations?: Prisma.TreeCollaboratorUncheckedUpdateManyWithoutUserNestedInput
   treeVersions?: Prisma.TreeVersionUncheckedUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutTreeVersionsInput = {
@@ -1163,6 +1304,7 @@ export type UserCreateWithoutTreeVersionsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   trees?: Prisma.TreeCreateNestedManyWithoutOwnerInput
   collaborations?: Prisma.TreeCollaboratorCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutTreeVersionsInput = {
@@ -1182,6 +1324,7 @@ export type UserUncheckedCreateWithoutTreeVersionsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   trees?: Prisma.TreeUncheckedCreateNestedManyWithoutOwnerInput
   collaborations?: Prisma.TreeCollaboratorUncheckedCreateNestedManyWithoutUserInput
+  memories?: Prisma.MemoryUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutTreeVersionsInput = {
@@ -1217,6 +1360,7 @@ export type UserUpdateWithoutTreeVersionsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   trees?: Prisma.TreeUpdateManyWithoutOwnerNestedInput
   collaborations?: Prisma.TreeCollaboratorUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTreeVersionsInput = {
@@ -1236,6 +1380,7 @@ export type UserUncheckedUpdateWithoutTreeVersionsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   trees?: Prisma.TreeUncheckedUpdateManyWithoutOwnerNestedInput
   collaborations?: Prisma.TreeCollaboratorUncheckedUpdateManyWithoutUserNestedInput
+  memories?: Prisma.MemoryUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 
@@ -1251,6 +1396,7 @@ export type UserCountOutputType = {
   trees: number
   collaborations: number
   treeVersions: number
+  memories: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1261,6 +1407,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   trees?: boolean | UserCountOutputTypeCountTreesArgs
   collaborations?: boolean | UserCountOutputTypeCountCollaborationsArgs
   treeVersions?: boolean | UserCountOutputTypeCountTreeVersionsArgs
+  memories?: boolean | UserCountOutputTypeCountMemoriesArgs
 }
 
 /**
@@ -1322,6 +1469,13 @@ export type UserCountOutputTypeCountTreeVersionsArgs<ExtArgs extends runtime.Typ
   where?: Prisma.TreeVersionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountMemoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MemoryWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1341,6 +1495,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   trees?: boolean | Prisma.User$treesArgs<ExtArgs>
   collaborations?: boolean | Prisma.User$collaborationsArgs<ExtArgs>
   treeVersions?: boolean | Prisma.User$treeVersionsArgs<ExtArgs>
+  memories?: boolean | Prisma.User$memoriesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1392,6 +1547,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   trees?: boolean | Prisma.User$treesArgs<ExtArgs>
   collaborations?: boolean | Prisma.User$collaborationsArgs<ExtArgs>
   treeVersions?: boolean | Prisma.User$treeVersionsArgs<ExtArgs>
+  memories?: boolean | Prisma.User$memoriesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1407,6 +1563,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     trees: Prisma.$TreePayload<ExtArgs>[]
     collaborations: Prisma.$TreeCollaboratorPayload<ExtArgs>[]
     treeVersions: Prisma.$TreeVersionPayload<ExtArgs>[]
+    memories: Prisma.$MemoryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1820,6 +1977,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   trees<T extends Prisma.User$treesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$treesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TreePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   collaborations<T extends Prisma.User$collaborationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$collaborationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TreeCollaboratorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   treeVersions<T extends Prisma.User$treeVersionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$treeVersionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TreeVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  memories<T extends Prisma.User$memoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$memoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2417,6 +2575,30 @@ export type User$treeVersionsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.TreeVersionScalarFieldEnum | Prisma.TreeVersionScalarFieldEnum[]
+}
+
+/**
+ * User.memories
+ */
+export type User$memoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Memory
+   */
+  select?: Prisma.MemorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Memory
+   */
+  omit?: Prisma.MemoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemoryInclude<ExtArgs> | null
+  where?: Prisma.MemoryWhereInput
+  orderBy?: Prisma.MemoryOrderByWithRelationInput | Prisma.MemoryOrderByWithRelationInput[]
+  cursor?: Prisma.MemoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MemoryScalarFieldEnum | Prisma.MemoryScalarFieldEnum[]
 }
 
 /**

@@ -1,95 +1,159 @@
 'use client';
 
+import React, { useMemo, useState } from 'react';
 import { useAppStore } from '@/store/use-app-store';
 import { FamilyTimeline } from '@/components/features/timeline/family-timeline';
 import { TimelineEventProps } from '@/components/features/timeline/timeline-event';
 import { TimelineSkeleton } from '@/components/ui/timeline-skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
-import { Clock } from 'lucide-react';
+import { Clock, Plus } from 'lucide-react';
 import { useMembers } from '@/hooks/use-members';
-import { useMemo } from 'react';
+import { useMemories } from '@/hooks/use-memories';
+import { MemoryFormModal } from '@/components/features/timeline/memory-form-modal';
+import { MemoryDetailModal } from '@/components/features/timeline/memory-detail-modal';
+import { Button } from '@/components/ui/button';
 
 export default function TimelinePage() {
   const activeTreeId = useAppStore(s => s.activeTreeId);
+  const isReadOnly = useAppStore(s => s.isReadOnly);
 
-  const { members, isLoading } = useMembers(activeTreeId || undefined);
+  const { members, isLoading: isLoadingMembers } = useMembers(activeTreeId || undefined);
+  const { memories, isLoading: isLoadingMemories, createMemory, updateMemory, deleteMemory } = useMemories(activeTreeId || undefined);
+
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedMemory, setSelectedMemory] = useState<any>(null);
+
+  const isLoading = isLoadingMembers || isLoadingMemories;
+  const canEdit = !isReadOnly;
 
   const events = useMemo(() => {
     const timelineEvents: TimelineEventProps['event'][] = [];
-    if (!members) return timelineEvents;
-
-    members.forEach((member: any) => {
-      if (member.birthDate) {
-        timelineEvents.push({
-          id: `birth-${member.id}`,
-          title: `${member.firstName} ${member.lastName} was born`,
-          date: member.birthDate,
-          type: 'BIRTH',
-          description: member.occupation
-            ? `${member.generation?.name || 'Unnamed Generation'} · ${member.occupation}`
-            : `Added to ${member.generation?.name || 'Unnamed Generation'}`,
-          members: [{
-            id: member.id,
-            name: `${member.firstName} ${member.lastName}`,
-            imageUrl: member.imageUrl
-          }]
-        });
-      }
-
-      if (member.deathDate) {
-        timelineEvents.push({
-          id: `death-${member.id}`,
-          title: `${member.firstName} ${member.lastName} passed away`,
-          date: member.deathDate,
-          type: 'DEATH',
-          description: member.generation?.name || 'Unnamed Generation',
-          members: [{
-            id: member.id,
-            name: `${member.firstName} ${member.lastName}`,
-            imageUrl: member.imageUrl
-          }]
-        });
-      }
-
-      const relationsTo = Array.isArray(member.relationsTo) ? member.relationsTo : [];
-      relationsTo.forEach((rel: any) => {
-        if (rel.type === 'PARENT' && rel.from && member.birthDate) {
+    
+    // Add member life events
+    if (members) {
+      members.forEach((member: any) => {
+        if (member.birthDate) {
           timelineEvents.push({
-            id: `child-${member.id}-parent-${rel.from.id}`,
-            title: `${rel.from.firstName} had a child, ${member.firstName}`,
-            date: member.birthDate,
-            type: 'CHILD_BORN',
-            description: `${member.firstName} was born`,
-            members: [
-              { id: rel.from.id, name: `${rel.from.firstName} ${rel.from.lastName}` },
-              { id: member.id, name: `${member.firstName} ${member.lastName}`, imageUrl: member.imageUrl }
-            ]
+            id: `birth-${member.id}`,
+            title: `${member.firstName} ${member.lastName} was born`,
+            date: new Date(member.birthDate),
+            type: 'BIRTH',
+            description: member.occupation
+              ? `${member.generation?.name || 'Unnamed Generation'} • ${member.occupation}`
+              : `Added to ${member.generation?.name || 'Unnamed Generation'}`,
+            members: [{
+              id: member.id,
+              name: `${member.firstName} ${member.lastName}`,
+              imageUrl: member.imageUrl
+            }]
           });
         }
-      });
 
-      const relationsFrom = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
-      relationsFrom.forEach((rel: any) => {
-         if (rel.type === 'SPOUSE' && rel.to) {
-           if (member.id < rel.to.id) {
-             timelineEvents.push({
-                id: `marriage-${member.id}-${rel.to.id}`,
-                title: `${member.firstName} and ${rel.to.firstName} were married`,
-                date: rel.createdAt || new Date(),
-                type: 'MARRIAGE',
-                description: `Marriage`,
-                members: [
-                  { id: member.id, name: `${member.firstName} ${member.lastName}`, imageUrl: member.imageUrl },
-                  { id: rel.to.id, name: `${rel.to.firstName} ${rel.to.lastName}` }
-                ]
-             });
-           }
-         }
-      });
-    });
+        if (member.deathDate) {
+          timelineEvents.push({
+            id: `death-${member.id}`,
+            title: `${member.firstName} ${member.lastName} passed away`,
+            date: new Date(member.deathDate),
+            type: 'DEATH',
+            description: member.generation?.name || 'Unnamed Generation',
+            members: [{
+              id: member.id,
+              name: `${member.firstName} ${member.lastName}`,
+              imageUrl: member.imageUrl
+            }]
+          });
+        }
 
-    return timelineEvents;
-  }, [members]);
+        const relationsTo = Array.isArray(member.relationsTo) ? member.relationsTo : [];
+        relationsTo.forEach((rel: any) => {
+          if (rel.type === 'PARENT' && rel.from && member.birthDate) {
+            timelineEvents.push({
+              id: `child-${member.id}-parent-${rel.from.id}`,
+              title: `${rel.from.firstName} had a child, ${member.firstName}`,
+              date: new Date(member.birthDate),
+              type: 'CHILD_BORN',
+              description: `${member.firstName} was born`,
+              members: [
+                { id: rel.from.id, name: `${rel.from.firstName} ${rel.from.lastName}` },
+                { id: member.id, name: `${member.firstName} ${member.lastName}`, imageUrl: member.imageUrl }
+              ]
+            });
+          }
+        });
+
+        const relationsFrom = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
+        relationsFrom.forEach((rel: any) => {
+          if (rel.type === 'SPOUSE' && rel.to) {
+            if (member.id < rel.to.id) {
+              timelineEvents.push({
+                  id: `marriage-${member.id}-${rel.to.id}`,
+                  title: `${member.firstName} and ${rel.to.firstName} were married`,
+                  date: new Date(rel.createdAt || new Date()), // Fallback
+                  type: 'MARRIAGE',
+                  description: `Marriage`,
+                  members: [
+                    { id: member.id, name: `${member.firstName} ${member.lastName}`, imageUrl: member.imageUrl },
+                    { id: rel.to.id, name: `${rel.to.firstName} ${rel.to.lastName}` }
+                  ]
+              });
+            }
+          }
+        });
+      });
+    }
+
+    // Add user-created memories
+    if (memories) {
+      memories.forEach((memory: any) => {
+        timelineEvents.push({
+          id: `memory-${memory.id}`,
+          title: memory.title,
+          date: new Date(memory.date),
+          type: 'MEMORY',
+          description: memory.description || memory.location || 'A family memory',
+          members: memory.members?.map((m: any) => ({
+            id: m.member.id,
+            name: `${m.member.firstName} ${m.member.lastName}`,
+            imageUrl: m.member.imageUrl
+          })) || [],
+          mediaCount: memory.media?.length || 0,
+          hasAlbum: !!memory.googlePhotosAlbumUrl,
+          memoryData: memory // Pass raw memory data for the detail modal
+        });
+      });
+    }
+
+    // Sort all events chronologically
+    return timelineEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [members, memories]);
+
+  const handleEventClick = (event: any) => {
+    if (event.type === 'MEMORY' && event.memoryData) {
+      setSelectedMemory(event.memoryData);
+      setIsDetailOpen(true);
+    }
+  };
+
+  const handleCreateMemory = async (data: any) => {
+    await createMemory(data);
+  };
+
+  const handleUpdateMemory = async (data: any) => {
+    if (selectedMemory) {
+      await updateMemory({ id: selectedMemory.id, data });
+      setSelectedMemory(null);
+    }
+  };
+
+  const handleDeleteMemory = async (id: string) => {
+    await deleteMemory(id);
+  };
+
+  const handleEditMemory = (memory: any) => {
+    setSelectedMemory(memory);
+    setIsFormOpen(true);
+  };
 
   // GLOBAL HYDRATION GUARD
   if (isLoading) {
@@ -100,25 +164,63 @@ export default function TimelinePage() {
     return null;
   }
 
-  if (!members || !events) {
-    return <TimelineSkeleton />;
-  }
-
   if (!events || events.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <EmptyState
           icon={Clock}
-          title="No timeline events yet"
-          description="Add birth dates and other milestones to your family members to build the timeline."
+          title="Preserve a family memory"
+          description="Add stories, photos, and important moments to your family history."
         />
+        
+        {canEdit && (
+          <Button onClick={() => { setSelectedMemory(null); setIsFormOpen(true); }} className="mt-4">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Memory
+          </Button>
+        )}
+
+        {canEdit && (
+          <MemoryFormModal
+            isOpen={isFormOpen}
+            onClose={() => { setIsFormOpen(false); setSelectedMemory(null); }}
+            onSubmit={selectedMemory ? handleUpdateMemory : handleCreateMemory}
+            initialData={selectedMemory}
+          />
+        )}
       </div>
     );
   }
 
   return (
-    <div>
-      <FamilyTimeline events={events} />
+    <div className="space-y-6">
+      {canEdit && (
+        <div className="flex justify-end">
+          <Button onClick={() => { setSelectedMemory(null); setIsFormOpen(true); }}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Memory
+          </Button>
+        </div>
+      )}
+
+      <FamilyTimeline events={events} onEventClick={handleEventClick} />
+
+      {canEdit && (
+        <MemoryFormModal
+          isOpen={isFormOpen}
+          onClose={() => { setIsFormOpen(false); setSelectedMemory(null); }}
+          onSubmit={selectedMemory ? handleUpdateMemory : handleCreateMemory}
+          initialData={selectedMemory}
+        />
+      )}
+
+      <MemoryDetailModal
+        isOpen={isDetailOpen}
+        onClose={() => { setIsDetailOpen(false); setSelectedMemory(null); }}
+        memory={selectedMemory}
+        onEdit={handleEditMemory}
+        onDelete={handleDeleteMemory}
+      />
     </div>
   );
 }

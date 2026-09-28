@@ -6,9 +6,10 @@ import { Calendar } from "lucide-react";
 
 interface FamilyTimelineProps {
   events: TimelineEventProps['event'][];
+  onEventClick?: (event: any) => void;
 }
 
-export function FamilyTimeline({ events }: FamilyTimelineProps) {
+export function FamilyTimeline({ events, onEventClick }: FamilyTimelineProps) {
   // Normalize events to ensure it is always an array
   const safeEvents = Array.isArray(events) ? events : [];
   
@@ -66,6 +67,7 @@ export function FamilyTimeline({ events }: FamilyTimelineProps) {
                     key={event.id} 
                     event={event} 
                     index={groupIndex % 2 === 0 ? index : index + 1} 
+                    onClick={onEventClick}
                   />
                 ))}
               </div>

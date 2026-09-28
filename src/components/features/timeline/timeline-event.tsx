@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { Star } from "lucide-react";
 import { MemberAvatar } from "../members/member-avatar";
 
-export type TimelineEventType = "BIRTH" | "MARRIAGE" | "DEATH" | "CHILD_BORN" | "CUSTOM";
+export type TimelineEventType = "BIRTH" | "MARRIAGE" | "DEATH" | "CHILD_BORN" | "CUSTOM" | "MEMORY";
 
 export interface TimelineEventProps {
   event: {
@@ -16,8 +16,12 @@ export interface TimelineEventProps {
     description?: string;
     date: Date;
     members: { id: string; name: string; imageUrl?: string | null }[];
+    mediaCount?: number;
+    hasAlbum?: boolean;
+    memoryData?: any;
   };
   index: number;
+  onClick?: (event: any) => void;
 }
 
 const getEventIcon = (type: TimelineEventType) => {
@@ -26,6 +30,7 @@ const getEventIcon = (type: TimelineEventType) => {
     case "MARRIAGE": return <span className="text-xl">💍</span>;
     case "DEATH": return <span className="text-xl">🕊</span>;
     case "CHILD_BORN": return <span className="text-xl">👶</span>;
+    case "MEMORY": return <span className="text-xl">📸</span>;
     case "CUSTOM": return <span className="text-xl">✨</span>;
   }
 };
@@ -36,11 +41,12 @@ const getEventBg = (type: TimelineEventType) => {
     case "MARRIAGE": return "bg-pink-500/10 ring-pink-500/20";
     case "DEATH": return "bg-gray-500/10 ring-gray-500/20";
     case "CHILD_BORN": return "bg-emerald-500/10 ring-emerald-500/20";
+    case "MEMORY": return "bg-purple-500/10 ring-purple-500/20";
     case "CUSTOM": return "bg-amber-500/10 ring-amber-500/20";
   }
 };
 
-export function TimelineEvent({ event, index }: TimelineEventProps) {
+export function TimelineEvent({ event, index, onClick }: TimelineEventProps) {
   const isEven = index % 2 === 0;
   const safeMembers = Array.isArray(event.members) ? event.members : [];
 
@@ -61,7 +67,7 @@ export function TimelineEvent({ event, index }: TimelineEventProps) {
 
       {/* Content */}
       <div className={`w-full md:w-5/12 ml-14 md:ml-0 ${isEven ? 'md:pr-14 md:text-right' : 'md:pl-14'}`}>
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative group">
+        <div onClick={() => onClick && onClick(event)} className={`bg-card border border-border rounded-2xl p-6 shadow-sm relative group transition-all ${onClick ? "cursor-pointer hover:shadow-md hover:border-primary/50" : "hover:shadow-md"}`}>
           {/* Connector line from box to center dot for desktop */}
           <div className={`hidden md:block absolute top-1/2 -translate-y-1/2 w-14 border-t-2 border-border/50 border-dashed ${isEven ? '-right-14' : '-left-14'}`} />
           
@@ -70,6 +76,12 @@ export function TimelineEvent({ event, index }: TimelineEventProps) {
               {format(new Date(event.date), "MMMM d, yyyy")}
             </span>
             <h3 className="text-xl font-bold">{event.title}</h3>
+            {event.type === "MEMORY" && (
+              <div className="flex gap-2 mt-2">
+                {event.mediaCount ? <span className="text-xs bg-muted px-2 py-1 rounded-full text-foreground/80">📸 {event.mediaCount} Photos</span> : null}
+                {event.hasAlbum && <span className="text-xs bg-blue-500/10 text-blue-500 px-2 py-1 rounded-full">🔗 Google Photos</span>}
+              </div>
+            )}
           </div>
           
           {event.description && (

@@ -391,6 +391,8 @@ export const ModelName = {
   Member: 'Member',
   Relationship: 'Relationship',
   Media: 'Media',
+  Memory: 'Memory',
+  MemoryMember: 'MemoryMember',
   ActivityLog: 'ActivityLog',
   Account: 'Account',
   Session: 'Session',
@@ -413,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "tree" | "treeCollaborator" | "generation" | "member" | "relationship" | "media" | "activityLog" | "account" | "session" | "verificationToken" | "notification" | "invite" | "treeVersion"
+    modelProps: "user" | "tree" | "treeCollaborator" | "generation" | "member" | "relationship" | "media" | "memory" | "memoryMember" | "activityLog" | "account" | "session" | "verificationToken" | "notification" | "invite" | "treeVersion"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -932,6 +934,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.MediaCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.MediaCountAggregateOutputType> | number
+        }
+      }
+    }
+    Memory: {
+      payload: Prisma.$MemoryPayload<ExtArgs>
+      fields: Prisma.MemoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MemoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MemoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>
+        }
+        findFirst: {
+          args: Prisma.MemoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MemoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>
+        }
+        findMany: {
+          args: Prisma.MemoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>[]
+        }
+        create: {
+          args: Prisma.MemoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>
+        }
+        createMany: {
+          args: Prisma.MemoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MemoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>[]
+        }
+        delete: {
+          args: Prisma.MemoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>
+        }
+        update: {
+          args: Prisma.MemoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.MemoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MemoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MemoryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.MemoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryPayload>
+        }
+        aggregate: {
+          args: Prisma.MemoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMemory>
+        }
+        groupBy: {
+          args: Prisma.MemoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MemoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    MemoryMember: {
+      payload: Prisma.$MemoryMemberPayload<ExtArgs>
+      fields: Prisma.MemoryMemberFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MemoryMemberFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryMemberPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MemoryMemberFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryMemberPayload>
+        }
+        findFirst: {
+          args: Prisma.MemoryMemberFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryMemberPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MemoryMemberFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryMemberPayload>
+        }
+        findMany: {
+          args: Prisma.MemoryMemberFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryMemberPayload>[]
+        }
+        create: {
+          args: Prisma.MemoryMemberCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryMemberPayload>
+        }
+        createMany: {
+          args: Prisma.MemoryMemberCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MemoryMemberCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryMemberPayload>[]
+        }
+        delete: {
+          args: Prisma.MemoryMemberDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryMemberPayload>
+        }
+        update: {
+          args: Prisma.MemoryMemberUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryMemberPayload>
+        }
+        deleteMany: {
+          args: Prisma.MemoryMemberDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MemoryMemberUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MemoryMemberUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryMemberPayload>[]
+        }
+        upsert: {
+          args: Prisma.MemoryMemberUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemoryMemberPayload>
+        }
+        aggregate: {
+          args: Prisma.MemoryMemberAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMemoryMember>
+        }
+        groupBy: {
+          args: Prisma.MemoryMemberGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemoryMemberGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MemoryMemberCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemoryMemberCountAggregateOutputType> | number
         }
       }
     }
@@ -1589,10 +1739,37 @@ export const MediaScalarFieldEnum = {
   eventTag: 'eventTag',
   type: 'type',
   memberId: 'memberId',
+  memoryId: 'memoryId',
   createdAt: 'createdAt'
 } as const
 
 export type MediaScalarFieldEnum = (typeof MediaScalarFieldEnum)[keyof typeof MediaScalarFieldEnum]
+
+
+export const MemoryScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  date: 'date',
+  type: 'type',
+  googlePhotosAlbumUrl: 'googlePhotosAlbumUrl',
+  location: 'location',
+  tags: 'tags',
+  treeId: 'treeId',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MemoryScalarFieldEnum = (typeof MemoryScalarFieldEnum)[keyof typeof MemoryScalarFieldEnum]
+
+
+export const MemoryMemberScalarFieldEnum = {
+  memoryId: 'memoryId',
+  memberId: 'memberId'
+} as const
+
+export type MemoryMemberScalarFieldEnum = (typeof MemoryMemberScalarFieldEnum)[keyof typeof MemoryMemberScalarFieldEnum]
 
 
 export const ActivityLogScalarFieldEnum = {
@@ -2002,6 +2179,8 @@ export type GlobalOmitConfig = {
   member?: Prisma.MemberOmit
   relationship?: Prisma.RelationshipOmit
   media?: Prisma.MediaOmit
+  memory?: Prisma.MemoryOmit
+  memoryMember?: Prisma.MemoryMemberOmit
   activityLog?: Prisma.ActivityLogOmit
   account?: Prisma.AccountOmit
   session?: Prisma.SessionOmit
