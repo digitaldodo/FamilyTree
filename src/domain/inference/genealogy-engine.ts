@@ -312,18 +312,18 @@ export const GenealogyEngine = {
       }
 
       // 6. Compute Layout (X/Y coordinates)
-      const LEVEL_HEIGHT = 450;
-      const NODE_WIDTH = 220;
-      const GAP = 80;
+      const LEVEL_HEIGHT = 380;
+      const NODE_WIDTH = 190;
+      const GAP = 52;
 
       const g = new dagre.graphlib.Graph({ compound: true });
-      g.setGraph({ rankdir: 'TB', nodesep: GAP, edgesep: 40, ranksep: LEVEL_HEIGHT - 300 });
+      g.setGraph({ rankdir: 'TB', nodesep: GAP, edgesep: 40, ranksep: LEVEL_HEIGHT - 250 });
       g.setDefaultEdgeLabel(() => ({}));
 
       for (const node of finalNodes) {
         const isCouple = node.type === 'COUPLE_CONTAINER';
         const nodeWidth = isCouple ? NODE_WIDTH * 2 + GAP : NODE_WIDTH;
-        g.setNode(node.id, { width: nodeWidth, height: 300 });
+        g.setNode(node.id, { width: nodeWidth, height: 250 });
       }
 
       for (const e of finalEdges) {

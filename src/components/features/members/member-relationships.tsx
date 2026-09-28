@@ -22,7 +22,7 @@ export function MemberRelationships({ member, members, onNavigateToMember, readO
 
   const { familyGraph } = useFamilyTree(member.treeId);
 
-  const derived = familyGraph.derivedRelationships[member.id] || {
+  const derived = (familyGraph.memberDerivedRelationships || familyGraph.derivedRelationships)[member.id] || {
     parents: [],
     children: [],
     spouses: [],
@@ -36,11 +36,11 @@ export function MemberRelationships({ member, members, onNavigateToMember, readO
   const siblingMembers = getMembersByIds(derived.siblings);
   
   // Grandparents
-  const grandparentsIds = derived.parents.flatMap(pid => familyGraph.derivedRelationships[pid]?.parents || []);
+  const grandparentsIds = derived.parents.flatMap(pid => (familyGraph.memberDerivedRelationships || familyGraph.derivedRelationships)[pid]?.parents || []);
   const grandparentMembers = getMembersByIds(Array.from(new Set(grandparentsIds)));
 
   // Grandchildren
-  const grandchildrenIds = derived.children.flatMap(cid => familyGraph.derivedRelationships[cid]?.children || []);
+  const grandchildrenIds = derived.children.flatMap(cid => (familyGraph.memberDerivedRelationships || familyGraph.derivedRelationships)[cid]?.children || []);
   const grandchildMembers = getMembersByIds(Array.from(new Set(grandchildrenIds)));
 
   const hasRelationships = spouseMembers.length > 0 || parentMembers.length > 0 || childMembers.length > 0 || siblingMembers.length > 0 || grandparentMembers.length > 0 || grandchildMembers.length > 0;
