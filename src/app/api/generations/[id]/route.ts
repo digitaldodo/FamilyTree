@@ -51,7 +51,7 @@ export async function PATCH(
     let body = null;
     try {
       body = await request.json();
-    } catch (error) {
+    } catch {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const validation = updateGenerationSchema.safeParse(body);

@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     // Strip ownerId from body — we always use session user
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
     const { ownerId: _ignoredOwnerId, ...bodyWithoutOwner } = body;
 
     const validation = createTreeSchema
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
       return errorResponse('UNAUTHORIZED', 'Authenticated user record not found in database.', 401);
     }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
     const { ownerId: _unused, ...rest } = validation.data;
 
     const tree = await prisma.tree.create({

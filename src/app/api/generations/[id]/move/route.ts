@@ -41,7 +41,7 @@ export async function PATCH(
     let body;
     try {
       body = await request.json();
-    } catch (error) {
+    } catch {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const { direction } = body;

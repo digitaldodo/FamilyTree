@@ -81,7 +81,7 @@ export function UploadMemoryModal({ isOpen, onClose, onUpload }: UploadMemoryMod
           <CldUploadWidget
             uploadPreset={uploadPreset}
             onSuccess={handleUploadSuccess}
-            onError={(error) => {
+            onError={(_error) => {
                
               // Cloudinary upload failed; surface error to the user.
               toast.error('Image upload failed');

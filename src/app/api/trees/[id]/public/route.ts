@@ -47,7 +47,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
 
     // Strip sensitive information
     const sanitizedMembers = tree.members.map(member => {
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
       const { email: _email, phone: _phone, ...safeMember } = member;
       return safeMember;
     });

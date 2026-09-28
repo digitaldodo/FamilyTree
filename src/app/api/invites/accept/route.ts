@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     let body = null;
     try {
       body = await request.json();
-    } catch (error) {
+    } catch {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const { token } = body;

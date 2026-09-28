@@ -13,7 +13,7 @@ export async function GET() {
   try {
     await prisma.$queryRaw`SELECT 1`;
     dbStatus = 'connected';
-  } catch (error) {
+  } catch {
     dbStatus = 'disconnected';
   }
 
