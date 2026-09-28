@@ -6,6 +6,7 @@ import { Camera, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { ImageCropper } from '@/components/ui/image-cropper';
+import { GooglePhotosPicker } from './google-photos-picker';
 
 interface ImageUploadProps {
   value?: string | null;
@@ -107,22 +108,34 @@ export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', i
         onChange={handleFileChange}
       />
 
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full"
-        disabled={isProcessing}
-        onClick={(e) => {
-          e.preventDefault();
-          fileInputRef.current?.click();
-        }}
-      >
-        {isProcessing ? (
-          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
-        ) : (
-          <><Camera className="w-4 h-4 mr-2" /> {value ? 'Change Image' : 'Upload Image'}</>
-        )}
-      </Button>
+      <div className="w-full flex flex-col gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          disabled={isProcessing}
+          onClick={(e) => {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }}
+        >
+          {isProcessing ? (
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+          ) : (
+            <><Camera className="w-4 h-4 mr-2" /> {value ? 'Change Image' : 'Upload Image'}</>
+          )}
+        </Button>
+        <GooglePhotosPicker 
+          disabled={isProcessing} 
+          onPhotoSelected={async (blob) => {
+            const reader = new FileReader();
+            reader.addEventListener('load', () => {
+              setSelectedImageSrc(reader.result?.toString() || null);
+            });
+            reader.readAsDataURL(blob);
+          }} 
+        />
+      </div>
 
       {selectedImageSrc && (
         <ImageCropper
@@ -137,4 +150,3 @@ export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', i
     </div>
   );
 }
-

@@ -6,6 +6,7 @@ import { successResponse, errorResponse } from '@/lib/utils';
 import { updateMemberSchema } from '@/validations/member.schema';
 import { isSpouseEligible } from '@/utils/relationship';
 import { createTreeSnapshot } from '@/lib/versioning';
+import { RelationshipEngine } from '@/lib/relationship-engine';
 import { computeRelationshipDiff, normalizeRelationshipSet } from '@/lib/relationship-canonical';
 
 type Params = { params: Promise<{ id: string }> };
@@ -179,15 +180,10 @@ export async function PUT(request: NextRequest, { params }: Params) {
              if (newGeneration.orderIndex + 1 !== relative.generation.orderIndex) {
                return errorResponse('VALIDATION_ERROR', `Parent must belong exactly to the generation immediately above the child.`, 400);
              }
-             const relativeParentCount = await prisma.relationship.count({
-               where: {
-                 type: 'PARENT',
-                 toId: rel.id,
-                 NOT: { fromId: id }
-               }
-             });
-             if (relativeParentCount >= 2) {
-               return errorResponse('VALIDATION_ERROR', 'This child already has two parents.', 400);
+             try {
+               await RelationshipEngine.validateParentCoupleRule(rel.id, id);
+             } catch (err: any) {
+               return errorResponse('VALIDATION_ERROR', err.message, 400);
              }
           }
         }

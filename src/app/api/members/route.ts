@@ -7,6 +7,7 @@ import { createMemberSchema } from '@/validations/member.schema';
 import { isSpouseEligible } from '@/utils/relationship';
 import { createTreeSnapshot } from '@/lib/versioning';
 import { normalizeRelationshipSet } from '@/lib/relationship-canonical';
+import { RelationshipEngine } from '@/lib/relationship-engine';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -185,6 +186,11 @@ export async function POST(request: NextRequest) {
          } else if (rel.type === 'CHILD') {
            if (relGenOrder <= targetGenOrder) {
              return errorResponse('VALIDATION_ERROR', 'Child must belong to a younger generation.', 400);
+           }
+           try {
+             await RelationshipEngine.validateParentCoupleRule(rel.id);
+           } catch (err: any) {
+             return errorResponse('VALIDATION_ERROR', err.message, 400);
            }
          } else if (rel.type === 'SPOUSE') {
            const spousesInPayload = safeRelations.filter((r: any) => r.type === 'SPOUSE');
