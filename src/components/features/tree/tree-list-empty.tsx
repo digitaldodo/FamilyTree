@@ -20,8 +20,8 @@ export function TreeListEmpty({ onCreateTree }: TreeListEmptyProps) {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-primary/10 rounded-full blur-[80px] pointer-events-none -z-10" />
 
       {/* Icon in gradient circle */}
-      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-purple-400/20 flex items-center justify-center mb-8 ring-1 ring-primary/10">
-        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center">
+      <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mb-8 ring-1 ring-primary/10">
+        <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
           <TreePine className="w-8 h-8 text-white" />
         </div>
       </div>
@@ -30,7 +30,8 @@ export function TreeListEmpty({ onCreateTree }: TreeListEmptyProps) {
         Start Your Family Legacy
       </h2>
       <p className="text-muted-foreground max-w-md mb-8 leading-relaxed">
-        Create your first family tree to begin preserving your family&apos;s history, memories, and connections.
+        Create your first family tree to begin preserving your family&apos;s
+        history, memories, and connections.
       </p>
 
       <Button size="lg" onClick={onCreateTree} className="h-12 px-8 text-base">

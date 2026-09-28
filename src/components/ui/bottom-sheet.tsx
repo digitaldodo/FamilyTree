@@ -13,7 +13,13 @@ interface BottomSheetProps {
   className?: string;
 }
 
-export function BottomSheet({ isOpen, onClose, children, title, className }: BottomSheetProps) {
+export function BottomSheet({
+  isOpen,
+  onClose,
+  children,
+  title,
+  className,
+}: BottomSheetProps) {
   // Prevent scrolling on body when open
   React.useEffect(() => {
     if (isOpen) {
@@ -39,7 +45,7 @@ export function BottomSheet({ isOpen, onClose, children, title, className }: Bot
             className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
             aria-hidden="true"
           />
-          
+
           {/* Sheet */}
           <motion.div
             initial={{ y: '100%' }}
@@ -47,21 +53,27 @@ export function BottomSheet({ isOpen, onClose, children, title, className }: Bot
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={cn(
-              "fixed bottom-0 left-0 right-0 z-[101] max-h-[90vh] overflow-y-auto rounded-t-3xl bg-background shadow-2xl border-t border-border",
+              'fixed bottom-0 left-0 right-0 z-[101] max-h-[90vh] overflow-y-auto rounded-t-2xl bg-background shadow-lg border-t border-border',
               className
             )}
             role="dialog"
             aria-modal="true"
           >
             {/* Drag Handle (Visual Only) */}
-            <div className="flex w-full items-center justify-center pt-3 pb-1" onClick={onClose} aria-hidden="true">
+            <div
+              className="flex w-full items-center justify-center pt-3 pb-1"
+              onClick={onClose}
+              aria-hidden="true"
+            >
               <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
             </div>
 
             {/* Header */}
             {title && (
               <div className="flex items-center justify-between px-6 pb-2 pt-2">
-                <h3 className="text-lg font-semibold tracking-tight">{title}</h3>
+                <h3 className="text-lg font-semibold tracking-tight">
+                  {title}
+                </h3>
                 <button
                   onClick={onClose}
                   className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
@@ -72,9 +84,7 @@ export function BottomSheet({ isOpen, onClose, children, title, className }: Bot
             )}
 
             {/* Content */}
-            <div className="px-4 pb-8 pt-2">
-              {children}
-            </div>
+            <div className="px-4 pb-8 pt-2">{children}</div>
           </motion.div>
         </>
       )}

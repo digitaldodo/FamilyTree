@@ -15,11 +15,19 @@ interface ImageUploadProps {
   isCover?: boolean;
 }
 
-export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', isCover = false }: ImageUploadProps) {
+export function ImageUpload({
+  value,
+  onChange,
+  folder = 'family-tree/avatars',
+  isCover = false,
+}: ImageUploadProps) {
   const [isProcessing, setIsProcessing] = React.useState(false);
-  const [selectedImageSrc, setSelectedImageSrc] = React.useState<string | null>(null);
-  
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "family-tree";
+  const [selectedImageSrc, setSelectedImageSrc] = React.useState<string | null>(
+    null
+  );
+
+  const uploadPreset =
+    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'family-tree';
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -42,7 +50,7 @@ export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', i
       toast.error('Cloudinary configuration is missing.');
       return;
     }
-    
+
     setIsProcessing(true);
     setSelectedImageSrc(null); // Close modal
 
@@ -52,18 +60,21 @@ export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', i
       formData.append('upload_preset', uploadPreset);
       formData.append('folder', folder);
 
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-        method: 'POST',
-        body: formData,
-      });
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
 
       let data;
-    try {
-      data = await res.json();
-    } catch {
-      throw new Error("Server returned invalid response");
-    }
-      
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error('Server returned invalid response');
+      }
+
       if (data.secure_url) {
         onChange(data.secure_url);
       } else {
@@ -78,11 +89,21 @@ export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', i
   };
 
   return (
-    <div className={`flex flex-col items-center gap-4 ${isCover ? 'w-full' : ''}`}>
+    <div
+      className={`flex flex-col items-center gap-4 ${isCover ? 'w-full' : ''}`}
+    >
       <div className="relative group w-full flex justify-center">
         {value ? (
-          <div className={`relative ${isCover ? 'w-full h-32 md:h-48' : 'w-24 h-24'} rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800`}>
-            <Image src={value} alt="Uploaded" fill className="w-full h-full object-cover" unoptimized />
+          <div
+            className={`relative ${isCover ? 'w-full h-32 md:h-48' : 'w-24 h-24'} rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800`}
+          >
+            <Image
+              src={value}
+              alt="Uploaded"
+              fill
+              className="w-full h-full object-cover"
+              unoptimized
+            />
             <Button
               type="button"
               variant="destructive"
@@ -94,7 +115,9 @@ export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', i
             </Button>
           </div>
         ) : (
-          <div className={`${isCover ? 'w-full h-32 md:h-48 rounded-xl' : 'w-24 h-24 rounded-full'} border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-900`}>
+          <div
+            className={`${isCover ? 'w-full h-32 md:h-48 rounded-xl' : 'w-24 h-24 rounded-full'} border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center bg-slate-50 dark:bg-slate-900`}
+          >
             <Camera className="w-8 h-8 text-slate-400" />
           </div>
         )}
@@ -120,20 +143,25 @@ export function ImageUpload({ value, onChange, folder = 'family-tree/avatars', i
           }}
         >
           {isProcessing ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...
+            </>
           ) : (
-            <><Camera className="w-4 h-4 mr-2" /> {value ? 'Change Image' : 'Upload Image'}</>
+            <>
+              <Camera className="w-4 h-4 mr-2" />{' '}
+              {value ? 'Change Image' : 'Upload Image'}
+            </>
           )}
         </Button>
-        <GooglePhotosPicker 
-          disabled={isProcessing} 
+        <GooglePhotosPicker
+          disabled={isProcessing}
           onPhotoSelected={async (blob) => {
             const reader = new FileReader();
             reader.addEventListener('load', () => {
               setSelectedImageSrc(reader.result?.toString() || null);
             });
             reader.readAsDataURL(blob);
-          }} 
+          }}
         />
       </div>
 

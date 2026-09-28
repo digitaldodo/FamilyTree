@@ -40,7 +40,7 @@ export function MemberAvatar({
   gender,
   className,
   iconClassName,
-  fallbackSize = 24
+  fallbackSize = 24,
 }: MemberAvatarProps) {
   const [hasLoadError, setHasLoadError] = useState(false);
 
@@ -62,9 +62,11 @@ export function MemberAvatar({
   }, [fullName]);
 
   const genderColor =
-    gender === 'MALE' ? 'text-blue-500' :
-    gender === 'FEMALE' ? 'text-pink-500' :
-    'text-slate-500';
+    gender === 'MALE'
+      ? 'text-blue-500'
+      : gender === 'FEMALE'
+        ? 'text-pink-500'
+        : 'text-slate-500';
 
   if (imageUrl && !hasLoadError) {
     return (
@@ -82,8 +84,19 @@ export function MemberAvatar({
   }
 
   return (
-    <div className={cn("absolute inset-0 flex items-center justify-center w-full h-full rounded-full text-lg font-semibold tracking-wide", fallbackClasses, className)}>
-      {initials || <User2 className={cn(genderColor, iconClassName)} style={{ width: fallbackSize, height: fallbackSize }} />}
+    <div
+      className={cn(
+        'absolute inset-0 flex items-center justify-center w-full h-full rounded-full text-lg font-semibold tracking-wide',
+        fallbackClasses,
+        className
+      )}
+    >
+      {initials || (
+        <User2
+          className={cn(genderColor, iconClassName)}
+          style={{ width: fallbackSize, height: fallbackSize }}
+        />
+      )}
     </div>
   );
 }

@@ -15,9 +15,10 @@ export function GlobalErrorListener() {
     const filterAndLogError = (error: any, defaultCategory: string) => {
       if (!error) return;
 
-      const errorMessage = typeof error === 'string' ? error : (error.message || '');
+      const errorMessage =
+        typeof error === 'string' ? error : error.message || '';
       const errorStack = error.stack || '';
-      
+
       // Ignore extension-related errors
       if (
         errorMessage.includes('VM') ||
@@ -34,14 +35,20 @@ export function GlobalErrorListener() {
 
       // Categorize
       let category = defaultCategory;
-      if (errorMessage.toLowerCase().includes('network') || errorMessage.toLowerCase().includes('fetch')) {
+      if (
+        errorMessage.toLowerCase().includes('network') ||
+        errorMessage.toLowerCase().includes('fetch')
+      ) {
         category = 'Network Error';
-      } else if (errorMessage.toLowerCase().includes('api') || (error.status && error.status >= 400)) {
+      } else if (
+        errorMessage.toLowerCase().includes('api') ||
+        (error.status && error.status >= 400)
+      ) {
         category = 'API Error';
       }
 
       // Log genuine application errors cleanly
-       
+
       console.log(`[${category}]`, error);
     };
 
@@ -50,7 +57,10 @@ export function GlobalErrorListener() {
 
     return () => {
       window.removeEventListener('error', handleGlobalError);
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      window.removeEventListener(
+        'unhandledrejection',
+        handleUnhandledRejection
+      );
     };
   }, []);
 

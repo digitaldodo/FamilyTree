@@ -1,23 +1,38 @@
-"use client";
+'use client';
 
 import { useState } from 'react';
 import { CldUploadWidget } from 'next-cloudinary';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { ImagePlus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface UploadMemoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpload: (url: string, publicId: string, caption?: string, eventTag?: string) => Promise<void>;
+  onUpload: (
+    url: string,
+    publicId: string,
+    caption?: string,
+    eventTag?: string
+  ) => Promise<void>;
 }
 
-export function UploadMemoryModal({ isOpen, onClose, onUpload }: UploadMemoryModalProps) {
+export function UploadMemoryModal({
+  isOpen,
+  onClose,
+  onUpload,
+}: UploadMemoryModalProps) {
   const [caption, setCaption] = useState('');
   const [eventTag, setEventTag] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "family-tree";
+  const uploadPreset =
+    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'family-tree';
 
   const handleUploadSuccess = async (result: any) => {
     setIsProcessing(true);
@@ -43,7 +58,7 @@ export function UploadMemoryModal({ isOpen, onClose, onUpload }: UploadMemoryMod
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 border-none shadow-2xl">
+      <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 border-none shadow-lg">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-center text-slate-800 dark:text-white">
             Add Memory
@@ -82,32 +97,31 @@ export function UploadMemoryModal({ isOpen, onClose, onUpload }: UploadMemoryMod
             uploadPreset={uploadPreset}
             onSuccess={handleUploadSuccess}
             onError={(_error) => {
-               
               // Cloudinary upload failed; surface error to the user.
               toast.error('Image upload failed');
               setIsProcessing(false);
             }}
             options={{
               maxFiles: 1,
-              resourceType: "image",
-              clientAllowedFormats: ["jpg", "jpeg", "png", "webp", "gif"],
+              resourceType: 'image',
+              clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
               styles: {
                 palette: {
-                  window: "#FFFFFF",
-                  windowBorder: "#90A0B3",
-                  tabIcon: "#0078FF",
-                  menuIcons: "#5A616A",
-                  textDark: "#000000",
-                  textLight: "#FFFFFF",
-                  link: "#0078FF",
-                  action: "#FF620C",
-                  inactiveTabIcon: "#0E2F5A",
-                  error: "#F44235",
-                  inProgress: "#0078FF",
-                  complete: "#20B832",
-                  sourceBg: "#E4EBF1"
-                }
-              }
+                  window: '#FFFFFF',
+                  windowBorder: '#90A0B3',
+                  tabIcon: '#0078FF',
+                  menuIcons: '#5A616A',
+                  textDark: '#000000',
+                  textLight: '#FFFFFF',
+                  link: '#0078FF',
+                  action: '#FF620C',
+                  inactiveTabIcon: '#0E2F5A',
+                  error: '#F44235',
+                  inProgress: '#0078FF',
+                  complete: '#20B832',
+                  sourceBg: '#E4EBF1',
+                },
+              },
             }}
           >
             {({ open }) => {

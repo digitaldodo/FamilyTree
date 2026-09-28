@@ -1,27 +1,31 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { ExportService, ExportFormat } from "@/services/export.service";
-import { Button } from "@/components/ui/button";
-import { FileImage, FileText, Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { useTheme } from "next-themes";
+import { useState } from 'react';
+import { ExportService, ExportFormat } from '@/services/export.service';
+import { Button } from '@/components/ui/button';
+import { FileImage, FileText, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useTheme } from 'next-themes';
 
 interface ExportToolbarProps {
   elementId: string;
   filename?: string;
 }
 
-import { ExportJson } from "./export-json";
+import { ExportJson } from './export-json';
 
-export function ExportToolbar({ elementId, treeId, filename = "family-tree" }: ExportToolbarProps & { treeId?: string }) {
+export function ExportToolbar({
+  elementId,
+  treeId,
+  filename = 'family-tree',
+}: ExportToolbarProps & { treeId?: string }) {
   const [isExporting, setIsExporting] = useState<ExportFormat | null>(null);
   const { resolvedTheme } = useTheme();
 
   const handleExport = async (format: ExportFormat) => {
     try {
       setIsExporting(format);
-      const bgColor = resolvedTheme === "dark" ? "#09090b" : "#ffffff";
+      const bgColor = resolvedTheme === 'dark' ? '#09090b' : '#ffffff';
       await ExportService.exportTree(elementId, format, filename, bgColor);
       toast.success(`Tree exported as ${format} successfully!`);
     } catch {
@@ -32,32 +36,32 @@ export function ExportToolbar({ elementId, treeId, filename = "family-tree" }: E
   };
 
   return (
-    <div className="flex items-center gap-2 bg-card/80 backdrop-blur-md border border-border p-2 rounded-xl shadow-sm">
+    <div className="flex items-center gap-2 bg-card border border-border p-2 rounded-md shadow-sm">
       <Button
         variant="ghost"
         size="sm"
         disabled={isExporting !== null}
-        onClick={() => handleExport("PNG")}
+        onClick={() => handleExport('PNG')}
         className="text-xs font-medium"
       >
-        {isExporting === "PNG" ? (
+        {isExporting === 'PNG' ? (
           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
         ) : (
           <FileImage className="w-4 h-4 mr-2 text-primary" />
         )}
         Export PNG
       </Button>
-      
+
       <div className="w-px h-4 bg-border mx-1" />
-      
+
       <Button
         variant="ghost"
         size="sm"
         disabled={isExporting !== null}
-        onClick={() => handleExport("PDF")}
+        onClick={() => handleExport('PDF')}
         className="text-xs font-medium"
       >
-        {isExporting === "PDF" ? (
+        {isExporting === 'PDF' ? (
           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
         ) : (
           <FileText className="w-4 h-4 mr-2 text-primary" />

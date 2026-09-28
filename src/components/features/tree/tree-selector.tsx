@@ -12,11 +12,33 @@ interface TreeSelectorProps {
   onCreateTree?: () => void;
 }
 
-const roleConfig: Record<string, { label: string; icon: React.ElementType; className: string }> = {
-  OWNER: { label: 'Owner', icon: Crown, className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
-  ADMIN: { label: 'Admin', icon: Crown, className: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
-  EDITOR: { label: 'Editor', icon: Edit3, className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  VIEWER: { label: 'Viewer', icon: Eye, className: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
+const roleConfig: Record<
+  string,
+  { label: string; icon: React.ElementType; className: string }
+> = {
+  OWNER: {
+    label: 'Owner',
+    icon: Crown,
+    className:
+      'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  },
+  ADMIN: {
+    label: 'Admin',
+    icon: Crown,
+    className:
+      'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  },
+  EDITOR: {
+    label: 'Editor',
+    icon: Edit3,
+    className:
+      'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  },
+  VIEWER: {
+    label: 'Viewer',
+    icon: Eye,
+    className: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+  },
 };
 
 export function TreeSelector({ onCreateTree }: TreeSelectorProps) {
@@ -47,7 +69,7 @@ export function TreeSelector({ onCreateTree }: TreeSelectorProps) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-colors text-left group',
+          'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-left group',
           isOpen && 'bg-muted'
         )}
       >
@@ -64,7 +86,7 @@ export function TreeSelector({ onCreateTree }: TreeSelectorProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute left-3 right-3 z-50 mt-1.5 rounded-xl bg-background border border-border shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2">
+        <div className="absolute left-3 right-3 z-50 mt-1.5 rounded-lg bg-card border border-border shadow-md overflow-hidden animate-in fade-in slide-in-from-top-2">
           <div className="max-h-[240px] overflow-y-auto py-1.5 custom-scrollbar">
             {userTrees.length === 0 && (
               <div className="px-3 py-4 text-center text-sm text-muted-foreground">
@@ -90,9 +112,16 @@ export function TreeSelector({ onCreateTree }: TreeSelectorProps) {
                 >
                   <TreePine className="h-3.5 w-3.5 shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">{tree.name}</div>
+                    <div className="text-sm font-medium truncate">
+                      {tree.name}
+                    </div>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className={cn('inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium', role.className)}>
+                      <span
+                        className={cn(
+                          'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium',
+                          role.className
+                        )}
+                      >
                         <RoleIcon className="h-2.5 w-2.5" />
                         {role.label}
                       </span>

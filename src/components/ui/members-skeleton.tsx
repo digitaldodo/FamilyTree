@@ -7,7 +7,10 @@ export function MembersSkeleton() {
         <section key={genIdx} className="relative">
           {/* Connector line between generations */}
           {genIdx > 0 && (
-            <div className="absolute left-8 -top-8 w-px h-10 bg-border/50" aria-hidden="true" />
+            <div
+              className="absolute left-8 -top-8 w-px h-10 bg-border/50"
+              aria-hidden="true"
+            />
           )}
 
           {/* Generation Header Skeleton */}
@@ -27,8 +30,13 @@ export function MembersSkeleton() {
 
           {/* Members Grid Skeleton */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {Array.from({ length: genIdx === 0 ? 2 : genIdx === 1 ? 4 : 5 }).map((_, memberIdx) => (
-              <div key={memberIdx} className="rounded-xl border bg-card p-4 flex flex-col gap-4">
+            {Array.from({
+              length: genIdx === 0 ? 2 : genIdx === 1 ? 4 : 5,
+            }).map((_, memberIdx) => (
+              <div
+                key={memberIdx}
+                className="rounded-xl border bg-card p-4 flex flex-col gap-4"
+              >
                 <div className="flex items-center gap-4">
                   <Skeleton className="w-16 h-16 rounded-full" />
                   <div className="space-y-2 flex-1">

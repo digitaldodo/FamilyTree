@@ -1,12 +1,10 @@
 import type { NextConfig } from "next";
-// @ts-expect-error - Next.js config types issue
-import withPWA from "next-pwa";
+import withPWAInit from "@ducanh2912/next-pwa";
 
-const withPWAConfig = withPWA({
+const withPWAConfig = withPWAInit({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
   register: true,
-  skipWaiting: true,
 });
 
 const nextConfig: NextConfig = {

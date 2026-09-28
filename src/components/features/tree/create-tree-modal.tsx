@@ -1,7 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,7 +31,11 @@ export function CreateTreeModal({ isOpen, onClose }: CreateTreeModalProps) {
   const queryClient = useQueryClient();
 
   const createMutation = useMutation({
-    mutationFn: async (data: { name: string; description?: string; isPublic: boolean }) => {
+    mutationFn: async (data: {
+      name: string;
+      description?: string;
+      isPublic: boolean;
+    }) => {
       const response = await createTree(data);
       return response.data;
     },
@@ -41,7 +51,7 @@ export function CreateTreeModal({ isOpen, onClose }: CreateTreeModalProps) {
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to create tree. Please try again.');
-    }
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -64,7 +74,8 @@ export function CreateTreeModal({ isOpen, onClose }: CreateTreeModalProps) {
             Create a Family Tree
           </DialogTitle>
           <DialogDescription>
-            Start preserving your family history. Give your family tree a name to get started.
+            Start preserving your family history. Give your family tree a name
+            to get started.
           </DialogDescription>
         </DialogHeader>
 
@@ -85,7 +96,10 @@ export function CreateTreeModal({ isOpen, onClose }: CreateTreeModalProps) {
 
           <div className="space-y-2">
             <label htmlFor="tree-description" className="text-sm font-medium">
-              Description <span className="text-muted-foreground font-normal">(optional)</span>
+              Description{' '}
+              <span className="text-muted-foreground font-normal">
+                (optional)
+              </span>
             </label>
             <Textarea
               id="tree-description"
@@ -96,10 +110,12 @@ export function CreateTreeModal({ isOpen, onClose }: CreateTreeModalProps) {
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3">
+          <div className="flex items-center justify-between rounded-lg bg-muted/50 px-4 py-3">
             <div>
               <div className="text-sm font-medium">Public tree</div>
-              <div className="text-xs text-muted-foreground">Allow anyone with the link to view</div>
+              <div className="text-xs text-muted-foreground">
+                Allow anyone with the link to view
+              </div>
             </div>
             <button
               type="button"
@@ -118,8 +134,14 @@ export function CreateTreeModal({ isOpen, onClose }: CreateTreeModalProps) {
             </button>
           </div>
 
-          <Button type="submit" className="w-full" disabled={createMutation.isPending || !name.trim()}>
-            {createMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={createMutation.isPending || !name.trim()}
+          >
+            {createMutation.isPending ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : null}
             Create Tree
           </Button>
         </form>

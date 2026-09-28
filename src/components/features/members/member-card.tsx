@@ -17,7 +17,12 @@ interface MemberCardProps {
 }
 
 export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
-  const { setSelectedMemberId, setIsMemberModalOpen, setIsEditingMember, activeTreeId } = useAppStore();
+  const {
+    setSelectedMemberId,
+    setIsMemberModalOpen,
+    setIsEditingMember,
+    activeTreeId,
+  } = useAppStore();
   const { generations } = useGenerations();
 
   const handleClick = () => {
@@ -33,8 +38,12 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
     setIsMemberModalOpen(true);
   };
 
-  const relationsFrom = Array.isArray(member.relationsFrom) ? member.relationsFrom : [];
-  const relationsTo = Array.isArray(member.relationsTo) ? member.relationsTo : [];
+  const relationsFrom = Array.isArray(member.relationsFrom)
+    ? member.relationsFrom
+    : [];
+  const relationsTo = Array.isArray(member.relationsTo)
+    ? member.relationsTo
+    : [];
   const relationCount = relationsFrom.length + relationsTo.length;
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -52,29 +61,37 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/members/${member.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/members/${member.id}`, {
+        method: 'DELETE',
+      });
       if (!res.ok) throw new Error('Failed to delete member');
       let data;
       try {
-      data = await res.json();
-    } catch {
-      throw new Error("Server returned invalid response");
-    }
+        data = await res.json();
+      } catch {
+        throw new Error('Server returned invalid response');
+      }
       return data;
     },
     onSuccess: async () => {
       toast.success('Member deleted successfully');
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['tree', activeTreeId] }),
-        queryClient.invalidateQueries({ queryKey: ['tree-versions', activeTreeId] }),
+        queryClient.invalidateQueries({
+          queryKey: ['tree-versions', activeTreeId],
+        }),
       ]);
     },
     onError: () => {
       toast.error('Failed to delete member');
-    }
+    },
   });
 
-  const genName = generations.find(g => g.id === member.generationId)?.name || (calculatedGeneration !== undefined ? `Gen ${calculatedGeneration + 1}` : 'Unknown Gen');
+  const genName =
+    generations.find((g) => g.id === member.generationId)?.name ||
+    (calculatedGeneration !== undefined
+      ? `Gen ${calculatedGeneration + 1}`
+      : 'Unknown Gen');
 
   const genderAccent =
     member.gender === 'MALE'
@@ -88,22 +105,41 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
       className={`cursor-pointer transition-all duration-200 group overflow-hidden hover:shadow-md border-border/60 hover:scale-[1.02] w-full max-w-none sm:max-w-[220px] h-[280px] relative flex flex-col`}
       onClick={handleClick}
     >
-      <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-        <Dropdown 
+      <div
+        className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Dropdown
           trigger={
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 bg-background/50 hover:bg-background/80 backdrop-blur-sm rounded-full">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 bg-background/50 hover:bg-background/80 backdrop-blur-sm rounded-full"
+            >
               <MoreVertical className="h-4 w-4" />
             </Button>
           }
         >
           <div className="flex flex-col text-sm w-40">
-            <button className="flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={(e) => { e.stopPropagation(); handleClick(); }}>
+            <button
+              className="flex items-center w-full px-4 py-2 text-left hover:bg-muted"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClick();
+              }}
+            >
               <Eye className="w-4 h-4 mr-2" /> View
             </button>
-            <button className="flex items-center w-full px-4 py-2 text-left hover:bg-muted" onClick={handleEdit}>
+            <button
+              className="flex items-center w-full px-4 py-2 text-left hover:bg-muted"
+              onClick={handleEdit}
+            >
               <Pencil className="w-4 h-4 mr-2" /> Edit
             </button>
-            <button className="flex items-center w-full px-4 py-2 text-left text-destructive hover:bg-muted" onClick={handleDelete}>
+            <button
+              className="flex items-center w-full px-4 py-2 text-left text-destructive hover:bg-muted"
+              onClick={handleDelete}
+            >
               <Trash2 className="w-4 h-4 mr-2" /> Delete
             </button>
           </div>
@@ -111,12 +147,12 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
       </div>
       <CardContent className="p-0 flex flex-col h-full">
         <div className="relative w-full flex-grow shrink bg-muted overflow-hidden">
-          <MemberAvatar 
-            imageUrl={member.imageUrl} 
-            firstName={member.firstName} 
-            lastName={member.lastName} 
-            gender={member.gender} 
-            fallbackSize={48} 
+          <MemberAvatar
+            imageUrl={member.imageUrl}
+            firstName={member.firstName}
+            lastName={member.lastName}
+            gender={member.gender}
+            fallbackSize={48}
             iconClassName="transition-transform duration-500 group-hover:scale-110"
             className="transition-transform duration-500 group-hover:scale-105"
           />
@@ -126,7 +162,9 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
             {member.firstName} {member.lastName}
           </h3>
           <div className="text-xs text-muted-foreground mt-0.5">
-            {member.birthDate ? format(new Date(member.birthDate), 'yyyy') : 'Unknown'}
+            {member.birthDate
+              ? format(new Date(member.birthDate), 'yyyy')
+              : 'Unknown'}
           </div>
           <div className="mt-1">
             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-[10px] font-medium text-primary">

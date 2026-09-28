@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState } from 'react';
 import { CldImage } from 'next-cloudinary';
@@ -16,7 +16,12 @@ interface MemoryCardProps {
   onClick?: () => void;
 }
 
-export function MemoryCard({ memory, onDelete, compact, onClick }: MemoryCardProps) {
+export function MemoryCard({
+  memory,
+  onDelete,
+  compact,
+  onClick,
+}: MemoryCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -34,8 +39,8 @@ export function MemoryCard({ memory, onDelete, compact, onClick }: MemoryCardPro
   return (
     <div
       className={cn(
-        "relative group rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 break-inside-avoid",
-        compact ? "h-full w-full" : ""
+        'relative group rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 break-inside-avoid',
+        compact ? 'h-full w-full' : ''
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -51,7 +56,10 @@ export function MemoryCard({ memory, onDelete, compact, onClick }: MemoryCardPro
           quality="auto"
           format="auto"
           alt={memory.caption || 'Family memory'}
-          className={cn("w-full object-cover transition-transform duration-500 group-hover:scale-105", compact ? "h-full" : "h-auto")}
+          className={cn(
+            'w-full object-cover transition-transform duration-500 group-hover:scale-105',
+            compact ? 'h-full' : 'h-auto'
+          )}
         />
       ) : (
         <Image
@@ -59,7 +67,10 @@ export function MemoryCard({ memory, onDelete, compact, onClick }: MemoryCardPro
           alt={memory.caption || 'Family memory'}
           width={600}
           height={600}
-          className={cn("w-full object-cover transition-transform duration-500 group-hover:scale-105", compact ? "h-full" : "h-auto")}
+          className={cn(
+            'w-full object-cover transition-transform duration-500 group-hover:scale-105',
+            compact ? 'h-full' : 'h-auto'
+          )}
           loading="lazy"
         />
       )}
@@ -108,7 +119,9 @@ export function MemoryCard({ memory, onDelete, compact, onClick }: MemoryCardPro
                 <div className="flex items-center gap-3 text-white/90 text-xs drop-shadow-md">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    <span>{format(new Date(memory.createdAt), 'MMM d, yyyy')}</span>
+                    <span>
+                      {format(new Date(memory.createdAt), 'MMM d, yyyy')}
+                    </span>
                   </div>
                   {memory.eventTag && (
                     <div className="flex items-center gap-1">

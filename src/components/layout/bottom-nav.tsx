@@ -21,8 +21,8 @@ export function BottomNav() {
     <div className="md:hidden fixed bottom-0 inset-x-0 h-16 bg-background/80 backdrop-blur-xl border-t border-border z-40 pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-around h-full px-2">
         {navItems.map((item) => {
-          const isActive = item.exact 
-            ? pathname === item.href 
+          const isActive = item.exact
+            ? pathname === item.href
             : pathname.startsWith(item.href);
           const Icon = item.icon;
 
@@ -43,12 +43,21 @@ export function BottomNav() {
                       layoutId="bottom-nav-active"
                       className="absolute inset-0 bg-primary/10 rounded-xl"
                       initial={false}
-                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 300,
+                        damping: 30,
+                      }}
                     />
                   )}
-                  <Icon className={cn('h-5 w-5 relative z-10', isActive && 'scale-110 transition-transform')} />
+                  <Icon
+                    className={cn(
+                      'h-5 w-5 relative z-10',
+                      isActive && 'scale-110 transition-transform'
+                    )}
+                  />
                 </div>
-                <span 
+                <span
                   className={cn(
                     'text-[10px] font-medium transition-colors',
                     isActive ? 'text-primary' : 'text-muted-foreground'

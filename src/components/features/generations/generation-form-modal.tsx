@@ -15,7 +15,8 @@ import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { Generation } from '@/types/member';
 
-export type GenerationFormMode = 'rename' | 'addAbove' | 'addBelow' | 'createFirst';
+export type GenerationFormMode =
+  'rename' | 'addAbove' | 'addBelow' | 'createFirst';
 
 interface GenerationFormModalProps {
   isOpen: boolean;
@@ -63,7 +64,9 @@ export function GenerationFormModal({
 
     // Check for duplicates
     const isDuplicate = existingGenerations.some(
-      g => g.name.toLowerCase() === trimmedName.toLowerCase() && g.id !== targetGenerationId
+      (g) =>
+        g.name.toLowerCase() === trimmedName.toLowerCase() &&
+        g.id !== targetGenerationId
     );
 
     if (isDuplicate) {
@@ -91,19 +94,27 @@ export function GenerationFormModal({
 
   const getTitle = () => {
     switch (mode) {
-      case 'rename': return 'Rename Generation';
-      case 'addAbove': return 'Add Generation Above';
-      case 'addBelow': return 'Add Generation Below';
-      case 'createFirst': return 'Create First Generation';
+      case 'rename':
+        return 'Rename Generation';
+      case 'addAbove':
+        return 'Add Generation Above';
+      case 'addBelow':
+        return 'Add Generation Below';
+      case 'createFirst':
+        return 'Create First Generation';
     }
   };
 
   const getDescription = () => {
     switch (mode) {
-      case 'rename': return 'Enter a new name for this generation.';
-      case 'addAbove': return 'Create a new generation directly above this one.';
-      case 'addBelow': return 'Create a new generation directly below this one.';
-      case 'createFirst': return 'Start your family tree by naming the first generation.';
+      case 'rename':
+        return 'Enter a new name for this generation.';
+      case 'addAbove':
+        return 'Create a new generation directly above this one.';
+      case 'addBelow':
+        return 'Create a new generation directly below this one.';
+      case 'createFirst':
+        return 'Start your family tree by naming the first generation.';
     }
   };
 
@@ -114,9 +125,7 @@ export function GenerationFormModal({
           <form onSubmit={handleSubmit}>
             <DialogHeader>
               <DialogTitle>{getTitle()}</DialogTitle>
-              <DialogDescription>
-                {getDescription()}
-              </DialogDescription>
+              <DialogDescription>{getDescription()}</DialogDescription>
             </DialogHeader>
 
             <div className="grid gap-4 py-4">
@@ -133,16 +142,27 @@ export function GenerationFormModal({
                   autoFocus
                   disabled={isSubmitting}
                 />
-                {error && <p className="text-sm font-medium text-destructive">{error}</p>}
+                {error && (
+                  <p className="text-sm font-medium text-destructive">
+                    {error}
+                  </p>
+                )}
               </div>
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={isSubmitting}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting || !name.trim()}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSubmitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 {mode === 'rename' ? 'Save Changes' : 'Create Generation'}
               </Button>
             </DialogFooter>

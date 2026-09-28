@@ -50,11 +50,11 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-2xl w-full p-0 overflow-hidden">
       {/* Compact Cover */}
-      <div className="h-24 sm:h-28 bg-gradient-to-br from-primary/30 via-purple-500/20 to-rose-500/10 relative overflow-hidden">
+      <div className="h-24 sm:h-28 bg-muted relative overflow-hidden">
         {member.coverImage && (
           <Image src={member.coverImage} alt="" fill className="w-full h-full object-cover" unoptimized />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         <div className="absolute bottom-3 left-4 right-4 flex items-end gap-3">
           <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border-3 border-white/90 dark:border-zinc-800 overflow-hidden bg-muted flex items-center justify-center shadow-lg shrink-0 relative">
             <MemberAvatar 

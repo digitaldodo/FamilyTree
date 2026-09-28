@@ -5,7 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Dropdown } from '@/components/ui/dropdown';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { MoreVertical, ArrowUpToLine, ArrowDownToLine, Pencil, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
+import {
+  MoreVertical,
+  ArrowUpToLine,
+  ArrowDownToLine,
+  Pencil,
+  ArrowUp,
+  ArrowDown,
+  Trash2,
+} from 'lucide-react';
 import { Generation } from '@/types/member';
 
 interface GenerationActionMenuProps {
@@ -47,9 +55,9 @@ export function GenerationActionMenu({
   };
 
   const trigger = (
-    <Button 
-      variant="ghost" 
-      size="sm" 
+    <Button
+      variant="ghost"
+      size="sm"
       className="h-7 w-7 p-0 flex items-center justify-center"
       onClick={(e) => {
         if (isMobile) {
@@ -65,47 +73,49 @@ export function GenerationActionMenu({
 
   const renderActions = (isMobileView: boolean) => (
     <div className="flex flex-col text-sm w-full gap-1">
-      <button 
+      <button
         className={`flex items-center w-full text-left hover:bg-muted rounded-md ${isMobileView ? 'px-4 py-3 min-h-[44px]' : 'px-4 py-2'}`}
         onClick={handleAction(onAddAbove)}
       >
-        <ArrowUpToLine className="w-4 h-4 mr-3 text-muted-foreground" /> Add Above
+        <ArrowUpToLine className="w-4 h-4 mr-3 text-muted-foreground" /> Add
+        Above
       </button>
-      <button 
+      <button
         className={`flex items-center w-full text-left hover:bg-muted rounded-md ${isMobileView ? 'px-4 py-3 min-h-[44px]' : 'px-4 py-2'}`}
         onClick={handleAction(onAddBelow)}
       >
-        <ArrowDownToLine className="w-4 h-4 mr-3 text-muted-foreground" /> Add Below
+        <ArrowDownToLine className="w-4 h-4 mr-3 text-muted-foreground" /> Add
+        Below
       </button>
-      
+
       <div className="h-px bg-border my-1 mx-2" />
-      
-      <button 
+
+      <button
         className={`flex items-center w-full text-left hover:bg-muted rounded-md ${isMobileView ? 'px-4 py-3 min-h-[44px]' : 'px-4 py-2'}`}
         onClick={handleAction(onRename)}
       >
         <Pencil className="w-4 h-4 mr-3 text-muted-foreground" /> Rename
       </button>
-      
-      <button 
+
+      <button
         className={`flex items-center w-full text-left hover:bg-muted rounded-md disabled:opacity-50 disabled:cursor-not-allowed ${isMobileView ? 'px-4 py-3 min-h-[44px]' : 'px-4 py-2'}`}
         onClick={handleAction(onMoveUp)}
         disabled={index === 0}
       >
         <ArrowUp className="w-4 h-4 mr-3 text-muted-foreground" /> Move Up
       </button>
-      
-      <button 
+
+      <button
         className={`flex items-center w-full text-left hover:bg-muted rounded-md disabled:opacity-50 disabled:cursor-not-allowed ${isMobileView ? 'px-4 py-3 min-h-[44px]' : 'px-4 py-2'}`}
         onClick={handleAction(onMoveDown)}
         disabled={index === totalGenerations - 1}
       >
         <ArrowDown className="w-4 h-4 mr-3 text-muted-foreground" /> Move Down
       </button>
-      
+
       <div className="h-px bg-border my-1 mx-2" />
-      
-      <button 
+
+      <button
         className={`flex items-center w-full text-left text-destructive hover:bg-muted hover:text-destructive rounded-md ${isMobileView ? 'px-4 py-3 min-h-[44px]' : 'px-4 py-2'}`}
         onClick={handleAction(onDelete)}
       >
@@ -129,9 +139,5 @@ export function GenerationActionMenu({
     );
   }
 
-  return (
-    <Dropdown trigger={trigger}>
-      {renderActions(false)}
-    </Dropdown>
-  );
+  return <Dropdown trigger={trigger}>{renderActions(false)}</Dropdown>;
 }

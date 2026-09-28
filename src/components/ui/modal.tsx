@@ -13,7 +13,13 @@ interface ModalProps {
   className?: string;
 }
 
-export function Modal({ isOpen, onClose, children, title, className }: ModalProps) {
+export function Modal({
+  isOpen,
+  onClose,
+  children,
+  title,
+  className,
+}: ModalProps) {
   // Prevent scrolling when modal is open
   React.useEffect(() => {
     if (isOpen) {
@@ -65,12 +71,12 @@ export function Modal({ isOpen, onClose, children, title, className }: ModalProp
             aria-label={title || 'Modal dialog'}
           >
             <motion.div
-              initial={{ opacity: 0, y: "100%" }}
+              initial={{ opacity: 0, y: '100%' }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: "100%" }}
+              exit={{ opacity: 0, y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className={cn(
-                'pointer-events-auto relative w-full max-w-lg rounded-t-3xl md:rounded-2xl bg-background p-6 shadow-xl border border-border glass mt-auto md:mt-0 flex flex-col',
+                'pointer-events-auto relative w-full max-w-lg rounded-t-2xl md:rounded-xl bg-card p-6 shadow-xl border border-border mt-auto md:mt-0 flex flex-col',
                 className
               )}
             >

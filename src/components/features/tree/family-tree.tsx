@@ -42,19 +42,34 @@ const edgeTypes = {
 };
 
 function FamilyTreeCanvas() {
-  const activeTreeId = useAppStore(s => s.activeTreeId);
-  const selectedTreeVersionId = useAppStore(s => s.selectedTreeVersionId);
-  const setSelectedMemberId = useAppStore(s => s.setSelectedMemberId);
-  const setIsMemberModalOpen = useAppStore(s => s.setIsMemberModalOpen);
-  const setIsEditingMember = useAppStore(s => s.setIsEditingMember);
+  const activeTreeId = useAppStore((s) => s.activeTreeId);
+  const selectedTreeVersionId = useAppStore((s) => s.selectedTreeVersionId);
+  const setSelectedMemberId = useAppStore((s) => s.setSelectedMemberId);
+  const setIsMemberModalOpen = useAppStore((s) => s.setIsMemberModalOpen);
+  const setIsEditingMember = useAppStore((s) => s.setIsEditingMember);
   const queryClient = useQueryClient();
-  
-  const { isSyncing, hasConflict, pendingChanges } = useTreeCollaboration(activeTreeId, selectedTreeVersionId);
-  
-  const { members: treeMembers, allMembers, familyGraph, generations, isLoading, error, errorStatus, refetch } = useFamilyTree(activeTreeId || undefined);
-  
-  const { nodes: rendererNodes, edges: rendererEdges } = useFamilyTreeRenderer(familyGraph, generations);
-  
+
+  const { isSyncing, hasConflict, pendingChanges } = useTreeCollaboration(
+    activeTreeId,
+    selectedTreeVersionId
+  );
+
+  const {
+    members: treeMembers,
+    allMembers,
+    familyGraph,
+    generations,
+    isLoading,
+    error,
+    errorStatus,
+    refetch,
+  } = useFamilyTree(activeTreeId || undefined);
+
+  const { nodes: rendererNodes, edges: rendererEdges } = useFamilyTreeRenderer(
+    familyGraph,
+    generations
+  );
+
   const [nodes, setNodes, onNodesChange] = useNodesState(rendererNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(rendererEdges);
 
@@ -103,17 +118,21 @@ function FamilyTreeCanvas() {
 
   if (error) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="p-6 glass-card rounded-2xl text-center max-w-md">
-          <h3 className="text-lg font-semibold text-destructive mb-2">Error Loading Tree</h3>
-          <p className="text-muted-foreground">{error}</p>
+      <div className="w-full h-full flex items-center justify-center p-4">
+        <div className="p-8 bg-card border rounded-lg text-center max-w-md shadow-sm">
+          <h3 className="text-lg font-medium text-destructive mb-2">
+            Error Loading Tree
+          </h3>
+          <p className="text-sm text-muted-foreground">{error}</p>
           {errorStatus ? (
-            <p className="mt-2 text-xs text-muted-foreground">Status {errorStatus}</p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Status {errorStatus}
+            </p>
           ) : null}
           <button
             type="button"
             onClick={() => refetch()}
-            className="mt-5 inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 shadow-sm"
           >
             <RefreshCw className="h-4 w-4" />
             Try again
@@ -133,11 +152,14 @@ function FamilyTreeCanvas() {
           {/* Main Toolbar */}
           <div className="flex flex-col 2xl:flex-row items-stretch 2xl:items-center justify-between w-full gap-3 pointer-events-auto">
             {/* Left Section */}
-            <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 w-full 2xl:w-auto bg-white/85 dark:bg-slate-900/85 backdrop-blur-md p-2 rounded-xl border border-white/20 dark:border-slate-800/50 shadow-sm">
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 w-full 2xl:w-auto bg-card p-2 rounded-lg border border-border shadow-sm">
               <MemberSearch />
               <GenerationFilter />
               <div className="hidden lg:block h-6 w-px bg-border/50" />
-              <FloatingFamilyStats totalMembers={treeMembers.length} generations={generations.length} />
+              <FloatingFamilyStats
+                totalMembers={treeMembers.length}
+                generations={generations.length}
+              />
             </div>
 
             {/* Right Section */}
@@ -173,7 +195,9 @@ function FamilyTreeCanvas() {
         </div>
       )}
 
-      <div className={`flex-1 relative w-full h-full ${!isTreeEmpty ? 'mt-8' : ''}`}>
+      <div
+        className={`flex-1 relative w-full h-full ${!isTreeEmpty ? 'mt-8' : ''}`}
+      >
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -190,57 +214,76 @@ function FamilyTreeCanvas() {
           onlyRenderVisibleElements={true}
         >
           <TreeBackground />
-          
-            <AnimatePresence>
-              {isTreeEmpty && (
-                <motion.div
-                  key="tree-empty-state"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm pointer-events-none"
-                >
-                  <div className="bg-card/90 backdrop-blur-xl border border-border shadow-2xl rounded-3xl p-8 max-w-md w-full text-center pointer-events-auto">
-                    <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                      <svg className="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                    </div>
-                    <h2 className="text-2xl font-bold mb-3 tracking-tight">Your family tree is empty</h2>
-                    <p className="text-muted-foreground mb-8">Start building your family legacy by adding the first member or setting up a generation.</p>
-                    <div className="flex flex-col gap-3">
-                      <button
-                        onClick={handleCreateGeneration}
-                        className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 rounded-xl font-medium transition-colors"
-                      >
-                        Create Generation
-                      </button>
-                      <button
-                        onClick={handleAddFirstMember}
-                        className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 h-12 rounded-xl font-medium transition-colors"
-                      >
-                        Add First Member
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
 
-              {isFilteredEmpty && (
-                <motion.div
-                  key="tree-filter-empty"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none"
-                >
-                  <div className="bg-card/90 backdrop-blur-xl border border-border shadow-lg rounded-xl px-5 py-4 text-center">
-                    <h2 className="text-base font-semibold">No members in selected generations</h2>
-                    <p className="text-sm text-muted-foreground mt-1">Adjust the generation filter to show more of the tree.</p>
+          <AnimatePresence>
+            {isTreeEmpty && (
+              <motion.div
+                key="tree-empty-state"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm pointer-events-none"
+              >
+                <div className="bg-card border border-border shadow-lg rounded-lg p-8 max-w-md w-full text-center pointer-events-auto">
+                  <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                    <svg
+                      className="w-10 h-10 text-primary"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                      />
+                    </svg>
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  <h2 className="text-xl font-semibold mb-3 tracking-tight">
+                    Your family tree is empty
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-8">
+                    Start building your family legacy by adding the first member
+                    or setting up a generation.
+                  </p>
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={handleCreateGeneration}
+                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 rounded-md text-sm font-medium transition-colors"
+                    >
+                      Create Generation
+                    </button>
+                    <button
+                      onClick={handleAddFirstMember}
+                      className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 rounded-md text-sm font-medium transition-colors"
+                    >
+                      Add First Member
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {isFilteredEmpty && (
+              <motion.div
+                key="tree-filter-empty"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none"
+              >
+                <div className="bg-card border border-border shadow-lg rounded-lg px-5 py-4 text-center">
+                  <h2 className="text-base font-semibold">
+                    No members in selected generations
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Adjust the generation filter to show more of the tree.
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </ReactFlow>
       </div>
     </div>

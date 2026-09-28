@@ -9,13 +9,9 @@ export function CreateTreeModalHost() {
   useEffect(() => {
     const openModal = () => setIsOpen(true);
     window.addEventListener('open-create-tree-modal', openModal);
-    return () => window.removeEventListener('open-create-tree-modal', openModal);
+    return () =>
+      window.removeEventListener('open-create-tree-modal', openModal);
   }, []);
 
-  return (
-    <CreateTreeModal
-      isOpen={isOpen}
-      onClose={() => setIsOpen(false)}
-    />
-  );
+  return <CreateTreeModal isOpen={isOpen} onClose={() => setIsOpen(false)} />;
 }

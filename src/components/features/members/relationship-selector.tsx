@@ -2,8 +2,18 @@
 
 import * as React from 'react';
 import { useMembers } from '@/hooks/use-members';
-import { getEligibleParents, getEligibleSpouses, getEligibleChildren } from '@/utils/relationship';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  getEligibleParents,
+  getEligibleSpouses,
+  getEligibleChildren,
+} from '@/utils/relationship';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { MemberWithRelations } from '@/types/member';
 import { Plus, X } from 'lucide-react';
@@ -13,8 +23,14 @@ interface RelationshipSelectorProps {
   currentGenerationId?: string;
   type: 'PARENT' | 'CHILD' | 'SPOUSE';
   label: string;
-  onAddRelation: (memberId: string, type: 'PARENT' | 'CHILD' | 'SPOUSE') => void;
-  onRemoveRelation: (memberId: string, type: 'PARENT' | 'CHILD' | 'SPOUSE') => void;
+  onAddRelation: (
+    memberId: string,
+    type: 'PARENT' | 'CHILD' | 'SPOUSE'
+  ) => void;
+  onRemoveRelation: (
+    memberId: string,
+    type: 'PARENT' | 'CHILD' | 'SPOUSE'
+  ) => void;
   existingRelations: string[]; // array of member IDs already related in this type
   allSelectedIds: string[]; // array of all member IDs already related in the form across all types
   currentGender?: string | null;
@@ -31,23 +47,47 @@ export function RelationshipSelector({
   onRemoveRelation,
   existingRelations,
   allSelectedIds,
-  currentGender
+  currentGender,
 }: RelationshipSelectorProps) {
   const { members, generations } = useMembers();
   const [selectedId, setSelectedId] = React.useState<string>('');
 
-  const validCandidates = React.useMemo(
-    () => {
-      let candidates: MemberWithRelations[] = [];
-      if (type === 'PARENT') candidates = getEligibleParents(members, generations, currentMemberId, currentGenerationId);
-      else if (type === 'CHILD') candidates = getEligibleChildren(members, generations, currentMemberId, currentGenerationId);
-      else if (type === 'SPOUSE') candidates = getEligibleSpouses(members, generations, currentMemberId, currentGenerationId, currentGender);
-      
-      // Filter out anyone already selected in the form for ANY relationship
-      return candidates.filter(c => !allSelectedIds.includes(c.id));
-    },
-    [members, generations, currentMemberId, type, currentGenerationId, allSelectedIds, currentGender]
-  );
+  const validCandidates = React.useMemo(() => {
+    let candidates: MemberWithRelations[] = [];
+    if (type === 'PARENT')
+      candidates = getEligibleParents(
+        members,
+        generations,
+        currentMemberId,
+        currentGenerationId
+      );
+    else if (type === 'CHILD')
+      candidates = getEligibleChildren(
+        members,
+        generations,
+        currentMemberId,
+        currentGenerationId
+      );
+    else if (type === 'SPOUSE')
+      candidates = getEligibleSpouses(
+        members,
+        generations,
+        currentMemberId,
+        currentGenerationId,
+        currentGender
+      );
+
+    // Filter out anyone already selected in the form for ANY relationship
+    return candidates.filter((c) => !allSelectedIds.includes(c.id));
+  }, [
+    members,
+    generations,
+    currentMemberId,
+    type,
+    currentGenerationId,
+    allSelectedIds,
+    currentGender,
+  ]);
 
   const handleAdd = () => {
     if (selectedId) {
@@ -56,8 +96,10 @@ export function RelationshipSelector({
     }
   };
 
-  const isSpouseLimitReached = type === 'SPOUSE' && existingRelations.length >= 1;
-  const isParentLimitReached = type === 'PARENT' && existingRelations.length >= 2;
+  const isSpouseLimitReached =
+    type === 'SPOUSE' && existingRelations.length >= 1;
+  const isParentLimitReached =
+    type === 'PARENT' && existingRelations.length >= 2;
   const isLimitReached = isParentLimitReached || isSpouseLimitReached;
 
   // If no candidates exist and no existing relations, show disabled message
@@ -65,7 +107,9 @@ export function RelationshipSelector({
     return (
       <div className="space-y-2 border border-border p-3 rounded-lg bg-card text-card-foreground">
         <h4 className="text-sm font-semibold">{label}</h4>
-        <p className="text-sm text-muted-foreground italic">No eligible {label.toLowerCase()} available.</p>
+        <p className="text-sm text-muted-foreground italic">
+          No eligible {label.toLowerCase()} available.
+        </p>
       </div>
     );
   }
@@ -74,17 +118,27 @@ export function RelationshipSelector({
     <ErrorBoundary>
       <div className="space-y-2 border border-border p-3 rounded-lg bg-card text-card-foreground">
         <h4 className="text-sm font-semibold">{label}</h4>
-        
+
         {/* List Existing */}
         {existingRelations.length > 0 && (
           <ul className="space-y-1 mb-2">
-            {existingRelations.map(relId => {
-              const relMember = members.find(m => m.id === relId);
+            {existingRelations.map((relId) => {
+              const relMember = members.find((m) => m.id === relId);
               if (!relMember) return null;
               return (
-                <li key={relId} className="flex justify-between items-center text-sm p-1 bg-muted rounded">
-                  <span>{relMember.firstName} {relMember.lastName}</span>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => onRemoveRelation(relId, type)}>
+                <li
+                  key={relId}
+                  className="flex justify-between items-center text-sm p-1 bg-muted rounded"
+                >
+                  <span>
+                    {relMember.firstName} {relMember.lastName}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 rounded-full"
+                    onClick={() => onRemoveRelation(relId, type)}
+                  >
                     <X className="h-3 w-3" />
                   </Button>
                 </li>
@@ -99,15 +153,25 @@ export function RelationshipSelector({
             <div className="flex gap-2 items-center">
               <Select value={selectedId} onValueChange={setSelectedId}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={`Select ${label.toLowerCase()}...`} />
+                  <SelectValue
+                    placeholder={`Select ${label.toLowerCase()}...`}
+                  />
                 </SelectTrigger>
                 <SelectContent>
-                  {validCandidates.map(c => (
-                    <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
+                  {validCandidates.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.firstName} {c.lastName}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <Button type="button" variant="outline" size="icon" onClick={handleAdd} disabled={!selectedId}>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleAdd}
+                disabled={!selectedId}
+              >
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
@@ -117,4 +181,3 @@ export function RelationshipSelector({
     </ErrorBoundary>
   );
 }
-

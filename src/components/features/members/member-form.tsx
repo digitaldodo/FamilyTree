@@ -7,7 +7,13 @@ import { z } from 'zod';
 import { updateMemberSchema } from '@/validations/member.schema';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { getMemberDefaultValues } from '@/utils/form-helpers';
 import { MemberWithRelations } from '@/types/member';
@@ -34,11 +40,18 @@ interface MemberFormProps {
   isSubmitting: boolean;
 }
 
-export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberFormProps) {
+export function MemberForm({
+  member,
+  onSubmit,
+  onCancel,
+  isSubmitting,
+}: MemberFormProps) {
   const { activeTreeId, defaultGenerationForNewMember } = useAppStore();
   const { generations, createGeneration } = useGenerations();
   useMembers();
-  const [status, setStatus] = React.useState<'Alive' | 'Deceased'>(member?.deathDate ? 'Deceased' : 'Alive');
+  const [status, setStatus] = React.useState<'Alive' | 'Deceased'>(
+    member?.deathDate ? 'Deceased' : 'Alive'
+  );
 
   const {
     register,
@@ -47,12 +60,12 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
     setValue,
     reset,
     setError,
-    formState: { errors }
+    formState: { errors },
   } = useForm<MemberFormData>({
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       ...(getMemberDefaultValues(member) as any),
-      generationId: member?.generationId || defaultGenerationForNewMember || "",
+      generationId: member?.generationId || defaultGenerationForNewMember || '',
     },
   });
 
@@ -61,31 +74,39 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
   const genderWatch = useWatch({ control, name: 'gender' });
 
   // Relationships state
-  const buildInitialRelations = React.useCallback((sourceMember?: MemberWithRelations) => {
-    if (!sourceMember) return [];
-    
-    const existing: {type: 'PARENT' | 'CHILD' | 'SPOUSE', id: string}[] = [];
-    
-    sourceMember.relationsFrom.forEach(r => {
-      if (r.type === 'PARENT') {
-        existing.push({ type: 'CHILD', id: r.toId });
-      } else if (r.type === 'SPOUSE') {
-        existing.push({ type: r.type, id: r.toId });
-      }
-    });
+  const buildInitialRelations = React.useCallback(
+    (sourceMember?: MemberWithRelations) => {
+      if (!sourceMember) return [];
 
-    sourceMember.relationsTo.forEach(r => {
-      if (r.type === 'PARENT') {
-        existing.push({ type: 'PARENT', id: r.fromId });
-      } else if (r.type === 'SPOUSE') {
-        existing.push({ type: r.type, id: r.fromId });
-      }
-    });
-    
-    return existing.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
-  }, []);
+      const existing: { type: 'PARENT' | 'CHILD' | 'SPOUSE'; id: string }[] =
+        [];
 
-  const [relations, setRelations] = React.useState<{type: 'PARENT' | 'CHILD' | 'SPOUSE', id: string}[]>(() => {
+      sourceMember.relationsFrom.forEach((r) => {
+        if (r.type === 'PARENT') {
+          existing.push({ type: 'CHILD', id: r.toId });
+        } else if (r.type === 'SPOUSE') {
+          existing.push({ type: r.type, id: r.toId });
+        }
+      });
+
+      sourceMember.relationsTo.forEach((r) => {
+        if (r.type === 'PARENT') {
+          existing.push({ type: 'PARENT', id: r.fromId });
+        } else if (r.type === 'SPOUSE') {
+          existing.push({ type: r.type, id: r.fromId });
+        }
+      });
+
+      return existing.filter(
+        (v, i, a) => a.findIndex((t) => t.id === v.id) === i
+      );
+    },
+    []
+  );
+
+  const [relations, setRelations] = React.useState<
+    { type: 'PARENT' | 'CHILD' | 'SPOUSE'; id: string }[]
+  >(() => {
     if (!member) return [];
     return buildInitialRelations(member);
   });
@@ -93,40 +114,57 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
   React.useEffect(() => {
     reset({
       ...(getMemberDefaultValues(member) as any),
-      generationId: member?.generationId || defaultGenerationForNewMember || "",
+      generationId: member?.generationId || defaultGenerationForNewMember || '',
     });
     setStatus(member?.deathDate ? 'Deceased' : 'Alive');
     setRelations(buildInitialRelations(member));
-  }, [member?.id, member?.updatedAt, defaultGenerationForNewMember, reset, buildInitialRelations]);
+  }, [
+    member?.id,
+    member?.updatedAt,
+    defaultGenerationForNewMember,
+    reset,
+    buildInitialRelations,
+  ]);
 
-  const allSelectedIds = relations.map(r => r.id);
+  const allSelectedIds = relations.map((r) => r.id);
 
-  const handleAddRelation = (id: string, type: 'PARENT' | 'CHILD' | 'SPOUSE') => {
+  const handleAddRelation = (
+    id: string,
+    type: 'PARENT' | 'CHILD' | 'SPOUSE'
+  ) => {
     if (type === 'SPOUSE') {
-      const spouseCount = relations.filter(r => r.type === 'SPOUSE').length;
+      const spouseCount = relations.filter((r) => r.type === 'SPOUSE').length;
       if (spouseCount >= 1) return;
-      setRelations(prev => [...prev, { id, type }]);
+      setRelations((prev) => [...prev, { id, type }]);
       return;
     }
 
     if (type === 'PARENT') {
-      const parentCount = relations.filter(r => r.type === 'PARENT').length;
+      const parentCount = relations.filter((r) => r.type === 'PARENT').length;
       if (parentCount >= 2) {
         alert('A member can have at most two parents.');
         return;
       }
     }
 
-    setRelations(prev => [...prev, { id, type }]);
+    setRelations((prev) => [...prev, { id, type }]);
   };
 
-  const handleRemoveRelation = (id: string, type: 'PARENT' | 'CHILD' | 'SPOUSE') => {
-    setRelations(prev => prev.filter(r => !(r.id === id && r.type === type)));
+  const handleRemoveRelation = (
+    id: string,
+    type: 'PARENT' | 'CHILD' | 'SPOUSE'
+  ) => {
+    setRelations((prev) =>
+      prev.filter((r) => !(r.id === id && r.type === type))
+    );
   };
 
   const handleFormSubmit = async (data: MemberFormData) => {
     if (status === 'Deceased' && !data.deathDate) {
-      setError('deathDate', { type: 'manual', message: 'Death date is required' });
+      setError('deathDate', {
+        type: 'manual',
+        message: 'Death date is required',
+      });
       return;
     }
 
@@ -134,10 +172,19 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
     const formattedData = {
       ...data,
       birthDate: data.birthDate !== undefined ? data.birthDate : undefined,
-      deathDate: status === 'Alive' ? null : (data.deathDate !== undefined ? data.deathDate : undefined),
+      deathDate:
+        status === 'Alive'
+          ? null
+          : data.deathDate !== undefined
+            ? data.deathDate
+            : undefined,
       treeId: activeTreeId || undefined,
-      generationId: data.generationId || member?.generationId || defaultGenerationForNewMember || undefined,
-      relations
+      generationId:
+        data.generationId ||
+        member?.generationId ||
+        defaultGenerationForNewMember ||
+        undefined,
+      relations,
     };
     await onSubmit(formattedData);
   };
@@ -156,13 +203,16 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-      
       {/* Avatar Upload */}
       <div className="flex flex-col items-center justify-center mb-6">
-        <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">Profile Photo</label>
-        <ImageUpload 
-          value={imageUrl} 
-          onChange={(val) => setValue('imageUrl', val || null, { shouldDirty: true })} 
+        <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">
+          Profile Photo
+        </label>
+        <ImageUpload
+          value={imageUrl}
+          onChange={(val) =>
+            setValue('imageUrl', val || null, { shouldDirty: true })
+          }
           folder="family-tree/avatars"
         />
       </div>
@@ -170,13 +220,29 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium mb-1 block">First Name</label>
-          <Input {...register('firstName')} placeholder="First name" className={errors.firstName ? 'border-destructive' : ''} />
-          {errors.firstName && <span className="text-xs text-destructive">{errors.firstName.message}</span>}
+          <Input
+            {...register('firstName')}
+            placeholder="First name"
+            className={errors.firstName ? 'border-destructive' : ''}
+          />
+          {errors.firstName && (
+            <span className="text-xs text-destructive">
+              {errors.firstName.message}
+            </span>
+          )}
         </div>
         <div>
           <label className="text-sm font-medium mb-1 block">Last Name</label>
-          <Input {...register('lastName')} placeholder="Last name" className={errors.lastName ? 'border-destructive' : ''} />
-          {errors.lastName && <span className="text-xs text-destructive">{errors.lastName.message}</span>}
+          <Input
+            {...register('lastName')}
+            placeholder="Last name"
+            className={errors.lastName ? 'border-destructive' : ''}
+          />
+          {errors.lastName && (
+            <span className="text-xs text-destructive">
+              {errors.lastName.message}
+            </span>
+          )}
         </div>
       </div>
 
@@ -196,11 +262,20 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
           <label className="text-sm font-medium mb-1 block">Generation</label>
           {generations.length === 0 ? (
             <div className="flex flex-col items-start gap-2 pt-1">
-              <span className="text-sm text-muted-foreground">No generations exist yet.</span>
-              <Button type="button" variant="outline" size="sm" onClick={() => {
-                const name = prompt('Enter first generation name (e.g. Founders):');
-                if (name) createGeneration(name);
-              }}>
+              <span className="text-sm text-muted-foreground">
+                No generations exist yet.
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const name = prompt(
+                    'Enter first generation name (e.g. Founders):'
+                  );
+                  if (name) createGeneration(name);
+                }}
+              >
                 Create First Generation
               </Button>
             </div>
@@ -210,8 +285,16 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
                 name="generationId"
                 control={control}
                 render={({ field }) => (
-                  <Select value={field.value || ""} onValueChange={field.onChange} disabled={field.disabled}>
-                    <SelectTrigger className={errors.generationId ? 'border-destructive' : ''}>
+                  <Select
+                    value={field.value || ''}
+                    onValueChange={field.onChange}
+                    disabled={field.disabled}
+                  >
+                    <SelectTrigger
+                      className={
+                        errors.generationId ? 'border-destructive' : ''
+                      }
+                    >
                       <SelectValue placeholder="Select generation" />
                     </SelectTrigger>
                     <SelectContent>
@@ -225,11 +308,17 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
                 )}
               />
               {!generationIdWatch && !errors.generationId && (
-                <span className="text-xs text-muted-foreground mt-1 block">Please select a generation.</span>
+                <span className="text-xs text-muted-foreground mt-1 block">
+                  Please select a generation.
+                </span>
               )}
             </>
           )}
-          {errors.generationId && <span className="text-xs text-destructive">{errors.generationId?.message as string}</span>}
+          {errors.generationId && (
+            <span className="text-xs text-destructive">
+              {errors.generationId?.message as string}
+            </span>
+          )}
         </div>
         <div>
           <label className="text-sm font-medium mb-1 block">Gender</label>
@@ -237,8 +326,14 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
             name="gender"
             control={control}
             render={({ field }) => (
-              <Select value={field.value || ""} onValueChange={field.onChange} disabled={field.disabled}>
-                <SelectTrigger className={errors.gender ? 'border-destructive' : ''}>
+              <Select
+                value={field.value || ''}
+                onValueChange={field.onChange}
+                disabled={field.disabled}
+              >
+                <SelectTrigger
+                  className={errors.gender ? 'border-destructive' : ''}
+                >
                   <SelectValue placeholder="Select gender" />
                 </SelectTrigger>
                 <SelectContent>
@@ -249,14 +344,21 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
               </Select>
             )}
           />
-          {errors.gender && <span className="text-xs text-destructive">{errors.gender.message}</span>}
+          {errors.gender && (
+            <span className="text-xs text-destructive">
+              {errors.gender.message}
+            </span>
+          )}
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium mb-1 block">Status</label>
-          <Select value={status} onValueChange={(val: 'Alive' | 'Deceased') => setStatus(val)}>
+          <Select
+            value={status}
+            onValueChange={(val: 'Alive' | 'Deceased') => setStatus(val)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -272,65 +374,89 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
         <div>
           <label className="text-sm font-medium mb-1 block">Birth Date</label>
           <div className="relative">
-            <Input 
-              type="text" 
+            <Input
+              type="text"
               placeholder="dd-mm-yyyy"
               maxLength={10}
-              {...register('birthDate')} 
+              {...register('birthDate')}
               onChange={(e) => {
                 const masked = applyDateMask(e.target.value);
-                setValue('birthDate', masked, { shouldValidate: true, shouldDirty: true });
+                setValue('birthDate', masked, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                });
               }}
-              className={errors.birthDate ? 'border-destructive pr-10' : 'pr-10'} 
+              className={
+                errors.birthDate ? 'border-destructive pr-10' : 'pr-10'
+              }
             />
             <div className="absolute right-0 top-0 h-full w-10 flex items-center justify-center">
               <CalendarIcon className="w-4 h-4 text-muted-foreground pointer-events-none" />
-              <input 
-                type="date" 
+              <input
+                type="date"
                 className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                 onChange={(e) => {
                   if (e.target.value) {
                     const [y, m, d] = e.target.value.split('-');
                     const formatted = `${d}-${m}-${y}`;
-                    setValue('birthDate', formatted, { shouldValidate: true, shouldDirty: true });
+                    setValue('birthDate', formatted, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
                   }
                 }}
               />
             </div>
           </div>
-          {errors.birthDate && <span className="text-xs text-destructive">{errors.birthDate.message}</span>}
+          {errors.birthDate && (
+            <span className="text-xs text-destructive">
+              {errors.birthDate.message}
+            </span>
+          )}
         </div>
         {status === 'Deceased' && (
           <div>
             <label className="text-sm font-medium mb-1 block">Death Date</label>
             <div className="relative">
-              <Input 
-                type="text" 
+              <Input
+                type="text"
                 placeholder="dd-mm-yyyy"
                 maxLength={10}
-                {...register('deathDate')} 
+                {...register('deathDate')}
                 onChange={(e) => {
                   const masked = applyDateMask(e.target.value);
-                  setValue('deathDate', masked, { shouldValidate: true, shouldDirty: true });
+                  setValue('deathDate', masked, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  });
                 }}
-                className={errors.deathDate ? 'border-destructive pr-10' : 'pr-10'} 
+                className={
+                  errors.deathDate ? 'border-destructive pr-10' : 'pr-10'
+                }
               />
               <div className="absolute right-0 top-0 h-full w-10 flex items-center justify-center">
                 <CalendarIcon className="w-4 h-4 text-muted-foreground pointer-events-none" />
-                <input 
-                  type="date" 
+                <input
+                  type="date"
                   className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                   onChange={(e) => {
                     if (e.target.value) {
                       const [y, m, d] = e.target.value.split('-');
                       const formatted = `${d}-${m}-${y}`;
-                      setValue('deathDate', formatted, { shouldValidate: true, shouldDirty: true });
+                      setValue('deathDate', formatted, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                      });
                     }
                   }}
                 />
               </div>
             </div>
-            {errors.deathDate && <span className="text-xs text-destructive">{errors.deathDate.message}</span>}
+            {errors.deathDate && (
+              <span className="text-xs text-destructive">
+                {errors.deathDate.message}
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -338,8 +464,17 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium mb-1 block">Email</label>
-          <Input type="email" {...register('email')} placeholder="Email" className={errors.email ? 'border-destructive' : ''} />
-          {errors.email && <span className="text-xs text-destructive">{errors.email.message}</span>}
+          <Input
+            type="email"
+            {...register('email')}
+            placeholder="Email"
+            className={errors.email ? 'border-destructive' : ''}
+          />
+          {errors.email && (
+            <span className="text-xs text-destructive">
+              {errors.email.message}
+            </span>
+          )}
         </div>
         <div>
           <label className="text-sm font-medium mb-1 block">Phone</label>
@@ -354,8 +489,14 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
 
       <div>
         <label className="text-sm font-medium mb-1 block">Biography</label>
-        <Textarea {...register('bio')} placeholder="Tell us about this person..." className={errors.bio ? 'border-destructive' : ''} />
-        {errors.bio && <span className="text-xs text-destructive">{errors.bio.message}</span>}
+        <Textarea
+          {...register('bio')}
+          placeholder="Tell us about this person..."
+          className={errors.bio ? 'border-destructive' : ''}
+        />
+        {errors.bio && (
+          <span className="text-xs text-destructive">{errors.bio.message}</span>
+        )}
       </div>
 
       <div className="space-y-4 pt-4 border-t border-border">
@@ -366,7 +507,9 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
             currentGenerationId={generationIdWatch}
             type="PARENT"
             label="Parents"
-            existingRelations={relations.filter(r => r.type === 'PARENT').map(r => r.id)}
+            existingRelations={relations
+              .filter((r) => r.type === 'PARENT')
+              .map((r) => r.id)}
             allSelectedIds={allSelectedIds}
             onAddRelation={handleAddRelation}
             onRemoveRelation={handleRemoveRelation}
@@ -376,7 +519,9 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
             currentGenerationId={generationIdWatch}
             type="CHILD"
             label="Children"
-            existingRelations={relations.filter(r => r.type === 'CHILD').map(r => r.id)}
+            existingRelations={relations
+              .filter((r) => r.type === 'CHILD')
+              .map((r) => r.id)}
             allSelectedIds={allSelectedIds}
             onAddRelation={handleAddRelation}
             onRemoveRelation={handleRemoveRelation}
@@ -387,17 +532,23 @@ export function MemberForm({ member, onSubmit, onCancel, isSubmitting }: MemberF
             currentGender={genderWatch}
             type="SPOUSE"
             label="Spouse(s)"
-            existingRelations={relations.filter(r => r.type === 'SPOUSE').map(r => r.id)}
+            existingRelations={relations
+              .filter((r) => r.type === 'SPOUSE')
+              .map((r) => r.id)}
             allSelectedIds={allSelectedIds}
             onAddRelation={handleAddRelation}
             onRemoveRelation={handleRemoveRelation}
           />
-
         </div>
       </div>
 
       <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isSubmitting}
+        >
           Cancel
         </Button>
         <Button type="submit" disabled={isSubmitting || !generationIdWatch}>

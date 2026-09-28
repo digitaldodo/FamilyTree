@@ -15,9 +15,15 @@ export function MemberDetails({ member }: MemberDetailsProps) {
             <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
           </div>
           <div className="flex flex-col">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Born</span>
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Born
+            </span>
             <span className="text-sm font-semibold">
-              {new Date(member.birthDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+              {new Date(member.birthDate).toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
             </span>
           </div>
         </div>
@@ -28,9 +34,15 @@ export function MemberDetails({ member }: MemberDetailsProps) {
             <Calendar className="w-4 h-4 text-slate-600 dark:text-slate-400" />
           </div>
           <div className="flex flex-col">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Date of Death</span>
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Date of Death
+            </span>
             <span className="text-sm font-semibold">
-              {new Date(member.deathDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+              {new Date(member.deathDate).toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
             </span>
           </div>
         </div>
@@ -41,8 +53,12 @@ export function MemberDetails({ member }: MemberDetailsProps) {
             <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Location</span>
-            <span className="text-sm font-semibold truncate">{member.address}</span>
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Location
+            </span>
+            <span className="text-sm font-semibold truncate">
+              {member.address}
+            </span>
           </div>
         </div>
       )}
@@ -52,8 +68,12 @@ export function MemberDetails({ member }: MemberDetailsProps) {
             <Briefcase className="w-4 h-4 text-amber-600 dark:text-amber-400" />
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Occupation</span>
-            <span className="text-sm font-semibold truncate">{member.occupation}</span>
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Occupation
+            </span>
+            <span className="text-sm font-semibold truncate">
+              {member.occupation}
+            </span>
           </div>
         </div>
       )}
@@ -63,8 +83,12 @@ export function MemberDetails({ member }: MemberDetailsProps) {
             <Mail className="w-4 h-4 text-sky-600 dark:text-sky-400" />
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Email</span>
-            <span className="text-sm font-semibold truncate">{member.email}</span>
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Email
+            </span>
+            <span className="text-sm font-semibold truncate">
+              {member.email}
+            </span>
           </div>
         </div>
       )}
@@ -74,8 +98,12 @@ export function MemberDetails({ member }: MemberDetailsProps) {
             <Phone className="w-4 h-4 text-teal-600 dark:text-teal-400" />
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Phone</span>
-            <span className="text-sm font-semibold truncate">{member.phone}</span>
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Phone
+            </span>
+            <span className="text-sm font-semibold truncate">
+              {member.phone}
+            </span>
           </div>
         </div>
       )}

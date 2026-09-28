@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import * as React from 'react';
 import { motion, HTMLMotionProps } from 'motion/react';
@@ -17,7 +17,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       outline:
         'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
       ghost: 'hover:bg-accent hover:text-accent-foreground',
-      icon: 'hover:bg-accent hover:text-accent-foreground rounded-full',
+      icon: 'hover:bg-accent hover:text-accent-foreground rounded-md',
     };
 
     const sizes = {

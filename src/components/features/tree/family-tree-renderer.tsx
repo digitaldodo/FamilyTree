@@ -14,7 +14,10 @@ interface FamilyTreeRendererProps {
   generations: any[]; // The explicit DB generations for lanes
 }
 
-export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any[]) {
+export function useFamilyTreeRenderer(
+  familyGraph: FamilyGraph,
+  generations: any[]
+) {
   const { nodes, edges } = React.useMemo(() => {
     const rfNodes: Node[] = [];
     const rfEdges: Edge[] = [];
@@ -33,7 +36,7 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
     // 2. Generate React Flow Nodes for Members
     for (const node of graphNodes) {
       const pos = { x: node.layoutHints?.x || 0, y: node.layoutHints?.y || 0 };
-      
+
       const isCouple = node.type === 'COUPLE_CONTAINER';
       const nodeWidth = isCouple ? NODE_WIDTH * 2 + 80 : NODE_WIDTH; // Approximate width
 
@@ -44,20 +47,23 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
         id: node.id,
         type: isCouple ? 'coupleContainer' : 'member',
         position: { x: pos.x, y: pos.y },
-        data: isCouple ? {
-          members: node.members,
-          generationName: `Generation ${node.generation}`,
-        } : {
-          member: node.member,
-          label: `${node.member?.firstName} ${node.member?.lastName}`,
-          generationName: `Generation ${node.generation}`,
-        }
+        data: isCouple
+          ? {
+              members: node.members,
+              generationName: `Generation ${node.generation}`,
+            }
+          : {
+              member: node.member,
+              label: `${node.member?.firstName} ${node.member?.lastName}`,
+              generationName: `Generation ${node.generation}`,
+            },
       });
     }
 
     // 3. Generate Generation Lanes
     const laneWidth = Math.max(3000, maxGlobalX - minGlobalX + 1200);
-    const laneX = minGlobalX === 0 && maxGlobalX === 0 ? -1000 : minGlobalX - 600;
+    const laneX =
+      minGlobalX === 0 && maxGlobalX === 0 ? -1000 : minGlobalX - 600;
 
     const engineGenerations = Object.keys(safeFamilyGraph.generations || {})
       .map(Number)
@@ -86,8 +92,8 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
 
     // 4. Generate Edges
     // Spouse Edges
-    const spouseEdges = graphEdges.filter(e => e.type === 'SPOUSE');
-    spouseEdges.forEach(rel => {
+    const spouseEdges = graphEdges.filter((e) => e.type === 'SPOUSE');
+    spouseEdges.forEach((rel) => {
       rfEdges.push({
         id: `e-${rel.source}-${rel.target}-SPOUSE`,
         source: rel.source,
@@ -105,11 +111,15 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
     // Parent-Child Edges
     // To support multiple parents correctly and cleanly, we can link directly or use junctions.
     // The previous design used familyJunctions for clean parent->junction->child rendering.
-    const parentGroups = new Map<string, { parents: string[], children: string[] }>();
-    
+    const parentGroups = new Map<
+      string,
+      { parents: string[]; children: string[] }
+    >();
+
     // Find all children and their exact parent sets
     for (const node of graphNodes) {
-      const parents = safeFamilyGraph.derivedRelationships[node.id]?.parents || [];
+      const parents =
+        safeFamilyGraph.derivedRelationships[node.id]?.parents || [];
       if (parents.length > 0) {
         const pKey = parents.slice().sort().join('-');
         if (!parentGroups.has(pKey)) {
@@ -125,18 +135,20 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
       // Calculate junction position (center of parents, below them)
       let sumX = 0;
       let maxY = 0;
-      parents.forEach(pId => {
-        const pNode = graphNodes.find(n => n.id === pId);
-        const pos = pNode ? { x: pNode.layoutHints?.x || 0, y: pNode.layoutHints?.y || 0 } : undefined;
+      parents.forEach((pId) => {
+        const pNode = graphNodes.find((n) => n.id === pId);
+        const pos = pNode
+          ? { x: pNode.layoutHints?.x || 0, y: pNode.layoutHints?.y || 0 }
+          : undefined;
         if (pos) {
           const isCouple = pNode?.type === 'COUPLE_CONTAINER';
           const nWidth = isCouple ? NODE_WIDTH * 2 + 80 : NODE_WIDTH;
-          sumX += pos.x + (nWidth / 2);
+          sumX += pos.x + nWidth / 2;
           maxY = Math.max(maxY, pos.y);
         }
       });
       const junctionX = sumX / parents.length;
-      const junctionY = maxY + NODE_HEIGHT + (GAP / 2);
+      const junctionY = maxY + NODE_HEIGHT + GAP / 2;
       const junctionId = `junction-${pKey}`;
 
       rfNodes.push({
@@ -150,7 +162,7 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
       });
 
       // Parents to Junction
-      parents.forEach(pId => {
+      parents.forEach((pId) => {
         rfEdges.push({
           id: `e-${pId}-to-${junctionId}`,
           source: pId,
@@ -166,7 +178,7 @@ export function useFamilyTreeRenderer(familyGraph: FamilyGraph, generations: any
       });
 
       // Junction to Children
-      children.forEach(cId => {
+      children.forEach((cId) => {
         rfEdges.push({
           id: `e-${junctionId}-to-${cId}`,
           source: junctionId,

@@ -52,7 +52,12 @@ export function ImageCropper({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Crop Image" className="max-w-md">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Crop Image"
+      className="max-w-md"
+    >
       <div className="relative w-full h-64 md:h-80 bg-black/5 rounded-lg overflow-hidden mt-2">
         <Cropper
           image={imageSrc}
@@ -66,7 +71,7 @@ export function ImageCropper({
           showGrid={false}
         />
       </div>
-      
+
       <div className="mt-6 flex flex-col gap-4">
         <div className="flex items-center gap-4">
           <ZoomOut className="w-5 h-5 text-muted-foreground" />
@@ -82,15 +87,24 @@ export function ImageCropper({
           />
           <ZoomIn className="w-5 h-5 text-muted-foreground" />
         </div>
-        
+
         <div className="flex justify-between items-center pt-2">
-          <Button variant="outline" size="sm" onClick={handleReset} type="button">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleReset}
+            type="button"
+          >
             <RotateCcw className="w-4 h-4 mr-2" />
             Reset
           </Button>
           <div className="flex gap-2">
-            <Button variant="ghost" onClick={onClose} type="button">Cancel</Button>
-            <Button onClick={handleSave} type="button">Save</Button>
+            <Button variant="ghost" onClick={onClose} type="button">
+              Cancel
+            </Button>
+            <Button onClick={handleSave} type="button">
+              Save
+            </Button>
           </div>
         </div>
       </div>

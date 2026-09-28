@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { motion } from 'framer-motion';
 import { Users, Heart } from 'lucide-react';
@@ -9,7 +9,10 @@ interface FloatingFamilyStatsProps {
   generations: number;
 }
 
-export function FloatingFamilyStats({ totalMembers, generations }: FloatingFamilyStatsProps) {
+export function FloatingFamilyStats({
+  totalMembers,
+  generations,
+}: FloatingFamilyStatsProps) {
   return (
     <motion.div
       variants={scaleIn}

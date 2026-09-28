@@ -20,11 +20,12 @@ function GenerationLaneNodeComponent({ data }: GenerationLaneNodeProps) {
       style={{
         width: data.width,
         height: data.height,
-        background: data.isEven ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.01)'
+        background: data.isEven ? 'var(--muted)' : 'transparent',
+        opacity: 0.1,
       }}
     >
-      <div className="absolute top-8 left-12 px-3 py-1 rounded-full text-xs backdrop-blur-sm border border-white/10 bg-white/10 flex items-center justify-center shadow-sm">
-        <span className="font-medium tracking-wide text-foreground/80">
+      <div className="absolute top-8 left-12 px-3 py-1 rounded-md text-xs border border-border bg-card flex items-center justify-center shadow-sm">
+        <span className="font-medium tracking-wide text-foreground">
           {data.label}
         </span>
       </div>

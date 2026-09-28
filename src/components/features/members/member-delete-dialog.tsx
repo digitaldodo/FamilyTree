@@ -1,6 +1,12 @@
 'use client';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
@@ -12,7 +18,12 @@ interface MemberDeleteDialogProps {
   memberName: string;
 }
 
-export function MemberDeleteDialog({ isOpen, onClose, onConfirm, memberName }: MemberDeleteDialogProps) {
+export function MemberDeleteDialog({
+  isOpen,
+  onClose,
+  onConfirm,
+  memberName,
+}: MemberDeleteDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleConfirm = async () => {
@@ -26,7 +37,9 @@ export function MemberDeleteDialog({ isOpen, onClose, onConfirm, memberName }: M
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Delete Member</DialogTitle>
-          <DialogDescription className="sr-only">Confirm deletion of member</DialogDescription>
+          <DialogDescription className="sr-only">
+            Confirm deletion of member
+          </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col items-center text-center space-y-4 py-4">
           <div className="h-12 w-12 rounded-full bg-destructive/20 flex items-center justify-center">
@@ -35,12 +48,20 @@ export function MemberDeleteDialog({ isOpen, onClose, onConfirm, memberName }: M
           <div>
             <h3 className="font-semibold text-lg">Are you sure?</h3>
             <p className="text-muted-foreground text-sm max-w-sm mt-1">
-              You are about to delete <strong>{memberName}</strong>. This will also remove any existing relationships tied to this member. This action cannot be undone.
+              You are about to delete <strong>{memberName}</strong>. This will
+              also remove any existing relationships tied to this member. This
+              action cannot be undone.
             </p>
           </div>
           <div className="flex gap-3 pt-4 w-full justify-end">
-            <Button variant="outline" onClick={onClose} disabled={isDeleting}>Cancel</Button>
-            <Button variant="destructive" onClick={handleConfirm} disabled={isDeleting}>
+            <Button variant="outline" onClick={onClose} disabled={isDeleting}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirm}
+              disabled={isDeleting}
+            >
               {isDeleting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Delete
             </Button>

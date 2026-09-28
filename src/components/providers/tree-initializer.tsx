@@ -5,7 +5,8 @@ import { useAppStore } from '@/store/use-app-store';
 import { useUserTrees } from '@/hooks/use-user-trees';
 
 export function TreeInitializer() {
-  const { activeTreeId, setActiveTreeId, setIsInitializingTrees } = useAppStore();
+  const { activeTreeId, setActiveTreeId, setIsInitializingTrees } =
+    useAppStore();
   const { userTrees, isLoading } = useUserTrees();
   const hasInitialized = useRef(false);
 
@@ -14,7 +15,7 @@ export function TreeInitializer() {
       setIsInitializingTrees(true);
     } else {
       setIsInitializingTrees(false);
-      
+
       if (userTrees) {
         if (userTrees.length > 0) {
           if (!hasInitialized.current) {
@@ -35,7 +36,13 @@ export function TreeInitializer() {
         }
       }
     }
-  }, [isLoading, userTrees, activeTreeId, setActiveTreeId, setIsInitializingTrees]);
+  }, [
+    isLoading,
+    userTrees,
+    activeTreeId,
+    setActiveTreeId,
+    setIsInitializingTrees,
+  ]);
 
   return null; // This is a logic-only component
 }

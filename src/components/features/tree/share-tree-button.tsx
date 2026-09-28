@@ -13,15 +13,20 @@ interface ShareTreeButtonProps {
   onTogglePublic?: (isPublic: boolean) => void;
 }
 
-export function ShareTreeButton({ treeId, isPublic: initialPublic, onTogglePublic }: ShareTreeButtonProps) {
+export function ShareTreeButton({
+  treeId,
+  isPublic: initialPublic,
+  onTogglePublic,
+}: ShareTreeButtonProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isPublic, setIsPublic] = React.useState(initialPublic);
   const [copied, setCopied] = React.useState(false);
   const queryClient = useQueryClient();
 
-  const shareUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/public/tree/${treeId}`
-    : `/public/tree/${treeId}`;
+  const shareUrl =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/public/tree/${treeId}`
+      : `/public/tree/${treeId}`;
 
   const toggleMutation = useMutation({
     mutationFn: async (newIsPublic: boolean) => {
@@ -31,24 +36,26 @@ export function ShareTreeButton({ treeId, isPublic: initialPublic, onTogglePubli
         body: JSON.stringify({ isPublic: newIsPublic }),
       });
       let data;
-    try {
-      data = await res.json();
-    } catch {
-      throw new Error("Server returned invalid response");
-    }
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error('Server returned invalid response');
+      }
       if (!data.success) throw new Error('Failed to update sharing settings');
       return newIsPublic;
     },
     onSuccess: (newIsPublic) => {
       setIsPublic(newIsPublic);
       onTogglePublic?.(newIsPublic);
-      toast.success(newIsPublic ? 'Tree is now public!' : 'Tree is now private');
+      toast.success(
+        newIsPublic ? 'Tree is now public!' : 'Tree is now private'
+      );
       queryClient.invalidateQueries({ queryKey: ['tree', treeId] });
       queryClient.invalidateQueries({ queryKey: ['userTrees'] });
     },
     onError: () => {
       toast.error('Failed to update sharing settings');
-    }
+    },
   });
 
   const handleToggle = () => {
@@ -72,13 +79,17 @@ export function ShareTreeButton({ treeId, isPublic: initialPublic, onTogglePubli
         variant="ghost"
         size="icon"
         onClick={() => setIsOpen(true)}
-        className="rounded-xl"
+        className="rounded-md"
         aria-label="Share tree"
       >
-        <Share2 className="h-5 w-5" />
+        <Share2 className="h-4 w-4" />
       </Button>
 
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Share Family Tree">
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title="Share Family Tree"
+      >
         <div className="space-y-5">
           {/* Public Toggle */}
           <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50 border border-border">
@@ -93,9 +104,13 @@ export function ShareTreeButton({ treeId, isPublic: initialPublic, onTogglePubli
                 </div>
               )}
               <div>
-                <p className="font-medium text-sm">{isPublic ? 'Public' : 'Private'}</p>
+                <p className="font-medium text-sm">
+                  {isPublic ? 'Public' : 'Private'}
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  {isPublic ? 'Anyone with the link can view' : 'Only you can access'}
+                  {isPublic
+                    ? 'Anyone with the link can view'
+                    : 'Only you can access'}
                 </p>
               </div>
             </div>
@@ -120,7 +135,9 @@ export function ShareTreeButton({ treeId, isPublic: initialPublic, onTogglePubli
           {/* Share Link */}
           {isPublic && (
             <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Share link</label>
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Share link
+              </label>
               <div className="flex gap-2">
                 <div className="flex-1 px-3 py-2.5 rounded-xl bg-muted/50 border border-border text-sm text-muted-foreground truncate font-mono">
                   {shareUrl}

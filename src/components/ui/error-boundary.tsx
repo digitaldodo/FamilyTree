@@ -26,7 +26,6 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-     
     console.error('Uncaught error in ErrorBoundary:', error, errorInfo);
   }
 
@@ -53,7 +52,8 @@ export class ErrorBoundary extends Component<Props, State> {
               Something went wrong
             </h3>
             <p className="text-red-600 dark:text-red-400/80 max-w-sm">
-              {this.state.error?.message || 'An unexpected error occurred while rendering this component.'}
+              {this.state.error?.message ||
+                'An unexpected error occurred while rendering this component.'}
             </p>
           </div>
           <Button

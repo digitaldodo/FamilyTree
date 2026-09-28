@@ -11,11 +11,11 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[100px] animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[100px] animate-pulse delay-1000" />
         
-        <div className="relative z-10 p-12 max-w-lg text-center backdrop-blur-sm bg-background/30 rounded-3xl border border-white/10 shadow-2xl">
+        <div className="relative z-10 p-12 max-w-lg text-center bg-card rounded-2xl border border-border shadow-lg">
           <div className="w-16 h-16 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-8 shadow-lg shadow-primary/25">
             <Heart className="w-8 h-8" />
           </div>
-          <h1 className="text-4xl font-bold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/60">
+          <h1 className="text-4xl font-bold tracking-tight mb-4 text-foreground">
             Preserve Your Legacy
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed">

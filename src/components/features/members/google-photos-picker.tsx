@@ -11,7 +11,10 @@ interface GooglePhotosPickerProps {
   disabled?: boolean;
 }
 
-export function GooglePhotosPicker({ onPhotoSelected, disabled }: GooglePhotosPickerProps) {
+export function GooglePhotosPicker({
+  onPhotoSelected,
+  disabled,
+}: GooglePhotosPickerProps) {
   const [isApiLoaded, setIsApiLoaded] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -22,10 +25,12 @@ export function GooglePhotosPicker({ onPhotoSelected, disabled }: GooglePhotosPi
 
   const startPickerFlow = async () => {
     if (!clientId) {
-      toast.error('Google Client ID is not configured in environment variables.');
+      toast.error(
+        'Google Client ID is not configured in environment variables.'
+      );
       return;
     }
-    
+
     if (typeof window === 'undefined' || !(window as any).google) {
       toast.error('Google API is not loaded yet.');
       return;
@@ -34,9 +39,12 @@ export function GooglePhotosPicker({ onPhotoSelected, disabled }: GooglePhotosPi
     setIsProcessing(true);
 
     try {
-      const tokenClient = (window as any).google.accounts.oauth2.initTokenClient({
+      const tokenClient = (
+        window as any
+      ).google.accounts.oauth2.initTokenClient({
         client_id: clientId,
-        scope: 'https://www.googleapis.com/auth/photospicker.mediaitems.readonly',
+        scope:
+          'https://www.googleapis.com/auth/photospicker.mediaitems.readonly',
         callback: async (tokenResponse: any) => {
           if (tokenResponse.error !== undefined) {
             console.error('Google Auth Error:', tokenResponse);
@@ -60,14 +68,17 @@ export function GooglePhotosPicker({ onPhotoSelected, disabled }: GooglePhotosPi
     let sessionId: string | null = null;
     try {
       // 1. Create Session
-      const sessionRes = await fetch('https://photospicker.googleapis.com/v1/sessions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({})
-      });
+      const sessionRes = await fetch(
+        'https://photospicker.googleapis.com/v1/sessions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        }
+      );
 
       if (!sessionRes.ok) {
         throw new Error('Failed to create picker session');
@@ -82,12 +93,17 @@ export function GooglePhotosPicker({ onPhotoSelected, disabled }: GooglePhotosPi
       }
 
       // 2. Open Picker Window
-      const pickerWindow = window.open(pickerUri, 'Google Photos Picker', 'width=800,height=600');
-      
+      const pickerWindow = window.open(
+        pickerUri,
+        'Google Photos Picker',
+        'width=800,height=600'
+      );
+
       // 3. Poll for completion
       const pollIntervalStr = sessionData.pollingConfig?.pollInterval || '2s';
-      const pollIntervalMs = parseFloat(pollIntervalStr.replace('s', '')) * 1000 || 2000;
-      
+      const pollIntervalMs =
+        parseFloat(pollIntervalStr.replace('s', '')) * 1000 || 2000;
+
       let isComplete = false;
       let mediaItemsSet = false;
 
@@ -96,9 +112,12 @@ export function GooglePhotosPicker({ onPhotoSelected, disabled }: GooglePhotosPi
           isComplete = true; // User closed window manually
         }
 
-        const pollRes = await fetch(`https://photospicker.googleapis.com/v1/sessions/${sessionId}`, {
-          headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
+        const pollRes = await fetch(
+          `https://photospicker.googleapis.com/v1/sessions/${sessionId}`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
 
         if (pollRes.ok) {
           const pollData = await pollRes.json();
@@ -110,7 +129,7 @@ export function GooglePhotosPicker({ onPhotoSelected, disabled }: GooglePhotosPi
       };
 
       while (!isComplete) {
-        await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
+        await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
         await poll();
       }
 
@@ -126,9 +145,12 @@ export function GooglePhotosPicker({ onPhotoSelected, disabled }: GooglePhotosPi
       }
 
       // 4. List Media Items
-      const mediaRes = await fetch(`https://photospicker.googleapis.com/v1/mediaItems?sessionId=${sessionId}`, {
-        headers: { 'Authorization': `Bearer ${accessToken}` }
-      });
+      const mediaRes = await fetch(
+        `https://photospicker.googleapis.com/v1/mediaItems?sessionId=${sessionId}`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
 
       if (!mediaRes.ok) {
         throw new Error('Failed to list media items');
@@ -152,7 +174,6 @@ export function GooglePhotosPicker({ onPhotoSelected, disabled }: GooglePhotosPi
       // 6. Pass back to parent
       await onPhotoSelected(blob);
       toast.success('Photo retrieved successfully');
-
     } catch (error) {
       console.error('Session error:', error);
       toast.error('Failed to retrieve photo from Google Photos');
@@ -161,8 +182,8 @@ export function GooglePhotosPicker({ onPhotoSelected, disabled }: GooglePhotosPi
         // Clean up session
         fetch(`https://photospicker.googleapis.com/v1/sessions/${sessionId}`, {
           method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${accessToken}` }
-        }).catch(e => console.error('Failed to delete session', e));
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }).catch((e) => console.error('Failed to delete session', e));
       }
       setIsProcessing(false);
     }
@@ -170,21 +191,27 @@ export function GooglePhotosPicker({ onPhotoSelected, disabled }: GooglePhotosPi
 
   return (
     <>
-      <Script 
-        src="https://accounts.google.com/gsi/client" 
+      <Script
+        src="https://accounts.google.com/gsi/client"
         strategy="lazyOnload"
         onLoad={handleScriptLoad}
       />
-      <Button 
-        type="button" 
-        variant="outline" 
-        size="sm" 
-        onClick={startPickerFlow} 
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={startPickerFlow}
         disabled={disabled || !isApiLoaded || isProcessing}
         className="w-full mt-2 flex items-center justify-center gap-2 border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
       >
-        {isProcessing ? <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /> : <ImageIcon className="w-4 h-4 text-slate-500" />}
-        <span className="text-sm font-medium">{isProcessing ? 'Connecting...' : 'Choose from Google Photos'}</span>
+        {isProcessing ? (
+          <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+        ) : (
+          <ImageIcon className="w-4 h-4 text-slate-500" />
+        )}
+        <span className="text-sm font-medium">
+          {isProcessing ? 'Connecting...' : 'Choose from Google Photos'}
+        </span>
       </Button>
     </>
   );

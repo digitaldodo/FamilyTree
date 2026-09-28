@@ -27,23 +27,37 @@ interface MemoryFormModalProps {
   isSubmitting?: boolean;
 }
 
-export function MemoryFormModal({ isOpen, onClose, onSubmit, initialData, isSubmitting }: MemoryFormModalProps) {
-  const activeTreeId = useAppStore(s => s.activeTreeId);
+export function MemoryFormModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  initialData,
+  isSubmitting,
+}: MemoryFormModalProps) {
+  const activeTreeId = useAppStore((s) => s.activeTreeId);
   const { members = [] } = useMembers(activeTreeId || undefined);
 
-  const { register, handleSubmit, control, reset, formState: { errors } } = useForm<any>({
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors },
+  } = useForm<any>({
     resolver: zodResolver(memorySchema),
     defaultValues: {
       title: initialData?.title || '',
       description: initialData?.description || '',
-      date: initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      date: initialData?.date
+        ? new Date(initialData.date).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0],
       type: 'MEMORY',
       googlePhotosAlbumUrl: initialData?.googlePhotosAlbumUrl || '',
       location: initialData?.location || '',
       tags: initialData?.tags || [],
       memberIds: initialData?.members?.map((m: any) => m.memberId) || [],
       mediaUrls: initialData?.media?.map((m: any) => m.url) || [],
-    }
+    },
   });
 
   // Reset form when opened with new initialData
@@ -52,7 +66,9 @@ export function MemoryFormModal({ isOpen, onClose, onSubmit, initialData, isSubm
       reset({
         title: initialData?.title || '',
         description: initialData?.description || '',
-        date: initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        date: initialData?.date
+          ? new Date(initialData.date).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0],
         type: 'MEMORY',
         googlePhotosAlbumUrl: initialData?.googlePhotosAlbumUrl || '',
         location: initialData?.location || '',
@@ -72,40 +88,65 @@ export function MemoryFormModal({ isOpen, onClose, onSubmit, initialData, isSubm
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{initialData ? 'Edit Memory' : 'Add Memory'}</DialogTitle>
+          <DialogTitle>
+            {initialData ? 'Edit Memory' : 'Add Memory'}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
-          
           <div className="space-y-2">
             <Label htmlFor="title">Title *</Label>
-            <Input id="title" placeholder="e.g., Family Trip to Agra" {...register('title')} />
-            {errors.title && <p className="text-sm text-destructive">{String(errors.title.message)}</p>}
+            <Input
+              id="title"
+              placeholder="e.g., Family Trip to Agra"
+              {...register('title')}
+            />
+            {errors.title && (
+              <p className="text-sm text-destructive">
+                {String(errors.title.message)}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="date">Date *</Label>
               <Input id="date" type="date" {...register('date')} />
-              {errors.date && <p className="text-sm text-destructive">{String(errors.date.message)}</p>}
+              {errors.date && (
+                <p className="text-sm text-destructive">
+                  {String(errors.date.message)}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="location">Location</Label>
-              <Input id="location" placeholder="e.g., Agra, India" {...register('location')} />
-              {errors.location && <p className="text-sm text-destructive">{String(errors.location.message)}</p>}
+              <Input
+                id="location"
+                placeholder="e.g., Agra, India"
+                {...register('location')}
+              />
+              {errors.location && (
+                <p className="text-sm text-destructive">
+                  {String(errors.location.message)}
+                </p>
+              )}
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="description">Story / Description</Label>
-            <Textarea 
+            <Textarea
               id="description"
-              placeholder="Share the story behind this memory..." 
+              placeholder="Share the story behind this memory..."
               className="min-h-[100px]"
-              {...register('description')} 
+              {...register('description')}
             />
-            {errors.description && <p className="text-sm text-destructive">{String(errors.description.message)}</p>}
+            {errors.description && (
+              <p className="text-sm text-destructive">
+                {String(errors.description.message)}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -121,8 +162,14 @@ export function MemoryFormModal({ isOpen, onClose, onSubmit, initialData, isSubm
                 />
               )}
             />
-            <p className="text-xs text-muted-foreground">Select family members present in this memory.</p>
-            {errors.memberIds && <p className="text-sm text-destructive">{String(errors.memberIds.message)}</p>}
+            <p className="text-xs text-muted-foreground">
+              Select family members present in this memory.
+            </p>
+            {errors.memberIds && (
+              <p className="text-sm text-destructive">
+                {String(errors.memberIds.message)}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -137,18 +184,40 @@ export function MemoryFormModal({ isOpen, onClose, onSubmit, initialData, isSubm
                 />
               )}
             />
-            {errors.mediaUrls && <p className="text-sm text-destructive">{String(errors.mediaUrls.message)}</p>}
+            {errors.mediaUrls && (
+              <p className="text-sm text-destructive">
+                {String(errors.mediaUrls.message)}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="googlePhotosAlbumUrl">Google Photos Album Link</Label>
-            <Input id="googlePhotosAlbumUrl" type="url" placeholder="https://photos.app.goo.gl/..." {...register('googlePhotosAlbumUrl')} />
-            <p className="text-xs text-muted-foreground">Link to an external Google Photos album.</p>
-            {errors.googlePhotosAlbumUrl && <p className="text-sm text-destructive">{String(errors.googlePhotosAlbumUrl.message)}</p>}
+            <Label htmlFor="googlePhotosAlbumUrl">
+              Google Photos Album Link
+            </Label>
+            <Input
+              id="googlePhotosAlbumUrl"
+              type="url"
+              placeholder="https://photos.app.goo.gl/..."
+              {...register('googlePhotosAlbumUrl')}
+            />
+            <p className="text-xs text-muted-foreground">
+              Link to an external Google Photos album.
+            </p>
+            {errors.googlePhotosAlbumUrl && (
+              <p className="text-sm text-destructive">
+                {String(errors.googlePhotosAlbumUrl.message)}
+              </p>
+            )}
           </div>
 
           <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>

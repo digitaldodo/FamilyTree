@@ -10,7 +10,7 @@ export const Card = React.forwardRef<HTMLDivElement, HTMLMotionProps<'div'>>(
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
       className={cn(
-        'rounded-2xl border bg-card text-card-foreground shadow-sm glass-card',
+        'rounded-xl border bg-card text-card-foreground shadow-sm',
         className
       )}
       {...props}

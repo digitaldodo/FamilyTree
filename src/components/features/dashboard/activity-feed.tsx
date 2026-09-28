@@ -1,10 +1,17 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { Activity, Plus, Edit2, Trash2, Eye, User as UserIcon } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { motion } from 'framer-motion';
+import {
+  Activity,
+  Plus,
+  Edit2,
+  Trash2,
+  Eye,
+  User as UserIcon,
+} from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
-export type ActivityType = "CREATE" | "UPDATE" | "DELETE" | "VIEW";
+export type ActivityType = 'CREATE' | 'UPDATE' | 'DELETE' | 'VIEW';
 
 interface ActivityFeedProps {
   activities: {
@@ -19,21 +26,31 @@ interface ActivityFeedProps {
 
 const ActivityIcon = ({ type }: { type: ActivityType }) => {
   switch (type) {
-    case "CREATE": return <Plus className="w-4 h-4 text-green-500" />;
-    case "UPDATE": return <Edit2 className="w-4 h-4 text-blue-500" />;
-    case "DELETE": return <Trash2 className="w-4 h-4 text-red-500" />;
-    case "VIEW": return <Eye className="w-4 h-4 text-purple-500" />;
-    default: return <Activity className="w-4 h-4 text-muted-foreground" />;
+    case 'CREATE':
+      return <Plus className="w-4 h-4 text-foreground" />;
+    case 'UPDATE':
+      return <Edit2 className="w-4 h-4 text-foreground" />;
+    case 'DELETE':
+      return <Trash2 className="w-4 h-4 text-foreground" />;
+    case 'VIEW':
+      return <Eye className="w-4 h-4 text-foreground" />;
+    default:
+      return <Activity className="w-4 h-4 text-muted-foreground" />;
   }
 };
 
 const ActivityBackground = (type: ActivityType) => {
   switch (type) {
-    case "CREATE": return "bg-green-500/10";
-    case "UPDATE": return "bg-blue-500/10";
-    case "DELETE": return "bg-red-500/10";
-    case "VIEW": return "bg-purple-500/10";
-    default: return "bg-muted";
+    case 'CREATE':
+      return 'bg-muted';
+    case 'UPDATE':
+      return 'bg-muted';
+    case 'DELETE':
+      return 'bg-muted';
+    case 'VIEW':
+      return 'bg-muted';
+    default:
+      return 'bg-muted';
   }
 };
 
@@ -43,10 +60,10 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.4 }}
-      className="bg-card border border-border rounded-2xl p-6 shadow-sm h-full flex flex-col"
+      className="bg-card border border-border rounded-lg p-6 shadow-sm h-full flex flex-col"
     >
       <div className="flex items-center gap-2 mb-6">
-        <Activity className="w-5 h-5 text-primary" />
+        <Activity className="w-5 h-5 text-foreground" />
         <h3 className="text-xl font-semibold">Recent Activity</h3>
       </div>
 
@@ -61,23 +78,32 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                 transition={{ delay: 0.5 + i * 0.1 }}
                 className="relative"
               >
-                <div className={`absolute -left-[35px] w-7 h-7 rounded-full flex items-center justify-center ring-4 ring-card ${ActivityBackground(activity.type)}`}>
+                <div
+                  className={`absolute -left-[35px] w-7 h-7 rounded-full flex items-center justify-center ring-4 ring-card ${ActivityBackground(activity.type)}`}
+                >
                   <ActivityIcon type={activity.type} />
                 </div>
-                <div className="bg-muted/30 rounded-xl p-3 text-sm">
+                <div className="bg-muted/30 rounded-md p-3 text-sm">
                   <p className="mb-1">
-                    <span className="font-semibold text-foreground">{activity.userName}</span>
-                    {" "}
-                    {activity.type === "CREATE" ? "added a new" 
-                      : activity.type === "UPDATE" ? "updated" 
-                      : activity.type === "DELETE" ? "removed" 
-                      : "viewed"}
-                    {" "}
-                    {activity.entityType.toLowerCase()}{" "}
-                    <span className="font-medium text-foreground">&quot;{activity.entityName}&quot;</span>
+                    <span className="font-semibold text-foreground">
+                      {activity.userName}
+                    </span>{' '}
+                    {activity.type === 'CREATE'
+                      ? 'added a new'
+                      : activity.type === 'UPDATE'
+                        ? 'updated'
+                        : activity.type === 'DELETE'
+                          ? 'removed'
+                          : 'viewed'}{' '}
+                    {activity.entityType.toLowerCase()}{' '}
+                    <span className="font-medium text-foreground">
+                      &quot;{activity.entityName}&quot;
+                    </span>
                   </p>
                   <p className="text-xs text-muted-foreground font-medium">
-                    {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(activity.createdAt), {
+                      addSuffix: true,
+                    })}
                   </p>
                 </div>
               </motion.div>

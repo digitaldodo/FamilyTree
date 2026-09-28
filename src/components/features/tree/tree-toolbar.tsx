@@ -13,9 +13,18 @@ interface TreeToolbarProps {
   isPublic?: boolean;
 }
 
-export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: TreeToolbarProps) {
+export function TreeToolbar({
+  readOnly = false,
+  treeId,
+  isPublic = false,
+}: TreeToolbarProps) {
   const { zoomIn, zoomOut, fitView } = useReactFlow();
-  const { setIsMemberModalOpen, setSelectedMemberId, setIsEditingMember, activeTreeId } = useAppStore();
+  const {
+    setIsMemberModalOpen,
+    setSelectedMemberId,
+    setIsEditingMember,
+    activeTreeId,
+  } = useAppStore();
   const resolvedTreeId = treeId || activeTreeId || '';
   const queryClient = useQueryClient();
 
@@ -27,25 +36,32 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
 
   const repairMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/trees/${resolvedTreeId}/repair`, { method: 'POST' });
-      let data;
+      const res = await fetch(`/api/trees/${resolvedTreeId}/repair`, {
+        method: 'POST',
+      });
+      let _data;
       try {
-        data = await res.json();
+        _data = await res.json();
       } catch {
-        throw new Error("Server returned invalid response");
+        throw new Error('Server returned invalid response');
       }
-      if (!res.ok) throw new Error(data.message || 'Unknown error');
-      return data.data;
+      if (!res.ok) throw new Error(_data.message || 'Unknown error');
+      return _data.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tree', resolvedTreeId] });
-    }
+    },
   });
 
   const handleRepair = () => {
     if (!resolvedTreeId) return;
-    if (!window.confirm("Run tree relationship repair? This will safely fix duplicates and sync parents.")) return;
-    
+    if (
+      !window.confirm(
+        'Run tree relationship repair? This will safely fix duplicates and sync parents.'
+      )
+    )
+      return;
+
     toast.promise(repairMutation.mutateAsync(), {
       loading: 'Checking family relationships...',
       success: (data) => {
@@ -54,7 +70,8 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
         }
         return `Repaired ${data.repaired} relationships successfully.`;
       },
-      error: (err) => `Unable to repair relationships: ${err.message || 'Please try again.'}`
+      error: (err) =>
+        `Unable to repair relationships: ${err.message || 'Please try again.'}`,
     });
   };
 
@@ -62,41 +79,63 @@ export function TreeToolbar({ readOnly = false, treeId, isPublic = false }: Tree
     <div className="flex flex-wrap items-center gap-2">
       {!readOnly && (
         <>
-          <Button 
-            className="rounded-xl shadow-sm h-10 px-3 sm:px-4" 
-            onClick={handleAdd} 
+          <Button
+            className="rounded-md shadow-sm h-10 px-3 sm:px-4"
+            onClick={handleAdd}
             title="Add Member"
           >
             <Plus className="h-4 w-4 mr-0 sm:mr-2" />
             <span className="hidden sm:inline">Add Member</span>
           </Button>
-          
+
           <ShareTreeButton treeId={resolvedTreeId} isPublic={isPublic} />
-          
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="rounded-xl h-10 w-10 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md" 
-            onClick={handleRepair} 
-            disabled={repairMutation.isPending} 
+
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-md h-10 w-10 bg-card"
+            onClick={handleRepair}
+            disabled={repairMutation.isPending}
             title="Settings / Repair Relationships"
           >
-            {repairMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wrench className="h-4 w-4 text-slate-600 dark:text-slate-300" />}
+            {repairMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Wrench className="h-4 w-4 text-muted-foreground" />
+            )}
           </Button>
           <div className="h-6 w-px bg-border/50 mx-1 hidden sm:block" />
         </>
       )}
-      
-      <div className="flex items-center gap-1 p-1 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-800/50 rounded-2xl shadow-sm">
-        <Button variant="ghost" size="icon" className="rounded-xl h-8 w-8 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => zoomIn({ duration: 300 })} title="Zoom In">
-          <ZoomIn className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+
+      <div className="flex items-center gap-1 p-1 bg-card border border-border rounded-md shadow-sm">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-md h-8 w-8 hover:bg-muted"
+          onClick={() => zoomIn({ duration: 300 })}
+          title="Zoom In"
+        >
+          <ZoomIn className="h-4 w-4 text-muted-foreground" />
         </Button>
-        <Button variant="ghost" size="icon" className="rounded-xl h-8 w-8 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => zoomOut({ duration: 300 })} title="Zoom Out">
-          <ZoomOut className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-md h-8 w-8 hover:bg-muted"
+          onClick={() => zoomOut({ duration: 300 })}
+          title="Zoom Out"
+        >
+          <ZoomOut className="h-4 w-4 text-muted-foreground" />
         </Button>
         <div className="h-4 w-px bg-border/50 mx-0.5" />
-        <Button variant="ghost" size="icon" className="rounded-xl h-8 w-8 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => fitView({ duration: 500, padding: 0.2, maxZoom: 1 })} title="Fit View">
-          <Maximize className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-md h-8 w-8 hover:bg-muted"
+          onClick={() => fitView({ duration: 500, padding: 0.2, maxZoom: 1 })}
+          title="Fit View"
+        >
+          <Maximize className="h-4 w-4 text-muted-foreground" />
         </Button>
       </div>
     </div>

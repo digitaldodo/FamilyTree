@@ -1,20 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { useAppStore } from '@/store/use-app-store';
 import { useMembers } from '@/hooks/use-members';
-import {
-  Edit2,
-  Trash2,
-  Camera,
-  X
-} from 'lucide-react';
+import { Edit2, Trash2, Camera, X } from 'lucide-react';
 import { MemberForm } from './member-form';
 import { MemberDeleteDialog } from './member-delete-dialog';
 import { useMemberMutations } from '@/hooks/use-member-mutations';
-import { MemoryGallery, Memory } from '../memories/memory-gallery';
+import { type Memory } from '../memories/memory-gallery';
 import { getGenerationLabel } from '@/utils/date';
 import { MemberDetails } from './member-details';
 import { MemberRelationships } from './member-relationships';
@@ -57,10 +51,12 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
     : undefined;
 
   const memberGeneration = member
-    ? generations.find(g => g.id === member.generationId)
+    ? generations.find((g) => g.id === member.generationId)
     : undefined;
-  
-  const memberGenIndex = memberGeneration ? generations.findIndex(g => g.id === memberGeneration.id) : 0;
+
+  const memberGenIndex = memberGeneration
+    ? generations.findIndex((g) => g.id === memberGeneration.id)
+    : 0;
 
   const handleClose = () => {
     setIsMemberModalOpen(false);
@@ -92,7 +88,6 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
     );
   };
 
-
   const age = getAge();
   const memories: Memory[] =
     (member as any)?.media?.filter((m: any) => m.type === 'image') || [];
@@ -106,29 +101,29 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   const drawerVariants = {
-    hidden: { 
-      opacity: 0, 
-      x: isMobile ? 0 : '100%', 
-      y: isMobile ? '100%' : 0 
-    },
-    visible: { 
-      opacity: 1, 
-      x: 0, 
-      y: 0,
-      transition: { type: 'spring', damping: 25, stiffness: 200 }
-    },
-    exit: { 
-      opacity: 0, 
-      x: isMobile ? 0 : '100%', 
+    hidden: {
+      opacity: 0,
+      x: isMobile ? 0 : '100%',
       y: isMobile ? '100%' : 0,
-      transition: { type: 'tween', duration: 0.2 }
-    }
+    },
+    visible: {
+      opacity: 1,
+      x: 0,
+      y: 0,
+      transition: { type: 'spring', damping: 25, stiffness: 200 },
+    },
+    exit: {
+      opacity: 0,
+      x: isMobile ? 0 : '100%',
+      y: isMobile ? '100%' : 0,
+      transition: { type: 'tween', duration: 0.2 },
+    },
   } satisfies Variants;
 
   return (
     <>
       <AnimatePresence>
-        {(isMemberModalOpen && (member || isEditingMember)) && (
+        {isMemberModalOpen && (member || isEditingMember) && (
           <>
             {/* Backdrop */}
             <motion.div
@@ -145,59 +140,49 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="fixed inset-x-0 bottom-0 md:inset-x-auto md:right-0 md:top-0 z-50 w-full md:w-[600px] h-[90vh] md:h-screen bg-background md:border-l border-border shadow-2xl flex flex-col rounded-t-3xl md:rounded-none overflow-hidden"
+              className="fixed inset-x-0 bottom-0 md:inset-x-auto md:right-0 md:top-0 z-50 w-full md:w-[520px] h-[90vh] md:h-screen bg-background md:border-l border-border shadow-lg flex flex-col rounded-t-2xl md:rounded-none overflow-hidden"
             >
-              {/* ── Premium Cover & Header ── */}
-              <div className="relative h-48 md:h-64 shrink-0 bg-gradient-to-br from-primary/30 via-purple-500/20 to-rose-500/10 overflow-hidden">
-                {member?.imageUrl && (
-                  <Image
-                    src={member.imageUrl}
-                    alt=""
-                    fill
-                    className="w-full h-full object-cover opacity-60 blur-md scale-110"
-                    unoptimized
-                  />
-                )}
-                {/* Dark gradient overlay for text contrast */}
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-
+              {/* ── Header ── */}
+              <div className="relative shrink-0 bg-card border-b border-border p-6 flex flex-col md:flex-row md:items-center gap-4">
                 {/* Close Button */}
-                <button 
+                <button
                   onClick={handleClose}
-                  className="absolute top-4 right-4 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-md transition-colors z-10"
+                  className="absolute top-4 right-4 p-2 rounded-md bg-transparent hover:bg-muted text-muted-foreground transition-colors z-10"
                 >
                   <X className="w-5 h-5" />
                 </button>
 
-                {/* Avatar + Name Overlay */}
-                <div className="absolute -bottom-6 left-6 right-6 flex items-end gap-4">
-                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl border-4 border-background overflow-hidden bg-muted flex items-center justify-center shadow-xl shrink-0 relative z-10">
-                    <MemberAvatar 
-                      imageUrl={member?.imageUrl} 
-                      firstName={member?.firstName} 
-                      lastName={member?.lastName} 
-                      gender={member?.gender} 
-                      fallbackSize={48} 
+                <div className="flex items-center gap-4 w-full pt-4 md:pt-0">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted flex items-center justify-center shrink-0">
+                    <MemberAvatar
+                      imageUrl={member?.imageUrl}
+                      firstName={member?.firstName}
+                      lastName={member?.lastName}
+                      gender={member?.gender}
+                      fallbackSize={32}
                     />
                   </div>
-                  
-                  <div className="flex-1 min-w-0 pb-8 md:pb-10 relative z-10">
+
+                  <div className="flex-1 min-w-0 pr-8">
                     {member && !isEditingMember && (
                       <>
-                        <h2 className="text-2xl md:text-3xl font-bold text-foreground truncate leading-tight tracking-tight">
+                        <h2 className="text-xl font-semibold text-foreground truncate">
                           {member.firstName} {member.lastName}
                         </h2>
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-semibold uppercase tracking-wider">
-                            Gen {memberGenIndex + 1} · {getGenerationLabel(member.birthDate) || memberGeneration?.name || 'Unknown'}
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-muted text-muted-foreground text-xs font-medium">
+                            Gen {memberGenIndex + 1} ·{' '}
+                            {getGenerationLabel(member.birthDate) ||
+                              memberGeneration?.name ||
+                              'Unknown'}
                           </span>
                           {member.deathDate && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-500/10 text-slate-600 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-muted text-muted-foreground text-xs font-medium">
                               🕊 In Loving Memory
                             </span>
                           )}
                           {age !== null && (
-                            <span className="text-sm font-medium text-muted-foreground">
+                            <span className="text-xs text-muted-foreground">
                               {member.deathDate
                                 ? `Age at Passing ${age} years`
                                 : `${age} years old`}
@@ -207,7 +192,7 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                       </>
                     )}
                     {isEditingMember && (
-                      <h2 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+                      <h2 className="text-xl font-semibold text-foreground">
                         {member ? 'Edit Member' : 'Add New Member'}
                       </h2>
                     )}
@@ -215,17 +200,17 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
 
                   {/* Action Buttons */}
                   {!isEditingMember && member && !readOnly && (
-                    <div className="flex gap-2 pb-8 md:pb-10 shrink-0 relative z-10">
+                    <div className="flex gap-2 shrink-0">
                       <button
                         onClick={() => setIsEditingMember(true)}
-                        className="p-2.5 rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors shadow-sm"
+                        className="p-2 rounded-md bg-muted text-muted-foreground hover:bg-muted/80 transition-colors shadow-sm"
                         aria-label="Edit member"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setIsDeleteDialogOpen(true)}
-                        className="p-2.5 rounded-xl bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors shadow-sm"
+                        className="p-2 rounded-md bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors shadow-sm"
                         aria-label="Delete member"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -236,7 +221,7 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
               </div>
 
               {/* ── Scrollable Content ── */}
-              <div className="flex-1 overflow-y-auto px-6 pt-12 pb-8 modal-scroll">
+              <div className="flex-1 overflow-y-auto px-6 pt-6 pb-8 modal-scroll">
                 {isEditingMember ? (
                   <div>
                     <MemberForm
@@ -264,7 +249,7 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                               {' — '}
                               <button
                                 onClick={() => setIsEditingMember(true)}
-                                className="text-purple-500 hover:underline font-medium"
+                                className="text-foreground underline font-medium"
                               >
                                 add one
                               </button>
@@ -277,12 +262,12 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                       <MemberDetails member={member} />
 
                       {/* ── Relationships ── */}
-                      <MemberRelationships 
-                        member={member} 
-                        members={members} 
-                        onNavigateToMember={navigateToMember} 
-                        readOnly={readOnly} 
-                        onAddRelationshipsClick={() => setIsEditingMember(true)} 
+                      <MemberRelationships
+                        member={member}
+                        members={members}
+                        onNavigateToMember={navigateToMember}
+                        readOnly={readOnly}
+                        onAddRelationshipsClick={() => setIsEditingMember(true)}
                       />
 
                       {/* ── Memories Section ── */}
@@ -290,11 +275,22 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                         {readOnly ? (
                           memories.length > 0 ? (
                             <div>
-                              <h3 className="text-lg font-bold mb-4">Memories</h3>
+                              <h3 className="text-lg font-medium mb-4">
+                                Memories
+                              </h3>
                               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                 {memories.slice(0, 6).map((m: any) => (
-                                  <div key={m.id} className="relative aspect-square rounded-2xl overflow-hidden bg-muted shadow-sm">
-                                    <Image src={m.url} alt={m.caption || ''} fill className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" unoptimized />
+                                  <div
+                                    key={m.id}
+                                    className="relative aspect-square rounded-lg overflow-hidden bg-muted shadow-sm"
+                                  >
+                                    <Image
+                                      src={m.url}
+                                      alt={m.caption || ''}
+                                      fill
+                                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                                      unoptimized
+                                    />
                                   </div>
                                 ))}
                               </div>
@@ -307,15 +303,20 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                           ) : (
                             <div className="text-center py-8">
                               <Camera className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
-                              <p className="text-sm text-muted-foreground/50 italic">No memories uploaded yet</p>
+                              <p className="text-sm text-muted-foreground/50 italic">
+                                No memories uploaded yet
+                              </p>
                             </div>
                           )
                         ) : (
-                          <div className="text-center py-8 bg-muted/30 rounded-xl border border-dashed border-border/50">
+                          <div className="text-center py-8 bg-muted/30 rounded-lg border border-dashed border-border/50">
                             <Camera className="w-8 h-8 text-muted-foreground/30 mx-auto mb-3" />
-                            <h4 className="text-sm font-medium text-foreground">Memory Uploads</h4>
+                            <h4 className="text-sm font-medium text-foreground">
+                              Memory Uploads
+                            </h4>
                             <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-                              The memory upload feature is currently under construction. Check back soon!
+                              The memory upload feature is currently under
+                              construction. Check back soon!
                             </p>
                           </div>
                         )}
@@ -340,4 +341,3 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
     </>
   );
 }
-

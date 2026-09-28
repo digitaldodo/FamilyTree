@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { Cake, Calendar } from "lucide-react";
-import { MemberAvatar } from "../members/member-avatar";
+import { motion } from 'framer-motion';
+import { Cake, Calendar } from 'lucide-react';
+import { MemberAvatar } from '../members/member-avatar';
 
 interface BirthdayWidgetProps {
   birthdays: {
@@ -21,10 +21,10 @@ export function BirthdayWidget({ birthdays }: BirthdayWidgetProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
-      className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col h-full"
+      className="bg-card border border-border rounded-lg p-6 shadow-sm flex flex-col h-full"
     >
       <div className="flex items-center gap-2 mb-6">
-        <Cake className="w-5 h-5 text-amber-500" />
+        <Cake className="w-5 h-5 text-foreground" />
         <h3 className="text-xl font-semibold">Upcoming Birthdays</h3>
       </div>
 
@@ -36,24 +36,31 @@ export function BirthdayWidget({ birthdays }: BirthdayWidgetProps) {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 + i * 0.1 }}
-              className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors"
+              className="flex items-center gap-4 p-3 rounded-md hover:bg-muted/50 transition-colors"
             >
-              <div className="relative w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
-                <MemberAvatar imageUrl={birthday.imageUrl} firstName={birthday.name.split(' ')[0]} lastName={birthday.name.split(' ')[1] || ''} fallbackSize={20} />
+              <div className="relative w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                <MemberAvatar
+                  imageUrl={birthday.imageUrl}
+                  firstName={birthday.name.split(' ')[0]}
+                  lastName={birthday.name.split(' ')[1] || ''}
+                  fallbackSize={20}
+                />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-sm truncate">{birthday.name}</h4>
+                <h4 className="font-medium text-sm truncate">
+                  {birthday.name}
+                </h4>
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
                   Turning {birthday.ageTurning}
                 </p>
               </div>
               <div className="text-right flex-shrink-0">
-                <span className="inline-block px-2.5 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold rounded-full">
-                  {birthday.daysRemaining === 0 
-                    ? "Today!" 
-                    : birthday.daysRemaining === 1 
-                      ? "Tomorrow" 
+                <span className="inline-block px-2.5 py-1 bg-muted text-foreground text-xs font-semibold rounded-md">
+                  {birthday.daysRemaining === 0
+                    ? 'Today!'
+                    : birthday.daysRemaining === 1
+                      ? 'Tomorrow'
                       : `In ${birthday.daysRemaining} days`}
                 </span>
               </div>
