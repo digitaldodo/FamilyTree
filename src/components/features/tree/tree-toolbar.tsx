@@ -127,10 +127,15 @@ export function TreeToolbar({
           size="icon"
           className="rounded-lg h-8 w-8 hover:bg-muted"
           onClick={() => {
-            toast.promise(exportTreeToPDF('family-tree', getNodes()), {
-              loading: 'Generating PDF...',
+            const nodes = getNodes();
+            if (!nodes.length) {
+              toast.error('Add family members before exporting.');
+              return;
+            }
+            toast.promise(exportTreeToPDF('Family Tree', nodes), {
+              loading: 'Building family tree PDF…',
               success: 'PDF downloaded successfully!',
-              error: 'Failed to generate PDF.',
+              error: (err) => `Unable to generate PDF: ${err?.message ?? 'Please try again.'}`,
             });
           }}
           title="Download PDF"

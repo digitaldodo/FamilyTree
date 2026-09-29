@@ -212,11 +212,34 @@
 }
 
 @media print {
-  header, nav, aside, footer, .print-hidden, [data-sidebar], .react-flow__panel, .react-flow__controls { display: none !important; }
-  body, main { background: white !important; color: black !important; }
-  .react-flow__node { background: white !important; color: black !important; box-shadow: none !important; border: 1px solid #ccc !important; }
-  .react-flow__edge-path { stroke: black !important; }
+  /* Hide all application chrome */
+  header, nav, aside, footer,
+  .print-hidden,
+  [data-sidebar],
+  .react-flow__panel,
+  .react-flow__controls,
+  .react-flow__minimap,
+  [data-toolbar],
+  .tree-watermark { display: none !important; }
+
+  /* Ensure white backgrounds for print */
+  html, body, main { background: white !important; color: black !important; margin: 0 !important; padding: 0 !important; }
+
+  /* Tree fills the page */
+  .react-flow { width: 100vw !important; height: 100vh !important; }
+  .react-flow__renderer { background: white !important; }
+
+  /* Cards: clean on white */
+  .react-flow__node { background: white !important; color: black !important; box-shadow: none !important; border: 1px solid #c8c2b5 !important; border-radius: 6px !important; }
+
+  /* Connectors: dark on white */
+  .react-flow__edge-path { stroke: #4a6b52 !important; stroke-width: 1.5px !important; }
+
+  /* Force color print */
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  /* Page setup */
+  @page { size: A3 landscape; margin: 12mm; }
 }
 
 /* Public landing page: a warm, editorial family-history experience. */

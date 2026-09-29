@@ -222,10 +222,15 @@ function PublicTreeToolbar({ treeName }: { treeName: string }) {
         <button
           className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground transition-colors"
           onClick={() => {
-            toast.promise(exportTreeToPDF(treeName, getNodes()), {
-              loading: 'Generating PDF...',
+            const nodes = getNodes();
+            if (!nodes.length) {
+              toast.error('No family members to export.');
+              return;
+            }
+            toast.promise(exportTreeToPDF(treeName, nodes), {
+              loading: 'Building family tree PDF…',
               success: 'PDF downloaded successfully!',
-              error: 'Failed to generate PDF.',
+              error: (err: Error) => `Unable to generate PDF: ${err?.message ?? 'Please try again.'}`,
             });
           }}
           title="Download PDF"
