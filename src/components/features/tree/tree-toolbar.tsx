@@ -12,12 +12,14 @@ interface TreeToolbarProps {
   readOnly?: boolean;
   treeId?: string;
   isPublic?: boolean;
+  treeName?: string;
 }
 
 export function TreeToolbar({
   readOnly = false,
   treeId,
   isPublic = false,
+  treeName = 'Family Tree',
 }: TreeToolbarProps) {
   const { zoomIn, zoomOut, fitView, getNodes } = useReactFlow();
   const {
@@ -76,8 +78,15 @@ export function TreeToolbar({
     });
   };
 
+  const handleFitTree = () => {
+    const treeNodes = getNodes().filter((node) => node.type !== 'generationLane');
+    if (treeNodes.length > 0) {
+      fitView({ nodes: treeNodes, duration: 500, padding: 0.16, maxZoom: 1 });
+    }
+  };
+
   return (
-    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+    <div data-toolbar className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
       {/* Primary & Secondary Actions */}
       {!readOnly && (
         <div className="flex items-center gap-2 bg-card/80 backdrop-blur-md p-1.5 rounded-xl border border-border shadow-sm">
@@ -132,7 +141,7 @@ export function TreeToolbar({
               toast.error('Add family members before exporting.');
               return;
             }
-            toast.promise(exportTreeToPDF('Family Tree', nodes), {
+            toast.promise(exportTreeToPDF(treeName, nodes), {
               loading: 'Building family tree PDF…',
               success: 'PDF downloaded successfully!',
               error: (err) => `Unable to generate PDF: ${err?.message ?? 'Please try again.'}`,
@@ -166,8 +175,8 @@ export function TreeToolbar({
           variant="ghost"
           size="icon"
           className="rounded-lg h-8 w-8 hover:bg-muted"
-          onClick={() => fitView({ duration: 500, padding: 0.2, maxZoom: 1 })}
-          title="Fit View"
+          onClick={handleFitTree}
+          title="Fit Tree"
         >
           <Maximize className="h-4 w-4 text-muted-foreground" />
         </Button>

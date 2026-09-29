@@ -79,12 +79,12 @@
   --color-ring: #123D2D;
 
   /* Tree Relationship Connectors (Light Mode) */
-  --color-tree-connector: #2D6048;
+  --color-tree-connector: #1a4a35;
   --color-tree-connector-active: #123D2D;
   --color-tree-spouse: #B07D20;
   --color-tree-spouse-active: #936126;
-  --color-tree-junction: #285B40;
-  --color-tree-glow: rgba(18, 61, 45, 0.15);
+  --color-tree-junction: #1a4a35;
+  --color-tree-glow: rgba(26, 74, 53, 0.15);
   --radius: 0.5rem;
 }
 
@@ -119,12 +119,12 @@
   --color-ring: #78936B;
 
   /* Tree Relationship Connectors (Dark Mode) */
-  --color-tree-connector: #78936B;
-  --color-tree-connector-active: #F3D17A;
+  --color-tree-connector: #78936b;
+  --color-tree-connector-active: #95b386;
   --color-tree-spouse: #D9A441;
   --color-tree-spouse-active: #F3D17A;
-  --color-tree-junction: #78936B;
-  --color-tree-glow: rgba(217, 164, 65, 0.2);
+  --color-tree-junction: #78936b;
+  --color-tree-glow: rgba(120, 147, 107, 0.2);
 }
 
 /* Elevation shadows — theme-aware */

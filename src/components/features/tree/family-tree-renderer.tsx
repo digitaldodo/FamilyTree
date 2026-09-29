@@ -16,7 +16,8 @@ interface FamilyTreeRendererProps {
 
 export function useFamilyTreeRenderer(
   familyGraph: FamilyGraph,
-  generations: any[]
+  generations: any[],
+  readOnly = false
 ) {
   const { nodes, edges } = React.useMemo(() => {
     const rfNodes: Node[] = [];
@@ -31,17 +32,18 @@ export function useFamilyTreeRenderer(
     }
 
     let minGlobalX = 0;
-    let maxGlobalX = 0;
 
     // 2. Generate React Flow Nodes for Members
     for (const node of graphNodes) {
       const pos = { x: node.layoutHints?.x || 0, y: node.layoutHints?.y || 0 };
 
       const isCouple = node.type === 'COUPLE_CONTAINER';
-      const nodeWidth = isCouple ? NODE_WIDTH * 2 + 80 : NODE_WIDTH; // Approximate width
-
       minGlobalX = Math.min(minGlobalX, pos.x);
-      maxGlobalX = Math.max(maxGlobalX, pos.x + nodeWidth);
+
+      const generation = generations?.find(
+        (item) => item.orderIndex === node.generation
+      );
+      const generationName = generation?.name?.trim() || `Generation ${node.generation}`;
 
       rfNodes.push({
         id: node.id,
@@ -50,38 +52,36 @@ export function useFamilyTreeRenderer(
         data: isCouple
           ? {
               members: node.members,
-              generationName: `Generation ${node.generation}`,
+              generationName,
             }
           : {
               member: node.member,
               label: `${node.member?.firstName} ${node.member?.lastName}`,
-              generationName: `Generation ${node.generation}`,
+              generationName,
             },
       });
     }
 
     // 3. Generate Generation Lanes
-    const laneWidth = Math.max(3000, maxGlobalX - minGlobalX + 1200);
-    const laneX =
-      minGlobalX === 0 && maxGlobalX === 0 ? -1000 : minGlobalX - 600;
-
     const engineGenerations = Object.keys(safeFamilyGraph.generations || {})
       .map(Number)
       .sort((a, b) => a - b);
 
     engineGenerations.forEach((level) => {
-      let label = `Generation ${level}`;
-      if (level === 0) label = 'Generation 0 (Reference)';
+      const dbGen = generations?.find((g) => g.orderIndex === level);
+      const label = dbGen?.name?.trim() || `Generation ${level}`;
 
       rfNodes.push({
         id: `lane-${level}`,
         type: 'generationLane',
-        position: { x: laneX, y: level * LEVEL_HEIGHT - 60 },
+        position: { x: minGlobalX, y: level * LEVEL_HEIGHT - 60 },
         data: {
           label,
-          width: laneWidth,
-          height: LEVEL_HEIGHT + 100,
-          isEven: level % 2 === 0,
+          generationId: dbGen?.id,
+          isEditable: Boolean(dbGen?.id) && !readOnly,
+          width: 200,
+          height: 50,
+          isEven: false,
         },
         zIndex: -2,
         selectable: false,
@@ -195,7 +195,7 @@ export function useFamilyTreeRenderer(
     });
 
     return { nodes: rfNodes, edges: rfEdges };
-  }, [familyGraph, generations]);
+  }, [familyGraph, generations, readOnly]);
 
   return { nodes, edges };
 }

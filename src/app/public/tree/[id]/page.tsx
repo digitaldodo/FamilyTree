@@ -254,8 +254,13 @@ function PublicTreeToolbar({ treeName }: { treeName: string }) {
         </button>
         <button
           className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground transition-colors"
-          onClick={() => fitView({ duration: 500, padding: 0.2, maxZoom: 1 })}
-          title="Fit View"
+          onClick={() => {
+            const treeNodes = getNodes().filter((node) => node.type !== 'generationLane');
+            if (treeNodes.length > 0) {
+              fitView({ nodes: treeNodes, duration: 500, padding: 0.16, maxZoom: 1 });
+            }
+          }}
+          title="Fit Tree"
         >
           <Maximize className="h-4 w-4" />
         </button>
@@ -269,7 +274,11 @@ function PublicTreeCanvas({ treeData }: { treeData: any }) {
     return GenealogyEngine.buildFamilyGraph(treeData.members || []);
   }, [treeData.members]);
 
-  const { nodes: rendererNodes, edges: rendererEdges } = useFamilyTreeRenderer(familyGraph, treeData.generations || []);
+  const { nodes: rendererNodes, edges: rendererEdges } = useFamilyTreeRenderer(
+    familyGraph,
+    treeData.generations || [],
+    true
+  );
   
   const [nodes, setNodes, onNodesChange] = useNodesState(rendererNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(rendererEdges);
@@ -297,7 +306,11 @@ function PublicTreeCanvas({ treeData }: { treeData: any }) {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        fitViewOptions={{ padding: 0.3 }}
+        fitViewOptions={{
+          padding: 0.16,
+          maxZoom: 1,
+          nodes: nodes.filter((node) => node.type !== 'generationLane'),
+        }}
         minZoom={0.1}
         maxZoom={2}
         defaultEdgeOptions={{ zIndex: 0 }}

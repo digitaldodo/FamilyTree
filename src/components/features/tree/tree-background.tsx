@@ -13,7 +13,7 @@ export function TreeBackground() {
         color="currentColor"
         className="text-foreground/[0.06] dark:text-foreground/[0.04]"
       />
-      <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-[-1] opacity-[0.03] dark:opacity-[0.05] select-none print:hidden">
+      <div className="tree-watermark absolute inset-0 pointer-events-none flex items-center justify-center z-[-1] opacity-[0.03] dark:opacity-[0.05] select-none print:hidden">
         <Image
           src="/logo.png"
           alt="FamilyTree Watermark"

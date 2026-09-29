@@ -6,6 +6,7 @@ import {
   useNodesState,
   useEdgesState,
   ReactFlowProvider,
+  useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -29,6 +30,7 @@ import { MemberSearch } from '@/components/features/members/member-search';
 import { GenerationFilter } from '@/components/features/generations/generation-filter';
 import { TreeVersionsDropdown } from './tree-versions-dropdown';
 import { fetchJson } from '@/lib/fetcher';
+import { useUserTrees } from '@/hooks/use-user-trees';
 
 const nodeTypes = {
   member: MemberNode,
@@ -42,12 +44,16 @@ const edgeTypes = {
 };
 
 function FamilyTreeCanvas() {
+  const { fitView, getNodes } = useReactFlow();
   const activeTreeId = useAppStore((s) => s.activeTreeId);
   const selectedTreeVersionId = useAppStore((s) => s.selectedTreeVersionId);
   const setSelectedMemberId = useAppStore((s) => s.setSelectedMemberId);
   const setIsMemberModalOpen = useAppStore((s) => s.setIsMemberModalOpen);
   const setIsEditingMember = useAppStore((s) => s.setIsEditingMember);
   const queryClient = useQueryClient();
+  const { userTrees } = useUserTrees();
+  const activeTreeName =
+    userTrees.find((tree) => tree.id === activeTreeId)?.name || 'Family Tree';
 
   const { isSyncing, hasConflict, pendingChanges } = useTreeCollaboration(
     activeTreeId,
@@ -77,6 +83,50 @@ function FamilyTreeCanvas() {
     setNodes(rendererNodes);
     setEdges(rendererEdges);
   }, [rendererNodes, rendererEdges, setNodes, setEdges]);
+
+  const fitTree = React.useCallback(
+    (duration = 0) => {
+      const treeNodes = getNodes().filter(
+        (node) => node.type !== 'generationLane'
+      );
+
+      if (treeNodes.length > 0) {
+        fitView({ nodes: treeNodes, duration, padding: 0.16, maxZoom: 1 });
+      }
+    },
+    [fitView, getNodes]
+  );
+
+  // Wait for React Flow to measure the freshly-rendered cards, then fit only
+  // visible family nodes. Generation labels are intentionally excluded so they
+  // can never create excess margins or change the tree's layout.
+  React.useEffect(() => {
+    if (rendererNodes.length === 0) return;
+
+    let secondFrame: number | undefined;
+    const firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => fitTree());
+    });
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      if (secondFrame) window.cancelAnimationFrame(secondFrame);
+    };
+  }, [rendererNodes, fitTree]);
+
+  React.useEffect(() => {
+    let frame: number | undefined;
+    const handleResize = () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => fitTree());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [fitTree]);
 
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => {
@@ -148,7 +198,7 @@ function FamilyTreeCanvas() {
   return (
     <div className="w-full h-full flex flex-col relative overflow-hidden bg-background">
       {!isTreeEmpty && (
-        <div className="w-full z-10 p-4 pb-0 flex flex-col gap-3 pointer-events-none">
+        <div data-toolbar className="w-full z-10 p-4 pb-0 flex flex-col gap-3 pointer-events-none">
           {/* Main Toolbar */}
           <div className="flex flex-col 2xl:flex-row items-stretch 2xl:items-center justify-between w-full gap-3 pointer-events-auto">
             {/* Left Section */}
@@ -184,7 +234,7 @@ function FamilyTreeCanvas() {
                   </div>
                 )}
               </div>
-              <TreeToolbar />
+              <TreeToolbar treeName={activeTreeName} />
             </div>
           </div>
 
@@ -206,7 +256,12 @@ function FamilyTreeCanvas() {
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           fitView
-          fitViewOptions={{ padding: 0.3, maxZoom: 1, minZoom: 0.2 }}
+          fitViewOptions={{
+            padding: 0.16,
+            maxZoom: 1,
+            minZoom: 0.2,
+            nodes: nodes.filter((node) => node.type !== 'generationLane'),
+          }}
           minZoom={0.05}
           maxZoom={1.5}
           defaultEdgeOptions={{ zIndex: 0 }}
