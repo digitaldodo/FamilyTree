@@ -9,7 +9,7 @@ cloudinary.config({
 
 export async function POST(req: NextRequest) {
   try {
-    const { mediaFileUrl, accessToken, folder = 'family-tree/avatars' } = await req.json();
+    const { mediaFileUrl, accessToken } = await req.json();
 
     if (!mediaFileUrl || !accessToken) {
       return NextResponse.json(

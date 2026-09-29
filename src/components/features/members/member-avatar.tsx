@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { User2 } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -44,6 +44,13 @@ export function MemberAvatar({
 }: MemberAvatarProps) {
   const [hasLoadError, setHasLoadError] = useState(false);
 
+  // A member can receive a new image while this component remains mounted.
+  // Resetting the failure state lets the replacement image render instead of
+  // leaving a previously failed avatar stuck on its initials fallback.
+  useEffect(() => {
+    setHasLoadError(false);
+  }, [imageUrl]);
+
   const fullName = useMemo(() => {
     return [firstName, lastName].filter(Boolean).join(' ').trim();
   }, [firstName, lastName]);
@@ -75,7 +82,8 @@ export function MemberAvatar({
           src={imageUrl}
           alt={fullName || 'Member'}
           fill
-          sizes="100vw"
+          sizes="(max-width: 768px) 40px, 48px"
+          unoptimized
           onError={() => setHasLoadError(true)}
           className="object-cover absolute inset-0"
         />

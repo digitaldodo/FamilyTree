@@ -18,7 +18,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 inset-x-0 bg-background border-t border-border z-30 safe-area-bottom select-none"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background pb-[env(safe-area-inset-bottom)] select-none md:hidden"
       aria-label="Mobile Navigation"
     >
       <div className="flex items-center justify-around h-14 px-1">

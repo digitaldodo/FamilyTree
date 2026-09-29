@@ -11,15 +11,15 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-dvh min-h-0 overflow-hidden bg-background">
       <TreeInitializer />
       <CreateTreeModalHost />
       <div className="hidden md:flex">
         <Sidebar />
       </div>
-      <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
         <Navbar />
-        <main className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 pb-20 md:pb-6 relative">
+        <main className="relative flex-1 overflow-y-auto custom-scrollbar p-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:p-6 md:pb-6">
           {children}
         </main>
       </div>

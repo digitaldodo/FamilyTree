@@ -129,7 +129,7 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm touch-none"
               onClick={handleClose}
             />
 
@@ -139,7 +139,7 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="fixed inset-x-0 bottom-0 md:inset-x-auto md:right-0 md:top-0 z-50 w-full md:w-[520px] h-[90vh] md:h-screen bg-background md:border-l border-border shadow-lg flex flex-col rounded-t-2xl md:rounded-none overflow-hidden"
+              className="fixed inset-x-0 bottom-0 z-50 flex h-[min(90dvh,calc(100dvh-env(safe-area-inset-bottom)))] w-full flex-col overflow-hidden rounded-t-2xl border-border bg-background shadow-lg md:inset-x-auto md:right-0 md:top-0 md:h-dvh md:w-[520px] md:rounded-none md:border-l"
             >
               {/* ── Hero Header ── */}
               <div className="relative shrink-0 w-full bg-card border-b border-border">

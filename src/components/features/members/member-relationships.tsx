@@ -4,6 +4,12 @@ import { MemberWithRelations } from '@/types/member';
 import { MemberAvatar } from './member-avatar';
 import { deriveFamilyConnections } from '@/lib/family-connections';
 
+type MemberAvatarRecord = MemberWithRelations & { avatar?: string | null };
+
+function getMemberImageUrl(member: MemberAvatarRecord) {
+  return member.imageUrl || member.avatar || null;
+}
+
 interface MemberRelationshipsProps {
   member: MemberWithRelations;
   members: MemberWithRelations[];
@@ -55,36 +61,34 @@ export function MemberRelationships({
   ) => {
     if (list.length === 0) return null;
     return (
-      <div>
+      <section>
         <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
           {title}
         </h4>
         <div className="flex flex-wrap gap-2">
           {list.map((m) => (
-            <div
+            <button
+              type="button"
               key={m.id}
               onClick={() => onNavigateToMember(m.id)}
-              className={`flex items-center gap-2 p-1.5 pr-4 rounded-full cursor-pointer transition-colors border ${colorClasses || 'bg-secondary hover:bg-secondary/80 border-border'}`}
+              className={`group flex max-w-full items-center gap-2 rounded-full border py-1.5 pl-1.5 pr-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${colorClasses || 'bg-secondary hover:bg-secondary/80 border-border'}`}
             >
-              <div
-                className={`w-8 h-8 rounded-full overflow-hidden relative flex items-center justify-center ${colorClasses ? 'bg-background/50' : 'bg-muted'}`}
-              >
-                <MemberAvatar
-                  imageUrl={m.imageUrl}
-                  firstName={m.firstName}
-                  lastName={m.lastName}
-                  gender={m.gender}
-                  fallbackSize={16}
-                  iconClassName={iconClassName}
-                />
-              </div>
-              <span className="text-sm font-medium">
+              <MemberAvatar
+                imageUrl={getMemberImageUrl(m)}
+                firstName={m.firstName}
+                lastName={m.lastName}
+                gender={m.gender}
+                fallbackSize={16}
+                iconClassName={iconClassName}
+                className="h-8 w-8 shrink-0 text-xs leading-none"
+              />
+              <span className="min-w-0 truncate text-sm font-medium">
                 {m.firstName} {m.lastName}
               </span>
-            </div>
+            </button>
           ))}
         </div>
-      </div>
+      </section>
     );
   };
 
