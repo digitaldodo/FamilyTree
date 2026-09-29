@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { MemberWithRelations } from '@/types/member';
 import { cn } from '@/lib/utils';
 import { getGenerationLabel } from '@/utils/date';
@@ -19,69 +19,85 @@ function TreeMemberCardComponent({
   onClick,
   className,
 }: TreeMemberCardProps) {
+  const [hasLoadError, setHasLoadError] = useState(false);
+  
   const generationName = getGenerationLabel(member?.birthDate) || propGenerationName;
 
   const birthYear = member.birthDate ? new Date(member.birthDate).getFullYear() : null;
   const deathYear = member.deathDate ? new Date(member.deathDate).getFullYear() : null;
-  const displayDates = birthYear ? `${birthYear} - ${deathYear || 'Present'}` : '';
+  
+  let displayDates = '';
+  if (birthYear && deathYear) {
+    displayDates = `${birthYear} - ${deathYear}`;
+  } else if (birthYear) {
+    const age = new Date().getFullYear() - birthYear;
+    displayDates = `Born ${birthYear} (Age ${age})`;
+  }
+
+  const initials = `${member.firstName?.charAt(0) || ''}${member.lastName?.charAt(0) || ''}`.toUpperCase();
 
   return (
     <div
       onClick={(e) => onClick?.(e, member.id)}
       className={cn(
-        'group relative flex flex-col w-[190px] h-[250px] rounded-2xl overflow-hidden bg-card border shadow-sm transition-all duration-300 cursor-pointer',
+        'group relative flex flex-col w-full h-full rounded-2xl overflow-hidden bg-card border shadow-sm transition-all duration-300 cursor-pointer text-center hover:bg-card/90',
         isSelected
-          ? 'border-foreground ring-1 ring-foreground/20 shadow-md'
-          : 'border-border/60 hover:border-border hover:shadow-md',
+          ? 'border-primary ring-1 ring-primary/30 shadow-md'
+          : 'border-border/60 hover:border-border/90 hover:shadow-md',
         className
       )}
     >
-      {/* Photo Area - Fixed 1:1 or 4:3 Ratio */}
-      <div className="w-full h-[160px] relative bg-secondary/50 flex items-center justify-center overflow-hidden shrink-0">
-        {member.imageUrl ? (
+      {/* Photograph Area (Top ~64%) */}
+      <div className="w-full h-[64%] relative bg-muted/40 flex items-center justify-center overflow-hidden shrink-0">
+        {member.imageUrl && !hasLoadError ? (
           <Image
             src={member.imageUrl}
             alt={`${member.firstName} ${member.lastName}`}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 768px) 170px, 190px"
+            className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+            sizes="(max-width: 768px) 190px, 220px"
+            onError={() => setHasLoadError(true)}
+            unoptimized
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground/60 transition-transform duration-500 group-hover:scale-105">
-            <span className="text-3xl font-medium tracking-tight">
-               {member.firstName?.charAt(0)}{member.lastName?.charAt(0)}
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/80 text-muted-foreground transition-transform duration-700 group-hover:scale-[1.03]">
+            <span className="text-4xl font-semibold tracking-wider opacity-60">
+               {initials}
             </span>
           </div>
         )}
-
-        {/* Selected Overlay Indicator */}
-        {isSelected && (
-          <div className="absolute inset-0 bg-primary/5 pointer-events-none" />
-        )}
+        
+        {/* Subtle gradient overlay to merge image with card background smoothly */}
+        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-card to-transparent pointer-events-none transition-colors duration-300" />
       </div>
 
-      {/* Info Area */}
-      <div className="flex-1 p-4 flex flex-col justify-center bg-card z-10 relative">
-        <h3 className="font-semibold text-sm text-foreground line-clamp-1 leading-tight tracking-tight mb-1">
+      {/* Information Area */}
+      <div className="flex-1 px-3 pb-3 pt-1 flex flex-col justify-start items-center relative z-10">
+        <h3 className="font-semibold text-[14px] text-foreground leading-tight mb-1 line-clamp-2 break-words max-w-full">
           {member.firstName} {member.lastName}
         </h3>
         
-        <div className="flex items-center justify-between mt-auto">
-          <span className="text-xs text-muted-foreground truncate">
+        {displayDates && (
+          <span className="text-[11px] text-muted-foreground font-medium mb-1.5">
             {displayDates}
           </span>
-        </div>
+        )}
 
         {generationName && (
-          <span className="absolute top-0 right-0 -translate-y-1/2 bg-background border border-border text-[10px] text-muted-foreground uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
+          <span className="inline-flex items-center justify-center bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full mt-auto">
             {generationName}
           </span>
         )}
       </div>
 
+      {/* Selected Indicator */}
+      {isSelected && (
+        <div className="absolute inset-0 bg-primary/5 pointer-events-none z-20" />
+      )}
+      
       {/* Subtle Status Indicator */}
       {member.deathDate && (
-        <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-foreground/30 border border-background z-20 shadow-sm" title="Deceased" />
+        <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-foreground/40 border border-background z-20 shadow-sm" title="Deceased" />
       )}
     </div>
   );
