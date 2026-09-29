@@ -88,3 +88,58 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     return errorResponse('DELETE_ERROR', getErrorMessage(error), 500);
   }
 }
+
+/** PUT /api/trees/:id/collaborators — Update a collaborator's role */
+export async function PUT(request: NextRequest, { params }: Params) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return errorResponse('UNAUTHORIZED', 'Authentication required', 401);
+    }
+
+    const { id } = await params;
+
+    const permission = await getTreePermission(session.user.id, id);
+    if (!canManageCollaborators(permission)) {
+      return errorResponse('FORBIDDEN', 'You do not have permission to manage collaborators', 403);
+    }
+
+    let body = null;
+    try {
+      body = await request.json();
+    } catch {
+      return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
+    }
+    const { userId, role } = body;
+
+    if (!userId || !role) {
+      return errorResponse('VALIDATION_ERROR', 'userId and role are required', 400);
+    }
+    if (role !== 'VIEWER' && role !== 'EDITOR' && role !== 'ADMIN') {
+      return errorResponse('VALIDATION_ERROR', 'Invalid role', 400);
+    }
+
+    const collaborator = await prisma.treeCollaborator.findUnique({
+      where: { userId_treeId: { userId, treeId: id } },
+    });
+
+    if (!collaborator) {
+      return errorResponse('NOT_FOUND', 'Collaborator not found', 404);
+    }
+
+    const updated = await prisma.treeCollaborator.update({
+      where: { userId_treeId: { userId, treeId: id } },
+      data: { role },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+    });
+
+    return successResponse(updated, 'Collaborator updated successfully');
+  } catch (error) {
+    console.error('[COLLAB_UPDATE_ERROR]', error);
+    return errorResponse('UPDATE_ERROR', getErrorMessage(error), 500);
+  }
+}

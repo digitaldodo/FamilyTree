@@ -8,6 +8,7 @@ import {
   useNodesState,
   useEdgesState,
   ReactFlowProvider,
+  useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { MemberNode } from '@/components/features/tree/member-node';
@@ -15,15 +16,19 @@ import { RelationshipEdgeMemo } from '@/components/features/tree/relationship-ed
 import { GenerationLaneNode } from '@/components/features/tree/generation-lane-node';
 import { FamilyJunctionNode } from '@/components/features/tree/family-junction-node';
 import { TreeBackground } from '@/components/features/tree/tree-background';
-import { Loader2, TreePine, Eye, LogIn } from 'lucide-react';
+import { Loader2, TreePine, Eye, LogIn, Printer, Download, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/ui/dialog';
 import { Calendar, MapPin, Briefcase, Heart, Users } from 'lucide-react';
 import { MemberAvatar } from '@/components/features/members/member-avatar';
 import Image from 'next/image';
 import { GenealogyEngine } from '@/domain/inference/genealogy-engine';
 import { useFamilyTreeRenderer } from '@/components/features/tree/family-tree-renderer';
+import { exportTreeToPDF } from '@/lib/pdf-export';
+import { toast } from 'sonner';
 
-const nodeTypes = { member: MemberNode, generationLane: GenerationLaneNode, familyJunction: FamilyJunctionNode };
+import { CoupleContainerNode } from '@/components/features/tree/couple-container-node';
+
+const nodeTypes = { member: MemberNode, generationLane: GenerationLaneNode, familyJunction: FamilyJunctionNode, coupleContainer: CoupleContainerNode };
 const edgeTypes = { relationship: RelationshipEdgeMemo };
 
 
@@ -201,8 +206,60 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
   );
 }
 
-function PublicTreeCanvas({ treeData }: { treeData: any }) {
+function PublicTreeToolbar({ treeName }: { treeName: string }) {
+  const { zoomIn, zoomOut, fitView, getNodes } = useReactFlow();
 
+  return (
+    <div className="absolute bottom-6 right-6 z-10 flex flex-col sm:flex-row items-end sm:items-center gap-3 print:hidden">
+      <div className="flex items-center gap-1 p-1.5 bg-card/90 backdrop-blur-md border border-border rounded-xl shadow-sm">
+        <button
+          className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground transition-colors"
+          onClick={() => window.print()}
+          title="Print Tree"
+        >
+          <Printer className="h-4 w-4" />
+        </button>
+        <button
+          className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground transition-colors"
+          onClick={() => {
+            toast.promise(exportTreeToPDF(treeName, getNodes()), {
+              loading: 'Generating PDF...',
+              success: 'PDF downloaded successfully!',
+              error: 'Failed to generate PDF.',
+            });
+          }}
+          title="Download PDF"
+        >
+          <Download className="h-4 w-4" />
+        </button>
+        <div className="h-4 w-px bg-border/80 mx-0.5" />
+        <button
+          className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground transition-colors"
+          onClick={() => zoomIn({ duration: 300 })}
+          title="Zoom In"
+        >
+          <ZoomIn className="h-4 w-4" />
+        </button>
+        <button
+          className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground transition-colors"
+          onClick={() => zoomOut({ duration: 300 })}
+          title="Zoom Out"
+        >
+          <ZoomOut className="h-4 w-4" />
+        </button>
+        <button
+          className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground transition-colors"
+          onClick={() => fitView({ duration: 500, padding: 0.2, maxZoom: 1 })}
+          title="Fit View"
+        >
+          <Maximize className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PublicTreeCanvas({ treeData }: { treeData: any }) {
   const familyGraph = React.useMemo(() => {
     return GenealogyEngine.buildFamilyGraph(treeData.members || []);
   }, [treeData.members]);
@@ -246,6 +303,8 @@ function PublicTreeCanvas({ treeData }: { treeData: any }) {
       >
         <TreeBackground />
       </ReactFlow>
+      
+      <PublicTreeToolbar treeName={treeData.name || 'family-tree'} />
 
       <PublicMemberModal
         member={selectedMember}
@@ -314,21 +373,33 @@ export default function PublicTreePage() {
 
   return (
     <div className="h-screen flex flex-col">
-      {/* Public Banner */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-primary/5 border-b border-primary/10">
-        <div className="flex items-center gap-2 text-sm">
-          <Eye className="w-4 h-4 text-primary" />
-          <span className="text-muted-foreground">
-            You&apos;re viewing <span className="font-semibold text-foreground">{treeData.name}</span> — a shared family tree
-          </span>
+      {/* Polished Public Header */}
+      <header className="flex items-center justify-between px-4 sm:px-6 py-3 bg-card border-b border-border shadow-sm z-50">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 font-bold text-lg text-primary tracking-tight">
+            <TreePine className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="hidden sm:inline">FamilyTree</span>
+          </div>
+          <div className="h-4 w-px bg-border" />
+          <div className="flex items-center gap-2 text-xs sm:text-sm">
+            <Eye className="w-4 h-4 text-muted-foreground hidden sm:block" />
+            <span className="text-muted-foreground truncate max-w-[150px] sm:max-w-none">
+              Viewing <span className="font-semibold text-foreground">{treeData.name}</span>
+            </span>
+            <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest hidden sm:inline-block">Shared</span>
+          </div>
         </div>
-        <Link
-          href="/register"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-opacity"
-        >
-          Create your own
-        </Link>
-      </div>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div id="public-tree-actions" className="flex items-center gap-2" />
+          
+          <Link
+            href="/register"
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold shadow-sm hover:bg-primary/90 transition-all hover:scale-105"
+          >
+            Create Your Own
+          </Link>
+        </div>
+      </header>
 
       {/* Tree */}
       <div className="flex-1 relative">

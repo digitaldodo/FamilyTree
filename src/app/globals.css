@@ -181,3 +181,11 @@
 .modal-scroll::-webkit-scrollbar-thumb {
   @apply bg-muted-foreground/20 rounded-full;
 }
+
+@media print {
+  header, nav, aside, footer, .print-hidden, [data-sidebar], .react-flow__panel, .react-flow__controls { display: none !important; }
+  body, main { background: white !important; color: black !important; }
+  .react-flow__node { background: white !important; color: black !important; box-shadow: none !important; border: 1px solid #ccc !important; }
+  .react-flow__edge-path { stroke: black !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}

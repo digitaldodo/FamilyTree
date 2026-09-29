@@ -10,7 +10,7 @@ export type TreePermission = 'OWNER' | 'ADMIN' | 'EDITOR' | 'VIEWER' | null;
  * Returns null if the user has no access.
  */
 export async function getTreePermission(
-  userId: string,
+  userId: string | null | undefined,
   treeId: string
 ): Promise<TreePermission> {
   // Check if user is the owner
@@ -20,24 +20,26 @@ export async function getTreePermission(
   });
 
   if (!tree) return null;
-  if (tree.ownerId === userId) return 'OWNER';
+  if (userId && tree.ownerId === userId) return 'OWNER';
 
   // Check if user is a collaborator
-  const collaborator = await prisma.treeCollaborator.findUnique({
-    where: { userId_treeId: { userId, treeId } },
-    select: { role: true },
-  });
+  if (userId) {
+    const collaborator = await prisma.treeCollaborator.findUnique({
+      where: { userId_treeId: { userId, treeId } },
+      select: { role: true },
+    });
 
-  if (collaborator) {
-    switch (collaborator.role) {
-      case 'ADMIN':
-        return 'ADMIN';
-      case 'EDITOR':
-        return 'EDITOR';
-      case 'VIEWER':
-        return 'VIEWER';
-      default:
-        return null;
+    if (collaborator) {
+      switch (collaborator.role) {
+        case 'ADMIN':
+          return 'ADMIN';
+        case 'EDITOR':
+          return 'EDITOR';
+        case 'VIEWER':
+          return 'VIEWER';
+        default:
+          return null;
+      }
     }
   }
 

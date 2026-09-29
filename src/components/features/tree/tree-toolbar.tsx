@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { useReactFlow } from '@xyflow/react';
-import { ZoomIn, ZoomOut, Maximize, Plus, Wrench, Loader2 } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize, Plus, Wrench, Loader2, Printer, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/store/use-app-store';
 import { ShareTreeButton } from './share-tree-button';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { exportTreeToPDF } from '@/lib/pdf-export';
 
 interface TreeToolbarProps {
   readOnly?: boolean;
@@ -18,7 +19,7 @@ export function TreeToolbar({
   treeId,
   isPublic = false,
 }: TreeToolbarProps) {
-  const { zoomIn, zoomOut, fitView } = useReactFlow();
+  const { zoomIn, zoomOut, fitView, getNodes } = useReactFlow();
   const {
     setIsMemberModalOpen,
     setSelectedMemberId,
@@ -112,6 +113,31 @@ export function TreeToolbar({
 
       {/* Navigation / View Actions */}
       <div className="flex items-center gap-1 p-1.5 bg-card/80 backdrop-blur-md border border-border rounded-xl shadow-sm">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-lg h-8 w-8 hover:bg-muted"
+          onClick={() => window.print()}
+          title="Print Tree"
+        >
+          <Printer className="h-4 w-4 text-muted-foreground" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-lg h-8 w-8 hover:bg-muted"
+          onClick={() => {
+            toast.promise(exportTreeToPDF('family-tree', getNodes()), {
+              loading: 'Generating PDF...',
+              success: 'PDF downloaded successfully!',
+              error: 'Failed to generate PDF.',
+            });
+          }}
+          title="Download PDF"
+        >
+          <Download className="h-4 w-4 text-muted-foreground" />
+        </Button>
+        <div className="h-4 w-px bg-border/80 mx-0.5" />
         <Button
           variant="ghost"
           size="icon"

@@ -83,11 +83,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
       session = await auth();
     } catch (error) {
       console.error('[TREE_GET_AUTH_ERROR]', error);
-      return errorResponse('AUTH_ERROR', 'Could not verify your session. Please sign in again.', 401);
-    }
-
-    if (!session?.user?.id) {
-      return errorResponse('UNAUTHORIZED', 'Authentication required', 401);
+      // Don't fail immediately, they might just want to view a public tree
     }
 
     let id: string;
@@ -101,6 +97,27 @@ export async function GET(_request: NextRequest, { params }: Params) {
 
     if (!isValidTreeId(id)) {
       return errorResponse('VALIDATION_ERROR', 'Invalid tree id.', 400);
+    }
+
+    const permission = await getTreePermission(session?.user?.id, id);
+    if (!permission) {
+      return errorResponse('FORBIDDEN', 'You do not have access to this tree', 403);
+    }
+
+    // Log VIEW activity if user is logged in
+    if (session?.user?.id) {
+      try {
+        await prisma.activityLog.create({
+          data: {
+            type: 'VIEW',
+            entityType: 'TREE',
+            entityId: id,
+            userId: session.user.id,
+          },
+        });
+      } catch (error) {
+        console.error('[TREE_ACTIVITY_LOG_ERROR]', error);
+      }
     }
 
     let treeData;
@@ -118,23 +135,6 @@ export async function GET(_request: NextRequest, { params }: Params) {
 
     if (!treeData) {
       return errorResponse('NOT_FOUND', 'Tree not found', 404);
-    }
-
-    let hasAccess = treeData.ownerId === session.user.id;
-    if (!hasAccess) {
-      try {
-        const collaborator = await prisma.treeCollaborator.findUnique({
-          where: { userId_treeId: { userId: session.user.id, treeId: id } },
-          select: { role: true },
-        });
-        hasAccess = Boolean(collaborator);
-      } catch (error) {
-        return databaseReadError(error, 'Unable to verify tree permissions.');
-      }
-    }
-
-    if (!hasAccess) {
-      return errorResponse('FORBIDDEN', 'You do not have access to this tree', 403);
     }
 
     let generations;
