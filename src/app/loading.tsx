@@ -1,11 +1,12 @@
-// Root Loading State
-// TODO: Implement skeleton loading UI
+import { Loader2 } from 'lucide-react';
 
 export default function Loading() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      {/* TODO: Replace with animated skeleton */}
-      <div className="animate-pulse text-lg">Loading...</div>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+      <Loader2 className="w-8 h-8 animate-spin text-primary/60 mb-4" />
+      <div className="text-sm font-medium text-muted-foreground animate-pulse tracking-wide uppercase">
+        Loading FamilyTree...
+      </div>
     </div>
   );
 }

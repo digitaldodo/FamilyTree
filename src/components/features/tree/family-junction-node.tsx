@@ -10,7 +10,7 @@ function FamilyJunctionNodeComponent() {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8 }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
+      transition={{ duration: 0.15, ease: 'easeOut' }}
       className="relative flex items-center justify-center w-4 h-4"
     >
       {/* Target handle for incoming parent connections */}
@@ -21,8 +21,8 @@ function FamilyJunctionNodeComponent() {
         className="opacity-0 w-1 h-1 pointer-events-none"
       />
 
-      {/* The visible dot */}
-      <div className="w-2 h-2 rounded-full bg-foreground shadow-sm ring-2 ring-background z-10" />
+      {/* The visible junction dot with high-contrast token */}
+      <div className="w-2.5 h-2.5 rounded-full bg-[var(--color-tree-junction)] shadow-xs ring-2 ring-background z-10 transition-colors" />
 
       {/* Source handle for outgoing child connections */}
       <Handle

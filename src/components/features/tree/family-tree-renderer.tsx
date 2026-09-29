@@ -104,7 +104,7 @@ export function useFamilyTreeRenderer(
         animated: false,
         zIndex: 1,
         data: { type: 'SPOUSE' },
-        style: { stroke: '#f43f5e', strokeWidth: 2 },
+        style: { stroke: 'var(--color-tree-spouse)', strokeWidth: 2 },
       });
     });
 
@@ -158,7 +158,7 @@ export function useFamilyTreeRenderer(
         data: {},
         draggable: false,
         selectable: false,
-        zIndex: 0,
+        zIndex: 2,
       });
 
       // Parents to Junction
@@ -171,9 +171,9 @@ export function useFamilyTreeRenderer(
           sourceHandle: 'parent-source',
           targetHandle: 'junction-target',
           animated: false,
-          zIndex: 0,
+          zIndex: 1,
           data: { type: 'PARENT' },
-          style: { stroke: '#6366f1', strokeWidth: 2 },
+          style: { stroke: 'var(--color-tree-connector)', strokeWidth: 2 },
         });
       });
 
@@ -187,9 +187,9 @@ export function useFamilyTreeRenderer(
           sourceHandle: 'junction-source',
           targetHandle: 'child-target',
           animated: false,
-          zIndex: 0,
+          zIndex: 1,
           data: { type: 'PARENT' },
-          style: { stroke: '#6366f1', strokeWidth: 2 },
+          style: { stroke: 'var(--color-tree-connector)', strokeWidth: 2 },
         });
       });
     });

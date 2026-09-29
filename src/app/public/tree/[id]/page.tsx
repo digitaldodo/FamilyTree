@@ -16,7 +16,7 @@ import { GenerationLaneNode } from '@/components/features/tree/generation-lane-n
 import { FamilyJunctionNode } from '@/components/features/tree/family-junction-node';
 import { TreeBackground } from '@/components/features/tree/tree-background';
 import { Loader2, TreePine, Eye, LogIn } from 'lucide-react';
-import { Modal } from '@/components/ui/modal';
+import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/ui/dialog';
 import { Calendar, MapPin, Briefcase, Heart, Users } from 'lucide-react';
 import { MemberAvatar } from '@/components/features/members/member-avatar';
 import Image from 'next/image';
@@ -48,14 +48,18 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
   const memories = member.media?.filter((m: any) => m.type === 'image') || [];
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-2xl w-full p-0 overflow-hidden">
-      {/* Compact Cover */}
-      <div className="h-24 sm:h-28 bg-muted relative overflow-hidden">
-        {member.coverImage && (
-          <Image src={member.coverImage} alt="" fill className="w-full h-full object-cover" unoptimized />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-        <div className="absolute bottom-3 left-4 right-4 flex items-end gap-3">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-2xl w-full p-0 overflow-hidden border-border bg-background">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Member Profile</DialogTitle>
+        </DialogHeader>
+        {/* Compact Cover */}
+        <div className="h-24 sm:h-28 bg-muted relative overflow-hidden">
+          {member.coverImage && (
+            <Image src={member.coverImage} alt="" fill className="w-full h-full object-cover" unoptimized />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          <div className="absolute bottom-3 left-4 right-4 flex items-end gap-3">
           <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border-3 border-white/90 dark:border-zinc-800 overflow-hidden bg-muted flex items-center justify-center shadow-lg shrink-0 relative">
             <MemberAvatar 
               imageUrl={member.imageUrl} 
@@ -192,7 +196,8 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
           </div>
         )}
       </div>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 }
 

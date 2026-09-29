@@ -5,7 +5,6 @@ import { useAppStore } from '@/store/use-app-store';
 import { FamilyTimeline } from '@/components/features/timeline/family-timeline';
 import { TimelineEventProps } from '@/components/features/timeline/timeline-event';
 import { TimelineSkeleton } from '@/components/ui/timeline-skeleton';
-import { EmptyState } from '@/components/ui/empty-state';
 import { Clock, Plus } from 'lucide-react';
 import { useMembers } from '@/hooks/use-members';
 import { useMemories } from '@/hooks/use-memories';
@@ -166,19 +165,34 @@ export default function TimelinePage() {
 
   if (!events || events.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <EmptyState
-          icon={Clock}
-          title="Preserve a family memory"
-          description="Add stories, photos, and important moments to your family history."
-        />
-        
-        {canEdit && (
-          <Button onClick={() => { setSelectedMemory(null); setIsFormOpen(true); }} className="mt-4">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Memory
-          </Button>
-        )}
+      <div className="flex flex-col items-center justify-center min-h-[70vh] px-6">
+        <div className="text-center py-24 bg-card border border-border rounded-3xl shadow-sm max-w-lg mx-auto w-full relative overflow-hidden">
+          {/* Subtle background decoration */}
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+          
+          <div className="relative z-10">
+            <div className="w-20 h-20 mx-auto bg-background rounded-full flex items-center justify-center mb-6 shadow-sm border border-border">
+              <Clock className="w-8 h-8 text-muted-foreground/50" />
+            </div>
+            <h2 className="text-3xl font-serif font-semibold mb-4 text-foreground tracking-tight">
+              Your family story begins here.
+            </h2>
+            <p className="text-base text-muted-foreground mb-10 px-8 leading-relaxed">
+              Start preserving the moments that shaped your family. Add photographs, stories, and milestones to create a beautiful digital archive.
+            </p>
+            
+            {canEdit && (
+              <Button 
+                onClick={() => { setSelectedMemory(null); setIsFormOpen(true); }} 
+                size="lg"
+                className="rounded-full shadow-md font-medium px-8 h-12"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Add First Memory
+              </Button>
+            )}
+          </div>
+        </div>
 
         {canEdit && (
           <MemoryFormModal
@@ -195,8 +209,11 @@ export default function TimelinePage() {
   return (
     <div className="space-y-6">
       {canEdit && (
-        <div className="flex justify-end">
-          <Button onClick={() => { setSelectedMemory(null); setIsFormOpen(true); }}>
+        <div className="flex justify-end px-6 max-w-5xl mx-auto -mb-6 relative z-20">
+          <Button 
+            onClick={() => { setSelectedMemory(null); setIsFormOpen(true); }}
+            className="rounded-full shadow-sm"
+          >
             <Plus className="w-4 h-4 mr-2" />
             Add Memory
           </Button>

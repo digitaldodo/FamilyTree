@@ -235,7 +235,6 @@ function MembersContent() {
                           Delete
                         </Button>
                         <GenerationActionMenu
-                          generation={gen}
                           index={idx}
                           totalGenerations={sortedGenerations.length}
                           onAddAbove={() => openFormModal('addAbove', { targetOrderIndex: gen.orderIndex })}

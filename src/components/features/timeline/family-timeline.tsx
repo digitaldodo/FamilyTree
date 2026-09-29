@@ -47,23 +47,25 @@ export function FamilyTimeline({ events, onEventClick }: FamilyTimelineProps) {
       </div>
 
       <div className="relative">
-        {/* Main timeline vertical line */}
-        <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-border -translate-x-1/2" />
+        {/* Main timeline vertical line - ensuring strong contrast */}
+        <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-zinc-300 dark:bg-zinc-600 -translate-x-1/2" />
 
         {events.length > 0 ? (
           decades.map((decade, groupIndex) => (
-            <div key={decade} className="mb-16">
+            <div key={decade} className="mb-24">
               {/* Decade marker */}
-              <div className="relative flex justify-center mb-12">
-                <div className="absolute left-4 md:left-1/2 w-0.5 h-full bg-border -translate-x-1/2" />
+              <div className="relative flex justify-center mb-16">
+                <div className="absolute left-4 md:left-1/2 w-0.5 h-full bg-zinc-300 dark:bg-zinc-600 -translate-x-1/2" />
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium shadow-sm z-10 flex items-center gap-2 text-sm"
+                  className="bg-card border border-zinc-300 dark:border-zinc-600 px-6 py-2 rounded-full shadow-sm z-10 flex items-center gap-2"
                 >
-                  <Calendar className="w-4 h-4" />
-                  {decade}s
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  <span className="font-serif text-lg font-medium text-foreground tracking-wide">
+                    {decade}s
+                  </span>
                 </motion.div>
               </div>
 
@@ -81,14 +83,13 @@ export function FamilyTimeline({ events, onEventClick }: FamilyTimelineProps) {
             </div>
           ))
         ) : (
-          <div className="text-center py-20 bg-card border border-border rounded-lg relative z-10">
-            <Calendar className="w-6 h-6 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-medium mb-2">
-              No historical events yet
+          <div className="text-center py-24 bg-card border border-border rounded-2xl relative z-10 max-w-lg mx-auto">
+            <Calendar className="w-12 h-12 text-muted-foreground/30 mx-auto mb-6" />
+            <h3 className="text-xl font-serif font-medium mb-3">
+              Your family story begins here.
             </h3>
-            <p className="text-sm text-muted-foreground">
-              Add dates to family members to automatically generate their
-              timeline.
+            <p className="text-[15px] text-muted-foreground mb-8 px-6">
+              Start preserving the moments that shaped your family. Add photographs, memories, and milestones to create a digital archive.
             </p>
           </div>
         )}

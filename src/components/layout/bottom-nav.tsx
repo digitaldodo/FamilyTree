@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Users, GitMerge, History } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion } from 'motion/react';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
@@ -18,8 +17,11 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <div className="md:hidden fixed bottom-0 inset-x-0 h-16 bg-background/80 backdrop-blur-xl border-t border-border z-40 pb-[env(safe-area-inset-bottom)]">
-      <div className="flex items-center justify-around h-full px-2">
+    <nav
+      className="md:hidden fixed bottom-0 inset-x-0 bg-background border-t border-border z-30 safe-area-bottom select-none"
+      aria-label="Mobile Navigation"
+    >
+      <div className="flex items-center justify-around h-14 px-1">
         {navItems.map((item) => {
           const isActive = item.exact
             ? pathname === item.href
@@ -27,40 +29,24 @@ export function BottomNav() {
           const Icon = item.icon;
 
           return (
-            <Link key={item.name} href={item.href} className="flex-1 h-full">
-              <div className="flex flex-col items-center justify-center h-full w-full gap-1 group relative pb-1">
-                <div
-                  className={cn(
-                    'flex items-center justify-center p-1.5 rounded-xl transition-all duration-300 relative',
-                    isActive
-                      ? 'text-primary'
-                      : 'text-muted-foreground group-hover:text-foreground'
-                  )}
-                >
-                  {/* Active Indicator Background */}
-                  {isActive && (
-                    <motion.div
-                      layoutId="bottom-nav-active"
-                      className="absolute inset-0 bg-primary/10 rounded-xl"
-                      initial={false}
-                      transition={{
-                        type: 'spring',
-                        stiffness: 300,
-                        damping: 30,
-                      }}
-                    />
-                  )}
-                  <Icon
-                    className={cn(
-                      'h-5 w-5 relative z-10',
-                      isActive && 'scale-110 transition-transform'
-                    )}
-                  />
-                </div>
+            <Link
+              key={item.name}
+              href={item.href}
+              className="flex-1 h-full min-w-0 flex items-center justify-center"
+            >
+              <div
+                className={cn(
+                  'flex flex-col items-center justify-center gap-1 w-full py-1.5 transition-colors',
+                  isActive
+                    ? 'text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <Icon className={cn('h-4 w-4 shrink-0 transition-transform', isActive && 'stroke-[2.25]')} />
                 <span
                   className={cn(
-                    'text-[10px] font-medium transition-colors',
-                    isActive ? 'text-primary' : 'text-muted-foreground'
+                    'text-[10px] tracking-tight leading-none truncate max-w-[64px]',
+                    isActive ? 'font-semibold text-foreground' : 'font-normal text-muted-foreground'
                   )}
                 >
                   {item.name}
@@ -70,6 +56,6 @@ export function BottomNav() {
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }

@@ -1,5 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { memo } from 'react';
+'use client';
+
+import { memo, useState } from 'react';
 import {
   BaseEdge,
   EdgeProps,
@@ -20,7 +21,9 @@ export function RelationshipEdge({
   data,
   selected,
 }: EdgeProps) {
+  const [isHovered, setIsHovered] = useState(false);
   const isSpouse = data?.type === 'SPOUSE';
+  const isActive = selected || isHovered;
 
   // Use Bezier for spouses (horizontal connection), SmoothStep for parents (vertical)
   const [edgePath] = isSpouse
@@ -39,53 +42,64 @@ export function RelationshipEdge({
         targetX,
         targetY,
         targetPosition,
-        borderRadius: 24, // Apple-like rounded corners for lines
+        borderRadius: 20,
       });
 
+  const baseStroke = isSpouse
+    ? 'var(--color-tree-spouse)'
+    : 'var(--color-tree-connector)';
+  const activeStroke = isSpouse
+    ? 'var(--color-tree-spouse-active)'
+    : 'var(--color-tree-connector-active)';
+  const strokeColor = isActive ? activeStroke : (style.stroke || baseStroke);
+  
+  // Increase stroke width for better visibility at a glance
+  const strokeWidth = isSpouse ? (isActive ? 4 : 3) : (isActive ? 3.5 : 2.5);
+
   return (
-    <>
-      {/* Background invisible thicker edge for easier hovering */}
-      <BaseEdge
-        path={edgePath}
-        style={{
-          strokeWidth: 20,
-          stroke: 'transparent',
-          cursor: 'pointer',
-        }}
+    <g
+      className="react-flow__edge-relationship group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Invisible thicker interaction zone for easy hovering and clicking */}
+      <path
+        d={edgePath}
+        fill="none"
+        stroke="transparent"
+        strokeWidth={24}
+        className="cursor-pointer pointer-events-stroke"
       />
-      {/* Glow layer when selected or hovered */}
-      {selected && (
+
+      {/* Subtle outer glow layer when active/selected */}
+      {isActive && (
         <BaseEdge
           path={edgePath}
           style={{
-            strokeWidth: isSpouse ? 6 : 5,
-            stroke: 'hsl(var(--foreground) / 0.15)',
+            strokeWidth: isSpouse ? 7 : 6,
+            stroke: 'var(--color-tree-glow)',
             strokeLinecap: 'round',
-            transition: 'stroke-width 0.2s, stroke 0.2s',
+            transition: 'stroke-width 0.15s ease, stroke 0.15s ease',
           }}
         />
       )}
-      {/* Main edge layer */}
+
+      {/* Main connector line */}
       <BaseEdge
+        id={id}
         path={edgePath}
         markerEnd={markerEnd}
         style={{
           ...style,
-          strokeWidth: isSpouse ? (selected ? 4 : 3) : selected ? 3 : 2,
+          stroke: strokeColor,
+          strokeWidth,
           strokeDasharray: isSpouse ? '6, 6' : 'none',
-          stroke: isSpouse
-            ? selected
-              ? 'hsl(var(--foreground) / 0.8)'
-              : 'hsl(var(--muted-foreground) / 0.6)'
-            : selected
-              ? 'hsl(var(--foreground) / 0.8)'
-              : 'hsl(var(--muted-foreground) / 0.6)',
           strokeLinecap: 'round',
-          transition: 'all 0.3s ease',
+          strokeLinejoin: 'round',
+          transition: 'stroke 0.15s ease, stroke-width 0.15s ease',
         }}
       />
-      {/* We need global css for the dashdraw animation if we want it moving, but this is fine for now */}
-    </>
+    </g>
   );
 }
 

@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     "public/sw.js",
     "public/workbox-*.js",
     "fix_*.js",
+    "fix-*.js",
+    "test-ui.mjs",
     // Legacy scripts (previously ignored via .eslintignore)
     "scripts/**",
   ]),

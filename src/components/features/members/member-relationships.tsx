@@ -88,6 +88,15 @@ export function MemberRelationships({
     );
   };
 
+  if (members.length === 0) {
+    return (
+      <div>
+        <h3 className="text-lg font-bold mb-4">Family Connections</h3>
+        <div className="text-sm text-muted-foreground animate-pulse">Loading connections...</div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <h3 className="text-lg font-bold mb-4">Family Connections</h3>
@@ -116,7 +125,7 @@ export function MemberRelationships({
             {onAddRelationshipsClick && (
               <button
                 onClick={onAddRelationshipsClick}
-                className="text-sm text-purple-500 hover:underline mt-1"
+                className="text-sm text-primary hover:underline mt-1"
               >
                 Add relationships
               </button>

@@ -13,7 +13,6 @@ import { getGenerationLabel } from '@/utils/date';
 import { MemberDetails } from './member-details';
 import { MemberRelationships } from './member-relationships';
 import Image from 'next/image';
-import { MemberAvatar } from './member-avatar';
 
 interface MemberModalProps {
   readOnly?: boolean;
@@ -142,82 +141,89 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
               exit="exit"
               className="fixed inset-x-0 bottom-0 md:inset-x-auto md:right-0 md:top-0 z-50 w-full md:w-[520px] h-[90vh] md:h-screen bg-background md:border-l border-border shadow-lg flex flex-col rounded-t-2xl md:rounded-none overflow-hidden"
             >
-              {/* ── Header ── */}
-              <div className="relative shrink-0 bg-card border-b border-border p-6 flex flex-col md:flex-row md:items-center gap-4">
+              {/* ── Hero Header ── */}
+              <div className="relative shrink-0 w-full bg-card border-b border-border">
                 {/* Close Button */}
                 <button
                   onClick={handleClose}
-                  className="absolute top-4 right-4 p-2 rounded-md bg-transparent hover:bg-muted text-muted-foreground transition-colors z-10"
+                  className="absolute top-4 right-4 p-2 rounded-full bg-background/50 backdrop-blur-md text-foreground hover:bg-background/80 transition-colors z-20 shadow-sm"
                 >
                   <X className="w-5 h-5" />
                 </button>
 
-                <div className="flex items-center gap-4 w-full pt-4 md:pt-0">
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted flex items-center justify-center shrink-0">
-                    <MemberAvatar
-                      imageUrl={member?.imageUrl}
-                      firstName={member?.firstName}
-                      lastName={member?.lastName}
-                      gender={member?.gender}
-                      fallbackSize={32}
-                    />
-                  </div>
-
-                  <div className="flex-1 min-w-0 pr-8">
-                    {member && !isEditingMember && (
-                      <>
-                        <h2 className="text-xl font-semibold text-foreground truncate">
-                          {member.firstName} {member.lastName}
-                        </h2>
-                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-muted text-muted-foreground text-xs font-medium">
-                            Gen {memberGenIndex + 1} ·{' '}
-                            {getGenerationLabel(member.birthDate) ||
-                              memberGeneration?.name ||
-                              'Unknown'}
+                {member && !isEditingMember ? (
+                  <div className="flex flex-col">
+                    {/* Big Photo Area */}
+                    <div className="w-full h-64 md:h-72 relative bg-secondary/50">
+                      {member.imageUrl ? (
+                        <Image
+                          src={member.imageUrl}
+                          alt={`${member.firstName} ${member.lastName}`}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground/30">
+                          <span className="text-7xl font-medium tracking-tight">
+                            {member.firstName?.charAt(0)}{member.lastName?.charAt(0)}
                           </span>
-                          {member.deathDate && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-muted text-muted-foreground text-xs font-medium">
-                              🕊 In Loving Memory
-                            </span>
-                          )}
-                          {age !== null && (
-                            <span className="text-xs text-muted-foreground">
-                              {member.deathDate
-                                ? `Age at Passing ${age} years`
-                                : `${age} years old`}
-                            </span>
-                          )}
                         </div>
-                      </>
-                    )}
-                    {isEditingMember && (
-                      <h2 className="text-xl font-semibold text-foreground">
-                        {member ? 'Edit Member' : 'Add New Member'}
-                      </h2>
-                    )}
-                  </div>
-
-                  {/* Action Buttons */}
-                  {!isEditingMember && member && !readOnly && (
-                    <div className="flex gap-2 shrink-0">
-                      <button
-                        onClick={() => setIsEditingMember(true)}
-                        className="p-2 rounded-md bg-muted text-muted-foreground hover:bg-muted/80 transition-colors shadow-sm"
-                        aria-label="Edit member"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => setIsDeleteDialogOpen(true)}
-                        className="p-2 rounded-md bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors shadow-sm"
-                        aria-label="Delete member"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      )}
+                      
+                      {/* Gradient overlay for text contrast */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+                      
+                      {/* Action Buttons overlay */}
+                      {!readOnly && (
+                        <div className="absolute bottom-4 right-4 flex gap-2 z-20">
+                          <button
+                            onClick={() => setIsEditingMember(true)}
+                            className="p-2.5 rounded-full bg-background/50 backdrop-blur-md text-foreground hover:bg-background/80 transition-colors shadow-sm"
+                            aria-label="Edit member"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => setIsDeleteDialogOpen(true)}
+                            className="p-2.5 rounded-full bg-background/50 backdrop-blur-md text-destructive hover:bg-destructive/20 transition-colors shadow-sm"
+                            aria-label="Delete member"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+
+                    {/* Member Name & Meta (overlapping/just below) */}
+                    <div className="px-6 pb-6 pt-2 relative z-10 -mt-12">
+                      <h2 className="text-3xl font-semibold text-foreground truncate drop-shadow-sm">
+                        {member.firstName} {member.lastName}
+                      </h2>
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-background border border-border text-muted-foreground text-xs font-medium shadow-sm">
+                          Gen {memberGenIndex + 1} ·{' '}
+                          {getGenerationLabel(member.birthDate) || memberGeneration?.name || 'Unknown'}
+                        </span>
+                        {member.deathDate && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-background border border-border text-muted-foreground text-xs font-medium shadow-sm">
+                            🕊 In Loving Memory
+                          </span>
+                        )}
+                        {age !== null && (
+                          <span className="text-xs text-muted-foreground ml-1">
+                            {member.deathDate ? `Passed at ${age}` : `${age} years old`}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-6 pt-16">
+                    <h2 className="text-2xl font-semibold text-foreground">
+                      {isEditingMember && member ? 'Edit Member' : 'Add New Member'}
+                    </h2>
+                  </div>
+                )}
               </div>
 
               {/* ── Scrollable Content ── */}

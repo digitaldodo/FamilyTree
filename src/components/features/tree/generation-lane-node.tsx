@@ -20,15 +20,17 @@ function GenerationLaneNodeComponent({ data }: GenerationLaneNodeProps) {
       style={{
         width: data.width,
         height: data.height,
-        background: data.isEven ? 'var(--muted)' : 'transparent',
-        opacity: 0.1,
+        backgroundColor: data.isEven ? 'var(--color-muted)' : 'transparent',
       }}
     >
-      <div className="absolute top-8 left-12 px-3 py-1 rounded-md text-xs border border-border bg-card flex items-center justify-center shadow-sm">
-        <span className="font-medium tracking-wide text-foreground">
+      <div className="absolute top-12 left-16 px-4 py-1.5 rounded-full text-xs border border-border bg-card/80 backdrop-blur-md shadow-sm opacity-80 flex items-center justify-center">
+        <span className="font-semibold tracking-wider text-muted-foreground uppercase">
           {data.label}
         </span>
       </div>
+      
+      {/* Subtle dashed line separator between generations */}
+      <div className="absolute bottom-0 left-0 right-0 h-px border-b border-dashed border-border/40" />
     </motion.div>
   );
 }

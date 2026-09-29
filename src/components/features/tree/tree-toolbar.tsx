@@ -76,43 +76,46 @@ export function TreeToolbar({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+      {/* Primary & Secondary Actions */}
       {!readOnly && (
-        <>
+        <div className="flex items-center gap-2 bg-card/80 backdrop-blur-md p-1.5 rounded-xl border border-border shadow-sm">
           <Button
-            className="rounded-md shadow-sm h-10 px-3 sm:px-4"
+            className="rounded-lg h-9 px-4 shadow-sm"
             onClick={handleAdd}
             title="Add Member"
           >
-            <Plus className="h-4 w-4 mr-0 sm:mr-2" />
-            <span className="hidden sm:inline">Add Member</span>
+            <Plus className="h-4 w-4 mr-2" />
+            <span className="font-medium">Add Member</span>
           </Button>
+
+          <div className="h-5 w-px bg-border/80 mx-1" />
 
           <ShareTreeButton treeId={resolvedTreeId} isPublic={isPublic} />
 
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
-            className="rounded-md h-10 w-10 bg-card"
+            className="rounded-lg h-9 w-9 hover:bg-muted"
             onClick={handleRepair}
             disabled={repairMutation.isPending}
-            title="Settings / Repair Relationships"
+            title="Repair Relationships"
           >
             {repairMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             ) : (
               <Wrench className="h-4 w-4 text-muted-foreground" />
             )}
           </Button>
-          <div className="h-6 w-px bg-border/50 mx-1 hidden sm:block" />
-        </>
+        </div>
       )}
 
-      <div className="flex items-center gap-1 p-1 bg-card border border-border rounded-md shadow-sm">
+      {/* Navigation / View Actions */}
+      <div className="flex items-center gap-1 p-1.5 bg-card/80 backdrop-blur-md border border-border rounded-xl shadow-sm">
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-md h-8 w-8 hover:bg-muted"
+          className="rounded-lg h-8 w-8 hover:bg-muted"
           onClick={() => zoomIn({ duration: 300 })}
           title="Zoom In"
         >
@@ -121,17 +124,17 @@ export function TreeToolbar({
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-md h-8 w-8 hover:bg-muted"
+          className="rounded-lg h-8 w-8 hover:bg-muted"
           onClick={() => zoomOut({ duration: 300 })}
           title="Zoom Out"
         >
           <ZoomOut className="h-4 w-4 text-muted-foreground" />
         </Button>
-        <div className="h-4 w-px bg-border/50 mx-0.5" />
+        <div className="h-4 w-px bg-border/80 mx-0.5" />
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-md h-8 w-8 hover:bg-muted"
+          className="rounded-lg h-8 w-8 hover:bg-muted"
           onClick={() => fitView({ duration: 500, padding: 0.2, maxZoom: 1 })}
           title="Fit View"
         >

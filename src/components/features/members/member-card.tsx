@@ -6,7 +6,12 @@ import { useAppStore } from '@/store/use-app-store';
 import { useGenerations } from '@/hooks/use-generations';
 import { format } from 'date-fns';
 import { MemberAvatar } from './member-avatar';
-import { Dropdown } from '@/components/ui/dropdown';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -109,41 +114,40 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
         className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
         onClick={(e) => e.stopPropagation()}
       >
-        <Dropdown
-          trigger={
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 w-7 p-0 bg-background/50 hover:bg-background/80 backdrop-blur-sm rounded-full"
+              className="h-7 w-7 p-0 bg-background/50 hover:bg-background/80 backdrop-blur-sm rounded-full focus-visible:ring-1 focus-visible:ring-ring"
             >
               <MoreVertical className="h-4 w-4" />
             </Button>
-          }
-        >
-          <div className="flex flex-col text-sm w-40">
-            <button
-              className="flex items-center w-full px-4 py-2 text-left hover:bg-muted"
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40 z-50">
+            <DropdownMenuItem
+              className="cursor-pointer py-2"
               onClick={(e) => {
                 e.stopPropagation();
                 handleClick();
               }}
             >
               <Eye className="w-4 h-4 mr-2" /> View
-            </button>
-            <button
-              className="flex items-center w-full px-4 py-2 text-left hover:bg-muted"
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer py-2"
               onClick={handleEdit}
             >
               <Pencil className="w-4 h-4 mr-2" /> Edit
-            </button>
-            <button
-              className="flex items-center w-full px-4 py-2 text-left text-destructive hover:bg-muted"
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer py-2 text-destructive focus:bg-destructive focus:text-destructive-foreground"
               onClick={handleDelete}
             >
               <Trash2 className="w-4 h-4 mr-2" /> Delete
-            </button>
-          </div>
-        </Dropdown>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <CardContent className="p-0 flex flex-col h-full">
         <div className="relative w-full flex-grow shrink bg-muted overflow-hidden">

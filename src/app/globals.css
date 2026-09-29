@@ -23,56 +23,77 @@
   --color-border: var(--color-border);
   --color-input: var(--color-input);
   --color-ring: var(--color-ring);
+  --color-tree-connector: var(--color-tree-connector);
+  --color-tree-connector-active: var(--color-tree-connector-active);
+  --color-tree-spouse: var(--color-tree-spouse);
+  --color-tree-spouse-active: var(--color-tree-spouse-active);
+  --color-tree-junction: var(--color-tree-junction);
+  --color-tree-glow: var(--color-tree-glow);
+  --radius-xl: 0.75rem;
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 }
 
 :root {
-  --color-background: #ffffff;
-  --color-foreground: #09090b;
+  /* Warm, refined editorial parchment palette for light mode */
+  --color-background: #fbfbfa;
+  --color-foreground: #18181b;
   --color-card: #ffffff;
-  --color-card-foreground: #09090b;
+  --color-card-foreground: #18181b;
   --color-popover: #ffffff;
-  --color-popover-foreground: #09090b;
-  /* Sophisticated neutral/dark primary instead of generic indigo */
-  --color-primary: #18181b; 
+  --color-popover-foreground: #18181b;
+  --color-primary: #18181b;
   --color-primary-foreground: #ffffff;
-  --color-secondary: #f4f4f5;
+  --color-secondary: #f4f3ef;
   --color-secondary-foreground: #18181b;
-  --color-muted: #f4f4f5;
+  --color-muted: #f4f3ef;
   --color-muted-foreground: #71717a;
-  --color-accent: #f4f4f5;
+  --color-accent: #eceae3;
   --color-accent-foreground: #18181b;
-  --color-destructive: #ef4444;
+  --color-destructive: #dc2626;
   --color-destructive-foreground: #ffffff;
-  --color-border: #e4e4e7;
-  --color-input: #e4e4e7;
+  --color-border: #e6e4dc;
+  --color-input: #e6e4dc;
   --color-ring: #18181b;
-  /* Tighter, professional border radius */
+  /* Core Tree Relationship Connectors (Light Mode - high contrast, warm slate/neutral) */
+  --color-tree-connector: #6b6963;
+  --color-tree-connector-active: #18181b;
+  --color-tree-spouse: #b45309;
+  --color-tree-spouse-active: #78350f;
+  --color-tree-junction: #44403c;
+  --color-tree-glow: rgba(24, 24, 27, 0.16);
   --radius: 0.5rem;
 }
 
 .dark {
-  --color-background: #09090b;
-  --color-foreground: #fafafa;
-  --color-card: #09090b;
-  --color-card-foreground: #fafafa;
-  --color-popover: #09090b;
-  --color-popover-foreground: #fafafa;
-  --color-primary: #fafafa;
-  --color-primary-foreground: #18181b;
-  --color-secondary: #27272a;
-  --color-secondary-foreground: #fafafa;
-  --color-muted: #27272a;
+  /* Deep warm obsidian palette for dark mode */
+  --color-background: #0d0d10;
+  --color-foreground: #f4f4f5;
+  --color-card: #141418;
+  --color-card-foreground: #f4f4f5;
+  --color-popover: #141418;
+  --color-popover-foreground: #f4f4f5;
+  --color-primary: #f4f4f5;
+  --color-primary-foreground: #111114;
+  --color-secondary: #1c1c21;
+  --color-secondary-foreground: #f4f4f5;
+  --color-muted: #1c1c21;
   --color-muted-foreground: #a1a1aa;
-  --color-accent: #27272a;
-  --color-accent-foreground: #fafafa;
-  --color-destructive: #7f1d1d;
-  --color-destructive-foreground: #fafafa;
-  --color-border: #27272a;
-  --color-input: #27272a;
+  --color-accent: #25252b;
+  --color-accent-foreground: #f4f4f5;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #27272d;
+  --color-input: #27272d;
   --color-ring: #d4d4d8;
+  /* Core Tree Relationship Connectors (Dark Mode - high visibility against dark background) */
+  --color-tree-connector: #d4d4d8; /* Zinc-300 for higher visibility */
+  --color-tree-connector-active: #ffffff;
+  --color-tree-spouse: #fca5a5; /* Red-300 for higher visibility */
+  --color-tree-spouse-active: #fecaca;
+  --color-tree-junction: #e4e4e7;
+  --color-tree-glow: rgba(255, 255, 255, 0.3);
 }
 
 @layer base {
@@ -83,16 +104,22 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-primary;
+    @apply bg-background text-foreground font-sans antialiased selection:bg-primary/10 selection:text-primary;
   }
   h1 {
-    @apply text-2xl font-semibold tracking-tight;
+    @apply text-2xl font-semibold tracking-tight text-foreground;
   }
   h2 {
-    @apply text-xl font-semibold tracking-tight;
+    @apply text-xl font-semibold tracking-tight text-foreground;
   }
   h3 {
-    @apply text-lg font-medium tracking-tight;
+    @apply text-lg font-medium tracking-tight text-foreground;
+  }
+  h4 {
+    @apply text-base font-medium tracking-tight text-foreground;
+  }
+  p {
+    @apply leading-relaxed;
   }
 }
 
@@ -105,6 +132,20 @@
   .safe-area-top {
     padding-top: env(safe-area-inset-top);
   }
+
+  /* Typography primitives */
+  .text-meta {
+    @apply text-xs text-muted-foreground tracking-normal font-normal;
+  }
+
+  .text-caption {
+    @apply text-[11px] text-muted-foreground uppercase tracking-wider font-medium;
+  }
+
+  /* Refined focus ring helper */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 ring-offset-background;
+  }
 }
 
 /* Custom Scrollbar */
@@ -116,18 +157,18 @@
   @apply bg-transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-muted-foreground/30 rounded-full hover:bg-muted-foreground/50 transition-colors;
+  @apply bg-muted-foreground/25 rounded-full hover:bg-muted-foreground/40 transition-colors;
 }
 
-/* React Flow Custom Overrides */
+/* React Flow Overrides */
 .react-flow__controls-button {
-  @apply bg-background border-border fill-foreground hover:bg-muted transition-colors rounded-md;
+  @apply bg-card border-border fill-foreground hover:bg-accent transition-colors rounded-md;
 }
 .react-flow__minimap {
-  @apply bg-background border border-border rounded-lg shadow-sm;
+  @apply bg-card border border-border rounded-lg shadow-sm;
 }
 .react-flow__minimap-mask {
-  @apply fill-primary/5;
+  @apply fill-foreground/5;
 }
 
 /* Member Modal Scrollbar */
