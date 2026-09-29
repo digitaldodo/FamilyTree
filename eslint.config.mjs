@@ -21,6 +21,11 @@ const eslintConfig = defineConfig([
     "scripts/**",
   ]),
   {
+    settings: {
+      react: {
+        version: "19.2.4",
+      },
+    },
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
       "react-hooks/exhaustive-deps": "off",
