@@ -24,18 +24,30 @@ export default function TimelinePage() {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  
+  // selectedMemory is used for viewing/editing an existing memory
   const [selectedMemory, setSelectedMemory] = useState<any>(null);
+  
+  // prefillData is used for creating a new memory from a context (e.g. Birth event)
+  const [prefillData, setPrefillData] = useState<any>(null);
 
   const isLoading = isLoadingMembers || isLoadingMemories || isLoadingTrees;
   const canEdit = !isReadOnly;
 
   const events = useMemo(() => {
     const timelineEvents: TimelineEventProps['event'][] = [];
+    const safeMemories = Array.isArray(memories) ? memories : [];
     
     // Add member life events
     if (members) {
       members.forEach((member: any) => {
         if (member.birthDate) {
+          const birthDateStr = new Date(member.birthDate).toDateString();
+          const associatedMemories = safeMemories.filter(m => 
+            new Date(m.date).toDateString() === birthDateStr && 
+            m.members?.some((mem: any) => mem.member.id === member.id)
+          );
+
           timelineEvents.push({
             id: `birth-${member.id}`,
             title: `${member.firstName} ${member.lastName} was born`,
@@ -48,11 +60,18 @@ export default function TimelinePage() {
               id: member.id,
               name: `${member.firstName} ${member.lastName}`,
               imageUrl: member.imageUrl
-            }]
+            }],
+            associatedMemories
           });
         }
 
         if (member.deathDate) {
+          const deathDateStr = new Date(member.deathDate).toDateString();
+          const associatedMemories = safeMemories.filter(m => 
+            new Date(m.date).toDateString() === deathDateStr && 
+            m.members?.some((mem: any) => mem.member.id === member.id)
+          );
+
           timelineEvents.push({
             id: `death-${member.id}`,
             title: `${member.firstName} ${member.lastName} passed away`,
@@ -63,7 +82,8 @@ export default function TimelinePage() {
               id: member.id,
               name: `${member.firstName} ${member.lastName}`,
               imageUrl: member.imageUrl
-            }]
+            }],
+            associatedMemories
           });
         }
 
@@ -106,8 +126,8 @@ export default function TimelinePage() {
     }
 
     // Add user-created memories
-    if (memories) {
-      memories.forEach((memory: any) => {
+    if (safeMemories.length > 0) {
+      safeMemories.forEach((memory: any) => {
         timelineEvents.push({
           id: `memory-${memory.id}`,
           title: memory.title,
@@ -137,6 +157,16 @@ export default function TimelinePage() {
     }
   };
 
+  const handleContextualAddMemory = (event: any) => {
+    setPrefillData({
+      title: event.type === 'BIRTH' ? `${event.members[0].name}'s Birth` : event.type === 'DEATH' ? `In Memory of ${event.members[0].name}` : '',
+      date: event.date,
+      members: event.members?.map((m: any) => ({ memberId: m.id })) || []
+    });
+    setSelectedMemory(null);
+    setIsFormOpen(true);
+  };
+
   const handleCreateMemory = async (data: any) => {
     await createMemory(data);
   };
@@ -154,6 +184,7 @@ export default function TimelinePage() {
 
   const handleEditMemory = (memory: any) => {
     setSelectedMemory(memory);
+    setPrefillData(null);
     setIsFormOpen(true);
   };
 
@@ -171,7 +202,8 @@ export default function TimelinePage() {
       <FamilyTimeline 
         events={events} 
         onEventClick={handleEventClick}
-        onAddMemory={() => { setSelectedMemory(null); setIsFormOpen(true); }}
+        onAddMemory={() => { setSelectedMemory(null); setPrefillData(null); setIsFormOpen(true); }}
+        onAddContextualMemory={handleContextualAddMemory}
         familyName={familyName}
         canEdit={canEdit}
       />
@@ -179,9 +211,9 @@ export default function TimelinePage() {
       {canEdit && (
         <MemoryFormModal
           isOpen={isFormOpen}
-          onClose={() => { setIsFormOpen(false); setSelectedMemory(null); }}
+          onClose={() => { setIsFormOpen(false); setSelectedMemory(null); setPrefillData(null); }}
           onSubmit={selectedMemory ? handleUpdateMemory : handleCreateMemory}
-          initialData={selectedMemory}
+          initialData={selectedMemory || prefillData}
         />
       )}
 
