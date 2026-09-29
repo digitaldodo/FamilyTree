@@ -63,9 +63,9 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
           {member.coverImage && (
             <Image src={member.coverImage} alt="" fill className="w-full h-full object-cover" unoptimized />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-          <div className="absolute bottom-3 left-4 right-4 flex items-end gap-3">
-          <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border-3 border-white/90 dark:border-zinc-800 overflow-hidden bg-muted flex items-center justify-center shadow-lg shrink-0 relative">
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute bottom-3 left-4 right-4 flex items-end gap-3 z-10">
+          <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border-3 border-background overflow-hidden bg-muted flex items-center justify-center shadow-lg shrink-0 relative">
             <MemberAvatar 
               imageUrl={member.imageUrl} 
               firstName={member.firstName} 
@@ -75,23 +75,23 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
             />
           </div>
           <div className="flex-1 min-w-0 pb-0.5">
-            <h2 className="text-lg sm:text-xl font-bold text-white truncate leading-tight">
+            <h2 className="text-lg sm:text-xl font-bold text-primary-foreground truncate leading-tight">
               {member.firstName} {member.lastName}
             </h2>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-xs font-medium text-white/90">
-                {generations.find(g => g.id === member.generationId)?.name || 'Unnamed Generation'}
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 backdrop-blur-sm text-xs font-medium text-primary-foreground">
+                {generations.find((g: any) => g.id === member.generationId)?.name || 'Unnamed Generation'}
               </span>
               {member.deathDate && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900/40 backdrop-blur-sm text-xs font-medium text-white/90">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary/80 backdrop-blur-sm text-xs font-medium text-secondary-foreground">
                   🕊 In Loving Memory
                 </span>
               )}
               {member.occupation && (
-                <span className="text-xs text-white/70 truncate">{member.occupation}</span>
+                <span className="text-xs text-primary-foreground/70 truncate">{member.occupation}</span>
               )}
               {age !== null && (
-                <span className="text-xs text-white/70">
+                <span className="text-xs text-primary-foreground/70">
                   {member.deathDate ? `Age at Passing ${age} years` : `${age} years old`}
                 </span>
               )}
@@ -147,27 +147,27 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">Family</h4>
             <div className="flex flex-wrap gap-2">
               {parents.map((r: any) => {
-                const p = members.find(m => m.id === r.fromId);
+                const p = members.find((m: any) => m.id === r.fromId);
                 return p && (
-                  <span key={r.id} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs font-medium border border-blue-200/50 dark:border-blue-800/30 hover:bg-blue-100 dark:hover:bg-blue-950/50 transition-colors cursor-default">
+                  <span key={r.id} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20 hover:bg-primary/20 transition-colors cursor-default">
                     <Users className="w-3 h-3" />
                     Parent: {p.firstName}
                   </span>
                 );
               })}
               {spouses.map((r: any) => {
-                const s = members.find(m => m.id === r.toId);
+                const s = members.find((m: any) => m.id === r.toId);
                 return s && (
-                  <span key={r.id} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 text-xs font-medium border border-rose-200/50 dark:border-rose-800/30 hover:bg-rose-100 dark:hover:bg-rose-950/50 transition-colors cursor-default">
+                  <span key={r.id} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/10 text-accent text-xs font-medium border border-accent/20 hover:bg-accent/20 transition-colors cursor-default">
                     <Heart className="w-3 h-3" />
                     Spouse: {s.firstName}
                   </span>
                 );
               })}
               {children.map((r: any) => {
-                const c = members.find(m => m.id === r.toId);
+                const c = members.find((m: any) => m.id === r.toId);
                 return c && (
-                  <span key={r.id} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 text-xs font-medium border border-emerald-200/50 dark:border-emerald-800/30 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors cursor-default">
+                  <span key={r.id} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-xs font-medium border border-border hover:bg-secondary/80 transition-colors cursor-default">
                     <Users className="w-3 h-3" />
                     Child: {c.firstName}
                   </span>
@@ -175,9 +175,9 @@ function PublicMemberModal({ member, members, generations, isOpen, onClose }: { 
               })}
               {siblings.map((r: any) => {
                 const sibId = r.fromId === member.id ? r.toId : r.fromId;
-                const sib = members.find(m => m.id === sibId);
+                const sib = members.find((m: any) => m.id === sibId);
                 return sib && (
-                  <span key={r.id} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 text-xs font-medium border border-amber-200/50 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors cursor-default">
+                  <span key={r.id} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-xs font-medium border border-border hover:bg-muted/80 transition-colors cursor-default">
                     <Users className="w-3 h-3" />
                     Sibling: {sib.firstName}
                   </span>

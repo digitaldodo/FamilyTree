@@ -48,11 +48,11 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
   if (isMemory) {
     cardClass += "hover:shadow-md hover:border-primary/40 cursor-pointer group ";
   } else if (isDeath) {
-    cardClass += "bg-zinc-50/80 dark:bg-zinc-900/40 border-zinc-200/60 dark:border-zinc-800/60 ";
+    cardClass += "bg-muted border-border/60 ";
   } else if (isBirth) {
-    cardClass += "bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-100/60 dark:border-emerald-900/40 ";
+    cardClass += "bg-primary/5 border-primary/20 ";
   } else if (isMarriage) {
-    cardClass += "bg-rose-50/30 dark:bg-rose-950/10 border-rose-100/50 dark:border-rose-900/30 ";
+    cardClass += "bg-accent/5 border-accent/20 ";
   }
 
   // MEMORY LAYOUT
@@ -174,10 +174,10 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
               firstName={primaryMember.name.split(' ')[0]}
               lastName={primaryMember.name.split(' ')[1] || ''}
               fallbackSize={24}
-              className={`w-12 h-12 sm:w-16 sm:h-16 shadow-sm border-2 ${isDeath ? 'border-zinc-200 dark:border-zinc-700 grayscale' : 'border-background'}`}
+              className={`w-12 h-12 sm:w-16 sm:h-16 shadow-sm border-2 ${isDeath ? 'border-muted-foreground grayscale' : 'border-background'}`}
             />
             <div className="sm:hidden flex flex-col">
-              <div className={`font-semibold text-[15px] ${isDeath ? 'text-zinc-700 dark:text-zinc-300' : 'text-foreground'}`}>
+              <div className={`font-semibold text-[15px] ${isDeath ? 'text-muted-foreground' : 'text-foreground'}`}>
                 {primaryMember.name}
               </div>
               {event.description && (
@@ -213,7 +213,7 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
           {/* Desktop Name/Context Header (Hidden on small screens where avatar handles it) */}
           {primaryMember && !isMarriage && (
             <div className="hidden sm:block mb-1">
-              <div className={`font-semibold text-[15px] ${isDeath ? 'text-zinc-700 dark:text-zinc-300' : 'text-foreground'}`}>
+              <div className={`font-semibold text-[15px] ${isDeath ? 'text-muted-foreground' : 'text-foreground'}`}>
                 {primaryMember.name}
               </div>
               {event.description && (
@@ -223,10 +223,10 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
           )}
 
           <div className="mt-1 sm:mt-1.5">
-            <h4 className={`text-xl sm:text-2xl font-serif font-medium leading-snug ${isDeath ? 'text-zinc-800 dark:text-zinc-200' : 'text-foreground'}`}>
+            <h4 className={`text-xl sm:text-2xl font-serif font-medium leading-snug ${isDeath ? 'text-muted-foreground' : 'text-foreground'}`}>
               {event.title}
             </h4>
-            <div className={`text-xs sm:text-sm font-medium tracking-wide uppercase mt-1.5 ${isDeath ? 'text-zinc-500' : 'text-muted-foreground'}`}>
+            <div className={`text-xs sm:text-sm font-medium tracking-wide uppercase mt-1.5 text-muted-foreground`}>
               {format(event.date, 'MMMM d, yyyy')}
             </div>
           </div>
@@ -240,7 +240,7 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
                   return (
                     <div key={mem.id || i} className="w-7 h-7 sm:w-8 sm:h-8 rounded bg-muted border-2 border-background overflow-hidden relative shadow-sm z-10">
                       {hasCover ? (
-                        <Image src={mem.media[0].url} alt="Memory" fill className="object-cover" />
+                         <Image src={mem.media[0].url} alt="Memory" fill className="object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary">
                           <Camera className="w-3 h-3" />
@@ -268,8 +268,8 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
                 variant="secondary" 
                 size="sm" 
                 className={`h-8 rounded-full px-3 text-xs shadow-none ${
-                  isDeath ? 'bg-zinc-200/50 hover:bg-zinc-200 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300' 
-                  : isBirth ? 'bg-emerald-100/50 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300'
+                  isDeath ? 'bg-muted hover:bg-muted/80 text-muted-foreground' 
+                  : isBirth ? 'bg-primary/10 hover:bg-primary/20 text-primary'
                   : 'bg-muted/60 hover:bg-muted'
                 }`}
               >

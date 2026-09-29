@@ -4,13 +4,13 @@ import { Panel } from '@xyflow/react';
 import { useMembers } from '@/hooks/use-members';
 
 const GENERATION_COLORS = [
-  'bg-amber-500',
-  'bg-indigo-500',
-  'bg-emerald-500',
-  'bg-rose-500',
-  'bg-cyan-500',
   'bg-primary',
-  'bg-orange-500',
+  'bg-accent',
+  'bg-secondary',
+  'bg-muted-foreground',
+  'bg-foreground',
+  'bg-border',
+  'bg-destructive',
 ];
 
 export function GenerationLegend() {

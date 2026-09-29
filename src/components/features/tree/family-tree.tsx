@@ -172,7 +172,7 @@ function FamilyTreeCanvas() {
                   </div>
                 )}
                 {!hasConflict && pendingChanges.length > 0 && (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-500 text-sm font-medium rounded-full border border-amber-500/20 shadow-sm">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 text-accent text-sm font-medium rounded-full border border-accent/20 shadow-sm">
                     <SaveAll className="w-4 h-4" />
                     <span>{pendingChanges.length} Pending</span>
                   </div>

@@ -129,7 +129,7 @@ function DashboardContent() {
       
       {/* 1. FAMILY INTRO / HERO */}
       <section className="flex flex-col items-center md:items-start text-center md:text-left pt-8 pb-4">
-        <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground mb-4">
+        <h1 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight text-foreground mb-4">
           {familyName}
         </h1>
         <p className="text-xl text-muted-foreground mb-8 max-w-2xl leading-relaxed">
@@ -173,7 +173,7 @@ function DashboardContent() {
           {/* MEMORIES HIGHLIGHT */}
           <section>
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-semibold tracking-tight">Recent Memories</h2>
+              <h2 className="text-2xl font-serif font-semibold tracking-tight">Recent Memories</h2>
               <Link href="/dashboard/timeline">
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                   View timeline
@@ -248,7 +248,7 @@ function DashboardContent() {
           {/* FAMILY TREE PREVIEW */}
           <section>
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-semibold tracking-tight">The Family Tree</h2>
+              <h2 className="text-2xl font-serif font-semibold tracking-tight">The Family Tree</h2>
             </div>
             <div className="relative rounded-3xl bg-secondary/30 border border-border h-80 overflow-hidden flex items-center justify-center group cursor-pointer transition-colors hover:bg-secondary/50 shadow-inner">
               <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary via-background/0 to-background/0 pointer-events-none" />
@@ -275,7 +275,7 @@ function DashboardContent() {
           {/* PEOPLE / PORTRAIT STRIP */}
           {featuredMembers.length > 0 && (
             <section>
-              <h2 className="text-lg font-semibold tracking-tight mb-4">Your Family</h2>
+              <h2 className="text-lg font-serif font-semibold tracking-tight mb-4">Your Family</h2>
               <div className="flex flex-wrap gap-2">
                 {featuredMembers.map((member) => (
                   <Link key={member.id} href={`/members`}>
@@ -305,7 +305,7 @@ function DashboardContent() {
           <section className="bg-card rounded-3xl p-6 border border-border shadow-sm">
             <div className="flex items-center gap-2 mb-6">
               <Calendar className="w-5 h-5 text-muted-foreground" />
-              <h2 className="text-lg font-semibold tracking-tight">Upcoming Dates</h2>
+              <h2 className="text-lg font-serif font-semibold tracking-tight">Upcoming Dates</h2>
             </div>
             
             {upcomingBirthdays.length > 0 ? (
@@ -345,7 +345,7 @@ function DashboardContent() {
           <section className="bg-card rounded-3xl p-6 border border-border shadow-sm">
             <div className="flex items-center gap-2 mb-6">
               <Clock className="w-5 h-5 text-muted-foreground" />
-              <h2 className="text-lg font-semibold tracking-tight">Recent Activity</h2>
+              <h2 className="text-lg font-serif font-semibold tracking-tight">Recent Activity</h2>
             </div>
 
             {timelinePreviewEvents.length > 0 ? (

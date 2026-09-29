@@ -46,7 +46,7 @@ export default function TreePage() {
   return (
     <div className="absolute inset-0 w-full h-full bg-background">
       {selectedTreeVersionId && (
-        <div className="absolute bottom-6 right-6 z-50 bg-yellow-500/10 text-yellow-600 px-4 py-2 rounded-xl border border-yellow-500/20 text-sm font-medium shadow-lg backdrop-blur-md">
+        <div className="absolute bottom-6 right-6 z-50 bg-accent/10 text-accent px-4 py-2 rounded-xl border border-accent/20 text-sm font-medium shadow-lg backdrop-blur-md">
           Viewing Historical Version (Read-only)
         </div>
       )}

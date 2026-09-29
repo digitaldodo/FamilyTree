@@ -39,7 +39,7 @@ export function MemoryCard({
   return (
     <div
       className={cn(
-        'relative group rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 break-inside-avoid',
+        'relative group rounded-lg overflow-hidden bg-card break-inside-avoid',
         compact ? 'h-full w-full' : ''
       )}
       onMouseEnter={() => setIsHovered(true)}

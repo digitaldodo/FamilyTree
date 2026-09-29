@@ -16,28 +16,10 @@ interface MemberAvatarProps {
   fallbackSize?: number;
 }
 
-const colorVariants = [
-  'bg-indigo-500/10 text-indigo-600',
-  'bg-emerald-500/10 text-emerald-600',
-  'bg-rose-500/10 text-rose-600',
-  'bg-slate-500/10 text-slate-600',
-  'bg-violet-500/10 text-violet-600',
-];
-
-function hashName(name: string) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i += 1) {
-    hash = (hash << 5) - hash + name.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash);
-}
-
 export function MemberAvatar({
   imageUrl,
   firstName,
   lastName,
-  gender,
   className,
   iconClassName,
   fallbackSize = 24,
@@ -56,28 +38,16 @@ export function MemberAvatar({
   }, [firstName, lastName]);
 
   const initials = useMemo(() => {
-    if (!fullName) return '??';
+    if (!fullName) return '';
     const parts = fullName.split(' ');
     return parts.length > 1
       ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
       : parts[0].slice(0, 2).toUpperCase();
   }, [fullName]);
 
-  const fallbackClasses = useMemo(() => {
-    const idx = hashName(fullName || 'member') % colorVariants.length;
-    return colorVariants[idx];
-  }, [fullName]);
-
-  const genderColor =
-    gender === 'MALE'
-      ? 'text-blue-500'
-      : gender === 'FEMALE'
-        ? 'text-pink-500'
-        : 'text-slate-500';
-
   if (imageUrl && !hasLoadError) {
     return (
-      <div className={cn('relative overflow-hidden rounded-full shrink-0 w-full h-full', className)}>
+      <div className={cn('relative overflow-hidden rounded-full shrink-0 w-full h-full bg-secondary', className)}>
         <Image
           src={imageUrl}
           alt={fullName || 'Member'}
@@ -94,14 +64,13 @@ export function MemberAvatar({
   return (
     <div
       className={cn(
-        'relative flex items-center justify-center rounded-full text-lg font-semibold tracking-wide shrink-0 w-full h-full',
-        fallbackClasses,
+        'relative flex items-center justify-center rounded-full text-lg font-semibold tracking-wide shrink-0 w-full h-full bg-secondary text-secondary-foreground border border-primary/10',
         className
       )}
     >
-      {initials || (
+      {initials ? initials : (
         <User2
-          className={cn(genderColor, iconClassName)}
+          className={cn("text-muted-foreground", iconClassName)}
           style={{ width: fallbackSize, height: fallbackSize }}
         />
       )}

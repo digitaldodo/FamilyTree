@@ -21,8 +21,8 @@ export function TreeListEmpty({ onCreateTree }: TreeListEmptyProps) {
 
       {/* Icon in gradient circle */}
       <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mb-8 ring-1 ring-primary/10">
-        <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-          <TreePine className="w-8 h-8 text-white" />
+        <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
+          <TreePine className="w-8 h-8" />
         </div>
       </div>
 

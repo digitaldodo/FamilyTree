@@ -198,12 +198,12 @@ export function ShareTreeButton({
                 <div className="flex items-center justify-between p-4 rounded-xl bg-muted/50 border border-border">
                   <div className="flex items-center gap-3">
                     {isPublic ? (
-                      <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                        <Globe className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Globe className="w-5 h-5 text-primary" />
                       </div>
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                        <Lock className="w-5 h-5 text-zinc-500" />
+                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                        <Lock className="w-5 h-5 text-muted-foreground" />
                       </div>
                     )}
                     <div>
@@ -217,7 +217,7 @@ export function ShareTreeButton({
                     onClick={() => toggleMutation.mutate(!isPublic)}
                     disabled={toggleMutation.isPending}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                      isPublic ? 'bg-emerald-500' : 'bg-zinc-300 dark:bg-zinc-600'
+                      isPublic ? 'bg-primary' : 'bg-muted-foreground/30'
                     } ${toggleMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${isPublic ? 'translate-x-6' : 'translate-x-1'}`} />
@@ -233,7 +233,7 @@ export function ShareTreeButton({
                         {shareUrl}
                       </div>
                       <Button variant="outline" size="sm" onClick={handleCopy} className="shrink-0 gap-1.5 h-10">
-                        {copied ? <><Check className="w-4 h-4 text-emerald-500" />Copied</> : <><Link2 className="w-4 h-4" />Copy Link</>}
+                        {copied ? <><Check className="w-4 h-4 text-primary" />Copied</> : <><Link2 className="w-4 h-4" />Copy Link</>}
                       </Button>
                     </div>
                   </div>
@@ -350,18 +350,18 @@ export function ShareTreeButton({
                 {activities.length === 0 ? (
                   <p className="text-sm text-muted-foreground italic">No recent activity.</p>
                 ) : (
-                  <div className="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                  <div className="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
                     {activities.map((activity: any) => (
                       <div key={activity.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-100 text-slate-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full border border-background bg-muted text-muted-foreground shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
                           {activity.type === 'VIEW' ? <Activity className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
                         </div>
                         <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border bg-card shadow-sm">
                           <div className="flex items-center justify-between space-x-2 mb-1">
-                            <div className="font-bold text-sm text-slate-900 dark:text-slate-100">{activity.user.name || activity.user.email}</div>
-                            <time className="text-xs font-medium text-emerald-500">{formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}</time>
+                            <div className="font-bold text-sm text-foreground">{activity.user.name || activity.user.email}</div>
+                            <time className="text-xs font-medium text-primary">{formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}</time>
                           </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                          <div className="text-xs text-muted-foreground">
                             {activity.type === 'VIEW' ? 'Viewed the tree' : `Performed ${activity.type} action`}
                           </div>
                         </div>

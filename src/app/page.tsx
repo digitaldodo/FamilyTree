@@ -178,22 +178,22 @@ export default function HomePage() {
                 <div className="w-full h-full bg-card rounded-2xl shadow-sm border border-border/50 p-6 flex flex-col">
                   <div className="w-full flex justify-between items-center mb-8 border-b border-border pb-4">
                     <div className="flex gap-2">
-                      <div className="w-3 h-3 rounded-full bg-border" />
-                      <div className="w-3 h-3 rounded-full bg-border" />
+                       <div className="w-3 h-3 rounded-full bg-border" />
+                       <div className="w-3 h-3 rounded-full bg-border" />
                     </div>
                     <div className="w-24 h-4 bg-muted rounded-full" />
                   </div>
                   <div className="flex-1 relative">
                     <div className="absolute inset-x-0 top-1/4 h-px bg-border" />
                     <div className="absolute inset-y-0 left-1/2 w-px bg-border" />
-                    <div className="absolute top-[25%] left-[20%] -translate-x-1/2 -translate-y-1/2 w-16 h-20 bg-muted rounded-xl border border-border" />
-                    <div className="absolute top-[25%] left-[80%] -translate-x-1/2 -translate-y-1/2 w-16 h-20 bg-muted rounded-xl border border-border" />
-                    <div className="absolute top-[75%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-16 h-20 bg-primary/10 rounded-xl border border-primary/20" />
+                    <div className="absolute top-[25%] left-[20%] -translate-x-1/2 -translate-y-1/2 w-16 h-20 bg-secondary rounded-xl border border-border" />
+                    <div className="absolute top-[25%] left-[80%] -translate-x-1/2 -translate-y-1/2 w-16 h-20 bg-secondary rounded-xl border border-border" />
+                    <div className="absolute top-[75%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-16 h-20 bg-primary/20 rounded-xl border border-primary/40" />
                   </div>
                 </div>
               </div>
               <div className="order-1 md:order-2 space-y-6">
-                <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center border border-border">
                   <GitMerge className="w-6 h-6 text-foreground" />
                 </div>
                 <h3 className="text-3xl md:text-4xl font-semibold">The Tree</h3>
@@ -206,7 +206,7 @@ export default function HomePage() {
             {/* Memories */}
             <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-center">
               <div className="space-y-6">
-                <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center border border-border">
                   <ImageIcon className="w-6 h-6 text-foreground" />
                 </div>
                 <h3 className="text-3xl md:text-4xl font-semibold">The Memories</h3>
@@ -225,10 +225,10 @@ export default function HomePage() {
                      <div className="w-2/3 h-4 bg-muted rounded" />
                    </div>
                    <div className="bg-card rounded-xl border border-border shadow-sm p-4 flex flex-col gap-4 justify-center items-center">
-                      <ImageIcon className="w-8 h-8 text-muted-foreground/30" />
+                      <ImageIcon className="w-8 h-8 text-muted-foreground/40" />
                    </div>
                    <div className="bg-card rounded-xl border border-border shadow-sm p-3">
-                     <div className="w-full h-full bg-primary/5 rounded-lg" />
+                     <div className="w-full h-full bg-accent/20 rounded-lg border border-accent/30" />
                    </div>
                 </div>
               </div>
@@ -241,7 +241,7 @@ export default function HomePage() {
                   {[1, 2, 3].map((i) => (
                     <div key={i} className="flex gap-4">
                       <div className="flex flex-col items-center">
-                        <div className="w-3 h-3 rounded-full bg-primary" />
+                        <div className={`w-3 h-3 rounded-full ${i === 2 ? 'bg-accent' : 'bg-primary'}`} />
                         {i !== 3 && <div className="w-px h-full bg-border my-2" />}
                       </div>
                       <div className="bg-card flex-1 rounded-xl p-4 border border-border shadow-sm pb-8">
@@ -253,7 +253,7 @@ export default function HomePage() {
                 </div>
               </div>
               <div className="order-1 md:order-2 space-y-6">
-                <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center border border-border">
                   <Calendar className="w-6 h-6 text-foreground" />
                 </div>
                 <h3 className="text-3xl md:text-4xl font-semibold">The Timeline</h3>
@@ -266,7 +266,7 @@ export default function HomePage() {
             {/* Collaboration */}
             <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-center">
               <div className="space-y-6">
-                <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center border border-border">
                   <Share2 className="w-6 h-6 text-foreground" />
                 </div>
                 <h3 className="text-3xl md:text-4xl font-semibold">Collaborate & Share</h3>
@@ -276,7 +276,7 @@ export default function HomePage() {
               </div>
               <div className="relative aspect-square bg-muted rounded-[2rem] p-8 border border-border shadow-sm flex items-center justify-center">
                  <div className="w-full h-full bg-card rounded-2xl border border-border shadow-sm p-6 flex flex-col">
-                   <div className="text-sm font-medium mb-4">Invite Family</div>
+                   <div className="text-sm font-medium mb-4 text-foreground">Invite Family</div>
                    <div className="flex gap-2 mb-6">
                      <div className="flex-1 h-10 bg-secondary rounded-lg border border-border" />
                      <div className="w-20 h-10 bg-primary rounded-lg" />
@@ -285,10 +285,10 @@ export default function HomePage() {
                      {[1, 2, 3].map((i) => (
                        <div key={i} className="flex items-center justify-between">
                          <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-full bg-muted" />
-                           <div className="w-24 h-4 bg-muted rounded" />
+                           <div className="w-8 h-8 rounded-full bg-secondary border border-border" />
+                           <div className="w-24 h-4 bg-secondary rounded" />
                          </div>
-                         <div className="w-16 h-4 bg-secondary rounded" />
+                         <div className="w-16 h-4 bg-muted rounded" />
                        </div>
                      ))}
                    </div>

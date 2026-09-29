@@ -40,10 +40,10 @@ function TreeMemberCardComponent({
     <div
       onClick={(e) => onClick?.(e, member.id)}
       className={cn(
-        'group relative flex flex-col w-full h-full rounded-2xl overflow-hidden bg-card border shadow-sm transition-all duration-300 cursor-pointer text-center hover:bg-card/90',
+        'group relative flex flex-col w-full h-full rounded-2xl overflow-hidden bg-card border border-border shadow-sm transition-all duration-300 cursor-pointer text-center hover:bg-card/90',
         isSelected
-          ? 'border-primary ring-1 ring-primary/30 shadow-md'
-          : 'border-border/60 hover:border-border/90 hover:shadow-md',
+          ? 'ring-2 ring-primary shadow-md'
+          : 'hover:shadow-md',
         className
       )}
     >

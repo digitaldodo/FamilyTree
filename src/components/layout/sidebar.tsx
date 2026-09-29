@@ -66,11 +66,11 @@ export function Sidebar() {
                 className={cn(
                   'flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-sm transition-colors cursor-pointer group',
                   isActive
-                    ? 'bg-accent text-accent-foreground font-medium'
+                    ? 'bg-primary text-primary-foreground font-medium'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
                 )}
               >
-                <Icon className={cn('h-4 w-4 shrink-0', isActive ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground')} />
+                <Icon className={cn('h-4 w-4 shrink-0', isActive ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-foreground')} />
                 {sidebarOpen && (
                   <span className="truncate tracking-tight">{item.name}</span>
                 )}

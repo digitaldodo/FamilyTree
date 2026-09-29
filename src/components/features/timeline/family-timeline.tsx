@@ -19,15 +19,15 @@ const getEventIcon = (type: TimelineEventType) => {
   switch (type) {
     case 'BIRTH':
     case 'CHILD_BORN':
-      return <Baby className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />;
+      return <Baby className="w-4 h-4 text-primary" />;
     case 'MARRIAGE':
-      return <Heart className="w-4 h-4 text-rose-600 dark:text-rose-400" />;
+      return <Heart className="w-4 h-4 text-accent" />;
     case 'DEATH':
-      return <Bird className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />;
+      return <Bird className="w-4 h-4 text-muted-foreground" />;
     case 'MEMORY':
-      return <Camera className="w-4 h-4 text-amber-600 dark:text-amber-400" />;
+      return <Camera className="w-4 h-4 text-accent" />;
     default:
-      return <Star className="w-4 h-4 text-sky-600 dark:text-sky-400" />;
+      return <Star className="w-4 h-4 text-primary" />;
   }
 };
 
@@ -35,15 +35,15 @@ const getEventBg = (type: TimelineEventType) => {
   switch (type) {
     case 'BIRTH':
     case 'CHILD_BORN':
-      return 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-900/50';
+      return 'bg-primary/10 border-primary/20';
     case 'MARRIAGE':
-      return 'bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-900/50';
+      return 'bg-accent/10 border-accent/20';
     case 'DEATH':
-      return 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800';
+      return 'bg-muted border-border';
     case 'MEMORY':
-      return 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-900/50';
+      return 'bg-accent/10 border-accent/20';
     default:
-      return 'bg-sky-50 dark:bg-sky-950/50 border-sky-200 dark:border-sky-900/50';
+      return 'bg-primary/10 border-primary/20';
   }
 };
 

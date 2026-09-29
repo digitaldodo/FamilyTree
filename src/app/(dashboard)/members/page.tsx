@@ -134,7 +134,7 @@ function MembersContent() {
     <div className="max-w-7xl mx-auto space-y-6 h-full flex flex-col pb-6">
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Family Members</h1>
+          <h1 className="text-3xl font-serif font-bold tracking-tight">Family Members</h1>
           <p className="text-muted-foreground mt-1">Your family tree, organized by generation.</p>
         </div>
         {hasEditAccess && (

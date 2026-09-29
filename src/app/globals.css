@@ -29,6 +29,19 @@
   --color-tree-spouse-active: var(--color-tree-spouse-active);
   --color-tree-junction: var(--color-tree-junction);
   --color-tree-glow: var(--color-tree-glow);
+  
+  /* Brand Design System Tokens */
+  --color-brand-primary: #123D2D;
+  --color-brand-deep: #09291F;
+  --color-brand-botanical: #285B40;
+  --color-brand-sage: #78936B;
+  --color-brand-gold: #D9A441;
+  --color-brand-gold-light: #F3D17A;
+  --color-brand-bronze: #936126;
+  --color-brand-brown: #4A2C1C;
+  --color-brand-ivory: #F7F2E7;
+  --color-brand-muted: #BDB7A9;
+
   --radius-xl: 0.75rem;
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
@@ -36,64 +49,82 @@
 }
 
 :root {
-  /* Warm, refined editorial parchment palette for light mode */
-  --color-background: #fbfbfa;
-  --color-foreground: #18181b;
-  --color-card: #ffffff;
-  --color-card-foreground: #18181b;
-  --color-popover: #ffffff;
-  --color-popover-foreground: #18181b;
-  --color-primary: #18181b;
-  --color-primary-foreground: #ffffff;
-  --color-secondary: #f4f3ef;
-  --color-secondary-foreground: #18181b;
-  --color-muted: #f4f3ef;
-  --color-muted-foreground: #71717a;
-  --color-accent: #eceae3;
-  --color-accent-foreground: #18181b;
+  /* Warm Ivory / Sage light theme */
+  --color-background: #F7F2E7;
+  --color-foreground: #09291F;
+  
+  --color-card: #FFFFFF;
+  --color-card-foreground: #09291F;
+  
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #09291F;
+  
+  --color-primary: #123D2D;
+  --color-primary-foreground: #F7F2E7;
+  
+  --color-secondary: #EBE5D9;
+  --color-secondary-foreground: #09291F;
+  
+  --color-muted: #EBE5D9;
+  --color-muted-foreground: #78936B;
+  
+  --color-accent: #D9A441;
+  --color-accent-foreground: #09291F;
+  
   --color-destructive: #dc2626;
   --color-destructive-foreground: #ffffff;
-  --color-border: #e6e4dc;
-  --color-input: #e6e4dc;
-  --color-ring: #18181b;
-  /* Core Tree Relationship Connectors (Light Mode - high contrast, warm slate/neutral) */
-  --color-tree-connector: #6b6963;
-  --color-tree-connector-active: #18181b;
-  --color-tree-spouse: #b45309;
-  --color-tree-spouse-active: #78350f;
-  --color-tree-junction: #44403c;
-  --color-tree-glow: rgba(24, 24, 27, 0.16);
+  
+  --color-border: #D8D2C5;
+  --color-input: #D8D2C5;
+  --color-ring: #123D2D;
+
+  /* Tree Relationship Connectors (Light Mode) */
+  --color-tree-connector: #78936B;
+  --color-tree-connector-active: #285B40;
+  --color-tree-spouse: #D9A441;
+  --color-tree-spouse-active: #936126;
+  --color-tree-junction: #285B40;
+  --color-tree-glow: rgba(40, 91, 64, 0.16);
   --radius: 0.5rem;
 }
 
 .dark {
-  /* Deep warm obsidian palette for dark mode */
-  --color-background: #0d0d10;
-  --color-foreground: #f4f4f5;
-  --color-card: #141418;
-  --color-card-foreground: #f4f4f5;
-  --color-popover: #141418;
-  --color-popover-foreground: #f4f4f5;
-  --color-primary: #f4f4f5;
-  --color-primary-foreground: #111114;
-  --color-secondary: #1c1c21;
-  --color-secondary-foreground: #f4f4f5;
-  --color-muted: #1c1c21;
-  --color-muted-foreground: #a1a1aa;
-  --color-accent: #25252b;
-  --color-accent-foreground: #f4f4f5;
+  /* Deep forest / Charcoal dark theme */
+  --color-background: #10130F;
+  --color-foreground: #F7F2E7;
+  
+  --color-card: #171B16;
+  --color-card-foreground: #F7F2E7;
+  
+  --color-popover: #1E241D;
+  --color-popover-foreground: #F7F2E7;
+  
+  --color-primary: #285B40;
+  --color-primary-foreground: #F7F2E7;
+  
+  --color-secondary: #1E241D;
+  --color-secondary-foreground: #F7F2E7;
+  
+  --color-muted: #1E241D;
+  --color-muted-foreground: #BDB7A9;
+  
+  --color-accent: #D9A441;
+  --color-accent-foreground: #10130F;
+  
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
-  --color-border: #27272d;
-  --color-input: #27272d;
-  --color-ring: #d4d4d8;
-  /* Core Tree Relationship Connectors (Dark Mode - high visibility against dark background) */
-  --color-tree-connector: #d4d4d8; /* Zinc-300 for higher visibility */
-  --color-tree-connector-active: #ffffff;
-  --color-tree-spouse: #fca5a5; /* Red-300 for higher visibility */
-  --color-tree-spouse-active: #fecaca;
-  --color-tree-junction: #e4e4e7;
-  --color-tree-glow: rgba(255, 255, 255, 0.3);
+  
+  --color-border: #30392F;
+  --color-input: #30392F;
+  --color-ring: #78936B;
+
+  /* Tree Relationship Connectors (Dark Mode) */
+  --color-tree-connector: #78936B;
+  --color-tree-connector-active: #F3D17A;
+  --color-tree-spouse: #D9A441;
+  --color-tree-spouse-active: #F3D17A;
+  --color-tree-junction: #78936B;
+  --color-tree-glow: rgba(217, 164, 65, 0.2);
 }
 
 @layer base {
@@ -104,7 +135,7 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased selection:bg-primary/10 selection:text-primary;
+    @apply bg-background text-foreground font-sans antialiased selection:bg-brand-primary/20 selection:text-brand-primary;
   }
   h1 {
     @apply text-2xl font-semibold tracking-tight text-foreground;
@@ -133,7 +164,6 @@
     padding-top: env(safe-area-inset-top);
   }
 
-  /* Typography primitives */
   .text-meta {
     @apply text-xs text-muted-foreground tracking-normal font-normal;
   }
@@ -142,7 +172,6 @@
     @apply text-[11px] text-muted-foreground uppercase tracking-wider font-medium;
   }
 
-  /* Refined focus ring helper */
   .focus-ring {
     @apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 ring-offset-background;
   }
@@ -157,12 +186,12 @@
   @apply bg-transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-muted-foreground/25 rounded-full hover:bg-muted-foreground/40 transition-colors;
+  @apply bg-brand-sage/40 rounded-full hover:bg-brand-sage/60 transition-colors;
 }
 
 /* React Flow Overrides */
 .react-flow__controls-button {
-  @apply bg-card border-border fill-foreground hover:bg-accent transition-colors rounded-md;
+  @apply bg-card border-border fill-foreground hover:bg-muted transition-colors rounded-md;
 }
 .react-flow__minimap {
   @apply bg-card border border-border rounded-lg shadow-sm;
@@ -179,7 +208,7 @@
   @apply bg-transparent;
 }
 .modal-scroll::-webkit-scrollbar-thumb {
-  @apply bg-muted-foreground/20 rounded-full;
+  @apply bg-brand-sage/30 rounded-full;
 }
 
 @media print {

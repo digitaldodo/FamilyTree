@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { MemberWithRelations } from '@/types/member';
 import { Card, CardContent } from '@/components/ui/card';
 import { MoreVertical, Eye, Pencil, Trash2 } from 'lucide-react';
@@ -97,13 +96,6 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
     (calculatedGeneration !== undefined
       ? `Gen ${calculatedGeneration + 1}`
       : 'Unknown Gen');
-
-  const genderAccent =
-    member.gender === 'MALE'
-      ? 'from-blue-500/15 to-indigo-500/10 hover:border-blue-400/50'
-      : member.gender === 'FEMALE'
-        ? 'from-pink-500/15 to-rose-500/10 hover:border-pink-400/50'
-        : 'from-primary/10 to-purple-500/10 hover:border-primary/50';
 
   return (
     <Card

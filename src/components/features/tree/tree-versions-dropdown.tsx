@@ -70,7 +70,7 @@ export function TreeVersionsDropdown() {
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <span className="font-medium text-sm">Latest (Active)</span>
-                <span className="px-1.5 py-0.5 rounded-md bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] uppercase font-bold tracking-wider">
+                <span className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] uppercase font-bold tracking-wider">
                   Active
                 </span>
               </div>
@@ -79,7 +79,7 @@ export function TreeVersionsDropdown() {
               </span>
             </div>
             {!selectedTreeVersionId && (
-              <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+              <Check className="w-4 h-4 text-primary" />
             )}
           </DropdownMenuItem>
           <div className="h-px bg-border/50 my-1.5 mx-2" />

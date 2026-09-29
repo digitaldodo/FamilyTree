@@ -17,7 +17,7 @@ interface CollaboratorManagerProps {
 
 const roleBadgeStyles: Record<TreeRole, string> = {
   ADMIN: 'bg-primary/10 text-primary',
-  EDITOR: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  EDITOR: 'bg-secondary text-secondary-foreground',
   VIEWER: 'bg-muted text-muted-foreground',
 };
 

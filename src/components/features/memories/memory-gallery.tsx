@@ -88,13 +88,13 @@ export function MemoryGallery({
     <div className="space-y-6">
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-2xl text-foreground tracking-tight">
+          <h3 className="font-serif font-bold text-2xl text-foreground tracking-tight">
             Memories
           </h3>
           {onUpload && (
             <button
               onClick={() => setIsUploadModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-full hover:bg-purple-700 transition-colors shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-full hover:bg-primary/90 transition-colors shadow-sm"
             >
               <Plus className="w-4 h-4" />
               Upload
@@ -109,7 +109,7 @@ export function MemoryGallery({
               onClick={() => setActiveTab('gallery')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 activeTab === 'gallery'
-                  ? 'bg-white dark:bg-zinc-800 shadow-sm text-foreground'
+                  ? 'bg-background shadow-sm text-foreground'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               }`}
             >
@@ -120,7 +120,7 @@ export function MemoryGallery({
               onClick={() => setActiveTab('albums')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 activeTab === 'albums'
-                  ? 'bg-white dark:bg-zinc-800 shadow-sm text-foreground'
+                  ? 'bg-background shadow-sm text-foreground'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               }`}
             >
@@ -131,7 +131,7 @@ export function MemoryGallery({
               onClick={() => setActiveTab('timeline')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 activeTab === 'timeline'
-                  ? 'bg-white dark:bg-zinc-800 shadow-sm text-foreground'
+                  ? 'bg-background shadow-sm text-foreground'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               }`}
             >
@@ -144,10 +144,10 @@ export function MemoryGallery({
 
       {memories.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center py-16 bg-muted/20 rounded-lg border border-dashed border-border mt-4">
-          <div className="w-20 h-20 rounded-full bg-purple-500/10 flex items-center justify-center mb-4">
-            <Camera className="w-10 h-10 text-purple-400" />
+          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <Camera className="w-10 h-10 text-primary" />
           </div>
-          <h4 className="text-lg font-bold mb-1">Preserve Family Moments</h4>
+          <h4 className="text-lg font-bold mb-1 font-serif">Preserve Family Moments</h4>
           <p className="text-muted-foreground/70 text-sm max-w-sm mb-6">
             Upload the first photo or create a memory album to start documenting
             their life story.
@@ -155,7 +155,7 @@ export function MemoryGallery({
           {onUpload && (
             <button
               onClick={() => setIsUploadModalOpen(true)}
-              className="px-6 py-2.5 text-sm font-medium text-white bg-purple-600 rounded-full hover:bg-purple-700 transition-colors shadow-lg shadow-purple-500/20"
+              className="px-6 py-2.5 text-sm font-medium text-primary-foreground bg-primary rounded-full hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
             >
               Upload first memory
             </button>
@@ -205,7 +205,7 @@ export function MemoryGallery({
                   albums.map((album) => (
                     <div key={album.name} className="space-y-4">
                       <div className="flex items-center gap-3">
-                        <h4 className="text-lg font-bold">{album.name}</h4>
+                        <h4 className="text-lg font-bold font-serif">{album.name}</h4>
                         <span className="px-2.5 py-0.5 rounded-full bg-muted text-xs font-medium text-muted-foreground">
                           {album.memories.length}{' '}
                           {album.memories.length === 1 ? 'item' : 'items'}
@@ -243,7 +243,7 @@ export function MemoryGallery({
                 {timelineMemories.map((memory) => (
                   <div key={memory.id} className="relative">
                     <div className="absolute -left-6 w-6 h-6 flex items-center justify-center">
-                      <div className="w-2.5 h-2.5 rounded-full bg-purple-500 ring-4 ring-background" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-accent ring-4 ring-background" />
                     </div>
 
                     <div className="mb-3 flex items-center gap-3">
@@ -254,7 +254,7 @@ export function MemoryGallery({
                         )}
                       </span>
                       {memory.eventTag && (
-                        <span className="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-semibold uppercase tracking-wider">
+                        <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider">
                           {memory.eventTag}
                         </span>
                       )}
