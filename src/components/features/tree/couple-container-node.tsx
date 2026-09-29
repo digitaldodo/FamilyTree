@@ -66,7 +66,7 @@ function CoupleContainerNodeComponent({ data }: CoupleContainerNodeProps) {
       ))}
       
       {/* Subtle spouse relationship connector line */}
-      <div className="absolute top-1/2 left-[190px] right-[190px] h-px bg-[var(--color-tree-spouse)] -translate-y-1/2 z-0 opacity-60" />
+      <div className="absolute top-1/2 left-[190px] right-[190px] h-[2px] bg-[var(--color-tree-spouse)] -translate-y-1/2 z-0 opacity-80" />
 
       {/* Subtle couple indicator */}
       <div 

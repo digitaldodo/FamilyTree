@@ -40,35 +40,35 @@ function TreeMemberCardComponent({
     <div
       onClick={(e) => onClick?.(e, member.id)}
       className={cn(
-        'group relative flex flex-col w-full h-full rounded-2xl overflow-hidden bg-card border border-border shadow-sm transition-all duration-300 cursor-pointer text-center hover:bg-card/90',
+        'group relative flex flex-col w-[190px] h-[250px] rounded-2xl overflow-hidden bg-card border border-border shadow-sm transition-all duration-300 cursor-pointer text-center',
         isSelected
           ? 'ring-2 ring-primary shadow-md'
-          : 'hover:shadow-md',
+          : 'hover:shadow-md hover:border-primary/50',
         className
       )}
     >
       {/* Photograph Area (Top ~64%) */}
-      <div className="w-full h-[64%] relative bg-muted/40 flex items-center justify-center overflow-hidden shrink-0">
+      <div className="w-full h-[160px] relative flex items-center justify-center overflow-hidden shrink-0">
         {member.imageUrl && !hasLoadError ? (
           <Image
             src={member.imageUrl}
             alt={`${member.firstName} ${member.lastName}`}
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-            sizes="(max-width: 768px) 190px, 220px"
+            sizes="190px"
             onError={() => setHasLoadError(true)}
             unoptimized
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/80 text-muted-foreground transition-transform duration-700 group-hover:scale-[1.03]">
-            <span className="text-4xl font-semibold tracking-wider opacity-60">
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary/90 text-primary-foreground transition-transform duration-700 group-hover:scale-[1.03]">
+            <span className="text-5xl font-semibold tracking-wider opacity-90">
                {initials}
             </span>
           </div>
         )}
         
         {/* Subtle gradient overlay to merge image with card background smoothly */}
-        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-card to-transparent pointer-events-none transition-colors duration-300" />
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-card to-transparent pointer-events-none transition-colors duration-300" />
       </div>
 
       {/* Information Area */}
