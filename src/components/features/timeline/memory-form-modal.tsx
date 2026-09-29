@@ -15,6 +15,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { MultiImageUpload } from './multi-image-upload';
 import { SelectMembers } from '../members/select-members';
+import { IconPicker } from '@/components/ui/icon-picker';
+import { ImageUpload } from '../members/image-upload';
 import { useMembers } from '@/hooks/use-members';
 import { useAppStore } from '@/store/use-app-store';
 import { Label } from '@/components/ui/label';
@@ -57,6 +59,11 @@ export function MemoryFormModal({
       tags: initialData?.tags || [],
       memberIds: initialData?.members?.map((m: any) => m.memberId) || [],
       mediaUrls: initialData?.media?.map((m: any) => m.url) || [],
+      icon: initialData?.icon || 'star',
+      iconColor: initialData?.iconColor || 'blue',
+      albumCoverUrl: initialData?.albumCoverUrl || '',
+      albumTitle: initialData?.albumTitle || '',
+      photoCount: initialData?.photoCount || null,
     },
   });
 
@@ -75,6 +82,11 @@ export function MemoryFormModal({
         tags: initialData?.tags || [],
         memberIds: initialData?.members?.map((m: any) => m.memberId) || [],
         mediaUrls: initialData?.media?.map((m: any) => m.url) || [],
+        icon: initialData?.icon || 'star',
+        iconColor: initialData?.iconColor || 'blue',
+        albumCoverUrl: initialData?.albumCoverUrl || '',
+        albumTitle: initialData?.albumTitle || '',
+        photoCount: initialData?.photoCount || null,
       });
     }
   }, [isOpen, initialData, reset]);
@@ -119,6 +131,30 @@ export function MemoryFormModal({
               )}
             </div>
 
+            <div className="space-y-2">
+              <Label>Memory Icon</Label>
+              <Controller
+                control={control}
+                name="icon"
+                render={({ field: iconField }) => (
+                  <Controller
+                    control={control}
+                    name="iconColor"
+                    render={({ field: colorField }) => (
+                      <IconPicker
+                        iconId={iconField.value}
+                        colorId={colorField.value}
+                        onIconChange={iconField.onChange}
+                        onColorChange={colorField.onChange}
+                      />
+                    )}
+                  />
+                )}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="location">Location</Label>
               <Input
@@ -191,24 +227,67 @@ export function MemoryFormModal({
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="googlePhotosAlbumUrl">
-              Google Photos Album Link
-            </Label>
-            <Input
-              id="googlePhotosAlbumUrl"
-              type="url"
-              placeholder="https://photos.app.goo.gl/..."
-              {...register('googlePhotosAlbumUrl')}
-            />
-            <p className="text-xs text-muted-foreground">
-              Link to an external Google Photos album.
-            </p>
-            {errors.googlePhotosAlbumUrl && (
-              <p className="text-sm text-destructive">
-                {String(errors.googlePhotosAlbumUrl.message)}
+          <div className="space-y-4 pt-4 border-t border-border">
+            <h4 className="font-medium text-sm">External Album Integration</h4>
+            
+            <div className="space-y-2">
+              <Label htmlFor="googlePhotosAlbumUrl">
+                Album Link
+              </Label>
+              <Input
+                id="googlePhotosAlbumUrl"
+                type="url"
+                placeholder="https://photos.app.goo.gl/..."
+                {...register('googlePhotosAlbumUrl')}
+              />
+              <p className="text-xs text-muted-foreground">
+                Link to an external Google Photos album.
               </p>
-            )}
+              {errors.googlePhotosAlbumUrl && (
+                <p className="text-sm text-destructive">
+                  {String(errors.googlePhotosAlbumUrl.message)}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="albumTitle">Album Title</Label>
+                  <Input
+                    id="albumTitle"
+                    placeholder="e.g., Summer Vacation 2026"
+                    {...register('albumTitle')}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="photoCount">Photo Count</Label>
+                  <Input
+                    id="photoCount"
+                    type="number"
+                    placeholder="e.g., 42"
+                    {...register('photoCount', { valueAsNumber: true })}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Album Cover</Label>
+                <Controller
+                  control={control}
+                  name="albumCoverUrl"
+                  render={({ field }) => (
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      folder="family-tree/albums"
+                      isCover={true}
+                    />
+                  )}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-4 border-t">

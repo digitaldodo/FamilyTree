@@ -58,6 +58,11 @@ export async function PUT(request: NextRequest, { params }: Params) {
         date: validatedData.date,
         type: validatedData.type,
         googlePhotosAlbumUrl: validatedData.googlePhotosAlbumUrl || null,
+        icon: validatedData.icon || null,
+        iconColor: validatedData.iconColor || null,
+        albumCoverUrl: validatedData.albumCoverUrl || null,
+        albumTitle: validatedData.albumTitle || null,
+        photoCount: validatedData.photoCount || null,
         location: validatedData.location,
         tags: validatedData.tags,
         members: {
@@ -75,9 +80,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
       include: {
         members: {
           include: {
-            member: {
-              select: { id: true, firstName: true, lastName: true, imageUrl: true }
-            }
+            member: true
           }
         },
         media: true

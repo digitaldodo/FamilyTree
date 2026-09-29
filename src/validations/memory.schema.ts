@@ -22,6 +22,11 @@ export const memorySchema = z.object({
   tags: z.array(z.string()).optional().default([]),
   memberIds: z.array(z.string()).optional().default([]),
   mediaUrls: z.array(z.string()).optional().default([]),
+  icon: z.string().optional().nullable(),
+  iconColor: z.string().optional().nullable(),
+  albumCoverUrl: z.string().optional().nullable(),
+  albumTitle: z.string().optional().nullable(),
+  photoCount: z.number().int().optional().nullable(),
 });
 
 export type MemoryFormData = z.infer<typeof memorySchema>;

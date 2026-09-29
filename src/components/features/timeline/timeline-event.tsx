@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { Camera, ImageIcon, Plus } from 'lucide-react';
 import { MemberAvatar } from '../members/member-avatar';
 import Image from 'next/image';
+import { MEMORY_ICONS, MEMORY_COLORS } from '@/components/ui/icon-picker';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -54,6 +55,10 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
 
   // MEMORY LAYOUT
   if (isMemory) {
+    const selectedIcon = MEMORY_ICONS.find(i => i.id === event.memoryData?.icon) || MEMORY_ICONS[11];
+    const selectedColor = MEMORY_COLORS.find(c => c.id === event.memoryData?.iconColor) || MEMORY_COLORS[0];
+    const IconComponent = selectedIcon.icon;
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 15 }}
@@ -63,32 +68,36 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
         onClick={() => onClick && onClick(event)}
         className={cardClass}
       >
-        {hasCoverPhoto && (
-          <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-muted overflow-hidden border-b border-border/40">
+        <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] overflow-hidden border-b border-border/40">
+          {hasCoverPhoto ? (
             <Image 
               src={memoryMedia[0].url} 
               alt={event.title}
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-40" />
-            
-            <div className="absolute bottom-3 left-3 flex gap-2">
-              {event.mediaCount && event.mediaCount > 1 && (
-                <span className="flex items-center gap-1.5 text-xs bg-black/50 backdrop-blur-md text-white px-2 py-1 rounded font-medium border border-white/10">
-                  <ImageIcon className="w-3.5 h-3.5" />
-                  {event.mediaCount}
-                </span>
-              )}
-              {event.hasAlbum && (
-                <span className="flex items-center gap-1.5 text-xs bg-black/50 backdrop-blur-md text-white px-2 py-1 rounded font-medium border border-white/10">
-                  <Camera className="w-3.5 h-3.5" />
-                  Album
-                </span>
-              )}
+          ) : (
+            <div className={`w-full h-full flex flex-col items-center justify-center opacity-80 ${selectedColor.value}`}>
+              <IconComponent className="w-16 h-16 text-white" />
             </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-40" />
+          
+          <div className="absolute bottom-3 left-3 flex gap-2">
+            {event.mediaCount && event.mediaCount > 1 && (
+              <span className="flex items-center gap-1.5 text-xs bg-black/50 backdrop-blur-md text-white px-2 py-1 rounded font-medium border border-white/10">
+                <ImageIcon className="w-3.5 h-3.5" />
+                {event.mediaCount}
+              </span>
+            )}
+            {event.hasAlbum && (
+              <span className="flex items-center gap-1.5 text-xs bg-black/50 backdrop-blur-md text-white px-2 py-1 rounded font-medium border border-white/10">
+                <Camera className="w-3.5 h-3.5" />
+                Album
+              </span>
+            )}
           </div>
-        )}
+        </div>
 
         <div className="p-4 sm:p-5">
           <div className="flex flex-wrap items-center gap-2 mb-2.5">
@@ -105,7 +114,8 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
             )}
           </div>
           
-          <h3 className="text-xl sm:text-2xl font-semibold text-foreground mb-2.5 leading-tight font-serif">
+          <h3 className="text-xl sm:text-2xl font-semibold text-foreground mb-2.5 leading-tight font-serif flex items-center gap-2">
+            <IconComponent className="w-5 h-5 opacity-70" />
             {event.title}
           </h3>
           

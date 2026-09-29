@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { MemberAvatar } from '../members/member-avatar';
 import { useAppStore } from '@/store/use-app-store';
+import { MEMORY_ICONS, MEMORY_COLORS } from '@/components/ui/icon-picker';
+import { cn } from '@/lib/utils';
 
 interface MemoryDetailModalProps {
   memory: any | null;
@@ -40,10 +42,14 @@ export function MemoryDetailModal({
   const safeMembers = Array.isArray(memory.members) ? memory.members : [];
   const safeMedia = Array.isArray(memory.media) ? memory.media : [];
 
+  const selectedIcon = MEMORY_ICONS.find(i => i.id === memory.icon) || MEMORY_ICONS[11];
+  const selectedColor = MEMORY_COLORS.find(c => c.id === memory.iconColor) || MEMORY_COLORS[0];
+  const IconComponent = selectedIcon.icon;
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 rounded-2xl border-none shadow-2xl bg-background modal-scroll">
-        <div className="relative w-full h-[300px] md:h-[400px] bg-muted overflow-hidden">
+        <div className={cn("relative w-full h-[300px] md:h-[400px] overflow-hidden", safeMedia.length === 0 ? selectedColor.value : "bg-muted")}>
           {safeMedia.length > 0 ? (
             <Image
               src={safeMedia[0].url}
@@ -52,8 +58,8 @@ export function MemoryDetailModal({
               className="object-cover"
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-100 dark:bg-zinc-900">
-              <Calendar className="w-16 h-16 text-muted-foreground/20 mb-4" />
+            <div className="w-full h-full flex flex-col items-center justify-center opacity-20">
+              <IconComponent className="w-32 h-32 text-white" />
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
@@ -108,25 +114,69 @@ export function MemoryDetailModal({
               </div>
             )}
 
-            {memory.googlePhotosAlbumUrl && (
-              <div className="flex items-center p-5 bg-muted/50 rounded-2xl border border-border">
-                <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center mr-5 shadow-sm border border-border">
-                  <LinkIcon className="w-5 h-5 text-foreground" />
+            {(memory.albumCoverUrl || memory.googlePhotosAlbumUrl) && (
+              <div className="space-y-4 pt-6 border-t border-border/50">
+                <h3 className="font-semibold text-xl font-serif tracking-tight text-foreground">Photo Album</h3>
+                <div className="relative group overflow-hidden rounded-2xl border border-border bg-muted/30">
+                  {memory.albumCoverUrl ? (
+                    <div className="aspect-[21/9] w-full relative">
+                      <Image
+                        src={memory.albumCoverUrl}
+                        alt={memory.albumTitle || 'Album Cover'}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-6 flex items-end justify-between text-white">
+                        <div>
+                          <h4 className="font-semibold text-xl md:text-2xl drop-shadow-sm">
+                            {memory.albumTitle || 'Family Album'}
+                          </h4>
+                          {memory.photoCount && (
+                            <p className="text-white/80 text-sm font-medium mt-1">
+                              {memory.photoCount} photos
+                            </p>
+                          )}
+                        </div>
+                        {memory.googlePhotosAlbumUrl && (
+                          <a
+                            href={memory.googlePhotosAlbumUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="shrink-0 flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-2 rounded-full text-sm font-medium transition-colors"
+                          >
+                            <LinkIcon className="w-4 h-4" />
+                            View Album
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center p-5">
+                      <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center mr-5 shadow-sm border border-border">
+                        <LinkIcon className="w-5 h-5 text-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-foreground">
+                          {memory.albumTitle || 'Google Photos Album'}
+                        </h4>
+                        <p className="text-sm text-muted-foreground mt-0.5">
+                          View the full collection of photos from this memory
+                        </p>
+                      </div>
+                      {memory.googlePhotosAlbumUrl && (
+                        <a
+                          href={memory.googlePhotosAlbumUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center h-10 px-5 text-sm font-medium rounded-full border border-border bg-background hover:bg-muted transition-colors shadow-sm"
+                        >
+                          Open Album
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-foreground">Google Photos Album</h4>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    View the full collection of photos from this memory
-                  </p>
-                </div>
-                <a
-                  href={memory.googlePhotosAlbumUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center h-10 px-5 text-sm font-medium rounded-full border border-border bg-background hover:bg-muted transition-colors shadow-sm"
-                >
-                  Open Album
-                </a>
               </div>
             )}
           </div>

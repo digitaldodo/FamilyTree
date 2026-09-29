@@ -20,8 +20,18 @@ export type MemoryModel = runtime.Types.Result.DefaultSelection<Prisma.$MemoryPa
 
 export type AggregateMemory = {
   _count: MemoryCountAggregateOutputType | null
+  _avg: MemoryAvgAggregateOutputType | null
+  _sum: MemorySumAggregateOutputType | null
   _min: MemoryMinAggregateOutputType | null
   _max: MemoryMaxAggregateOutputType | null
+}
+
+export type MemoryAvgAggregateOutputType = {
+  photoCount: number | null
+}
+
+export type MemorySumAggregateOutputType = {
+  photoCount: number | null
 }
 
 export type MemoryMinAggregateOutputType = {
@@ -31,6 +41,11 @@ export type MemoryMinAggregateOutputType = {
   date: Date | null
   type: string | null
   googlePhotosAlbumUrl: string | null
+  icon: string | null
+  iconColor: string | null
+  albumCoverUrl: string | null
+  albumTitle: string | null
+  photoCount: number | null
   location: string | null
   treeId: string | null
   createdById: string | null
@@ -45,6 +60,11 @@ export type MemoryMaxAggregateOutputType = {
   date: Date | null
   type: string | null
   googlePhotosAlbumUrl: string | null
+  icon: string | null
+  iconColor: string | null
+  albumCoverUrl: string | null
+  albumTitle: string | null
+  photoCount: number | null
   location: string | null
   treeId: string | null
   createdById: string | null
@@ -59,6 +79,11 @@ export type MemoryCountAggregateOutputType = {
   date: number
   type: number
   googlePhotosAlbumUrl: number
+  icon: number
+  iconColor: number
+  albumCoverUrl: number
+  albumTitle: number
+  photoCount: number
   location: number
   tags: number
   treeId: number
@@ -69,6 +94,14 @@ export type MemoryCountAggregateOutputType = {
 }
 
 
+export type MemoryAvgAggregateInputType = {
+  photoCount?: true
+}
+
+export type MemorySumAggregateInputType = {
+  photoCount?: true
+}
+
 export type MemoryMinAggregateInputType = {
   id?: true
   title?: true
@@ -76,6 +109,11 @@ export type MemoryMinAggregateInputType = {
   date?: true
   type?: true
   googlePhotosAlbumUrl?: true
+  icon?: true
+  iconColor?: true
+  albumCoverUrl?: true
+  albumTitle?: true
+  photoCount?: true
   location?: true
   treeId?: true
   createdById?: true
@@ -90,6 +128,11 @@ export type MemoryMaxAggregateInputType = {
   date?: true
   type?: true
   googlePhotosAlbumUrl?: true
+  icon?: true
+  iconColor?: true
+  albumCoverUrl?: true
+  albumTitle?: true
+  photoCount?: true
   location?: true
   treeId?: true
   createdById?: true
@@ -104,6 +147,11 @@ export type MemoryCountAggregateInputType = {
   date?: true
   type?: true
   googlePhotosAlbumUrl?: true
+  icon?: true
+  iconColor?: true
+  albumCoverUrl?: true
+  albumTitle?: true
+  photoCount?: true
   location?: true
   tags?: true
   treeId?: true
@@ -151,6 +199,18 @@ export type MemoryAggregateArgs<ExtArgs extends runtime.Types.Extensions.Interna
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: MemoryAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: MemorySumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: MemoryMinAggregateInputType
@@ -181,6 +241,8 @@ export type MemoryGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   _count?: MemoryCountAggregateInputType | true
+  _avg?: MemoryAvgAggregateInputType
+  _sum?: MemorySumAggregateInputType
   _min?: MemoryMinAggregateInputType
   _max?: MemoryMaxAggregateInputType
 }
@@ -192,6 +254,11 @@ export type MemoryGroupByOutputType = {
   date: Date
   type: string
   googlePhotosAlbumUrl: string | null
+  icon: string | null
+  iconColor: string | null
+  albumCoverUrl: string | null
+  albumTitle: string | null
+  photoCount: number | null
   location: string | null
   tags: string[]
   treeId: string
@@ -199,6 +266,8 @@ export type MemoryGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   _count: MemoryCountAggregateOutputType | null
+  _avg: MemoryAvgAggregateOutputType | null
+  _sum: MemorySumAggregateOutputType | null
   _min: MemoryMinAggregateOutputType | null
   _max: MemoryMaxAggregateOutputType | null
 }
@@ -228,6 +297,11 @@ export type MemoryWhereInput = {
   date?: Prisma.DateTimeFilter<"Memory"> | Date | string
   type?: Prisma.StringFilter<"Memory"> | string
   googlePhotosAlbumUrl?: Prisma.StringNullableFilter<"Memory"> | string | null
+  icon?: Prisma.StringNullableFilter<"Memory"> | string | null
+  iconColor?: Prisma.StringNullableFilter<"Memory"> | string | null
+  albumCoverUrl?: Prisma.StringNullableFilter<"Memory"> | string | null
+  albumTitle?: Prisma.StringNullableFilter<"Memory"> | string | null
+  photoCount?: Prisma.IntNullableFilter<"Memory"> | number | null
   location?: Prisma.StringNullableFilter<"Memory"> | string | null
   tags?: Prisma.StringNullableListFilter<"Memory">
   treeId?: Prisma.StringFilter<"Memory"> | string
@@ -247,6 +321,11 @@ export type MemoryOrderByWithRelationInput = {
   date?: Prisma.SortOrder
   type?: Prisma.SortOrder
   googlePhotosAlbumUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  icon?: Prisma.SortOrderInput | Prisma.SortOrder
+  iconColor?: Prisma.SortOrderInput | Prisma.SortOrder
+  albumCoverUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  albumTitle?: Prisma.SortOrderInput | Prisma.SortOrder
+  photoCount?: Prisma.SortOrderInput | Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
   tags?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
@@ -269,6 +348,11 @@ export type MemoryWhereUniqueInput = Prisma.AtLeast<{
   date?: Prisma.DateTimeFilter<"Memory"> | Date | string
   type?: Prisma.StringFilter<"Memory"> | string
   googlePhotosAlbumUrl?: Prisma.StringNullableFilter<"Memory"> | string | null
+  icon?: Prisma.StringNullableFilter<"Memory"> | string | null
+  iconColor?: Prisma.StringNullableFilter<"Memory"> | string | null
+  albumCoverUrl?: Prisma.StringNullableFilter<"Memory"> | string | null
+  albumTitle?: Prisma.StringNullableFilter<"Memory"> | string | null
+  photoCount?: Prisma.IntNullableFilter<"Memory"> | number | null
   location?: Prisma.StringNullableFilter<"Memory"> | string | null
   tags?: Prisma.StringNullableListFilter<"Memory">
   treeId?: Prisma.StringFilter<"Memory"> | string
@@ -288,6 +372,11 @@ export type MemoryOrderByWithAggregationInput = {
   date?: Prisma.SortOrder
   type?: Prisma.SortOrder
   googlePhotosAlbumUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  icon?: Prisma.SortOrderInput | Prisma.SortOrder
+  iconColor?: Prisma.SortOrderInput | Prisma.SortOrder
+  albumCoverUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  albumTitle?: Prisma.SortOrderInput | Prisma.SortOrder
+  photoCount?: Prisma.SortOrderInput | Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
   tags?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
@@ -295,8 +384,10 @@ export type MemoryOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.MemoryCountOrderByAggregateInput
+  _avg?: Prisma.MemoryAvgOrderByAggregateInput
   _max?: Prisma.MemoryMaxOrderByAggregateInput
   _min?: Prisma.MemoryMinOrderByAggregateInput
+  _sum?: Prisma.MemorySumOrderByAggregateInput
 }
 
 export type MemoryScalarWhereWithAggregatesInput = {
@@ -309,6 +400,11 @@ export type MemoryScalarWhereWithAggregatesInput = {
   date?: Prisma.DateTimeWithAggregatesFilter<"Memory"> | Date | string
   type?: Prisma.StringWithAggregatesFilter<"Memory"> | string
   googlePhotosAlbumUrl?: Prisma.StringNullableWithAggregatesFilter<"Memory"> | string | null
+  icon?: Prisma.StringNullableWithAggregatesFilter<"Memory"> | string | null
+  iconColor?: Prisma.StringNullableWithAggregatesFilter<"Memory"> | string | null
+  albumCoverUrl?: Prisma.StringNullableWithAggregatesFilter<"Memory"> | string | null
+  albumTitle?: Prisma.StringNullableWithAggregatesFilter<"Memory"> | string | null
+  photoCount?: Prisma.IntNullableWithAggregatesFilter<"Memory"> | number | null
   location?: Prisma.StringNullableWithAggregatesFilter<"Memory"> | string | null
   tags?: Prisma.StringNullableListFilter<"Memory">
   treeId?: Prisma.StringWithAggregatesFilter<"Memory"> | string
@@ -324,6 +420,11 @@ export type MemoryCreateInput = {
   date: Date | string
   type?: string
   googlePhotosAlbumUrl?: string | null
+  icon?: string | null
+  iconColor?: string | null
+  albumCoverUrl?: string | null
+  albumTitle?: string | null
+  photoCount?: number | null
   location?: string | null
   tags?: Prisma.MemoryCreatetagsInput | string[]
   createdAt?: Date | string
@@ -341,6 +442,11 @@ export type MemoryUncheckedCreateInput = {
   date: Date | string
   type?: string
   googlePhotosAlbumUrl?: string | null
+  icon?: string | null
+  iconColor?: string | null
+  albumCoverUrl?: string | null
+  albumTitle?: string | null
+  photoCount?: number | null
   location?: string | null
   tags?: Prisma.MemoryCreatetagsInput | string[]
   treeId: string
@@ -358,6 +464,11 @@ export type MemoryUpdateInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   googlePhotosAlbumUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.MemoryUpdatetagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -375,6 +486,11 @@ export type MemoryUncheckedUpdateInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   googlePhotosAlbumUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.MemoryUpdatetagsInput | string[]
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -392,6 +508,11 @@ export type MemoryCreateManyInput = {
   date: Date | string
   type?: string
   googlePhotosAlbumUrl?: string | null
+  icon?: string | null
+  iconColor?: string | null
+  albumCoverUrl?: string | null
+  albumTitle?: string | null
+  photoCount?: number | null
   location?: string | null
   tags?: Prisma.MemoryCreatetagsInput | string[]
   treeId: string
@@ -407,6 +528,11 @@ export type MemoryUpdateManyMutationInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   googlePhotosAlbumUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.MemoryUpdatetagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -420,6 +546,11 @@ export type MemoryUncheckedUpdateManyInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   googlePhotosAlbumUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.MemoryUpdatetagsInput | string[]
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -458,12 +589,21 @@ export type MemoryCountOrderByAggregateInput = {
   date?: Prisma.SortOrder
   type?: Prisma.SortOrder
   googlePhotosAlbumUrl?: Prisma.SortOrder
+  icon?: Prisma.SortOrder
+  iconColor?: Prisma.SortOrder
+  albumCoverUrl?: Prisma.SortOrder
+  albumTitle?: Prisma.SortOrder
+  photoCount?: Prisma.SortOrder
   location?: Prisma.SortOrder
   tags?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type MemoryAvgOrderByAggregateInput = {
+  photoCount?: Prisma.SortOrder
 }
 
 export type MemoryMaxOrderByAggregateInput = {
@@ -473,6 +613,11 @@ export type MemoryMaxOrderByAggregateInput = {
   date?: Prisma.SortOrder
   type?: Prisma.SortOrder
   googlePhotosAlbumUrl?: Prisma.SortOrder
+  icon?: Prisma.SortOrder
+  iconColor?: Prisma.SortOrder
+  albumCoverUrl?: Prisma.SortOrder
+  albumTitle?: Prisma.SortOrder
+  photoCount?: Prisma.SortOrder
   location?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
@@ -487,11 +632,20 @@ export type MemoryMinOrderByAggregateInput = {
   date?: Prisma.SortOrder
   type?: Prisma.SortOrder
   googlePhotosAlbumUrl?: Prisma.SortOrder
+  icon?: Prisma.SortOrder
+  iconColor?: Prisma.SortOrder
+  albumCoverUrl?: Prisma.SortOrder
+  albumTitle?: Prisma.SortOrder
+  photoCount?: Prisma.SortOrder
   location?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type MemorySumOrderByAggregateInput = {
+  photoCount?: Prisma.SortOrder
 }
 
 export type MemoryScalarRelationFilter = {
@@ -603,6 +757,14 @@ export type MemoryCreatetagsInput = {
   set: string[]
 }
 
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type MemoryUpdatetagsInput = {
   set?: string[]
   push?: string | string[]
@@ -629,6 +791,11 @@ export type MemoryCreateWithoutCreatedByInput = {
   date: Date | string
   type?: string
   googlePhotosAlbumUrl?: string | null
+  icon?: string | null
+  iconColor?: string | null
+  albumCoverUrl?: string | null
+  albumTitle?: string | null
+  photoCount?: number | null
   location?: string | null
   tags?: Prisma.MemoryCreatetagsInput | string[]
   createdAt?: Date | string
@@ -645,6 +812,11 @@ export type MemoryUncheckedCreateWithoutCreatedByInput = {
   date: Date | string
   type?: string
   googlePhotosAlbumUrl?: string | null
+  icon?: string | null
+  iconColor?: string | null
+  albumCoverUrl?: string | null
+  albumTitle?: string | null
+  photoCount?: number | null
   location?: string | null
   tags?: Prisma.MemoryCreatetagsInput | string[]
   treeId: string
@@ -690,6 +862,11 @@ export type MemoryScalarWhereInput = {
   date?: Prisma.DateTimeFilter<"Memory"> | Date | string
   type?: Prisma.StringFilter<"Memory"> | string
   googlePhotosAlbumUrl?: Prisma.StringNullableFilter<"Memory"> | string | null
+  icon?: Prisma.StringNullableFilter<"Memory"> | string | null
+  iconColor?: Prisma.StringNullableFilter<"Memory"> | string | null
+  albumCoverUrl?: Prisma.StringNullableFilter<"Memory"> | string | null
+  albumTitle?: Prisma.StringNullableFilter<"Memory"> | string | null
+  photoCount?: Prisma.IntNullableFilter<"Memory"> | number | null
   location?: Prisma.StringNullableFilter<"Memory"> | string | null
   tags?: Prisma.StringNullableListFilter<"Memory">
   treeId?: Prisma.StringFilter<"Memory"> | string
@@ -705,6 +882,11 @@ export type MemoryCreateWithoutTreeInput = {
   date: Date | string
   type?: string
   googlePhotosAlbumUrl?: string | null
+  icon?: string | null
+  iconColor?: string | null
+  albumCoverUrl?: string | null
+  albumTitle?: string | null
+  photoCount?: number | null
   location?: string | null
   tags?: Prisma.MemoryCreatetagsInput | string[]
   createdAt?: Date | string
@@ -721,6 +903,11 @@ export type MemoryUncheckedCreateWithoutTreeInput = {
   date: Date | string
   type?: string
   googlePhotosAlbumUrl?: string | null
+  icon?: string | null
+  iconColor?: string | null
+  albumCoverUrl?: string | null
+  albumTitle?: string | null
+  photoCount?: number | null
   location?: string | null
   tags?: Prisma.MemoryCreatetagsInput | string[]
   createdById: string
@@ -763,6 +950,11 @@ export type MemoryCreateWithoutMediaInput = {
   date: Date | string
   type?: string
   googlePhotosAlbumUrl?: string | null
+  icon?: string | null
+  iconColor?: string | null
+  albumCoverUrl?: string | null
+  albumTitle?: string | null
+  photoCount?: number | null
   location?: string | null
   tags?: Prisma.MemoryCreatetagsInput | string[]
   createdAt?: Date | string
@@ -779,6 +971,11 @@ export type MemoryUncheckedCreateWithoutMediaInput = {
   date: Date | string
   type?: string
   googlePhotosAlbumUrl?: string | null
+  icon?: string | null
+  iconColor?: string | null
+  albumCoverUrl?: string | null
+  albumTitle?: string | null
+  photoCount?: number | null
   location?: string | null
   tags?: Prisma.MemoryCreatetagsInput | string[]
   treeId: string
@@ -811,6 +1008,11 @@ export type MemoryUpdateWithoutMediaInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   googlePhotosAlbumUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.MemoryUpdatetagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -827,6 +1029,11 @@ export type MemoryUncheckedUpdateWithoutMediaInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   googlePhotosAlbumUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.MemoryUpdatetagsInput | string[]
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -843,6 +1050,11 @@ export type MemoryCreateWithoutMembersInput = {
   date: Date | string
   type?: string
   googlePhotosAlbumUrl?: string | null
+  icon?: string | null
+  iconColor?: string | null
+  albumCoverUrl?: string | null
+  albumTitle?: string | null
+  photoCount?: number | null
   location?: string | null
   tags?: Prisma.MemoryCreatetagsInput | string[]
   createdAt?: Date | string
@@ -859,6 +1071,11 @@ export type MemoryUncheckedCreateWithoutMembersInput = {
   date: Date | string
   type?: string
   googlePhotosAlbumUrl?: string | null
+  icon?: string | null
+  iconColor?: string | null
+  albumCoverUrl?: string | null
+  albumTitle?: string | null
+  photoCount?: number | null
   location?: string | null
   tags?: Prisma.MemoryCreatetagsInput | string[]
   treeId: string
@@ -891,6 +1108,11 @@ export type MemoryUpdateWithoutMembersInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   googlePhotosAlbumUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.MemoryUpdatetagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -907,6 +1129,11 @@ export type MemoryUncheckedUpdateWithoutMembersInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   googlePhotosAlbumUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.MemoryUpdatetagsInput | string[]
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -923,6 +1150,11 @@ export type MemoryCreateManyCreatedByInput = {
   date: Date | string
   type?: string
   googlePhotosAlbumUrl?: string | null
+  icon?: string | null
+  iconColor?: string | null
+  albumCoverUrl?: string | null
+  albumTitle?: string | null
+  photoCount?: number | null
   location?: string | null
   tags?: Prisma.MemoryCreatetagsInput | string[]
   treeId: string
@@ -937,6 +1169,11 @@ export type MemoryUpdateWithoutCreatedByInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   googlePhotosAlbumUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.MemoryUpdatetagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -953,6 +1190,11 @@ export type MemoryUncheckedUpdateWithoutCreatedByInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   googlePhotosAlbumUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.MemoryUpdatetagsInput | string[]
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -969,6 +1211,11 @@ export type MemoryUncheckedUpdateManyWithoutCreatedByInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   googlePhotosAlbumUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.MemoryUpdatetagsInput | string[]
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -983,6 +1230,11 @@ export type MemoryCreateManyTreeInput = {
   date: Date | string
   type?: string
   googlePhotosAlbumUrl?: string | null
+  icon?: string | null
+  iconColor?: string | null
+  albumCoverUrl?: string | null
+  albumTitle?: string | null
+  photoCount?: number | null
   location?: string | null
   tags?: Prisma.MemoryCreatetagsInput | string[]
   createdById: string
@@ -997,6 +1249,11 @@ export type MemoryUpdateWithoutTreeInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   googlePhotosAlbumUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.MemoryUpdatetagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1013,6 +1270,11 @@ export type MemoryUncheckedUpdateWithoutTreeInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   googlePhotosAlbumUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.MemoryUpdatetagsInput | string[]
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1029,6 +1291,11 @@ export type MemoryUncheckedUpdateManyWithoutTreeInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   googlePhotosAlbumUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  iconColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumCoverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  albumTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  photoCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.MemoryUpdatetagsInput | string[]
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1083,6 +1350,11 @@ export type MemorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   date?: boolean
   type?: boolean
   googlePhotosAlbumUrl?: boolean
+  icon?: boolean
+  iconColor?: boolean
+  albumCoverUrl?: boolean
+  albumTitle?: boolean
+  photoCount?: boolean
   location?: boolean
   tags?: boolean
   treeId?: boolean
@@ -1103,6 +1375,11 @@ export type MemorySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   date?: boolean
   type?: boolean
   googlePhotosAlbumUrl?: boolean
+  icon?: boolean
+  iconColor?: boolean
+  albumCoverUrl?: boolean
+  albumTitle?: boolean
+  photoCount?: boolean
   location?: boolean
   tags?: boolean
   treeId?: boolean
@@ -1120,6 +1397,11 @@ export type MemorySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   date?: boolean
   type?: boolean
   googlePhotosAlbumUrl?: boolean
+  icon?: boolean
+  iconColor?: boolean
+  albumCoverUrl?: boolean
+  albumTitle?: boolean
+  photoCount?: boolean
   location?: boolean
   tags?: boolean
   treeId?: boolean
@@ -1137,6 +1419,11 @@ export type MemorySelectScalar = {
   date?: boolean
   type?: boolean
   googlePhotosAlbumUrl?: boolean
+  icon?: boolean
+  iconColor?: boolean
+  albumCoverUrl?: boolean
+  albumTitle?: boolean
+  photoCount?: boolean
   location?: boolean
   tags?: boolean
   treeId?: boolean
@@ -1145,7 +1432,7 @@ export type MemorySelectScalar = {
   updatedAt?: boolean
 }
 
-export type MemoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "date" | "type" | "googlePhotosAlbumUrl" | "location" | "tags" | "treeId" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["memory"]>
+export type MemoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "date" | "type" | "googlePhotosAlbumUrl" | "icon" | "iconColor" | "albumCoverUrl" | "albumTitle" | "photoCount" | "location" | "tags" | "treeId" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["memory"]>
 export type MemoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tree?: boolean | Prisma.TreeDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1177,6 +1464,11 @@ export type $MemoryPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     date: Date
     type: string
     googlePhotosAlbumUrl: string | null
+    icon: string | null
+    iconColor: string | null
+    albumCoverUrl: string | null
+    albumTitle: string | null
+    photoCount: number | null
     location: string | null
     tags: string[]
     treeId: string
@@ -1616,6 +1908,11 @@ export interface MemoryFieldRefs {
   readonly date: Prisma.FieldRef<"Memory", 'DateTime'>
   readonly type: Prisma.FieldRef<"Memory", 'String'>
   readonly googlePhotosAlbumUrl: Prisma.FieldRef<"Memory", 'String'>
+  readonly icon: Prisma.FieldRef<"Memory", 'String'>
+  readonly iconColor: Prisma.FieldRef<"Memory", 'String'>
+  readonly albumCoverUrl: Prisma.FieldRef<"Memory", 'String'>
+  readonly albumTitle: Prisma.FieldRef<"Memory", 'String'>
+  readonly photoCount: Prisma.FieldRef<"Memory", 'Int'>
   readonly location: Prisma.FieldRef<"Memory", 'String'>
   readonly tags: Prisma.FieldRef<"Memory", 'String[]'>
   readonly treeId: Prisma.FieldRef<"Memory", 'String'>

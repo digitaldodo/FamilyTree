@@ -158,6 +158,11 @@ model Memory {
   date                 DateTime
   type                 String         @default("MEMORY")
   googlePhotosAlbumUrl String?
+  icon                 String?
+  iconColor            String?
+  albumCoverUrl        String?
+  albumTitle           String?
+  photoCount           Int?
   location             String?
   tags                 String[]
   treeId               String
