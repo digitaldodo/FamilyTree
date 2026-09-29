@@ -8,10 +8,10 @@ export function TreeBackground() {
     <>
       <Background
         variant={BackgroundVariant.Dots}
-        gap={48}
-        size={1.5}
+        gap={40}
+        size={1.2}
         color="currentColor"
-        className="text-border/40 dark:text-border/20"
+        className="text-foreground/[0.06] dark:text-foreground/[0.04]"
       />
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-[-1] opacity-[0.03] dark:opacity-[0.05] select-none print:hidden">
         <Image

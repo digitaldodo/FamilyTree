@@ -64,7 +64,7 @@ export function MemberAvatar({
   return (
     <div
       className={cn(
-        'relative flex items-center justify-center rounded-full text-lg font-semibold tracking-wide shrink-0 w-full h-full bg-secondary text-secondary-foreground border border-primary/10',
+        'relative flex items-center justify-center rounded-full font-semibold tracking-wide shrink-0 w-full h-full bg-primary/[0.08] dark:bg-primary/20 text-primary border border-primary/15 dark:border-primary/30',
         className
       )}
     >

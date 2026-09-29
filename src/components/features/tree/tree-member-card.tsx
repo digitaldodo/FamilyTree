@@ -40,12 +40,13 @@ function TreeMemberCardComponent({
     <div
       onClick={(e) => onClick?.(e, member.id)}
       className={cn(
-        'group relative flex flex-col w-[190px] h-[250px] rounded-2xl overflow-hidden bg-card border border-border shadow-sm transition-all duration-300 cursor-pointer text-center',
+        'group relative flex flex-col w-[190px] h-[250px] rounded-xl overflow-hidden bg-card border border-border cursor-pointer text-center transition-all duration-300',
         isSelected
-          ? 'ring-2 ring-primary shadow-md'
-          : 'hover:shadow-md hover:border-primary/50',
+          ? 'ring-2 ring-primary/70 shadow-md'
+          : 'hover:shadow-md hover:border-primary/40',
         className
       )}
+      style={{ boxShadow: 'var(--shadow-tree-card)' }}
     >
       {/* Photograph Area (Top ~64%) */}
       <div className="w-full h-[160px] relative flex items-center justify-center overflow-hidden shrink-0">
@@ -60,15 +61,13 @@ function TreeMemberCardComponent({
             unoptimized
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary/90 text-primary-foreground transition-transform duration-700 group-hover:scale-[1.03]">
-            <span className="text-5xl font-semibold tracking-wider opacity-90">
-               {initials}
-            </span>
+          <div className="w-full h-full flex items-center justify-center bg-primary/[0.85] dark:bg-primary text-primary-foreground transition-transform duration-700 group-hover:scale-[1.03]">
+            <span className="text-4xl font-light tracking-widest opacity-90">{initials}</span>
           </div>
         )}
         
         {/* Subtle gradient overlay to merge image with card background smoothly */}
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-card to-transparent pointer-events-none transition-colors duration-300" />
+        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-card/95 to-transparent pointer-events-none" />
       </div>
 
       {/* Information Area */}
@@ -84,7 +83,7 @@ function TreeMemberCardComponent({
         )}
 
         {generationName && (
-          <span className="inline-flex items-center justify-center bg-primary/10 text-primary text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full mt-auto">
+          <span className="inline-flex items-center justify-center bg-primary/[0.08] dark:bg-primary/20 text-primary text-[9px] font-semibold uppercase tracking-widest px-2.5 py-0.5 rounded-full mt-auto border border-primary/10">
             {generationName}
           </span>
         )}

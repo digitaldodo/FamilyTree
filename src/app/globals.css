@@ -49,64 +49,64 @@
 }
 
 :root {
-  /* Warm Ivory / Sage light theme */
-  --color-background: #F7F2E7;
-  --color-foreground: #09291F;
+  /* Premium warm heritage archive light theme */
+  --color-background: #F5EFE0;
+  --color-foreground: #1C2E26;
   
-  --color-card: #FFFFFF;
-  --color-card-foreground: #09291F;
+  --color-card: #FDFAF4;
+  --color-card-foreground: #1C2E26;
   
   --color-popover: #FFFFFF;
-  --color-popover-foreground: #09291F;
+  --color-popover-foreground: #1C2E26;
   
   --color-primary: #123D2D;
-  --color-primary-foreground: #F7F2E7;
+  --color-primary-foreground: #F5EFE0;
   
-  --color-secondary: #EBE5D9;
-  --color-secondary-foreground: #09291F;
+  --color-secondary: #EDE7D6;
+  --color-secondary-foreground: #1C2E26;
   
-  --color-muted: #EBE5D9;
-  --color-muted-foreground: #78936B;
+  --color-muted: #E8E1CE;
+  --color-muted-foreground: #6B7A65;
   
-  --color-accent: #D9A441;
-  --color-accent-foreground: #09291F;
+  --color-accent: #C8922A;
+  --color-accent-foreground: #FFFFFF;
   
   --color-destructive: #dc2626;
   --color-destructive-foreground: #ffffff;
   
-  --color-border: #D8D2C5;
-  --color-input: #D8D2C5;
+  --color-border: #CFC8B4;
+  --color-input: #EDE7D6;
   --color-ring: #123D2D;
 
   /* Tree Relationship Connectors (Light Mode) */
-  --color-tree-connector: #78936B;
-  --color-tree-connector-active: #285B40;
-  --color-tree-spouse: #D9A441;
+  --color-tree-connector: #2D6048;
+  --color-tree-connector-active: #123D2D;
+  --color-tree-spouse: #B07D20;
   --color-tree-spouse-active: #936126;
   --color-tree-junction: #285B40;
-  --color-tree-glow: rgba(40, 91, 64, 0.16);
+  --color-tree-glow: rgba(18, 61, 45, 0.15);
   --radius: 0.5rem;
 }
 
 .dark {
   /* Deep forest / Charcoal dark theme */
-  --color-background: #10130F;
+  --color-background: #0D110C;
   --color-foreground: #F7F2E7;
   
-  --color-card: #171B16;
+  --color-card: #161A15;
   --color-card-foreground: #F7F2E7;
   
-  --color-popover: #1E241D;
+  --color-popover: #1C2219;
   --color-popover-foreground: #F7F2E7;
   
   --color-primary: #285B40;
   --color-primary-foreground: #F7F2E7;
   
-  --color-secondary: #1E241D;
+  --color-secondary: #1C2219;
   --color-secondary-foreground: #F7F2E7;
   
-  --color-muted: #1E241D;
-  --color-muted-foreground: #BDB7A9;
+  --color-muted: #1C2219;
+  --color-muted-foreground: #A8B49E;
   
   --color-accent: #D9A441;
   --color-accent-foreground: #10130F;
@@ -114,7 +114,7 @@
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
   
-  --color-border: #30392F;
+  --color-border: #2C3A2B;
   --color-input: #30392F;
   --color-ring: #78936B;
 
@@ -125,6 +125,21 @@
   --color-tree-spouse-active: #F3D17A;
   --color-tree-junction: #78936B;
   --color-tree-glow: rgba(217, 164, 65, 0.2);
+}
+
+/* Elevation shadows — theme-aware */
+:root {
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-elevated: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.06);
+  --shadow-modal: 0 20px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-tree-card: 0 2px 8px rgba(18, 61, 45, 0.08), 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.dark {
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
+  --shadow-elevated: 0 4px 16px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.3);
+  --shadow-modal: 0 20px 60px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-tree-card: 0 2px 8px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
 }
 
 @layer base {
