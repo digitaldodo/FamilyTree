@@ -7,7 +7,6 @@ import { MemberAvatar } from '../members/member-avatar';
 import Image from 'next/image';
 import { MEMORY_ICONS, MEMORY_COLORS } from '@/components/ui/icon-picker';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 
 export type TimelineEventType =
   'BIRTH' | 'MARRIAGE' | 'DEATH' | 'CHILD_BORN' | 'CUSTOM' | 'MEMORY';
@@ -274,14 +273,6 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
                 <Plus className="w-3.5 h-3.5 mr-1.5" />
                 Add Memory
               </Button>
-            )}
-            
-            {primaryMember && (
-              <Link href={`/dashboard/members/${primaryMember.id}`}>
-                <Button variant="ghost" size="sm" className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:text-foreground">
-                  View Profile
-                </Button>
-              </Link>
             )}
           </div>
 

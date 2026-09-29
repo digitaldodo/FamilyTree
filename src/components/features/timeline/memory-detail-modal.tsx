@@ -5,7 +5,6 @@ import { format } from 'date-fns';
 import {
   MapPin,
   Users,
-  Calendar,
   Link as LinkIcon,
   Edit,
   Trash2,
