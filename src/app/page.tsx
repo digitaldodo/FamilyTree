@@ -1,354 +1,56 @@
-'use client';
+// FamilyTree Public Landing Page
 
-import Link from 'next/link';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { 
-  Heart, 
-  GitMerge, 
-  Users,
-  Image as ImageIcon,
-  Calendar,
-  Share2
-} from 'lucide-react';
-import { motion } from 'motion/react';
+import Link from 'next/link';
+import { ArrowUpRight, Heart, LockKeyhole, Plus, Sparkles } from 'lucide-react';
+
+const people = [
+  { name: 'Meera Rao', position: 'object-[52%_54%]' },
+  { name: 'Arun Rao', position: 'object-[62%_25%]' },
+  { name: 'Nandini Rao', position: 'object-[70%_39%]' },
+  { name: 'Kabir Rao', position: 'object-[83%_48%]' },
+];
+
+function Portrait({ index, alt, className = '' }: { index: number; alt: string; className?: string }) {
+  return <Image src="/landing/family-album.png" alt={alt} fill sizes="(max-width: 640px) 96px, 160px" className={`object-cover ${people[index].position} ${className}`} />;
+}
+
+function TreePerson({ index, role, className = '' }: { index: number; role: string; className?: string }) {
+  return <article className={`landing-tree-person ${className}`}><div className="landing-tree-avatar"><Portrait index={index} alt={`${people[index].name}, ${role}`} /></div><div><p>{people[index].name}</p><span>{role}</span></div></article>;
+}
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-background selection:bg-primary/20 selection:text-primary overflow-hidden">
-      {/* Navbar Minimal */}
-      <header className="absolute top-0 w-full h-24 z-50 flex items-center justify-between px-6 md:px-12 lg:px-24 safe-area-top">
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center"
-        >
-          <Image
-            src="/logo.png"
-            alt="FamilyTree"
-            width={140}
-            height={90}
-            className="w-28 md:w-36 h-auto"
-            priority
-          />
-        </motion.div>
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex gap-3 md:gap-6 items-center"
-        >
-          <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Log In
-          </Link>
-          <Link href="/register">
-            <Button className="rounded-full px-6">Start Your Story</Button>
-          </Link>
-        </motion.div>
+    <div className="landing-page">
+      <header className="landing-nav">
+        <Link href="/" aria-label="FamilyTree home" className="landing-logo"><Image src="/logo.png" alt="FamilyTree" width={152} height={78} priority /></Link>
+        <nav aria-label="Primary navigation" className="landing-nav-links"><a href="#tree">The tree</a><a href="#memories">Memories</a><a href="#sharing">Sharing</a></nav>
+        <div className="landing-nav-actions"><Link href="/login" className="landing-login">Sign in</Link><Link href="/register" className="landing-button landing-button-small">Create a tree <ArrowUpRight aria-hidden="true" /></Link></div>
       </header>
 
       <main>
-        {/* Hero Section */}
-        <section className="relative pt-36 md:pt-48 pb-20 md:pb-32 px-6 lg:px-24 flex flex-col items-center text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-4xl mx-auto flex flex-col items-center"
-          >
-            <span className="text-sm uppercase tracking-[0.2em] font-medium text-muted-foreground mb-6">
-              A Premium Family Heritage Platform
-            </span>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tight text-foreground leading-[1.1] mb-8">
-              Preserve your family <br className="hidden md:block" />
-              <span className="text-muted-foreground italic font-serif">history & stories.</span>
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed mb-10">
-              FamilyTree provides a single, beautiful place to connect generations, save precious photographs, and document the relationships that define who you are.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <Link href="/register" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full h-14 px-8 rounded-full text-base shadow-sm">
-                  Build Your Family Tree
-                </Button>
-              </Link>
-              <Link href="/login" className="w-full sm:w-auto">
-                <Button size="lg" variant="secondary" className="w-full h-14 px-8 rounded-full text-base">
-                  View Existing Tree
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
-
-          {/* Abstract / UI Representation of the Tree */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full max-w-6xl mx-auto mt-20 relative h-[400px] md:h-[600px] bg-secondary/30 rounded-3xl md:rounded-[2.5rem] border border-border/50 overflow-hidden flex items-center justify-center"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-background/0 to-background/0" />
-            
-            {/* Simulated UI Nodes */}
-            <div className="relative w-full h-full">
-              {/* Grandparents Layer */}
-              <div className="absolute top-[15%] left-1/2 -translate-x-1/2 flex gap-16 md:gap-32">
-                <div className="flex gap-4 items-center">
-                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-card border border-border shadow-sm flex items-center justify-center text-muted-foreground">
-                    <Users className="w-6 h-6 md:w-8 md:h-8 opacity-20" />
-                  </div>
-                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-card border border-border shadow-sm flex items-center justify-center text-muted-foreground">
-                    <Users className="w-6 h-6 md:w-8 md:h-8 opacity-20" />
-                  </div>
-                </div>
-              </div>
-              
-              {/* Lines */}
-              <svg className="absolute inset-0 w-full h-full pointer-events-none stroke-border stroke-[2px] fill-none" preserveAspectRatio="none">
-                <path d="M 50% 25% L 50% 45%" />
-                <path d="M 35% 45% L 65% 45%" />
-                <path d="M 35% 45% L 35% 55%" />
-                <path d="M 65% 45% L 65% 55%" />
-              </svg>
-
-              {/* Parents Layer */}
-              <div className="absolute top-[55%] left-[35%] -translate-x-1/2 flex items-center justify-center">
-                 <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-card border-2 border-primary shadow-md flex items-center justify-center">
-                   <Heart className="w-6 h-6 md:w-8 md:h-8 text-primary" />
-                 </div>
-              </div>
-
-              <div className="absolute top-[55%] left-[65%] -translate-x-1/2 flex gap-4 items-center justify-center">
-                 <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-card border border-border shadow-sm flex items-center justify-center text-muted-foreground">
-                   <Users className="w-6 h-6 md:w-8 md:h-8 opacity-20" />
-                 </div>
-                 <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-card border border-border shadow-sm flex items-center justify-center text-muted-foreground">
-                   <Users className="w-6 h-6 md:w-8 md:h-8 opacity-20" />
-                 </div>
-              </div>
-            </div>
-          </motion.div>
+        <section className="landing-hero" aria-labelledby="hero-title">
+          <div className="landing-hero-copy"><p className="landing-eyebrow"><span /> A family heritage platform</p><h1 id="hero-title">Every family has a story.<br /><em>Keep it in the family.</em></h1><p className="landing-intro">Connect generations, preserve photographs and memories, and hold on to the stories of the people who made you who you are.</p><div className="landing-hero-actions"><Link href="/register" className="landing-button">Start your family tree <ArrowUpRight aria-hidden="true" /></Link><a href="#tree" className="landing-text-link">Explore a family tree <span aria-hidden="true">↓</span></a></div></div>
+          <div className="landing-hero-stage" aria-label="A sample FamilyTree showing four generations"><div className="landing-sun" /><p className="landing-stage-label">The Rao family <span>•</span> 4 generations</p><div className="landing-tree-window"><div className="landing-tree-toolbar"><span className="landing-toolbar-mark" /><span>Rao family tree</span><button type="button" aria-label="Add a family member"><Plus aria-hidden="true" /></button></div><div className="landing-tree-canvas"><svg className="landing-tree-lines" viewBox="0 0 760 490" preserveAspectRatio="none" aria-hidden="true"><path d="M380 108v58M218 166h324M218 166v60M542 166v60M218 300v42M542 300v42M218 342h324M380 342v58" /></svg><TreePerson index={0} role="Grandmother" className="landing-tree-grandma" /><TreePerson index={1} role="Father" className="landing-tree-father" /><TreePerson index={2} role="Mother" className="landing-tree-mother" /><TreePerson index={3} role="Son" className="landing-tree-son" /><span className="landing-heart"><Heart aria-hidden="true" /></span></div><div className="landing-tree-caption"><span>Family Tree</span><span>Zoomed to fit</span></div></div><div className="landing-memory-note"><span>1973</span><p>“The house with the mango tree.”</p><i /></div></div>
+          <div className="landing-hero-rule" aria-hidden="true"><span>Scroll to begin</span></div>
         </section>
 
-        {/* Why Family History Matters */}
-        <section className="py-24 md:py-32 px-6 lg:px-24 bg-card border-y border-border">
-          <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8">
-              <h2 className="text-3xl md:text-5xl font-semibold tracking-tight">
-                Because every family has a story to tell.
-              </h2>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                We believe that understanding where you come from grounds you in who you are. FamilyTree isn&apos;t just software—it&apos;s a digital heirloom designed to preserve the essence of your lineage for the generations that follow.
-              </p>
-              <ul className="space-y-4">
-                {[
-                  "Trace connections across generations",
-                  "Preserve fragile historical memories",
-                  "Document vital family milestones",
-                  "Create a lasting legacy for your children"
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-foreground">
-                    <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center shrink-0">
-                      <div className="w-2 h-2 rounded-full bg-primary" />
-                    </div>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-secondary">
-              <Image 
-                src="https://images.unsplash.com/photo-1581955743431-7788be4f16b6?auto=format&fit=crop&q=80&w=1000"
-                alt="Vintage family portrait"
-                fill
-                className="object-cover opacity-90 sepia-[.2]"
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-            </div>
-          </div>
-        </section>
+        <section className="landing-statement" aria-labelledby="story-title"><p className="landing-eyebrow"><span /> More than names and dates</p><div><h2 id="story-title">Family history is not something you find. <em>It is something you keep.</em></h2><p>There are stories carried in an old photograph, a favourite saying, and the way a name is remembered. FamilyTree gives those pieces a place to belong—together.</p></div></section>
 
-        {/* Feature Narrative */}
-        <section className="py-24 md:py-32 px-6 lg:px-24">
-          <div className="max-w-6xl mx-auto space-y-32">
-            
-            {/* The Tree */}
-            <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-center">
-              <div className="order-2 md:order-1 relative aspect-square bg-muted rounded-[2rem] p-8 border border-border shadow-sm flex items-center justify-center">
-                {/* Abstract UI Representation */}
-                <div className="w-full h-full bg-card rounded-2xl shadow-sm border border-border/50 p-6 flex flex-col">
-                  <div className="w-full flex justify-between items-center mb-8 border-b border-border pb-4">
-                    <div className="flex gap-2">
-                       <div className="w-3 h-3 rounded-full bg-border" />
-                       <div className="w-3 h-3 rounded-full bg-border" />
-                    </div>
-                    <div className="w-24 h-4 bg-muted rounded-full" />
-                  </div>
-                  <div className="flex-1 relative">
-                    <div className="absolute inset-x-0 top-1/4 h-px bg-border" />
-                    <div className="absolute inset-y-0 left-1/2 w-px bg-border" />
-                    <div className="absolute top-[25%] left-[20%] -translate-x-1/2 -translate-y-1/2 w-16 h-20 bg-secondary rounded-xl border border-border" />
-                    <div className="absolute top-[25%] left-[80%] -translate-x-1/2 -translate-y-1/2 w-16 h-20 bg-secondary rounded-xl border border-border" />
-                    <div className="absolute top-[75%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-16 h-20 bg-primary/20 rounded-xl border border-primary/40" />
-                  </div>
-                </div>
-              </div>
-              <div className="order-1 md:order-2 space-y-6">
-                <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center border border-border">
-                  <GitMerge className="w-6 h-6 text-foreground" />
-                </div>
-                <h3 className="text-3xl md:text-4xl font-semibold">The Tree</h3>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  Map your lineage with our intuitive interface. Connect parents, children, and spouses, visually structuring generations of history in a format that feels natural and expansive.
-                </p>
-              </div>
-            </div>
+        <section id="tree" className="landing-tree-section" aria-labelledby="tree-title"><div className="landing-section-heading"><p className="landing-eyebrow"><span /> Where the story begins</p><h2 id="tree-title">See the shape of your family.</h2><p>Bring grandparents, parents, partners and children into one living picture. Follow connections across generations at a glance.</p><a href="#sharing" className="landing-text-link">Explore the family tree <ArrowUpRight aria-hidden="true" /></a></div><div className="landing-tree-detail" aria-label="Family tree product preview"><div className="landing-detail-top"><span>Family members</span><span>Generation 03</span></div><div className="landing-detail-map"><svg viewBox="0 0 800 470" preserveAspectRatio="none" aria-hidden="true"><path d="M135 108v58h260v64M395 166h270v64M395 230v70M248 300h294M248 300v75M542 300v75" /></svg><div className="landing-detail-person p1"><Portrait index={0} alt="Meera Rao" /><b>Meera</b><small>Grandmother</small></div><div className="landing-detail-person p2"><Portrait index={1} alt="Arun Rao" /><b>Arun</b><small>Father</small></div><div className="landing-detail-person p3"><Portrait index={2} alt="Nandini Rao" /><b>Nandini</b><small>Mother</small></div><div className="landing-detail-person p4"><Portrait index={3} alt="Kabir Rao" /><b>Kabir</b><small>Son</small></div><div className="landing-detail-person p5"><Portrait index={0} alt="A family member" /><b>Leela</b><small>Daughter</small></div></div><div className="landing-detail-footer"><span><i /> Parent</span><span><i /> Partner</span><span><i /> Child</span></div></div></section>
 
-            {/* Memories */}
-            <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-center">
-              <div className="space-y-6">
-                <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center border border-border">
-                  <ImageIcon className="w-6 h-6 text-foreground" />
-                </div>
-                <h3 className="text-3xl md:text-4xl font-semibold">The Memories</h3>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  More than just names and dates. Upload historical photographs, digitize letters, and link rich stories directly to the family members they belong to.
-                </p>
-              </div>
-              <div className="relative aspect-square bg-muted rounded-[2rem] p-8 border border-border shadow-sm flex items-center justify-center">
-                <div className="w-full h-full relative grid grid-cols-2 grid-rows-2 gap-4">
-                   <div className="bg-card rounded-xl border border-border shadow-sm p-3">
-                     <div className="w-full h-full bg-secondary rounded-lg" />
-                   </div>
-                   <div className="bg-card rounded-xl border border-border shadow-sm p-3 flex flex-col gap-3">
-                     <div className="w-full h-1/2 bg-secondary rounded-lg" />
-                     <div className="w-full h-4 bg-muted rounded" />
-                     <div className="w-2/3 h-4 bg-muted rounded" />
-                   </div>
-                   <div className="bg-card rounded-xl border border-border shadow-sm p-4 flex flex-col gap-4 justify-center items-center">
-                      <ImageIcon className="w-8 h-8 text-muted-foreground/40" />
-                   </div>
-                   <div className="bg-card rounded-xl border border-border shadow-sm p-3">
-                     <div className="w-full h-full bg-accent/20 rounded-lg border border-accent/30" />
-                   </div>
-                </div>
-              </div>
-            </div>
+        <section className="landing-his-story" aria-labelledby="history-title"><div className="landing-his-copy"><p className="landing-eyebrow"><span /> The people within the tree</p><h2 id="history-title"><span>His</span>-story. <span>Her</span>-story. <span>Their</span>-story.</h2><p>A family’s history is made of individual lives. Give every person more than a branch: a photograph, a voice, and a place in the story that follows.</p></div><div className="landing-his-portrait"><Image src="/landing/family-album.png" alt="A grandmother sharing a photograph album with her family" fill sizes="(max-width: 900px) 100vw, 48vw" className="object-cover object-[62%_47%]" /><div className="landing-portrait-caption"><span>Meera Rao</span><span>Keeper of stories</span></div></div></section>
 
-            {/* Timeline */}
-            <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-center">
-              <div className="order-2 md:order-1 relative aspect-square bg-muted rounded-[2rem] p-8 border border-border shadow-sm flex items-center justify-center">
-                <div className="w-full max-w-sm flex flex-col gap-6">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex gap-4">
-                      <div className="flex flex-col items-center">
-                        <div className={`w-3 h-3 rounded-full ${i === 2 ? 'bg-accent' : 'bg-primary'}`} />
-                        {i !== 3 && <div className="w-px h-full bg-border my-2" />}
-                      </div>
-                      <div className="bg-card flex-1 rounded-xl p-4 border border-border shadow-sm pb-8">
-                        <div className="w-16 h-3 bg-muted rounded mb-3" />
-                        <div className="w-3/4 h-4 bg-secondary rounded" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="order-1 md:order-2 space-y-6">
-                <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center border border-border">
-                  <Calendar className="w-6 h-6 text-foreground" />
-                </div>
-                <h3 className="text-3xl md:text-4xl font-semibold">The Timeline</h3>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  View your family&apos;s history chronologically. Watch as historical events shape your ancestors&apos; lives, bringing context and depth to names in the tree.
-                </p>
-              </div>
-            </div>
-            
-            {/* Collaboration */}
-            <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-center">
-              <div className="space-y-6">
-                <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center border border-border">
-                  <Share2 className="w-6 h-6 text-foreground" />
-                </div>
-                <h3 className="text-3xl md:text-4xl font-semibold">Collaborate & Share</h3>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  Family history is a collective effort. Invite relatives to view, contribute, and help map out branches of the family you might not know.
-                </p>
-              </div>
-              <div className="relative aspect-square bg-muted rounded-[2rem] p-8 border border-border shadow-sm flex items-center justify-center">
-                 <div className="w-full h-full bg-card rounded-2xl border border-border shadow-sm p-6 flex flex-col">
-                   <div className="text-sm font-medium mb-4 text-foreground">Invite Family</div>
-                   <div className="flex gap-2 mb-6">
-                     <div className="flex-1 h-10 bg-secondary rounded-lg border border-border" />
-                     <div className="w-20 h-10 bg-primary rounded-lg" />
-                   </div>
-                   <div className="space-y-4">
-                     {[1, 2, 3].map((i) => (
-                       <div key={i} className="flex items-center justify-between">
-                         <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-full bg-secondary border border-border" />
-                           <div className="w-24 h-4 bg-secondary rounded" />
-                         </div>
-                         <div className="w-16 h-4 bg-muted rounded" />
-                       </div>
-                     ))}
-                   </div>
-                 </div>
-              </div>
-            </div>
+        <section id="memories" className="landing-memories" aria-labelledby="memories-title"><div className="landing-memories-title"><p className="landing-eyebrow"><span /> What they lived</p><h2 id="memories-title">Keep the moments behind the names.</h2></div><div className="landing-memory-grid"><article className="landing-photo landing-photo-tall"><Portrait index={0} alt="A remembered family moment" /><div><span>1968</span><p>The first home</p></div></article><article className="landing-memory-quote"><Sparkles aria-hidden="true" /><p>“Some memories are too important to leave in a drawer.”</p><span>— a note for the next generation</span></article><article className="landing-photo landing-photo-wide"><Image src="/landing/family-album.png" alt="A family looking through old photographs" fill sizes="(max-width: 900px) 100vw, 60vw" className="object-cover object-[65%_58%]" /><div><span>Memory</span><p>The album comes out every summer</p></div></article><article className="landing-memory-detail"><span>APR</span><b>14</b><p>A new chapter begins</p><small>Milestone • 2001</small></article></div><p className="landing-memories-outro">Add photographs, stories and milestones directly to the people and moments they belong to.</p></section>
 
-          </div>
-        </section>
+        <section className="landing-timeline" aria-labelledby="timeline-title"><div className="landing-timeline-intro"><p className="landing-eyebrow"><span /> How the story unfolds</p><h2 id="timeline-title">From the first story <br className="landing-desktop-only" />to the latest chapter.</h2></div><ol className="landing-timeline-list"><li><time>1942</time><div className="landing-dot" /><div><h3>Meera is born</h3><p>A new branch begins.</p></div></li><li><time>1973</time><div className="landing-dot" /><div><h3>A home, a family album</h3><p>Photographs find their place in the story.</p></div></li><li><time>2001</time><div className="landing-dot" /><div><h3>The next generation</h3><p>New faces, old stories passed along.</p></div></li><li><time>Today</time><div className="landing-dot landing-dot-now" /><div><h3>Keep writing</h3><p>Your family history is still unfolding.</p></div></li></ol></section>
 
-        {/* Final CTA */}
-        <section className="py-24 md:py-32 px-6 bg-card border-t border-border text-center">
-          <div className="max-w-3xl mx-auto space-y-8">
-            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight">Begin your family story.</h2>
-            <p className="text-lg md:text-xl text-muted-foreground">
-              Join families worldwide in preserving their most valuable asset: their history.
-            </p>
-            <div className="pt-4">
-              <Link href="/register">
-                <Button size="lg" className="h-14 px-10 rounded-full text-base shadow-sm">
-                  Preserve Your History
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
+        <section id="sharing" className="landing-sharing" aria-labelledby="sharing-title"><div className="landing-share-visual" aria-label="Sharing settings product preview"><div className="landing-share-window"><div className="landing-share-head"><span>Share the Rao family tree</span><LockKeyhole aria-hidden="true" /></div><p>Only the people you choose can see or add to this family story.</p><div className="landing-share-invite"><span>Invite family members</span><button type="button">Send invite</button></div><div className="landing-share-person"><div><div className="landing-share-avatar"><Portrait index={1} alt="" /></div><span><b>Arun Rao</b><small>Can edit</small></span></div><em>Owner</em></div><div className="landing-share-person"><div><div className="landing-share-avatar"><Portrait index={2} alt="" /></div><span><b>Nandini Rao</b><small>Can view</small></span></div><em>Invited</em></div></div></div><div className="landing-share-copy"><p className="landing-eyebrow"><span /> Keep it close</p><h2 id="sharing-title">Share the story, <em>on your terms.</em></h2><p>Invite the people who know the stories best. Keep your tree private, decide who can view it, and choose who can help add the next memory.</p><Link href="/register" className="landing-text-link">Start preserving your history <ArrowUpRight aria-hidden="true" /></Link></div></section>
+
+        <section className="landing-final-cta" aria-labelledby="cta-title"><p className="landing-eyebrow"><span /> Your history has a home</p><h2 id="cta-title">Don’t let your family’s stories disappear.</h2><p>Start preserving the people, places and moments that matter—before they fade.</p><Link href="/register" className="landing-button">Start your family tree <ArrowUpRight aria-hidden="true" /></Link></section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-background border-t border-border pt-16 pb-8 px-6 lg:px-24">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-16">
-          <div>
-            <Image
-              src="/logo.png"
-              alt="FamilyTree"
-              width={140}
-              height={90}
-              className="w-24 md:w-32 h-auto mb-4"
-            />
-            <p className="text-muted-foreground max-w-xs text-sm">
-              Helping families preserve generations, relationships, stories, and memories in one place.
-            </p>
-          </div>
-          <div className="flex gap-12">
-             <div className="flex flex-col gap-3">
-               <span className="font-semibold text-sm">Product</span>
-               <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">Login</Link>
-               <Link href="/register" className="text-sm text-muted-foreground hover:text-foreground">Register</Link>
-             </div>
-             <div className="flex flex-col gap-3">
-               <span className="font-semibold text-sm">Legal</span>
-               <span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer">Privacy</span>
-               <span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer">Terms</span>
-             </div>
-          </div>
-        </div>
-        <div className="max-w-6xl mx-auto pt-8 border-t border-border/50 text-sm text-muted-foreground text-center md:text-left flex flex-col md:flex-row justify-between safe-area-bottom">
-          <p>© {new Date().getFullYear()} FamilyTree. All rights reserved.</p>
-        </div>
-      </footer>
+      <footer className="landing-footer"><div className="landing-footer-main"><div><Image src="/logo.png" alt="FamilyTree" width={145} height={75} /><p>A place for generations, relationships, photographs and the stories that connect them.</p></div><nav aria-label="Footer navigation"><Link href="/register">Create a family tree</Link><Link href="/login">Sign in</Link><a href="#tree">Explore the tree</a></nav></div><div className="landing-footer-bottom"><span>© {new Date().getFullYear()} FamilyTree</span><span>Made for the stories that stay with us.</span></div></footer>
     </div>
   );
 }
