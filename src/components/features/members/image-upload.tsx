@@ -26,10 +26,6 @@ export function ImageUpload({
     null
   );
 
-  const uploadPreset =
-    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'family-tree';
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,10 +42,6 @@ export function ImageUpload({
   };
 
   const uploadToCloudinary = async (blob: Blob) => {
-    if (!cloudName) {
-      toast.error('Cloudinary configuration is missing.');
-      return;
-    }
 
     setIsProcessing(true);
     setSelectedImageSrc(null); // Close modal
@@ -57,16 +49,12 @@ export function ImageUpload({
     try {
       const formData = new FormData();
       formData.append('file', blob);
-      formData.append('upload_preset', uploadPreset);
       formData.append('folder', folder);
 
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
 
       let data;
       try {
@@ -75,8 +63,8 @@ export function ImageUpload({
         throw new Error('Server returned invalid response');
       }
 
-      if (data.secure_url) {
-        onChange(data.secure_url);
+      if (data.url || data.secure_url) {
+        onChange(data.url || data.secure_url);
       } else {
         throw new Error('Upload failed');
       }

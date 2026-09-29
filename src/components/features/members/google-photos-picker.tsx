@@ -164,12 +164,16 @@ export function GooglePhotosPicker({
       const selectedItem = mediaData.mediaItems[0];
       const mediaFileUrl = selectedItem.mediaFileUrl;
 
-      // 5. Fetch image as blob
-      const imageRes = await fetch(mediaFileUrl);
-      if (!imageRes.ok) {
-        throw new Error('Failed to download media file');
+      // 5. Fetch image via our backend proxy to handle auth and CORS
+      const downloadRes = await fetch('/api/upload/google-photos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mediaFileUrl, accessToken }),
+      });
+      if (!downloadRes.ok) {
+        throw new Error('Failed to download media file from Google via backend');
       }
-      const blob = await imageRes.blob();
+      const blob = await downloadRes.blob();
 
       // 6. Pass back to parent
       await onPhotoSelected(blob);

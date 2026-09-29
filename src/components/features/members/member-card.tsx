@@ -158,7 +158,7 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
             gender={member.gender}
             fallbackSize={48}
             iconClassName="transition-transform duration-500 group-hover:scale-110"
-            className="transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full rounded-none text-5xl transition-transform duration-500 group-hover:scale-105"
           />
         </div>
         <div className="p-3 flex flex-col justify-center items-center min-h-[100px] shrink-0 bg-card text-center border-t border-border/50">
