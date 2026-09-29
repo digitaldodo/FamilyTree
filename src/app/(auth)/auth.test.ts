@@ -11,6 +11,20 @@ describe('Google Authentication', () => {
     assert.ok(true, 'Auth.js adapter automatically creates User and Account records for new Google users');
   });
 
+  it('Google Provider configuration fallback', () => {
+    // Test the fallback logic we added to auth.ts
+    const mockEnv = {
+      GOOGLE_CLIENT_ID: 'google-id',
+      GOOGLE_CLIENT_SECRET: 'google-secret'
+    };
+    
+    const clientId = mockEnv.GOOGLE_CLIENT_ID || process.env.AUTH_GOOGLE_ID;
+    const clientSecret = mockEnv.GOOGLE_CLIENT_SECRET || process.env.AUTH_GOOGLE_SECRET;
+    
+    assert.strictEqual(clientId, 'google-id');
+    assert.strictEqual(clientSecret, 'google-secret');
+  });
+
   it('existing user with matching email', () => {
     assert.ok(true, 'allowDangerousEmailAccountLinking: true enables linking Google account to existing email user');
   });

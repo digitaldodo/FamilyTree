@@ -79,25 +79,33 @@ export function FamilyTimeline({ events, onEventClick, onAddMemory, onAddContext
 
       <div className="mt-4">
         {sortedEvents.length > 0 ? (
-          <div className="flex flex-col">
+          <div className="flex flex-col relative before:absolute before:inset-0 before:ml-7 sm:before:ml-10 md:before:mx-auto md:before:w-px md:before:bg-border/60 md:before:left-0 md:before:right-0">
             {sortedEvents.map((event, index) => {
               const currentYear = new Date(event.date).getFullYear();
               const prevYear = index > 0 ? new Date(sortedEvents[index - 1].date).getFullYear() : null;
               const showYear = currentYear !== prevYear;
-              const isLastEvent = index === sortedEvents.length - 1;
+              
+              const isEven = index % 2 === 0;
 
               return (
                 <div key={event.id} className="flex flex-col">
                   {/* Year Marker Segment */}
                   {showYear && (
-                    <div className="flex relative z-10 group">
-                      <div className="w-14 sm:w-20 shrink-0 flex flex-col items-center">
-                        {/* Only draw top line if it's not the absolute first year marker */}
-                        <div className={`w-px bg-border/60 ${index === 0 ? 'h-6 sm:h-8 opacity-0' : 'flex-1'}`} />
-                        <div className="w-2.5 h-2.5 rounded-full bg-border/80 my-3 sm:my-4" />
-                        <div className="w-px bg-border/60 flex-1" />
+                    <div className="flex md:justify-center relative z-10 group mt-4 mb-8 md:mb-12">
+                      <div className="w-14 sm:w-20 md:w-auto shrink-0 flex items-center md:justify-center">
+                        <div className="hidden md:flex w-full items-center justify-center">
+                          <div className="px-4 py-1.5 rounded-full bg-background border border-border shadow-sm">
+                            <h2 className="text-lg md:text-xl font-serif font-bold tracking-tight text-foreground/80">
+                              {currentYear}
+                            </h2>
+                          </div>
+                        </div>
+                        {/* Mobile Year */}
+                        <div className="md:hidden flex flex-col items-center w-full">
+                          <div className="w-2.5 h-2.5 rounded-full bg-border/80 my-3 sm:my-4" />
+                        </div>
                       </div>
-                      <div className="flex-1 py-4 sm:py-6 min-w-0 pr-2">
+                      <div className="md:hidden flex-1 py-4 sm:py-6 min-w-0 pr-2">
                         <h2 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight text-foreground/80">
                           {currentYear}
                         </h2>
@@ -106,25 +114,39 @@ export function FamilyTimeline({ events, onEventClick, onAddMemory, onAddContext
                   )}
 
                   {/* Event Segment */}
-                  <div className="flex relative group">
-                    {/* Spine Column */}
-                    <div className="w-14 sm:w-20 shrink-0 flex flex-col items-center">
-                      <div className="w-px bg-border/60 h-6 sm:h-8" />
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center z-10 shadow-sm border ring-4 ring-background ${getEventBg(event.type)}`}>
-                        {getEventIcon(event.type)}
-                      </div>
-                      {/* Flex-1 line connects seamlessly to the next row's top line. We hide it on the last element if we don't want it dangling. */}
-                      <div className={`w-px bg-border/60 ${isLastEvent ? 'h-6 sm:h-8' : 'flex-1'}`} />
+                  <div className="flex md:justify-between items-center w-full relative group mb-8 md:mb-12">
+                    
+                    {/* Left Side (Desktop Only for Odd indices, Mobile it's nothing) */}
+                    <div className={`hidden md:block w-[calc(50%-2rem)] ${!isEven ? 'md:order-1' : 'md:order-3'}`}>
+                      {!isEven && (
+                        <div className="w-full">
+                          <TimelineEvent
+                            event={event}
+                            onClick={onEventClick}
+                            onAddContextualMemory={onAddContextualMemory}
+                          />
+                        </div>
+                      )}
                     </div>
                     
-                    {/* Event Content Column */}
-                    <div className="flex-1 pb-8 sm:pb-12 min-w-0 pt-2 sm:pt-4">
-                      <TimelineEvent
-                        event={event}
-                        onClick={onEventClick}
-                        onAddContextualMemory={onAddContextualMemory}
-                      />
+                    {/* Spine Column */}
+                    <div className="w-14 sm:w-20 md:w-16 shrink-0 flex flex-col items-center justify-center relative z-10 md:order-2">
+                      <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-sm border ring-4 ring-background ${getEventBg(event.type)}`}>
+                        {getEventIcon(event.type)}
+                      </div>
                     </div>
+                    
+                    {/* Right Side (Content for Even indices, and Mobile Content) */}
+                    <div className={`flex-1 md:w-[calc(50%-2rem)] md:flex-none min-w-0 md:order-3 ${isEven ? '' : 'md:hidden'}`}>
+                      <div className="w-full">
+                        <TimelineEvent
+                          event={event}
+                          onClick={onEventClick}
+                          onAddContextualMemory={onAddContextualMemory}
+                        />
+                      </div>
+                    </div>
+                    
                   </div>
                 </div>
               );
