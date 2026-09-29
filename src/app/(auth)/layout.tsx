@@ -5,36 +5,40 @@ import Image from "next/image";
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background flex flex-col md:flex-row">
-      {/* Visual Side */}
-      <div className="hidden md:flex flex-1 relative bg-secondary border-r border-border items-end justify-start overflow-hidden p-12 lg:p-24">
-        {/* Full background image, authentic and warm */}
-        <Image 
-          src="https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?auto=format&fit=crop&q=80&w=1600"
-          alt="Family memories"
-          fill
-          className="object-cover opacity-80 mix-blend-multiply filter grayscale-[0.3]"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+      <div className="hidden md:flex flex-1 relative bg-gradient-to-br from-background via-muted/30 to-muted items-center justify-center overflow-hidden p-12 lg:p-24 border-r border-border">
+        {/* Subtle branching line pattern / watermark */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.04]">
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="branch-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                <path d="M50 100 V70 M50 70 Q50 50 20 50 M50 70 Q50 50 80 50 M20 50 V20 M80 50 V20" stroke="currentColor" strokeWidth="1" fill="none" />
+              </pattern>
+            </defs>
+            <rect x="0" y="0" width="100%" height="100%" fill="url(#branch-pattern)" />
+          </svg>
+        </div>
         
-        <div className="relative z-10 max-w-lg">
-          <Link href="/">
+        <div className="relative z-10 max-w-lg w-full">
+          <Link href="/" className="inline-block mb-12">
             <Image
               src="/logo.png"
               alt="FamilyTree"
               width={160}
               height={107}
-              className="w-32 md:w-40 h-auto mb-8 bg-background/50 backdrop-blur-md rounded-lg p-2"
+              className="w-32 md:w-40 h-auto drop-shadow-sm"
               priority
             />
           </Link>
-          <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight mb-4 text-foreground leading-[1.2]">
-            Every family has a story. <br className="hidden lg:block" />
-            <span className="text-muted-foreground italic font-serif">Start yours today.</span>
-          </h1>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            Join thousands of families building their interactive family trees. Share memories, discover connections, and preserve your history forever.
-          </p>
+          <div className="space-y-6">
+            <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-[1.15]">
+              Every family has a story.
+              <br />
+              <span className="text-primary italic font-serif font-medium mt-2 block">Start yours today.</span>
+            </h1>
+            <p className="text-lg text-muted-foreground leading-relaxed max-w-md">
+              Bring generations together, preserve precious memories, and discover the connections that make your family unique.
+            </p>
+          </div>
         </div>
       </div>
 
