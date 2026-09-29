@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import Script from 'next/script';
+import { getGoogleClientId } from '@/app/actions/google';
 
 interface GooglePhotosPickerProps {
   onPhotoSelected: (blob: Blob) => Promise<void>;
@@ -17,7 +18,14 @@ export function GooglePhotosPicker({
 }: GooglePhotosPickerProps) {
   const [isApiLoaded, setIsApiLoaded] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const [clientId, setClientId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Also try checking NEXT_PUBLIC variable as fallback
+    getGoogleClientId().then(id => {
+      setClientId(id || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || null);
+    });
+  }, []);
 
   const handleScriptLoad = () => {
     setIsApiLoaded(true);
@@ -26,7 +34,7 @@ export function GooglePhotosPicker({
   const startPickerFlow = async () => {
     if (!clientId) {
       toast.error(
-        'Google Client ID is not configured in environment variables.'
+        'Google Client ID is not configured (missing GOOGLE_CLIENT_ID or AUTH_GOOGLE_ID)'
       );
       return;
     }

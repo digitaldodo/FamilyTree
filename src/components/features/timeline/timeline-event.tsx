@@ -32,7 +32,10 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
   const safeMembers = Array.isArray(event.members) ? event.members : [];
   const isMemory = event.type === 'MEMORY';
   const memoryMedia = event.memoryData?.media;
-  const hasCoverPhoto = isMemory && Array.isArray(memoryMedia) && memoryMedia.length > 0;
+  const memoryCoverUrl = (Array.isArray(memoryMedia) && memoryMedia.length > 0) 
+    ? memoryMedia[0].url 
+    : event.memoryData?.albumCoverUrl;
+  const hasCoverPhoto = !!memoryCoverUrl;
   const primaryMember = safeMembers[0];
   const associatedMemoriesCount = event.associatedMemories?.length || 0;
 
@@ -70,7 +73,7 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
         <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] overflow-hidden border-b border-border/40">
           {hasCoverPhoto ? (
             <Image 
-              src={memoryMedia[0].url} 
+              src={memoryCoverUrl} 
               alt={event.title}
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -83,7 +86,7 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-40" />
           
           <div className="absolute bottom-3 left-3 flex gap-2">
-            {event.mediaCount && event.mediaCount > 1 && (
+            {(event.mediaCount || 0) > 1 && (
               <span className="flex items-center gap-1.5 text-xs bg-black/50 backdrop-blur-md text-white px-2 py-1 rounded font-medium border border-white/10">
                 <ImageIcon className="w-3.5 h-3.5" />
                 {event.mediaCount}

@@ -77,7 +77,7 @@ export function MemberAvatar({
 
   if (imageUrl && !hasLoadError) {
     return (
-      <div className={cn('relative overflow-hidden rounded-full shrink-0', className)}>
+      <div className={cn('relative overflow-hidden rounded-full shrink-0 w-full h-full', className)}>
         <Image
           src={imageUrl}
           alt={fullName || 'Member'}
@@ -94,7 +94,7 @@ export function MemberAvatar({
   return (
     <div
       className={cn(
-        'relative flex items-center justify-center rounded-full text-lg font-semibold tracking-wide shrink-0',
+        'relative flex items-center justify-center rounded-full text-lg font-semibold tracking-wide shrink-0 w-full h-full',
         fallbackClasses,
         className
       )}
