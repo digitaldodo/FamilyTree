@@ -28,6 +28,17 @@ model User {
   memories       Memory[]
 }
 
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  tokenHash String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  lastSent  DateTime @default(now())
+
+  @@index([email])
+}
+
 model Tree {
   id            String             @id @default(cuid())
   name          String

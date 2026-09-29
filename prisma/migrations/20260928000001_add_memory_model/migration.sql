@@ -1,4 +1,3 @@
-Γùç injected env (9) from .env // tip: Γîÿ custom filepath { path: '/custom/path/.env' }
 -- AlterTable
 ALTER TABLE "Media" ADD COLUMN     "memoryId" TEXT,
 ALTER COLUMN "memberId" DROP NOT NULL;

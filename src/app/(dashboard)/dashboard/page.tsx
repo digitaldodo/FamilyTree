@@ -6,9 +6,10 @@ import { useMembers } from '@/hooks/use-members';
 import { useMemories } from '@/hooks/use-memories';
 import { useUserTrees } from '@/hooks/use-user-trees';
 import { DashboardSkeleton } from '@/components/ui/dashboard-skeleton';
+import { DashboardTreePreview } from '@/components/features/dashboard/dashboard-tree-preview';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { EmptyState } from '@/components/ui/empty-state';
-import { TreePine, ArrowRight, Clock, Users, Plus, ImageIcon, ChevronRight, Calendar } from 'lucide-react';
+import { TreePine, ArrowRight, Clock, Plus, ImageIcon, ChevronRight, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -249,32 +250,19 @@ function DashboardContent() {
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-semibold tracking-tight">The Family Tree</h2>
             </div>
-            <div className="relative rounded-3xl bg-secondary/30 border border-border h-64 overflow-hidden flex items-center justify-center group cursor-pointer transition-colors hover:bg-secondary/50">
-              {/* Abstract tree representation */}
-              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary via-background/0 to-background/0" />
-              <div className="relative flex flex-col items-center gap-8">
-                <div className="flex gap-16 relative">
-                  <div className="w-12 h-12 rounded-full bg-card border border-border shadow-sm flex items-center justify-center text-muted-foreground z-10">
-                     <Users className="w-5 h-5 opacity-40" />
-                  </div>
-                  <div className="w-12 h-12 rounded-full bg-card border border-border shadow-sm flex items-center justify-center text-muted-foreground z-10">
-                     <Users className="w-5 h-5 opacity-40" />
-                  </div>
-                  <div className="absolute top-1/2 left-6 right-6 h-px bg-border -z-0" />
-                  <div className="absolute top-1/2 left-1/2 w-px h-10 bg-border -z-0" />
-                </div>
-                <div className="w-16 h-16 rounded-full bg-card border-2 border-primary shadow-md flex items-center justify-center text-foreground z-10 relative">
-                  <TreePine className="w-6 h-6" />
-                  <div className="absolute -top-4 left-1/2 w-px h-4 bg-border -z-0" />
-                </div>
-              </div>
+            <div className="relative rounded-3xl bg-secondary/30 border border-border h-80 overflow-hidden flex items-center justify-center group cursor-pointer transition-colors hover:bg-secondary/50 shadow-inner">
+              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary via-background/0 to-background/0 pointer-events-none" />
               
-              <div className="absolute inset-0 bg-background/50 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                 <Link href="/tree">
-                   <Button className="rounded-full shadow-lg">
-                     Open Interactive Tree
-                   </Button>
-                 </Link>
+              {/* REAL TREE PREVIEW */}
+              <div className="w-full h-full relative z-10 pointer-events-none">
+                <DashboardTreePreview treeId={activeTreeId} />
+              </div>
+
+              {/* OVERLAY ACTION */}
+              <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-background/10 backdrop-blur-[1px]">
+                <div className="bg-background/90 text-foreground font-medium px-6 py-3 rounded-full shadow-lg border border-border flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                  Explore Family Tree <ArrowRight className="w-4 h-4" />
+                </div>
               </div>
             </div>
           </section>

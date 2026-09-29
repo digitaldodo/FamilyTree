@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 
@@ -12,6 +13,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma as any),
   session: { strategy: "jwt" },
   providers: [
+    GoogleProvider({
+      allowDangerousEmailAccountLinking: true,
+    }),
     CredentialsProvider({
       credentials: {
         email: { label: "Email", type: "email" },
@@ -24,6 +28,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { email: credentials.email as string }
         });
         
+        // Let users who originally signed up via Google sign in if they somehow have a password?
+        // Wait, if they ONLY have a Google account, they have no password, so they can't sign in via credentials unless they set a password.
         if (!user || !user.password) return null;
         
         const isPasswordValid = await bcrypt.compare(

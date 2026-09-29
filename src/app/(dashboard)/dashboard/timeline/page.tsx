@@ -5,12 +5,11 @@ import { useAppStore } from '@/store/use-app-store';
 import { FamilyTimeline } from '@/components/features/timeline/family-timeline';
 import { TimelineEventProps } from '@/components/features/timeline/timeline-event';
 import { TimelineSkeleton } from '@/components/ui/timeline-skeleton';
-import { Clock, Plus } from 'lucide-react';
 import { useMembers } from '@/hooks/use-members';
 import { useMemories } from '@/hooks/use-memories';
+import { useUserTrees } from '@/hooks/use-user-trees';
 import { MemoryFormModal } from '@/components/features/timeline/memory-form-modal';
 import { MemoryDetailModal } from '@/components/features/timeline/memory-detail-modal';
-import { Button } from '@/components/ui/button';
 
 export default function TimelinePage() {
   const activeTreeId = useAppStore(s => s.activeTreeId);
@@ -18,12 +17,16 @@ export default function TimelinePage() {
 
   const { members, isLoading: isLoadingMembers } = useMembers(activeTreeId || undefined);
   const { memories, isLoading: isLoadingMemories, createMemory, updateMemory, deleteMemory } = useMemories(activeTreeId || undefined);
+  const { userTrees, isLoading: isLoadingTrees } = useUserTrees();
+  
+  const activeTree = userTrees.find(t => t.id === activeTreeId);
+  const familyName = activeTree?.name || '';
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedMemory, setSelectedMemory] = useState<any>(null);
 
-  const isLoading = isLoadingMembers || isLoadingMemories;
+  const isLoading = isLoadingMembers || isLoadingMemories || isLoadingTrees;
   const canEdit = !isReadOnly;
 
   const events = useMemo(() => {
@@ -163,64 +166,15 @@ export default function TimelinePage() {
     return null;
   }
 
-  if (!events || events.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh] px-6">
-        <div className="text-center py-24 bg-card border border-border rounded-3xl shadow-sm max-w-lg mx-auto w-full relative overflow-hidden">
-          {/* Subtle background decoration */}
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-          
-          <div className="relative z-10">
-            <div className="w-20 h-20 mx-auto bg-background rounded-full flex items-center justify-center mb-6 shadow-sm border border-border">
-              <Clock className="w-8 h-8 text-muted-foreground/50" />
-            </div>
-            <h2 className="text-3xl font-serif font-semibold mb-4 text-foreground tracking-tight">
-              Your family story begins here.
-            </h2>
-            <p className="text-base text-muted-foreground mb-10 px-8 leading-relaxed">
-              Start preserving the moments that shaped your family. Add photographs, stories, and milestones to create a beautiful digital archive.
-            </p>
-            
-            {canEdit && (
-              <Button 
-                onClick={() => { setSelectedMemory(null); setIsFormOpen(true); }} 
-                size="lg"
-                className="rounded-full shadow-md font-medium px-8 h-12"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                Add First Memory
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {canEdit && (
-          <MemoryFormModal
-            isOpen={isFormOpen}
-            onClose={() => { setIsFormOpen(false); setSelectedMemory(null); }}
-            onSubmit={selectedMemory ? handleUpdateMemory : handleCreateMemory}
-            initialData={selectedMemory}
-          />
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      {canEdit && (
-        <div className="flex justify-end px-6 max-w-5xl mx-auto -mb-6 relative z-20">
-          <Button 
-            onClick={() => { setSelectedMemory(null); setIsFormOpen(true); }}
-            className="rounded-full shadow-sm"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Memory
-          </Button>
-        </div>
-      )}
-
-      <FamilyTimeline events={events} onEventClick={handleEventClick} />
+      <FamilyTimeline 
+        events={events} 
+        onEventClick={handleEventClick}
+        onAddMemory={() => { setSelectedMemory(null); setIsFormOpen(true); }}
+        familyName={familyName}
+        canEdit={canEdit}
+      />
 
       {canEdit && (
         <MemoryFormModal

@@ -75,7 +75,7 @@ export function TimelineEvent({ event, index, onClick }: TimelineEventProps) {
       className={`relative flex items-start justify-between md:justify-normal w-full mb-16 ${isEven ? 'md:flex-row-reverse' : ''}`}
     >
       {/* Center timeline dot */}
-      <div className="absolute left-4 md:left-1/2 w-10 h-10 -translate-x-1/2 rounded-full bg-background flex items-center justify-center z-10 shadow-sm mt-0 md:mt-4">
+      <div className="absolute left-6 md:left-1/2 w-10 h-10 -translate-x-1/2 rounded-full bg-background flex items-center justify-center z-10 shadow-sm mt-0 md:mt-4">
         <div className={`w-8 h-8 rounded-full flex items-center justify-center ring-4 ${getEventBg(event.type)}`}>
           {getEventIcon(event.type)}
         </div>
