@@ -35,6 +35,26 @@ const TEMPLATES: { value: TemplateType; label: string; desc: string }[] = [
   { value: 'FESTIVE_HERITAGE', label: 'Festive Heritage', desc: 'Subtle gold and botanical' },
   { value: 'MEMORY_ALBUM', label: 'Memory Album', desc: 'Like a page from an album' },
 ];
+const CollapsibleSection = ({ title, defaultOpen = true, children }: any) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  return (
+    <div className="border border-border rounded-lg overflow-hidden bg-card shadow-sm">
+      <button 
+        type="button" 
+        onClick={() => setIsOpen(!isOpen)} 
+        className="w-full flex items-center justify-between p-4 bg-muted/20 hover:bg-muted/40 transition-colors"
+      >
+        <h3 className="font-semibold text-sm tracking-wide">{title}</h3>
+        <span className="text-muted-foreground text-xs">{isOpen ? '▼' : '▶'}</span>
+      </button>
+      {isOpen && (
+        <div className="p-4 border-t border-border/50 space-y-4">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface ControlsProps {
   editor: ReturnType<typeof useGreetingsEditor>;
@@ -260,27 +280,6 @@ export function GreetingsControls({ editor }: ControlsProps) {
   }
 
   const selectedMember = members?.find(m => m.id === state.heroMemberId);
-
-  const CollapsibleSection = ({ title, defaultOpen = true, children }: any) => {
-    const [isOpen, setIsOpen] = useState(defaultOpen);
-    return (
-      <div className="border border-border rounded-lg overflow-hidden bg-card shadow-sm">
-        <button 
-          type="button" 
-          onClick={() => setIsOpen(!isOpen)} 
-          className="w-full flex items-center justify-between p-4 bg-muted/20 hover:bg-muted/40 transition-colors"
-        >
-          <h3 className="font-semibold text-sm tracking-wide">{title}</h3>
-          <span className="text-muted-foreground text-xs">{isOpen ? '▼' : '▶'}</span>
-        </button>
-        {isOpen && (
-          <div className="p-4 border-t border-border/50 space-y-4">
-            {children}
-          </div>
-        )}
-      </div>
-    );
-  };
 
   return (
     <div className="p-4 space-y-4 pb-20">
