@@ -405,6 +405,7 @@ export function GreetingsControls({ editor }: ControlsProps) {
             </SelectContent>
           </Select>
         </div>
+        </div>
       </CollapsibleSection>
 
       {/* Text Content */}
@@ -444,6 +445,7 @@ export function GreetingsControls({ editor }: ControlsProps) {
             <Label className="text-xs">Sender Name</Label>
             <Input value={state.senderName} onChange={(e) => updateText({ senderName: e.target.value })} />
           </div>
+        </div>
         </div>
       </CollapsibleSection>
 
