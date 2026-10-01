@@ -8,7 +8,7 @@ interface MemberDetailsProps {
 
 export function MemberDetails({ member }: MemberDetailsProps) {
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {member.birthDate && (
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">

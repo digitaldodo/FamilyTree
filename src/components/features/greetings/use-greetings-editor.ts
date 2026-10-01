@@ -22,6 +22,7 @@ type Action =
   | { type: 'UPDATE_SUPPORTING_PHOTO'; payload: { id: string; updates: Partial<SupportingPhoto> } }
   | { type: 'REMOVE_SUPPORTING_PHOTO'; payload: string }
   | { type: 'SET_HERO_MODE'; payload: 'BACKGROUND' | 'FOREGROUND' }
+  | { type: 'TOGGLE_SELECTED_MEMBER'; payload: string }
   | { type: 'RESET' };
 
 const defaultAdjustment: ImageAdjustment = { zoom: 1, x: 0, y: 0, opacity: 100 };
@@ -41,6 +42,7 @@ const initialState: GreetingState = {
   footer: 'With love,',
   senderName: 'Your Family',
   supportingPhotos: [],
+  selectedMemberIds: [],
 };
 
 // Smart defaults based on occasion
@@ -87,6 +89,7 @@ function reducer(state: GreetingState, action: Action): GreetingState {
       return {
         ...state,
         heroMemberId: member.id,
+        selectedMemberIds: Array.from(new Set([...state.selectedMemberIds, member.id])),
         heroImageUrl: member.imageUrl || null,
         heroName: `${member.firstName} ${member.lastName}`,
         heroAdjustment: { ...defaultAdjustment, opacity: state.heroMode === 'BACKGROUND' ? 30 : 100 },
@@ -146,6 +149,15 @@ function reducer(state: GreetingState, action: Action): GreetingState {
            opacity: action.payload === 'BACKGROUND' ? 30 : 100
         }
       };
+    case 'TOGGLE_SELECTED_MEMBER': {
+      const isSelected = state.selectedMemberIds.includes(action.payload);
+      return {
+        ...state,
+        selectedMemberIds: isSelected 
+          ? state.selectedMemberIds.filter(id => id !== action.payload)
+          : [...state.selectedMemberIds, action.payload]
+      };
+    }
     case 'RESET':
       return initialState;
     default:
@@ -170,6 +182,7 @@ export function useGreetingsEditor() {
     updateSupportingPhoto: useCallback((id: string, updates: Partial<SupportingPhoto>) => dispatch({ type: 'UPDATE_SUPPORTING_PHOTO', payload: { id, updates } }), []),
     removeSupportingPhoto: useCallback((id: string) => dispatch({ type: 'REMOVE_SUPPORTING_PHOTO', payload: id }), []),
     setHeroMode: useCallback((mode: 'BACKGROUND' | 'FOREGROUND') => dispatch({ type: 'SET_HERO_MODE', payload: mode }), []),
+    toggleSelectedMember: useCallback((memberId: string) => dispatch({ type: 'TOGGLE_SELECTED_MEMBER', payload: memberId }), []),
     reset: useCallback(() => dispatch({ type: 'RESET' }), []),
   };
 }

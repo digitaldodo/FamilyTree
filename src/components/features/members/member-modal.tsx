@@ -146,7 +146,7 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                 {member && !isEditingMember ? (
                   <div className="flex flex-col">
                     {/* Big Photo Area */}
-                    <div className="w-full h-64 md:h-72 relative bg-secondary/50">
+                    <div className="w-full h-48 sm:h-64 md:h-72 relative bg-secondary/50">
                       {member.imageUrl ? (
                         <Image
                           src={member.imageUrl}

@@ -343,14 +343,14 @@
 
 /* Public landing page: a warm, editorial family-history experience. */
 .landing-page {
-  --landing-ink: #123d2d;
-  --landing-deep: #09291f;
-  --landing-leaf: #477053;
-  --landing-sage: #aeb99c;
-  --landing-gold: #d6a243;
-  --landing-ivory: #f7f2e7;
-  --landing-paper: #fffdf8;
-  --landing-line: #d8d0c1;
+  --landing-ink: #F7F2E7;
+  --landing-deep: #0D110C;
+  --landing-leaf: #78936B;
+  --landing-sage: #285B40;
+  --landing-gold: #D9A441;
+  --landing-ivory: #0D110C;
+  --landing-paper: #161A15;
+  --landing-line: #2C3A2B;
   background: var(--landing-ivory);
   color: var(--landing-ink);
   font-family: var(--font-inter), Arial, sans-serif;

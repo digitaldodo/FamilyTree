@@ -25,10 +25,15 @@ export const GreetingsCanvas = forwardRef<HTMLDivElement, GreetingsCanvasProps>(
     useEffect(() => {
       const updateScale = () => {
         if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        // Calculate scale to fit width and height, adding some padding
+        const parent = containerRef.current.parentElement;
+        if (!parent) return;
+        const rect = parent.getBoundingClientRect();
+        
+        // On mobile (narrow width), scale primarily by width. On desktop, fit to height if needed.
+        const isMobile = window.innerWidth < 768;
         const scaleW = (rect.width - 32) / originalWidth;
-        const scaleH = (rect.height - 32) / originalHeight;
+        const scaleH = isMobile ? scaleW : (window.innerHeight - 200) / originalHeight;
+        
         setScale(Math.min(scaleW, scaleH, 1));
       };
       
@@ -40,7 +45,8 @@ export const GreetingsCanvas = forwardRef<HTMLDivElement, GreetingsCanvasProps>(
     return (
       <div 
         ref={containerRef}
-        className="relative w-full h-full flex items-center justify-center overflow-hidden"
+        className="relative w-full flex items-center justify-center overflow-visible"
+        style={{ height: isExporting ? originalHeight : originalHeight * scale + 32 }}
       >
         <div
            className={cn(

@@ -112,8 +112,8 @@ export function MemberRelationships({
           {renderSection(
             'Spouses',
             spouseMembers,
-            'bg-accent/10 text-accent-foreground hover:bg-accent/20 border-accent/20',
-            'text-accent'
+            'bg-amber-100 text-amber-950 hover:bg-amber-200 border-amber-300 dark:bg-amber-950/40 dark:text-amber-200 dark:border-amber-700/50 dark:hover:bg-amber-900/50',
+            'text-amber-700 dark:text-amber-400'
           )}
           {renderSection('Siblings', siblingMembers)}
           {renderSection('Children', childMembers)}

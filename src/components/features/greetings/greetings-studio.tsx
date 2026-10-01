@@ -151,7 +151,7 @@ export function GreetingsStudio() {
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center">
         {/* Canvas Area */}
-        <div className="w-full bg-muted/30 flex items-center justify-center p-4 min-h-[40vh] md:min-h-[60vh] shrink-0 border-b border-border relative">
+        <div className="w-full bg-muted/30 flex items-center justify-center p-4 border-b border-border relative">
           <GreetingsCanvas state={editor.state} ref={canvasRef} isExporting={isExporting} />
         </div>
 

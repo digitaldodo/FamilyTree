@@ -37,7 +37,8 @@ export interface SupportingPhoto {
 
 export interface GreetingState {
   // Selections
-  heroMemberId: string | null;
+  heroMemberId: string | null; // The primary subject (for name/date defaults)
+  selectedMemberIds: string[]; // Members whose photos are available for the card
   occasion: OccasionType;
   template: TemplateType;
   format: CanvasFormat;
