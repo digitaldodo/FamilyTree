@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, GitMerge, History } from 'lucide-react';
+import { LayoutDashboard, Users, GitMerge, History, ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -11,6 +11,7 @@ const navItems = [
   { name: 'Tree', href: '/tree', icon: GitMerge },
   { name: 'Members', href: '/members', icon: Users },
   { name: 'Timeline', href: '/dashboard/timeline', icon: History },
+  { name: 'Greetings', href: '/greetings', icon: ImageIcon },
 ];
 
 export function BottomNav() {

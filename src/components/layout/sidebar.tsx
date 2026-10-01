@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   History,
+  ImageIcon,
 } from 'lucide-react';
 import { useAppStore } from '@/store/use-app-store';
 import { cn } from '@/lib/utils';
@@ -20,6 +21,7 @@ const navItems = [
   { name: 'Family Tree', href: '/tree', icon: GitMerge },
   { name: 'Members', href: '/members', icon: Users },
   { name: 'Timeline', href: '/dashboard/timeline', icon: History },
+  { name: 'Greetings', href: '/greetings', icon: ImageIcon },
 ];
 
 export function Sidebar() {
