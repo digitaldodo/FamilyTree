@@ -149,19 +149,14 @@ export function GreetingsStudio() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden flex flex-col md:flex-row relative">
-        {/* Controls - Left on Desktop, Bottom Sheet on Mobile */}
-        <div className="md:w-80 lg:w-[350px] flex-shrink-0 bg-card border-r border-border h-full overflow-y-auto hidden md:block">
-          <GreetingsControls editor={editor} />
-        </div>
-
+      <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center">
         {/* Canvas Area */}
-        <div className="flex-1 bg-muted/30 overflow-y-auto flex items-center justify-center p-4 md:p-8">
+        <div className="w-full bg-muted/30 flex items-center justify-center p-4 min-h-[40vh] md:min-h-[60vh] shrink-0 border-b border-border relative">
           <GreetingsCanvas state={editor.state} ref={canvasRef} isExporting={isExporting} />
         </div>
 
-        {/* Mobile Controls */}
-        <div className="md:hidden flex-shrink-0 border-t border-border bg-card max-h-[50dvh] overflow-y-auto">
+        {/* Controls Area */}
+        <div className="w-full max-w-2xl bg-card">
           <GreetingsControls editor={editor} isMobile />
         </div>
       </div>

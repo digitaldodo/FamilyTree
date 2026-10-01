@@ -26,7 +26,7 @@ export const TemplateHeritagePortrait: React.FC<Props> = ({ state, scale = 1 }) 
 
   return (
     <div 
-      className="relative w-full overflow-hidden bg-[#F9F7F1] flex flex-col items-center justify-between font-serif" 
+      className="relative w-full h-full overflow-hidden bg-[#F9F7F1] font-serif flex flex-col" 
       style={containerStyle}
     >
       {/* Background Hero Image */}
@@ -41,61 +41,71 @@ export const TemplateHeritagePortrait: React.FC<Props> = ({ state, scale = 1 }) 
       )}
 
       {/* Decorative Borders */}
-      <div className="absolute inset-0 border-[20px] border-solid border-[#E2D5C3] m-6 pointer-events-none z-10" />
-      <div className="absolute inset-0 border border-solid border-[#4A3B32] m-[30px] opacity-20 pointer-events-none z-10" />
+      <div className="absolute inset-0 border-[16px] border-solid border-[#E2D5C3] pointer-events-none z-10" />
+      <div className="absolute inset-0 border border-solid border-[#4A3B32] m-[24px] opacity-20 pointer-events-none z-10" />
       
-      {/* Text Content */}
-      <div className="z-20 pt-20 px-16 text-center text-[#4A3B32] w-full">
-        {state.headline && <h2 className="text-2xl tracking-[0.2em] uppercase mb-4 opacity-80">{state.headline}</h2>}
-        {state.heroName && <h1 className="text-7xl font-normal mb-4 text-[#4A3B32] drop-shadow-md">{state.heroName}</h1>}
-        {state.dateStr && <p className="font-sans text-sm tracking-widest opacity-80 uppercase font-semibold">{state.dateStr}</p>}
-      </div>
+      <div className="z-20 relative flex flex-col w-full h-full p-12 justify-between">
+        {/* Top Text Content */}
+        <div className="text-center text-[#4A3B32] w-full shrink-0">
+          {state.headline && <h2 className="text-2xl tracking-[0.2em] uppercase mb-2 opacity-80">{state.headline}</h2>}
+          {state.heroName && <h1 className="text-6xl font-medium mb-3 text-[#4A3B32] drop-shadow-sm leading-tight break-words">{state.heroName}</h1>}
+          {state.dateStr && <p className="font-sans text-sm tracking-widest opacity-80 uppercase font-semibold">{state.dateStr}</p>}
+        </div>
 
-      {/* Foreground Hero Image (if MODE B) */}
-      {!isBackgroundMode && (
-        <div className="relative w-2/3 flex-grow my-8 mx-auto overflow-hidden shadow-xl rounded-t-[100px] border-8 border-white z-20" style={{ minHeight: '30%' }}>
-          {state.heroImageUrl ? (
-            <img 
-              src={state.heroImageUrl} 
-              alt={state.heroName}
-              style={getImageStyle(state.heroAdjustment)}
-            />
-          ) : (
-            <div className="w-full h-full bg-[#E2D5C3]/30 flex items-center justify-center">
-              <span className="text-[#4A3B32]/30 text-sm tracking-widest uppercase">Portrait</span>
+        {/* Middle Content */}
+        <div className="flex-1 min-h-0 flex flex-col items-center justify-center py-6 w-full">
+            {/* Foreground Hero Image (if MODE B) */}
+            {!isBackgroundMode && (
+              <div className="relative w-3/4 max-h-full flex-1 mx-auto overflow-hidden shadow-xl rounded-t-full border-8 border-white mb-6">
+                <div className="absolute inset-0 w-full h-full">
+                  {state.heroImageUrl ? (
+                    <img 
+                      src={state.heroImageUrl} 
+                      alt={state.heroName}
+                      className="absolute inset-0"
+                      style={getImageStyle(state.heroAdjustment)}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#E2D5C3]/30 flex items-center justify-center">
+                      <span className="text-[#4A3B32]/30 text-sm tracking-widest uppercase">Portrait</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Supporting Photos (Circular) */}
+            {state.supportingPhotos.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-4 shrink-0 mt-auto">
+                {state.supportingPhotos.map((photo) => (
+                  <div key={photo.id} className="w-32 h-32 rounded-full overflow-hidden border-[3px] border-white shadow-lg bg-[#E2D5C3] shrink-0 relative">
+                    <img 
+                      src={photo.imageUrl} 
+                      alt="Supporting Photo"
+                      className="absolute inset-0"
+                      style={getImageStyle(photo.adjustment, 1)}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+        </div>
+
+        {/* Bottom Text Content */}
+        <div className="text-center text-[#4A3B32] shrink-0 mt-auto bg-[#F9F7F1]/80 p-6 rounded-xl backdrop-blur-sm shadow-sm border border-[#E2D5C3]/30">
+          {state.message && <p className="text-2xl italic mb-6 leading-relaxed font-medium drop-shadow-sm opacity-90 break-words">{state.message}</p>}
+          {(state.senderName || state.footer) && (
+            <div className="flex flex-col items-center">
+              <span className="w-12 h-[1px] bg-[#4A3B32] mb-3 opacity-50"></span>
+              {state.senderName && <p className="font-sans text-sm font-bold tracking-widest uppercase">{state.senderName}</p>}
+              {state.footer && <p className="font-sans text-xs opacity-70 mt-2 font-semibold">{state.footer}</p>}
             </div>
           )}
         </div>
-      )}
-
-      {/* Supporting Photos (Circular) */}
-      {state.supportingPhotos.length > 0 && (
-        <div className={`z-20 flex flex-wrap justify-center gap-6 ${isBackgroundMode ? 'my-auto' : 'mb-8'}`}>
-          {state.supportingPhotos.map((photo) => (
-            <div key={photo.id} className="w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-lg bg-[#E2D5C3]">
-              <img 
-                src={photo.imageUrl} 
-                alt="Family Member"
-                style={getImageStyle(photo.adjustment, 1)}
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className={`z-20 pb-20 px-20 text-center text-[#4A3B32] ${isBackgroundMode ? 'mt-auto' : ''}`}>
-        {state.message && <p className="text-2xl italic mb-8 leading-relaxed font-semibold drop-shadow-md opacity-90">&quot;{state.message}&quot;</p>}
-        {state.senderName && (
-          <div className="flex flex-col items-center">
-            <span className="w-12 h-[1px] bg-[#4A3B32] mb-4 opacity-50"></span>
-            <p className="font-sans text-sm font-bold tracking-widest uppercase">{state.senderName}</p>
-          </div>
-        )}
-        {state.footer && <p className="font-sans text-xs opacity-70 mt-4 font-semibold">{state.footer}</p>}
       </div>
-
-      <div className="absolute bottom-10 left-0 right-0 text-center z-20">
-        <span className="text-[10px] uppercase tracking-widest font-bold text-[#4A3B32] drop-shadow-sm">FamilyTree</span>
+      
+      <div className="absolute bottom-6 left-0 right-0 text-center z-20">
+        <span className="text-[9px] uppercase tracking-widest font-bold text-[#4A3B32]/50 drop-shadow-sm">FamilyTree</span>
       </div>
     </div>
   );

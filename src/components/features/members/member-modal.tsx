@@ -12,6 +12,7 @@ import { type Memory } from '../memories/memory-gallery';
 import { MemberDetails } from './member-details';
 import { MemberRelationships } from './member-relationships';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 interface MemberModalProps {
   readOnly?: boolean;
@@ -265,17 +266,67 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
 
                       {/* ── Memories Section ── */}
                       <div>
-                        {readOnly ? (
-                          memories.length > 0 ? (
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-medium">Memories</h3>
+                          {!readOnly && (
+                            <div className="relative">
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                multiple
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                                onChange={async (e) => {
+                                  const files = Array.from(e.target.files || []);
+                                  if (!files.length) return;
+                                  
+                                  const toastId = toast.loading(`Uploading ${files.length} photo(s)...`);
+                                  try {
+                                    for (const file of files) {
+                                      const formData = new FormData();
+                                      formData.append('file', file);
+                                      formData.append('folder', 'family-tree/members');
+                                      
+                                      const res = await fetch('/api/upload', {
+                                        method: 'POST',
+                                        body: formData,
+                                      });
+                                      if (!res.ok) throw new Error('Failed to upload file');
+                                      const data = await res.json();
+                                      
+                                      // create media record
+                                      await fetch('/api/media', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                          url: data.url,
+                                          memberId: member.id,
+                                          type: 'image',
+                                        })
+                                      });
+                                    }
+                                    toast.success('Photos uploaded successfully', { id: toastId });
+                                    // Refresh the page or refetch member data ideally
+                                    window.location.reload(); 
+                                  } catch (error) {
+                                    console.error(error);
+                                    toast.error('Failed to upload photos', { id: toastId });
+                                  }
+                                }}
+                              />
+                              <button className="text-sm px-3 py-1 bg-primary text-primary-foreground rounded-md shadow-sm hover:bg-primary/90 flex items-center gap-1">
+                                <Camera className="w-3 h-3" />
+                                Add Photos
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        {memories.length > 0 ? (
                             <div>
-                              <h3 className="text-lg font-medium mb-4">
-                                Memories
-                              </h3>
                               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                {memories.slice(0, 6).map((m: any) => (
+                                {memories.map((m: any) => (
                                   <div
                                     key={m.id}
-                                    className="relative aspect-square rounded-lg overflow-hidden bg-muted shadow-sm"
+                                    className="relative aspect-square rounded-lg overflow-hidden bg-muted shadow-sm group"
                                   >
                                     <Image
                                       src={m.url}
@@ -284,32 +335,48 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                                       unoptimized
                                     />
+                                    {!readOnly && (
+                                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                        <button 
+                                          className="text-xs px-2 py-1 bg-white/20 text-white hover:bg-white/40 rounded backdrop-blur-sm"
+                                          onClick={async () => {
+                                            if (!confirm('Make this the primary profile photo?')) return;
+                                            try {
+                                              await updateMember(member.id, { imageUrl: m.url });
+                                              toast.success('Profile photo updated');
+                                            } catch (error) {
+                                              toast.error('Failed to update profile photo');
+                                            }
+                                          }}
+                                        >
+                                          Set Primary
+                                        </button>
+                                        <button 
+                                          className="text-xs px-2 py-1 bg-destructive/80 text-white hover:bg-destructive rounded backdrop-blur-sm"
+                                          onClick={async () => {
+                                            if (!confirm('Remove this photo?')) return;
+                                            try {
+                                              await fetch(`/api/media?id=${m.id}`, { method: 'DELETE' });
+                                              toast.success('Photo removed');
+                                              window.location.reload();
+                                            } catch (error) {
+                                              toast.error('Failed to remove photo');
+                                            }
+                                          }}
+                                        >
+                                          Delete
+                                        </button>
+                                      </div>
+                                    )}
                                   </div>
                                 ))}
                               </div>
-                              {memories.length > 6 && (
-                                <p className="text-sm font-medium text-muted-foreground text-center mt-4">
-                                  +{memories.length - 6} more memories
-                                </p>
-                              )}
                             </div>
-                          ) : (
-                            <div className="text-center py-8">
-                              <Camera className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
-                              <p className="text-sm text-muted-foreground/50 italic">
-                                No memories uploaded yet
-                              </p>
-                            </div>
-                          )
                         ) : (
-                          <div className="text-center py-8 bg-muted/30 rounded-lg border border-dashed border-border/50">
-                            <Camera className="w-8 h-8 text-muted-foreground/30 mx-auto mb-3" />
-                            <h4 className="text-sm font-medium text-foreground">
-                              Memory Uploads
-                            </h4>
-                            <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-                              The memory upload feature is currently under
-                              construction. Check back soon!
+                          <div className="text-center py-8">
+                            <Camera className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
+                            <p className="text-sm text-muted-foreground/50 italic">
+                              No photos added yet
                             </p>
                           </div>
                         )}

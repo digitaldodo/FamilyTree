@@ -80,11 +80,18 @@ export interface InferredRelationships {
   grandchildren: string[];
 }
 
+export interface Media {
+  id: string;
+  url: string;
+  type: string;
+}
+
 /** A member with its relationships loaded */
 export interface MemberWithRelations extends Member {
   relationsFrom: Relationship[];
   relationsTo: Relationship[];
   inferredRelationships?: InferredRelationships;
+  media?: Media[];
 }
 
 /** Input for creating a relationship */

@@ -12,8 +12,9 @@ import { useMembers } from '@/hooks/use-members';
 import { GooglePhotosPicker } from '@/components/features/members/google-photos-picker';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { ZoomIn, ImagePlus, Upload } from 'lucide-react';
+import { ZoomIn, ImagePlus, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 const OCCASIONS: { value: OccasionType; label: string }[] = [
   { value: 'BIRTHDAY', label: 'Birthday' },
@@ -49,6 +50,8 @@ export function GreetingsControls({ editor }: ControlsProps) {
   // For simplicity, we can just render a list or use a custom select
   const [isChoosingCardType, setIsChoosingCardType] = useState(!state.heroMemberId);
   const [isSelectingMember, setIsSelectingMember] = useState(false);
+  const [memberPhotoPicker, setMemberPhotoPicker] = useState<string | null>(null);
+  const [pickerMode, setPickerMode] = useState<'HERO' | 'SUPPORTING'>('SUPPORTING');
   const [searchQuery, setSearchQuery] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
@@ -258,30 +261,56 @@ export function GreetingsControls({ editor }: ControlsProps) {
 
   const selectedMember = members?.find(m => m.id === state.heroMemberId);
 
+  const CollapsibleSection = ({ title, defaultOpen = true, children }: any) => {
+    const [isOpen, setIsOpen] = useState(defaultOpen);
+    return (
+      <div className="border border-border rounded-lg overflow-hidden bg-card shadow-sm">
+        <button 
+          type="button" 
+          onClick={() => setIsOpen(!isOpen)} 
+          className="w-full flex items-center justify-between p-4 bg-muted/20 hover:bg-muted/40 transition-colors"
+        >
+          <h3 className="font-semibold text-sm tracking-wide">{title}</h3>
+          <span className="text-muted-foreground text-xs">{isOpen ? '▼' : '▶'}</span>
+        </button>
+        {isOpen && (
+          <div className="p-4 border-t border-border/50 space-y-4">
+            {children}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div className="p-4 space-y-8 pb-20">
+    <div className="p-4 space-y-4 pb-20">
       {/* Selected Hero */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Hero Person</Label>
-          <Button variant="ghost" size="sm" className="h-auto p-0 text-xs" onClick={() => setIsSelectingMember(true)}>Change</Button>
+      <CollapsibleSection title="Main Photo (Hero)" defaultOpen={true}>
+        <div className="flex items-center justify-end">
+          <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-primary" onClick={() => setIsSelectingMember(true)}>Change Person</Button>
         </div>
         <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border border-border">
            <div className="w-12 h-12 rounded-full bg-primary/10 overflow-hidden relative shrink-0">
-             {selectedMember?.imageUrl ? (
-               <Image src={selectedMember.imageUrl} alt={selectedMember.firstName} fill className="object-cover" unoptimized />
+             {state.heroImageUrl ? (
+               <Image src={state.heroImageUrl} alt={selectedMember?.firstName || 'Hero'} fill className="object-cover" unoptimized />
              ) : (
                <div className="w-full h-full flex items-center justify-center text-primary font-medium">
-                 {selectedMember?.firstName.charAt(0)}{selectedMember?.lastName.charAt(0)}
+                 {selectedMember ? `${selectedMember.firstName.charAt(0)}${selectedMember.lastName.charAt(0)}` : 'H'}
                </div>
              )}
            </div>
-           <div>
+           <div className="flex-1">
              <p className="font-medium text-sm">{selectedMember?.firstName} {selectedMember?.lastName}</p>
              <div className="flex gap-2 mt-1">
                 <Button variant="outline" size="sm" className="h-6 text-[10px] px-2" onClick={() => updateHeroAdjustment({ zoom: Math.min(state.heroAdjustment.zoom + 0.1, 3) })}><ZoomIn className="w-3 h-3 mr-1"/> Zoom</Button>
                 {/* Reset adjust */}
                 <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2" onClick={() => updateHeroAdjustment({ zoom: 1, x: 0, y: 0 })}>Reset</Button>
+                {selectedMember && (selectedMember.media?.length ?? 0) > 0 && (
+                  <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2 ml-auto" onClick={() => {
+                    setPickerMode('HERO');
+                    setMemberPhotoPicker(selectedMember.id);
+                  }}>Change Photo</Button>
+                )}
              </div>
            </div>
         </div>
@@ -319,12 +348,12 @@ export function GreetingsControls({ editor }: ControlsProps) {
             className="w-full accent-primary"
           />
         </div>
-      </section>
+      </CollapsibleSection>
 
       {/* Occasion & Template */}
-      <section className="space-y-4">
-        <div className="space-y-2">
-          <Label>Occasion</Label>
+      <CollapsibleSection title="Layout & Occasion" defaultOpen={false}>
+        <div className="space-y-4">
+          <div className="space-y-2">
           <Select value={state.occasion} onValueChange={(v) => setOccasion(v as OccasionType)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -376,11 +405,11 @@ export function GreetingsControls({ editor }: ControlsProps) {
             </SelectContent>
           </Select>
         </div>
-      </section>
+      </CollapsibleSection>
 
       {/* Text Content */}
-      <section className="space-y-4">
-        <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Text Customization</Label>
+      <CollapsibleSection title="Message & Text" defaultOpen={false}>
+        <div className="space-y-4">
         
         <div className="space-y-2">
           <Label className="text-xs">Headline</Label>
@@ -416,54 +445,48 @@ export function GreetingsControls({ editor }: ControlsProps) {
             <Input value={state.senderName} onChange={(e) => updateText({ senderName: e.target.value })} />
           </div>
         </div>
-      </section>
+      </CollapsibleSection>
 
       {/* Supporting Photos */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Supporting Photos</Label>
-        </div>
+      <CollapsibleSection title={`Additional Photos (${state.supportingPhotos.length})`} defaultOpen={false}>
         <div className="space-y-3">
-          {state.supportingPhotos.map((p) => {
-            const member = members?.find(m => m.id === p.memberId);
-            return (
-              <div key={p.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border border-border">
-                 <div className="w-10 h-10 rounded-sm bg-primary/10 overflow-hidden relative shrink-0">
-                   <Image src={p.imageUrl} alt="Supporting" fill className="object-cover" unoptimized />
-                 </div>
-                 <div className="flex-1">
-                   <p className="font-medium text-xs truncate">{member ? `${member.firstName} ${member.lastName}` : 'Custom Photo'}</p>
-                 </div>
-                 <Button variant="ghost" size="icon" onClick={() => editor.removeSupportingPhoto(p.id)} className="h-6 w-6 text-destructive hover:text-destructive">
-                   &times;
-                 </Button>
-              </div>
-            );
-          })}
+          <div className="grid grid-cols-1 gap-2">
+            {state.supportingPhotos.map((p) => {
+              const member = members?.find(m => m.id === p.memberId);
+              return (
+                <div key={p.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border border-border">
+                   <div className="w-10 h-10 rounded-sm bg-primary/10 overflow-hidden relative shrink-0">
+                     <Image src={p.imageUrl} alt="Supporting" fill className="object-cover" unoptimized />
+                   </div>
+                   <div className="flex-1 min-w-0">
+                     <p className="font-medium text-xs truncate">{member ? `${member.firstName} ${member.lastName}` : 'Custom Photo'}</p>
+                   </div>
+                   <Button variant="ghost" size="icon" onClick={() => editor.removeSupportingPhoto(p.id)} className="h-6 w-6 text-destructive hover:text-destructive shrink-0">
+                     <X className="w-4 h-4" />
+                   </Button>
+                </div>
+              );
+            })}
+          </div>
           
-          <div className="flex gap-2">
-            <Select 
-              onValueChange={(val) => {
-                const m = members?.find(x => x.id === val);
-                if (m && m.imageUrl) {
-                  editor.addSupportingPhoto({
-                    id: Math.random().toString(),
-                    memberId: m.id,
-                    imageUrl: m.imageUrl,
-                    adjustment: { zoom: 1, x: 0, y: 0, opacity: 100 }
-                  });
-                }
-              }}
-            >
-              <SelectTrigger className="w-full text-xs h-8"><SelectValue placeholder="Add Family Member" /></SelectTrigger>
-              <SelectContent>
-                {members?.filter(m => m.imageUrl && m.id !== state.heroMemberId).map(m => (
-                  <SelectItem key={m.id} value={m.id}>{m.firstName} {m.lastName}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex flex-wrap gap-2">
+            <div className="w-full sm:w-auto flex-1 min-w-[150px]">
+              <Select 
+                onValueChange={(val) => {
+                  setPickerMode('SUPPORTING');
+                  setMemberPhotoPicker(val);
+                }}
+              >
+                <SelectTrigger className="w-full text-xs h-8"><SelectValue placeholder="Add Family Member Photo" /></SelectTrigger>
+                <SelectContent>
+                  {members?.filter(m => m.id !== state.heroMemberId && (m.imageUrl || (m.media && m.media.length > 0))).map(m => (
+                    <SelectItem key={m.id} value={m.id}>{m.firstName} {m.lastName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-            <div className="relative">
+            <div className="relative flex-shrink-0">
               <input 
                 type="file" 
                 accept="image/*" 
@@ -473,16 +496,66 @@ export function GreetingsControls({ editor }: ControlsProps) {
                 disabled={isUploading}
               />
               <Button variant="outline" className="h-8 px-3" disabled={isUploading}>
-                <ImagePlus className="w-4 h-4" />
+                <ImagePlus className="w-4 h-4 mr-2" /> Upload
               </Button>
             </div>
             
-            <div className="[&>div>button]:h-8 [&>div>button]:px-3">
+            <div className="flex-shrink-0 [&>div>button]:h-8 [&>div>button]:px-3">
               <GooglePhotosPicker onPhotoSelected={(blob) => handleGooglePhoto(blob, false)} disabled={isUploading} />
             </div>
           </div>
         </div>
-      </section>
+      </CollapsibleSection>
+
+      {/* Member Photo Picker Dialog */}
+      <Dialog open={!!memberPhotoPicker} onOpenChange={(open) => !open && setMemberPhotoPicker(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Select Photos</DialogTitle>
+            <DialogDescription>
+              Choose one or more photos of this family member to include in the greeting.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            {memberPhotoPicker && members?.find(m => m.id === memberPhotoPicker) && (() => {
+              const m = members.find(m => m.id === memberPhotoPicker)!;
+              const allPhotos = [];
+              if (m.imageUrl) allPhotos.push(m.imageUrl);
+              if (m.media && m.media.length > 0) {
+                m.media.filter((media: any) => media.type === 'image' && media.url !== m.imageUrl).forEach((media: any) => allPhotos.push(media.url));
+              }
+              if (allPhotos.length === 0) return <p className="text-sm text-muted-foreground col-span-2 text-center">No photos available.</p>;
+
+              return allPhotos.map((url, i) => (
+                <div key={i} className="relative aspect-square rounded-md overflow-hidden group border border-border">
+                  <Image src={url} alt="Photo" fill className="object-cover" unoptimized />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <Button 
+                      size="sm" 
+                      variant="secondary" 
+                      onClick={() => {
+                        if (pickerMode === 'HERO') {
+                          editor.setHeroImage(url);
+                        } else {
+                          editor.addSupportingPhoto({
+                            id: Math.random().toString(),
+                            memberId: m.id,
+                            imageUrl: url,
+                            adjustment: { zoom: 1, x: 0, y: 0, opacity: 100 }
+                          });
+                        }
+                        setMemberPhotoPicker(null);
+                      }}
+                    >
+                      Select
+                    </Button>
+                  </div>
+                </div>
+              ));
+            })()}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
