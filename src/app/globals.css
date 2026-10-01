@@ -257,6 +257,90 @@
   @page { size: A3 landscape; margin: 12mm; }
 }
 
+/*
+ * PDF Export Mode
+ * Applied temporarily by export.ts during html-to-image capture.
+ * Forces all tree cards to render with a clean light background,
+ * regardless of the current dark/light theme.
+ */
+.pdf-export-mode {
+  /* Override every CSS custom property to the light palette */
+  --color-background: #F7F2E7 !important;
+  --color-foreground: #1C2E26 !important;
+  --color-card: #FDFAF4 !important;
+  --color-card-foreground: #1C2E26 !important;
+  --color-popover: #FFFFFF !important;
+  --color-popover-foreground: #1C2E26 !important;
+  --color-primary: #123D2D !important;
+  --color-primary-foreground: #F5EFE0 !important;
+  --color-secondary: #EDE7D6 !important;
+  --color-secondary-foreground: #1C2E26 !important;
+  --color-muted: #E8E1CE !important;
+  --color-muted-foreground: #6B7A65 !important;
+  --color-accent: #C8922A !important;
+  --color-accent-foreground: #FFFFFF !important;
+  --color-border: #CFC8B4 !important;
+  --color-input: #EDE7D6 !important;
+  --color-ring: #123D2D !important;
+  --color-tree-connector: #1a4a35 !important;
+  --color-tree-connector-active: #123D2D !important;
+  --color-tree-spouse: #B07D20 !important;
+  --color-tree-spouse-active: #936126 !important;
+  --color-tree-junction: #1a4a35 !important;
+  --color-tree-glow: rgba(26, 74, 53, 0.10) !important;
+  --shadow-tree-card: 0 1px 4px rgba(18, 61, 45, 0.10), 0 0 0 1.5px #CFC8B4 !important;
+}
+
+/* Force ReactFlow background to ivory in PDF mode */
+.pdf-export-mode .react-flow,
+.pdf-export-mode .react-flow__renderer,
+.pdf-export-mode .react-flow__background {
+  background-color: #F7F2E7 !important;
+}
+
+/* Force every card/node to light ivory background with green border */
+.pdf-export-mode .react-flow__node > *,
+.pdf-export-mode [class*="bg-card"],
+.pdf-export-mode [class*="bg-background"] {
+  background-color: #FDFAF4 !important;
+  color: #1C2E26 !important;
+}
+
+/* Remove all dark gradients and overlays from image sections */
+.pdf-export-mode [class*="bg-gradient-to-t"],
+.pdf-export-mode [class*="from-card"] {
+  background: transparent !important;
+}
+
+/* Ensure dark bg for initials placeholder stays readable */
+.pdf-export-mode [class*="bg-primary"] {
+  background-color: #123D2D !important;
+  color: #F5EFE0 !important;
+}
+
+/* Card text colours */
+.pdf-export-mode [class*="text-foreground"] { color: #1C2E26 !important; }
+.pdf-export-mode [class*="text-muted-foreground"] { color: #6B7A65 !important; }
+.pdf-export-mode [class*="text-primary"] { color: #123D2D !important; }
+
+/* Hide interactive chrome in PDF: handles, minimap, controls */
+.pdf-export-mode .react-flow__handle,
+.pdf-export-mode .react-flow__controls,
+.pdf-export-mode .react-flow__minimap,
+.pdf-export-mode .react-flow__panel { display: none !important; }
+
+/* Connector edges: forest green */
+.pdf-export-mode .react-flow__edge-path {
+  stroke: #1a4a35 !important;
+  stroke-width: 2px !important;
+}
+
+/* Remove excessive glow/shadows from edges */
+.pdf-export-mode .react-flow__edge { filter: none !important; }
+
+/* Generation lane labels: hide in PDF (not on member cards) */
+.pdf-export-mode [id^="lane-"] { opacity: 0.5 !important; }
+
 /* Public landing page: a warm, editorial family-history experience. */
 .landing-page {
   --landing-ink: #123d2d;

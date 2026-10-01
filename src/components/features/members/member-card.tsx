@@ -2,7 +2,6 @@ import { MemberWithRelations } from '@/types/member';
 import { Card, CardContent } from '@/components/ui/card';
 import { MoreVertical, Eye, Pencil, Trash2 } from 'lucide-react';
 import { useAppStore } from '@/store/use-app-store';
-import { useGenerations } from '@/hooks/use-generations';
 import { format } from 'date-fns';
 import { MemberAvatar } from './member-avatar';
 import {
@@ -20,14 +19,13 @@ interface MemberCardProps {
   calculatedGeneration?: number;
 }
 
-export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
+export function MemberCard({ member, calculatedGeneration: _calculatedGeneration }: MemberCardProps) {
   const {
     setSelectedMemberId,
     setIsMemberModalOpen,
     setIsEditingMember,
     activeTreeId,
   } = useAppStore();
-  const { generations } = useGenerations();
 
   const handleClick = () => {
     setSelectedMemberId(member.id);
@@ -91,11 +89,9 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
     },
   });
 
-  const genName =
-    generations.find((g) => g.id === member.generationId)?.name ||
-    (calculatedGeneration !== undefined
-      ? `Gen ${calculatedGeneration + 1}`
-      : 'Unknown Gen');
+  const birthDisplay = member.birthDate
+    ? format(new Date(member.birthDate), 'dd/MM/yyyy')
+    : null;
 
   return (
     <Card
@@ -157,16 +153,11 @@ export function MemberCard({ member, calculatedGeneration }: MemberCardProps) {
           <h3 className="font-semibold text-[15px] leading-tight group-hover:text-primary transition-colors line-clamp-2 break-words">
             {member.firstName} {member.lastName}
           </h3>
-          <div className="text-xs text-muted-foreground mt-0.5">
-            {member.birthDate
-              ? format(new Date(member.birthDate), 'yyyy')
-              : 'Unknown'}
-          </div>
-          <div className="mt-1">
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-[10px] font-medium text-primary">
-              {genName}
-            </span>
-          </div>
+          {birthDisplay && (
+            <div className="text-xs text-muted-foreground mt-0.5">
+              {birthDisplay}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

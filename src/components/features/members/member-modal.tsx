@@ -9,7 +9,6 @@ import { MemberForm } from './member-form';
 import { MemberDeleteDialog } from './member-delete-dialog';
 import { useMemberMutations } from '@/hooks/use-member-mutations';
 import { type Memory } from '../memories/memory-gallery';
-import { getGenerationLabel } from '@/utils/date';
 import { MemberDetails } from './member-details';
 import { MemberRelationships } from './member-relationships';
 import Image from 'next/image';
@@ -27,7 +26,7 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
     isEditingMember,
     setIsEditingMember,
   } = useAppStore();
-  const { members, generations } = useMembers();
+  const { members } = useMembers();
   const { createMember, updateMember, deleteMember, isSubmitting } =
     useMemberMutations();
 
@@ -48,14 +47,6 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
   const member = selectedMemberId
     ? members.find((m) => m.id === selectedMemberId)
     : undefined;
-
-  const memberGeneration = member
-    ? generations.find((g) => g.id === member.generationId)
-    : undefined;
-
-  const memberGenIndex = memberGeneration
-    ? generations.findIndex((g) => g.id === memberGeneration.id)
-    : 0;
 
   const handleClose = () => {
     setIsMemberModalOpen(false);
@@ -200,10 +191,6 @@ export function MemberModal({ readOnly = false }: MemberModalProps) {
                         {member.firstName} {member.lastName}
                       </h2>
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-background border border-border text-muted-foreground text-xs font-medium shadow-sm">
-                          Gen {memberGenIndex + 1} ·{' '}
-                          {getGenerationLabel(member.birthDate) || memberGeneration?.name || 'Unknown'}
-                        </span>
                         {member.deathDate && (
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-background border border-border text-muted-foreground text-xs font-medium shadow-sm">
                             🕊 In Loving Memory
