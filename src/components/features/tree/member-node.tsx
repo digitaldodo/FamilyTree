@@ -41,7 +41,7 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
         type="target"
         position={Position.Top}
         id="child-target"
-        className="w-2.5 h-2.5 bg-[var(--color-tree-connector)] border-2 border-background z-20 rounded-full"
+        className="opacity-0 pointer-events-none w-0 h-0"
       />
 
       <TreeMemberCard
@@ -51,24 +51,40 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
         onClick={handleClick}
       />
 
+      {/* Gold Flow Card Perimeter Animation */}
+      <svg className="absolute inset-0 pointer-events-none z-30" viewBox="0 0 190 250">
+        <rect
+          x="1"
+          y="1"
+          width="188"
+          height="248"
+          rx="11"
+          fill="none"
+          stroke="var(--color-tree-gold, #d4af37)"
+          strokeWidth="2"
+          className="gold-flow-card-animation"
+          style={{ opacity: 0.8 }}
+        />
+      </svg>
+
       {/* Source handles for outgoing connections */}
       <Handle
         type="source"
         position={Position.Bottom}
         id="parent-source"
-        className="w-2.5 h-2.5 bg-[var(--color-tree-connector)] border-2 border-background z-20 rounded-full"
+        className="opacity-0 pointer-events-none w-0 h-0"
       />
       <Handle
         type="source"
         position={Position.Right}
         id="spouse"
-        className="w-2.5 h-2.5 top-1/2 bg-[var(--color-tree-spouse)] border-2 border-background z-20 rounded-full"
+        className="opacity-0 pointer-events-none w-0 h-0"
       />
       <Handle
         type="target"
         position={Position.Left}
         id="spouse-target"
-        className="w-2.5 h-2.5 top-1/2 bg-[var(--color-tree-spouse)] border-2 border-background z-20 rounded-full"
+        className="opacity-0 pointer-events-none w-0 h-0"
       />
     </motion.div>
   );

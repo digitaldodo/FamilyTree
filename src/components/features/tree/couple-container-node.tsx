@@ -52,7 +52,7 @@ function CoupleContainerNodeComponent({ data }: CoupleContainerNodeProps) {
         type="target"
         position={Position.Top}
         id="child-target"
-        className="w-2.5 h-2.5 bg-[var(--color-tree-connector)] border-2 border-background z-20 rounded-full"
+        className="opacity-0 pointer-events-none w-0 h-0"
       />
       
       {members.map((member, index) => (
@@ -90,7 +90,7 @@ function CoupleContainerNodeComponent({ data }: CoupleContainerNodeProps) {
         type="source"
         position={Position.Bottom}
         id="parent-source"
-        className="w-2.5 h-2.5 bg-[var(--color-tree-connector)] border-2 border-background z-20 rounded-full"
+        className="opacity-0 pointer-events-none w-0 h-0"
       />
     </motion.div>
   );

@@ -43,7 +43,7 @@ export function useFamilyTreeRenderer(
       const generation = generations?.find(
         (item) => item.orderIndex === node.generation
       );
-      const generationName = generation?.name?.trim() || `Generation ${node.generation}`;
+      const generationName = generation?.name?.trim() || undefined;
 
       rfNodes.push({
         id: node.id,

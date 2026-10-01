@@ -339,7 +339,7 @@
 .pdf-export-mode .react-flow__edge { filter: none !important; }
 
 /* Generation lane labels: hide in PDF (not on member cards) */
-.pdf-export-mode [id^="lane-"] { opacity: 0.5 !important; }
+.pdf-export-mode [id^="lane-"] { display: none !important; }
 
 /* Public landing page: a warm, editorial family-history experience. */
 .landing-page {
@@ -474,22 +474,35 @@
 
 /* Gold Flow Animation */
 @keyframes gold-flow {
-  0% { stroke-dashoffset: 60; }
+  0% { stroke-dashoffset: 100; }
   100% { stroke-dashoffset: 0; }
 }
 
 .gold-flow-animation {
-  stroke-dasharray: 10 20;
+  stroke-dasharray: 8 92;
   animation: gold-flow 1.5s linear infinite;
   pointer-events: none;
 }
 
+@keyframes gold-flow-card {
+  0% { stroke-dashoffset: 864; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.gold-flow-card-animation {
+  stroke-dasharray: 8 856;
+  animation: gold-flow-card 13.5s linear infinite; /* scaled duration to match speed: perimeter 864 / 100 * 1.5s ≈ 13s */
+  pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .gold-flow-animation {
+  .gold-flow-animation,
+  .gold-flow-card-animation {
     animation: none;
     display: none;
   }
 }
-.exporting-pdf .gold-flow-animation {
+.exporting-pdf .gold-flow-animation,
+.exporting-pdf .gold-flow-card-animation {
   display: none !important;
 }

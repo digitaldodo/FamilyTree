@@ -22,7 +22,7 @@ function FamilyJunctionNodeComponent() {
       />
 
       {/* The visible junction dot with high-contrast token */}
-      <div className="w-2.5 h-2.5 rounded-full bg-[var(--color-tree-junction)] shadow-xs ring-2 ring-background z-10 transition-colors" />
+      <div className="opacity-0 w-0 h-0" />
 
       {/* Source handle for outgoing child connections */}
       <Handle
