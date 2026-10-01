@@ -16,7 +16,7 @@ export type TemplateType =
   | 'FESTIVE_HERITAGE'
   | 'MEMORY_ALBUM';
 
-export type CanvasFormat = 'PORTRAIT' | 'SQUARE';
+export type CanvasFormat = 'PORTRAIT' | 'SQUARE' | 'LANDSCAPE';
 
 export interface ImageAdjustment {
   zoom: number;

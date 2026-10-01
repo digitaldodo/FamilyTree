@@ -11,6 +11,7 @@ import { MemberWithRelations } from '@/types/member';
 
 type Action =
   | { type: 'SET_HERO_MEMBER'; payload: { member: MemberWithRelations; defaultOccasion?: OccasionType } }
+  | { type: 'SET_CUSTOM_HERO'; payload: { imageUrl: string; defaultOccasion?: OccasionType } }
   | { type: 'SET_OCCASION'; payload: OccasionType }
   | { type: 'SET_TEMPLATE'; payload: TemplateType }
   | { type: 'SET_FORMAT'; payload: CanvasFormat }
@@ -94,6 +95,20 @@ function reducer(state: GreetingState, action: Action): GreetingState {
         dateStr,
       };
     }
+    case 'SET_CUSTOM_HERO': {
+      const occasion = action.payload.defaultOccasion || state.occasion;
+      const defaults = getOccasionDefaults(occasion);
+      return {
+        ...state,
+        heroMemberId: 'CUSTOM',
+        heroImageUrl: action.payload.imageUrl,
+        heroName: 'Our Family',
+        heroAdjustment: { ...defaultAdjustment, opacity: state.heroMode === 'BACKGROUND' ? 30 : 100 },
+        occasion,
+        ...defaults,
+        dateStr: '',
+      };
+    }
     case 'SET_OCCASION': {
       const defaults = getOccasionDefaults(action.payload);
       return { ...state, occasion: action.payload, ...defaults };
@@ -144,6 +159,7 @@ export function useGreetingsEditor() {
   return {
     state,
     setHeroMember: useCallback((member: MemberWithRelations, defaultOccasion?: OccasionType) => dispatch({ type: 'SET_HERO_MEMBER', payload: { member, defaultOccasion } }), []),
+    setCustomHero: useCallback((imageUrl: string, defaultOccasion?: OccasionType) => dispatch({ type: 'SET_CUSTOM_HERO', payload: { imageUrl, defaultOccasion } }), []),
     setOccasion: useCallback((occasion: OccasionType) => dispatch({ type: 'SET_OCCASION', payload: occasion }), []),
     setTemplate: useCallback((template: TemplateType) => dispatch({ type: 'SET_TEMPLATE', payload: template }), []),
     setFormat: useCallback((format: CanvasFormat) => dispatch({ type: 'SET_FORMAT', payload: format }), []),

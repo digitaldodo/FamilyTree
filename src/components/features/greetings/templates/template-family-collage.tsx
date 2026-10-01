@@ -17,7 +17,7 @@ const getImageStyle = (adj: ImageAdjustment, overrideOpacity?: number) => ({
 
 export const TemplateFamilyCollage: React.FC<Props> = ({ state, scale = 1 }) => {
   const containerStyle = {
-    aspectRatio: state.format === 'PORTRAIT' ? '1080/1350' : '1/1',
+    aspectRatio: state.format === 'LANDSCAPE' ? '1200/675' : state.format === 'PORTRAIT' ? '1080/1350' : '1/1',
     transform: `scale(${scale})`,
     transformOrigin: 'top left',
   };

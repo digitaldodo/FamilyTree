@@ -4,10 +4,14 @@ import { useGreetingsEditor } from './use-greetings-editor';
 import { GreetingsCanvas } from './greetings-canvas';
 import { GreetingsControls } from './greetings-controls';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Download, Share } from 'lucide-react';
+import { ArrowLeft, Download, Share, Save } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useRef, useState } from 'react';
 import { toJpeg } from 'html-to-image';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useAppStore } from '@/store/use-app-store';
 import { toast } from 'sonner';
 
 export function GreetingsStudio() {
@@ -71,6 +75,56 @@ export function GreetingsStudio() {
     }
   }, [handleDownload]);
 
+  const activeTreeId = useAppStore((s) => s.activeTreeId);
+  const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
+  const [memoryTitle, setMemoryTitle] = useState('');
+  const [memoryDate, setMemoryDate] = useState(new Date().toISOString().split('T')[0]);
+  const [isSavingMemory, setIsSavingMemory] = useState(false);
+
+  const handleSaveMemory = async () => {
+    if (!canvasRef.current || !activeTreeId) return;
+    try {
+      setIsSavingMemory(true);
+      setIsExporting(true);
+      
+      const dataUrl = await toJpeg(canvasRef.current, { quality: 0.9, pixelRatio: 2 });
+      const blob = await (await fetch(dataUrl)).blob();
+      
+      // Upload image
+      const formData = new FormData();
+      formData.append('file', blob, 'greeting.jpg');
+      formData.append('folder', 'family-tree/memories');
+      const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData });
+      if (!uploadRes.ok) throw new Error('Upload failed');
+      const uploadData = await uploadRes.json();
+      
+      // Create memory
+      const memRes = await fetch('/api/memories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: memoryTitle || 'Family Greeting',
+          date: new Date(memoryDate).toISOString(),
+          description: editor.state.message || '',
+          type: 'MEMORY',
+          treeId: activeTreeId,
+          memberIds: editor.state.heroMemberId && editor.state.heroMemberId !== 'CUSTOM' ? [editor.state.heroMemberId] : [],
+          media: [{ url: uploadData.url, type: 'image' }]
+        }),
+      });
+      
+      if (!memRes.ok) throw new Error('Failed to save memory');
+      toast.success('Saved as Memory successfully!');
+      setIsMemoryModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to save memory');
+    } finally {
+      setIsSavingMemory(false);
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-[100dvh] bg-background">
       {/* Header */}
@@ -82,6 +136,9 @@ export function GreetingsStudio() {
           <h1 className="font-semibold text-lg">Family Greetings</h1>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setIsMemoryModalOpen(true)} disabled={isExporting || !editor.state.heroMemberId}>
+            <Save className="w-4 h-4 mr-2" /> Save as Memory
+          </Button>
           <Button variant="outline" size="sm" onClick={handleShare} disabled={isExporting || !editor.state.heroMemberId}>
             <Share className="w-4 h-4 mr-2" /> Share
           </Button>
@@ -108,6 +165,31 @@ export function GreetingsStudio() {
           <GreetingsControls editor={editor} isMobile />
         </div>
       </div>
+
+      <Dialog open={isMemoryModalOpen} onOpenChange={setIsMemoryModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save as Memory</DialogTitle>
+            <DialogDescription>Save this greeting as a memory in your family tree.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <Input value={memoryTitle} onChange={(e) => setMemoryTitle(e.target.value)} placeholder="e.g. Grandma's 80th Birthday Greeting" />
+            </div>
+            <div className="space-y-2">
+              <Label>Date</Label>
+              <Input type="date" value={memoryDate} onChange={(e) => setMemoryDate(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsMemoryModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveMemory} disabled={isSavingMemory}>
+              {isSavingMemory ? 'Saving...' : 'Save Memory'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,18 +1,19 @@
 'use client';
 
 import { useGreetingsEditor } from './use-greetings-editor';
-import { MemberSearch } from '@/components/features/members/member-search';
 import { useAppStore } from '@/store/use-app-store';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { OccasionType, TemplateType, CanvasFormat } from '@/types/greetings';
+import { OccasionType, TemplateType } from '@/types/greetings';
 import { useMembers } from '@/hooks/use-members';
+import { GooglePhotosPicker } from '@/components/features/members/google-photos-picker';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Crop, ZoomIn, Move } from 'lucide-react';
+import { ZoomIn, ImagePlus, Upload } from 'lucide-react';
+import { toast } from 'sonner';
 
 const OCCASIONS: { value: OccasionType; label: string }[] = [
   { value: 'BIRTHDAY', label: 'Birthday' },
@@ -46,12 +47,135 @@ export function GreetingsControls({ editor }: ControlsProps) {
   
   // A temporary state to handle member selection through the existing member search or a custom one
   // For simplicity, we can just render a list or use a custom select
-  const [isSelectingMember, setIsSelectingMember] = useState(!state.heroMemberId);
+  const [isChoosingCardType, setIsChoosingCardType] = useState(!state.heroMemberId);
+  const [isSelectingMember, setIsSelectingMember] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isHero: boolean = false) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File too large (max 10MB)');
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'family-tree/greetings');
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error('Upload failed');
+      
+      const data = await res.json();
+      
+      if (isHero) {
+        editor.setCustomHero(data.url, 'THANK_YOU');
+        setIsSelectingMember(false);
+      } else {
+        editor.addSupportingPhoto({
+          id: Math.random().toString(),
+          imageUrl: data.url,
+          adjustment: { zoom: 1, x: 0, y: 0, opacity: 100 }
+        });
+      }
+      toast.success('Photo uploaded successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to upload photo');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleGooglePhoto = async (blob: Blob, isHero: boolean = false) => {
+    if (blob.size > 10 * 1024 * 1024) {
+      toast.error('File too large (max 10MB)');
+      return;
+    }
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append('file', blob, 'google-photo.jpg');
+      formData.append('folder', 'family-tree/greetings');
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error('Upload failed');
+      
+      const data = await res.json();
+      
+      if (isHero) {
+        editor.setCustomHero(data.url, 'THANK_YOU');
+        setIsSelectingMember(false);
+      } else {
+        editor.addSupportingPhoto({
+          id: Math.random().toString(),
+          imageUrl: data.url,
+          adjustment: { zoom: 1, x: 0, y: 0, opacity: 100 }
+        });
+      }
+      toast.success('Photo imported successfully');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to import photo');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!state.heroMemberId) setIsSelectingMember(true);
-  }, [state.heroMemberId]);
+    if (!state.heroMemberId && !isChoosingCardType) setIsSelectingMember(true);
+  }, [state.heroMemberId, isChoosingCardType]);
+
+  if (isChoosingCardType) {
+    return (
+      <div className="p-4 space-y-6">
+        <div>
+          <h2 className="text-lg font-semibold">1. Choose Card Type</h2>
+          <p className="text-sm text-muted-foreground mt-1">What kind of card would you like to create?</p>
+        </div>
+
+        <div className="space-y-3">
+          <Button 
+            className="w-full h-auto py-4 flex flex-col items-start gap-1"
+            variant="outline"
+            onClick={() => {
+              setOccasion('BIRTHDAY');
+              setIsChoosingCardType(false);
+              setIsSelectingMember(true);
+            }}
+          >
+            <span className="font-semibold">Family Greeting</span>
+            <span className="text-xs text-muted-foreground font-normal">Birthdays, Anniversaries, Celebrations</span>
+          </Button>
+
+          <Button 
+            className="w-full h-auto py-4 flex flex-col items-start gap-1"
+            variant="outline"
+            onClick={() => {
+              setOccasion('THANK_YOU');
+              setIsChoosingCardType(false);
+              setIsSelectingMember(true);
+            }}
+          >
+            <span className="font-semibold">Thank You Card</span>
+            <span className="text-xs text-muted-foreground font-normal">Express gratitude with custom family photos</span>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (isSelectingMember) {
     const filteredMembers = members?.filter(m => 
@@ -61,8 +185,8 @@ export function GreetingsControls({ editor }: ControlsProps) {
     return (
       <div className="p-4 space-y-6">
         <div>
-          <h2 className="text-lg font-semibold">1. Who is this greeting for?</h2>
-          <p className="text-sm text-muted-foreground mt-1">Select the main person (Hero) for this greeting.</p>
+          <h2 className="text-lg font-semibold">2. Who is this card for?</h2>
+          <p className="text-sm text-muted-foreground mt-1">Select the main person (Hero) for this card.</p>
         </div>
 
         <div>
@@ -74,7 +198,30 @@ export function GreetingsControls({ editor }: ControlsProps) {
           />
         </div>
         
-        <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
+        <div className="pt-4 border-t border-border">
+          <Label className="text-sm font-semibold mb-2 block text-muted-foreground">Or use a custom photo</Label>
+          <div className="relative">
+            <input 
+              type="file" 
+              accept="image/*" 
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
+              onChange={(e) => {
+                 handleFileUpload(e, true);
+              }}
+              title="Upload custom photo"
+              disabled={isUploading}
+            />
+            <Button variant="outline" className="w-full flex gap-2" disabled={isUploading}>
+              <Upload className="w-4 h-4" />
+              {isUploading ? 'Uploading...' : 'Upload from Device'}
+            </Button>
+          </div>
+          <div className="mt-2 w-full [&>div>button]:w-full [&>div>button]:justify-center">
+            <GooglePhotosPicker onPhotoSelected={(blob) => handleGooglePhoto(blob, true)} disabled={isUploading} />
+          </div>
+        </div>
+
+        <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2">
           {filteredMembers.map(m => (
             <button
               key={m.id}
@@ -191,17 +338,24 @@ export function GreetingsControls({ editor }: ControlsProps) {
           <div className="flex gap-2">
             <Button 
               variant={state.format === 'PORTRAIT' ? 'default' : 'outline'} 
-              className="flex-1" 
+              className="flex-1 text-xs px-2" 
               onClick={() => setFormat('PORTRAIT')}
             >
-              Portrait (4:5)
+              Portrait
             </Button>
             <Button 
               variant={state.format === 'SQUARE' ? 'default' : 'outline'} 
-              className="flex-1" 
+              className="flex-1 text-xs px-2" 
               onClick={() => setFormat('SQUARE')}
             >
-              Square (1:1)
+              Square
+            </Button>
+            <Button 
+              variant={state.format === 'LANDSCAPE' ? 'default' : 'outline'} 
+              className="flex-1 text-xs px-2" 
+              onClick={() => setFormat('LANDSCAPE')}
+            >
+              Landscape
             </Button>
           </div>
         </div>
@@ -287,26 +441,46 @@ export function GreetingsControls({ editor }: ControlsProps) {
             );
           })}
           
-          <Select 
-            onValueChange={(val) => {
-              const m = members?.find(x => x.id === val);
-              if (m && m.imageUrl) {
-                editor.addSupportingPhoto({
-                  id: Math.random().toString(),
-                  memberId: m.id,
-                  imageUrl: m.imageUrl,
-                  adjustment: { zoom: 1, x: 0, y: 0, opacity: 100 }
-                });
-              }
-            }}
-          >
-            <SelectTrigger className="w-full text-xs h-8"><SelectValue placeholder="Add Family Member Photo" /></SelectTrigger>
-            <SelectContent>
-              {members?.filter(m => m.imageUrl && m.id !== state.heroMemberId).map(m => (
-                <SelectItem key={m.id} value={m.id}>{m.firstName} {m.lastName}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2">
+            <Select 
+              onValueChange={(val) => {
+                const m = members?.find(x => x.id === val);
+                if (m && m.imageUrl) {
+                  editor.addSupportingPhoto({
+                    id: Math.random().toString(),
+                    memberId: m.id,
+                    imageUrl: m.imageUrl,
+                    adjustment: { zoom: 1, x: 0, y: 0, opacity: 100 }
+                  });
+                }
+              }}
+            >
+              <SelectTrigger className="w-full text-xs h-8"><SelectValue placeholder="Add Family Member" /></SelectTrigger>
+              <SelectContent>
+                {members?.filter(m => m.imageUrl && m.id !== state.heroMemberId).map(m => (
+                  <SelectItem key={m.id} value={m.id}>{m.firstName} {m.lastName}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className="relative">
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
+                onChange={(e) => handleFileUpload(e, false)}
+                title="Upload custom photo"
+                disabled={isUploading}
+              />
+              <Button variant="outline" className="h-8 px-3" disabled={isUploading}>
+                <ImagePlus className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="[&>div>button]:h-8 [&>div>button]:px-3">
+              <GooglePhotosPicker onPhotoSelected={(blob) => handleGooglePhoto(blob, false)} disabled={isUploading} />
+            </div>
+          </div>
         </div>
       </section>
     </div>

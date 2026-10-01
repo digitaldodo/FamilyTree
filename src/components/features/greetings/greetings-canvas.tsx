@@ -18,8 +18,9 @@ export const GreetingsCanvas = forwardRef<HTMLDivElement, GreetingsCanvasProps>(
     const [scale, setScale] = useState(1);
 
     const isPortrait = state.format === 'PORTRAIT';
-    const originalWidth = 1080;
-    const originalHeight = isPortrait ? 1350 : 1080;
+    const isLandscape = state.format === 'LANDSCAPE';
+    const originalWidth = isLandscape ? 1200 : 1080;
+    const originalHeight = isLandscape ? 675 : isPortrait ? 1350 : 1080;
 
     useEffect(() => {
       const updateScale = () => {
