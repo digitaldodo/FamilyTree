@@ -45,6 +45,7 @@ export interface GreetingState {
   // Hero Image
   heroImageUrl: string | null;
   heroAdjustment: ImageAdjustment;
+  heroMode: 'BACKGROUND' | 'FOREGROUND';
 
   // Text
   headline: string;

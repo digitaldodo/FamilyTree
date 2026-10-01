@@ -20,6 +20,7 @@ type Action =
   | { type: 'ADD_SUPPORTING_PHOTO'; payload: SupportingPhoto }
   | { type: 'UPDATE_SUPPORTING_PHOTO'; payload: { id: string; updates: Partial<SupportingPhoto> } }
   | { type: 'REMOVE_SUPPORTING_PHOTO'; payload: string }
+  | { type: 'SET_HERO_MODE'; payload: 'BACKGROUND' | 'FOREGROUND' }
   | { type: 'RESET' };
 
 const defaultAdjustment: ImageAdjustment = { zoom: 1, x: 0, y: 0, opacity: 100 };
@@ -30,7 +31,8 @@ const initialState: GreetingState = {
   template: 'HERITAGE_PORTRAIT',
   format: 'PORTRAIT',
   heroImageUrl: null,
-  heroAdjustment: { ...defaultAdjustment },
+  heroAdjustment: { ...defaultAdjustment, opacity: 30 }, // Defaulting to low opacity for background mode
+  heroMode: 'BACKGROUND',
   headline: 'Happy Birthday',
   heroName: '',
   message: 'Wishing you a beautiful year ahead.',
@@ -86,7 +88,7 @@ function reducer(state: GreetingState, action: Action): GreetingState {
         heroMemberId: member.id,
         heroImageUrl: member.imageUrl || null,
         heroName: `${member.firstName} ${member.lastName}`,
-        heroAdjustment: { ...defaultAdjustment },
+        heroAdjustment: { ...defaultAdjustment, opacity: state.heroMode === 'BACKGROUND' ? 30 : 100 },
         occasion,
         ...defaults,
         dateStr,
@@ -120,6 +122,15 @@ function reducer(state: GreetingState, action: Action): GreetingState {
         ...state,
         supportingPhotos: state.supportingPhotos.filter((p) => p.id !== action.payload),
       };
+    case 'SET_HERO_MODE':
+      return {
+        ...state,
+        heroMode: action.payload,
+        heroAdjustment: {
+           ...state.heroAdjustment,
+           opacity: action.payload === 'BACKGROUND' ? 30 : 100
+        }
+      };
     case 'RESET':
       return initialState;
     default:
@@ -142,6 +153,7 @@ export function useGreetingsEditor() {
     addSupportingPhoto: useCallback((photo: SupportingPhoto) => dispatch({ type: 'ADD_SUPPORTING_PHOTO', payload: photo }), []),
     updateSupportingPhoto: useCallback((id: string, updates: Partial<SupportingPhoto>) => dispatch({ type: 'UPDATE_SUPPORTING_PHOTO', payload: { id, updates } }), []),
     removeSupportingPhoto: useCallback((id: string) => dispatch({ type: 'REMOVE_SUPPORTING_PHOTO', payload: id }), []),
+    setHeroMode: useCallback((mode: 'BACKGROUND' | 'FOREGROUND') => dispatch({ type: 'SET_HERO_MODE', payload: mode }), []),
     reset: useCallback(() => dispatch({ type: 'RESET' }), []),
   };
 }

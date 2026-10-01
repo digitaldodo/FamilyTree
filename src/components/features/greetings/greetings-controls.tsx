@@ -39,7 +39,7 @@ interface ControlsProps {
   isMobile?: boolean;
 }
 
-export function GreetingsControls({ editor, isMobile }: ControlsProps) {
+export function GreetingsControls({ editor }: ControlsProps) {
   const { state, setHeroMember, setOccasion, setTemplate, setFormat, updateText, updateHeroAdjustment } = editor;
   const activeTreeId = useAppStore((s) => s.activeTreeId);
   const { members } = useMembers(activeTreeId || '');
@@ -47,21 +47,35 @@ export function GreetingsControls({ editor, isMobile }: ControlsProps) {
   // A temporary state to handle member selection through the existing member search or a custom one
   // For simplicity, we can just render a list or use a custom select
   const [isSelectingMember, setIsSelectingMember] = useState(!state.heroMemberId);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (!state.heroMemberId) setIsSelectingMember(true);
   }, [state.heroMemberId]);
 
   if (isSelectingMember) {
+    const filteredMembers = members?.filter(m => 
+      `${m.firstName} ${m.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
+
     return (
       <div className="p-4 space-y-6">
         <div>
           <h2 className="text-lg font-semibold">1. Who is this greeting for?</h2>
           <p className="text-sm text-muted-foreground mt-1">Select the main person (Hero) for this greeting.</p>
         </div>
+
+        <div>
+          <Input 
+            placeholder="Search family members..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full"
+          />
+        </div>
         
         <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
-          {members?.map(m => (
+          {filteredMembers.map(m => (
             <button
               key={m.id}
               onClick={() => {
@@ -87,8 +101,8 @@ export function GreetingsControls({ editor, isMobile }: ControlsProps) {
               </div>
             </button>
           ))}
-          {members?.length === 0 && (
-            <p className="text-sm text-muted-foreground">No members found in this tree.</p>
+          {filteredMembers.length === 0 && (
+            <p className="text-sm text-muted-foreground">No members found.</p>
           )}
         </div>
       </div>
@@ -123,6 +137,40 @@ export function GreetingsControls({ editor, isMobile }: ControlsProps) {
                 <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2" onClick={() => updateHeroAdjustment({ zoom: 1, x: 0, y: 0 })}>Reset</Button>
              </div>
            </div>
+        </div>
+
+        <div className="space-y-2 mt-4">
+          <Label className="text-xs">Composition Mode</Label>
+          <div className="flex gap-2">
+            <Button 
+              variant={state.heroMode === 'BACKGROUND' ? 'default' : 'outline'} 
+              size="sm"
+              className="flex-1 text-xs" 
+              onClick={() => editor.setHeroMode('BACKGROUND')}
+            >
+              Background
+            </Button>
+            <Button 
+              variant={state.heroMode === 'FOREGROUND' ? 'default' : 'outline'} 
+              size="sm"
+              className="flex-1 text-xs" 
+              onClick={() => editor.setHeroMode('FOREGROUND')}
+            >
+              Foreground
+            </Button>
+          </div>
+        </div>
+
+        <div className="space-y-2 mt-4">
+          <Label className="text-xs">Opacity ({state.heroAdjustment.opacity}%)</Label>
+          <input 
+            type="range" 
+            min="5" 
+            max="100" 
+            value={state.heroAdjustment.opacity}
+            onChange={(e) => updateHeroAdjustment({ opacity: parseInt(e.target.value) })}
+            className="w-full accent-primary"
+          />
         </div>
       </section>
 
@@ -186,7 +234,7 @@ export function GreetingsControls({ editor, isMobile }: ControlsProps) {
         </div>
         
         <div className="space-y-2">
-          <Label className="text-xs">Person's Name</Label>
+          <Label className="text-xs">Person&apos;s Name</Label>
           <Input value={state.heroName} onChange={(e) => updateText({ heroName: e.target.value })} />
         </div>
         
@@ -222,7 +270,7 @@ export function GreetingsControls({ editor, isMobile }: ControlsProps) {
           <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Supporting Photos</Label>
         </div>
         <div className="space-y-3">
-          {state.supportingPhotos.map((p, i) => {
+          {state.supportingPhotos.map((p) => {
             const member = members?.find(m => m.id === p.memberId);
             return (
               <div key={p.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border border-border">
