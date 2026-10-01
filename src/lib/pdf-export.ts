@@ -36,7 +36,8 @@ const HIDE_SELECTORS = [
   '[data-radix-popper-content-wrapper]',
   '[role="dialog"]',
   // FamilyTree watermark overlay (the visual canvas watermark)
-  '.tree-watermark',
+  '.tree-watermark', 
+  '.react-flow__handle',
 ];
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -81,6 +82,9 @@ function patchViewportBackground(viewport: HTMLElement): () => void {
   viewport.style.background = '#ffffff';
   viewport.style.backgroundColor = '#ffffff';
 
+  // Add global exporting class
+  document.body.classList.add('exporting-pdf');
+
   // Also clear generation lane backgrounds (they use dark ink fill)
   const lanes = viewport.querySelectorAll<HTMLElement>('.react-flow__node-generationLane');
   const laneOriginals: { el: HTMLElement; bg: string }[] = [];
@@ -92,6 +96,7 @@ function patchViewportBackground(viewport: HTMLElement): () => void {
   return () => {
     viewport.style.background = orig;
     viewport.style.backgroundColor = origBg;
+    document.body.classList.remove('exporting-pdf');
     laneOriginals.forEach(({ el, bg }) => { el.style.background = bg; });
   };
 }
@@ -120,8 +125,8 @@ export async function exportTreeToPDF(
   try {
     // 4. Calculate tight bounding box around all nodes
     // Exclude generation lanes from bounds calculation for a tighter crop
-    const memberNodes = nodes.filter(n => n.type !== 'generationLane');
-    const bounds = getNodesBounds(memberNodes);
+    const captureNodes = nodes.filter(n => n.type !== 'generationLane');
+    const bounds = getNodesBounds(captureNodes);
     const PADDING_PX = 80;
     const captureW = Math.ceil(bounds.width + PADDING_PX * 2);
     const captureH = Math.ceil(bounds.height + PADDING_PX * 2);
@@ -280,3 +285,4 @@ export async function exportTreeToPDF(
     restoreElements(hidden);
   }
 }
+

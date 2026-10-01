@@ -69,25 +69,27 @@ export function useFamilyTreeRenderer(
 
     engineGenerations.forEach((level) => {
       const dbGen = generations?.find((g) => g.orderIndex === level);
-      const label = dbGen?.name?.trim() || `Generation ${level}`;
-
-      rfNodes.push({
-        id: `lane-${level}`,
-        type: 'generationLane',
-        position: { x: minGlobalX, y: level * LEVEL_HEIGHT - 60 },
-        data: {
-          label,
-          generationId: dbGen?.id,
-          isEditable: Boolean(dbGen?.id) && !readOnly,
-          width: 200,
-          height: 50,
-          isEven: false,
-        },
-        zIndex: -2,
-        selectable: false,
-        draggable: false,
-        focusable: false,
-      });
+      const configuredName = dbGen?.name?.trim();
+      
+      if (configuredName) {
+        rfNodes.push({
+          id: `lane-${level}`,
+          type: 'generationLane',
+          position: { x: minGlobalX, y: level * LEVEL_HEIGHT - 60 },
+          data: {
+            label: configuredName,
+            generationId: dbGen?.id,
+            isEditable: !readOnly,
+            width: 200,
+            height: 50,
+            isEven: false,
+          },
+          zIndex: -2,
+          selectable: false,
+          draggable: false,
+          focusable: false,
+        });
+      }
     });
 
     // 4. Generate Edges

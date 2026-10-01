@@ -99,6 +99,20 @@ export function RelationshipEdge({
           transition: 'stroke 0.15s ease, stroke-width 0.15s ease',
         }}
       />
+
+      {/* Gold Flow Animation Highlight (only for parent-child) */}
+      {!isSpouse && (
+        <path
+          d={edgePath}
+          fill="none"
+          stroke="var(--color-tree-gold, #d4af37)"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="gold-flow-animation"
+          style={{ opacity: 0.8 }}
+        />
+      )}
     </g>
   );
 }

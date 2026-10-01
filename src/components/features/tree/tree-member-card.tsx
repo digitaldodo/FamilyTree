@@ -85,8 +85,6 @@ function TreeMemberCardComponent({
           </div>
         )}
 
-        {/* Subtle gradient overlay to merge image with card background smoothly */}
-        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-card/95 to-transparent pointer-events-none" />
       </div>
 
       {/* Information Area */}
