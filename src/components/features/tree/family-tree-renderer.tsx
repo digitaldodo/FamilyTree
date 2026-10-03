@@ -71,7 +71,10 @@ export function useFamilyTreeRenderer(
       const dbGen = generations?.find((g) => g.orderIndex === level);
       const configuredName = dbGen?.name?.trim();
       
-      if (configuredName) {
+      // Do not render if the name is an old system-generated default
+      const isLegacyAuto = configuredName && ['GRANDPARENTS', 'PARENTS', 'CHILDREN', 'GRANDCHILDREN', 'GREAT GRANDPARENTS'].includes(configuredName.toUpperCase());
+      
+      if (configuredName && !isLegacyAuto) {
         rfNodes.push({
           id: `lane-${level}`,
           type: 'generationLane',

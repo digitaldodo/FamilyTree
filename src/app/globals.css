@@ -227,7 +227,31 @@
 }
 
 @media print {
-  /* Hide all application chrome */
+  /* Enforce Light Theme CSS variables during print, ignoring .dark */
+  :root, .dark {
+    --color-background: #F5EFE0;
+    --color-foreground: #1C2E26;
+    --color-card: #FDFAF4;
+    --color-card-foreground: #1C2E26;
+    --color-popover: #FFFFFF;
+    --color-popover-foreground: #1C2E26;
+    --color-primary: #123D2D;
+    --color-primary-foreground: #F5EFE0;
+    --color-secondary: #EDE7D6;
+    --color-secondary-foreground: #1C2E26;
+    --color-muted: #E8E1CE;
+    --color-muted-foreground: #6B7A65;
+    --color-accent: #C8922A;
+    --color-border: #C8C2B5;
+    --color-tree-connector: #4A6B52;
+    --color-tree-connector-active: #2C4A33;
+    --color-tree-spouse: #9F7336;
+    --color-tree-spouse-active: #C8922A;
+    --color-tree-junction: #2C4A33;
+    --color-tree-glow: rgba(74, 107, 82, 0.1);
+  }
+
+  /* Hide all application chrome and interactions */
   header, nav, aside, footer,
   .print-hidden,
   [data-sidebar],
@@ -235,26 +259,41 @@
   .react-flow__controls,
   .react-flow__minimap,
   [data-toolbar],
-  .tree-watermark { display: none !important; }
+  .tree-watermark,
+  .gold-flow-animation,
+  .gold-flow-card-animation,
+  .react-flow__background { 
+    display: none !important; 
+  }
 
-  /* Ensure white backgrounds for print */
-  html, body, main { background: white !important; color: black !important; margin: 0 !important; padding: 0 !important; }
+  /* Ensure print margins and hide overflow */
+  html, body, main { 
+    background: white !important; 
+    margin: 0 !important; 
+    padding: 0 !important;
+  }
 
-  /* Tree fills the page */
-  .react-flow { width: 100vw !important; height: 100vh !important; }
-  .react-flow__renderer { background: white !important; }
-
-  /* Cards: clean on white */
-  .react-flow__node { background: white !important; color: black !important; box-shadow: none !important; border: 1px solid #c8c2b5 !important; border-radius: 6px !important; }
-
-  /* Connectors: dark on white */
-  .react-flow__edge-path { stroke: #4a6b52 !important; stroke-width: 1.5px !important; }
+  /* Tree fills the page but keeps aspect */
+  .react-flow { 
+    width: 100% !important; 
+    height: auto !important; 
+    min-height: 100vh !important;
+  }
+  
+  .react-flow__renderer { 
+    background: transparent !important; 
+  }
 
   /* Force color print */
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  * { 
+    -webkit-print-color-adjust: exact !important; 
+    print-color-adjust: exact !important; 
+  }
 
-  /* Page setup */
-  @page { size: A3 landscape; margin: 12mm; }
+  /* Page setup (auto fits on paper) */
+  @page { 
+    margin: 10mm; 
+  }
 }
 
 /*

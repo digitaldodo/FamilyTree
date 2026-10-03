@@ -127,14 +127,33 @@ export async function exportTreeToPDF(
     // Exclude generation lanes from bounds calculation for a tighter crop
     const captureNodes = nodes.filter(n => n.type !== 'generationLane');
     const bounds = getNodesBounds(captureNodes);
-    const PADDING_PX = 80;
+    const PADDING_PX = 20;
     const captureW = Math.ceil(bounds.width + PADDING_PX * 2);
     const captureH = Math.ceil(bounds.height + PADDING_PX * 2);
 
-    // Auto-detect orientation based on tree dimensions
+    // Dynamic page fitting: instead of a fixed A3, we use the actual tree proportions
+    // converted to physical dimensions (1 px ~ 0.264 mm). We enforce a minimum and maximum size
+    // so it feels like a deliberate print layout (e.g. Letter/A4 or larger if needed).
     const isLandscape = captureW >= captureH;
     const orientation = isLandscape ? 'landscape' : 'portrait';
-    const pageFormat = isLandscape ? [420, 297] : [297, 420]; // A3
+    
+    // Scale the pixel dimensions to mm (1 px = 0.264583 mm).
+    // We scale down slightly so a huge tree doesn't produce a 5-meter PDF.
+    const mmPerPx = 0.264583;
+    let baseFormatW = captureW * mmPerPx;
+    let baseFormatH = captureH * mmPerPx;
+    
+    // Ensure it's at least A4 size (210 x 297 mm)
+    const minW = isLandscape ? 297 : 210;
+    const minH = isLandscape ? 210 : 297;
+    
+    // If the tree is smaller than A4, we use A4. 
+    // If the tree is larger, we scale the PDF format to precisely match the tree + header space.
+    let formatW = Math.max(minW, baseFormatW);
+    // Add space for header and footer in the PDF height
+    let formatH = Math.max(minH, baseFormatH) + HEADER_HEIGHT_MM + FOOTER_HEIGHT_MM + (DOC_PADDING_MM * 2);
+    
+    const pageFormat = [formatW, formatH];
 
     // 5. Capture the viewport as JPEG with tight crop
     const [dataUrl, logoDataUrl] = await Promise.all([
@@ -158,6 +177,8 @@ export async function exportTreeToPDF(
         if (el.classList.contains('react-flow__panel')) return false;
         if (el.classList.contains('react-flow__controls')) return false;
         if (el.classList.contains('react-flow__minimap')) return false;
+        if (el.classList.contains('react-flow__background')) return false;
+        if (el.classList.contains('tree-watermark')) return false;
         return true;
       },
       }),
@@ -173,7 +194,7 @@ export async function exportTreeToPDF(
     });
 
     pdf.setProperties({
-      title: `${treeName} — Family Tree`,
+      title: `${treeName} - Family Tree`,
       author: 'FamilyTree',
       subject: 'Family history and genealogy',
       creator: 'FamilyTree App',
@@ -196,7 +217,7 @@ export async function exportTreeToPDF(
     const titleLimit = isLandscape ? 56 : 38;
     const titleText =
       fullTitle.length > titleLimit
-        ? `${fullTitle.slice(0, titleLimit - 1)}…`
+        ? `${fullTitle.slice(0, titleLimit - 1)}.`
         : fullTitle;
     pdf.text(titleText, DOC_PADDING_MM, HEADER_HEIGHT_MM / 2 + 4);
 
@@ -256,6 +277,8 @@ export async function exportTreeToPDF(
     pdf.restoreGraphicsState();
 
     // 6h. Place the tree image, scaled to fill the content area
+    // Since we sized the pageFormat precisely to match the baseFormat (if > A4),
+    // the image will naturally fit perfectly without excessive white space.
     const contentW = pageW - DOC_PADDING_MM * 2;
     const contentH = treeAreaH;
     const imgAspect = captureW / captureH;
