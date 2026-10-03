@@ -293,6 +293,7 @@
   /* Page setup (auto fits on paper) */
   @page { 
     margin: 10mm; 
+    size: landscape;
   }
 }
 

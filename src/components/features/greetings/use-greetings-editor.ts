@@ -23,6 +23,7 @@ type Action =
   | { type: 'REMOVE_SUPPORTING_PHOTO'; payload: string }
   | { type: 'SET_HERO_MODE'; payload: 'BACKGROUND' | 'FOREGROUND' }
   | { type: 'TOGGLE_SELECTED_MEMBER'; payload: string }
+  | { type: 'ADD_MULTIPLE_SELECTED_MEMBERS'; payload: string[] }
   | { type: 'RESET' };
 
 const defaultAdjustment: ImageAdjustment = { zoom: 1, x: 0, y: 0, opacity: 100 };
@@ -156,8 +157,12 @@ function reducer(state: GreetingState, action: Action): GreetingState {
         selectedMemberIds: isSelected 
           ? state.selectedMemberIds.filter(id => id !== action.payload)
           : [...state.selectedMemberIds, action.payload]
-      };
-    }
+        };
+      }
+      case 'ADD_MULTIPLE_SELECTED_MEMBERS': {
+        const newIds = action.payload.filter(id => !state.selectedMemberIds.includes(id));
+        return { ...state, selectedMemberIds: [...state.selectedMemberIds, ...newIds] };
+      }
     case 'RESET':
       return initialState;
     default:
@@ -183,6 +188,7 @@ export function useGreetingsEditor() {
     removeSupportingPhoto: useCallback((id: string) => dispatch({ type: 'REMOVE_SUPPORTING_PHOTO', payload: id }), []),
     setHeroMode: useCallback((mode: 'BACKGROUND' | 'FOREGROUND') => dispatch({ type: 'SET_HERO_MODE', payload: mode }), []),
     toggleSelectedMember: useCallback((memberId: string) => dispatch({ type: 'TOGGLE_SELECTED_MEMBER', payload: memberId }), []),
+    addMultipleSelectedMembers: useCallback((memberIds: string[]) => dispatch({ type: 'ADD_MULTIPLE_SELECTED_MEMBERS', payload: memberIds }), []),
     reset: useCallback(() => dispatch({ type: 'RESET' }), []),
   };
 }

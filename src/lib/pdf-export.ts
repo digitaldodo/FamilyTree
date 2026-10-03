@@ -134,7 +134,7 @@ export async function exportTreeToPDF(
     // Dynamic page fitting: instead of a fixed A3, we use the actual tree proportions
     // converted to physical dimensions (1 px ~ 0.264 mm). We enforce a minimum and maximum size
     // so it feels like a deliberate print layout (e.g. Letter/A4 or larger if needed).
-    const isLandscape = captureW >= captureH;
+    const isLandscape = true;
     const orientation = isLandscape ? 'landscape' : 'portrait';
     
     // Scale the pixel dimensions to mm (1 px = 0.264583 mm).
@@ -152,6 +152,11 @@ export async function exportTreeToPDF(
     let formatW = Math.max(minW, baseFormatW);
     // Add space for header and footer in the PDF height
     let formatH = Math.max(minH, baseFormatH) + HEADER_HEIGHT_MM + FOOTER_HEIGHT_MM + (DOC_PADDING_MM * 2);
+
+    // Force landscape if requested, avoiding portrait mismatch
+    if (isLandscape && formatH > formatW) {
+      formatW = formatH * 1.414; // Standard A-series landscape aspect ratio
+    }
     
     const pageFormat = [formatW, formatH];
 
