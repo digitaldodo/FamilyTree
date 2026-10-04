@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation';
 import { CldImage } from 'next-cloudinary';
 import { ArrowLeft, Calendar, MapPin, Tag, Users, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import { getMemoryCover } from '@/lib/memory-cover';
 import { MemoryActions } from '@/components/features/memories/memory-actions';
 
 export default async function MemoryDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -42,9 +43,7 @@ export default async function MemoryDetailPage({ params }: { params: Promise<{ i
     return notFound();
   }
 
-  const coverUrl = memory.media && memory.media.length > 0 
-    ? memory.media[0].url 
-    : memory.albumCoverUrl;
+  const coverUrl = getMemoryCover(memory);
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -233,12 +232,20 @@ export default async function MemoryDetailPage({ params }: { params: Promise<{ i
                   >
                     <div className="w-10 h-10 rounded-full bg-muted border border-border overflow-hidden flex-shrink-0 relative">
                       {mm.member.imageUrl ? (
-                        <CldImage
-                          src={mm.member.imageUrl}
-                          alt={mm.member.firstName}
-                          fill
-                          className="object-cover"
-                        />
+                        mm.member.imageUrl.includes('cloudinary') ? (
+                          <CldImage
+                            src={mm.member.imageUrl}
+                            alt={mm.member.firstName}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <img
+                            src={mm.member.imageUrl}
+                            alt={mm.member.firstName}
+                            className="w-full h-full object-cover"
+                          />
+                        )
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-medium text-sm">
                           {mm.member.firstName[0]}{mm.member.lastName?.[0]}

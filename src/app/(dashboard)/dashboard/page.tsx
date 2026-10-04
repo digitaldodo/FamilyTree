@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import { useAppStore } from '@/store/use-app-store';
 import { useMembers } from '@/hooks/use-members';
 import { useMemories } from '@/hooks/use-memories';
+import { getMemoryCover } from '@/lib/memory-cover';
 import { useUserTrees } from '@/hooks/use-user-trees';
 import { DashboardSkeleton } from '@/components/ui/dashboard-skeleton';
 import { DashboardTreePreview } from '@/components/features/dashboard/dashboard-tree-preview';
@@ -187,25 +188,25 @@ function DashboardContent() {
                 {/* Featured Memory */}
                 <Link href={`/memories/${recentMemories[0].id}`}>
                   <div className="group relative rounded-3xl overflow-hidden bg-muted aspect-video border border-border shadow-sm transition-all hover:shadow-md cursor-pointer block">
-                    {recentMemories[0].media && recentMemories[0].media.length > 0 ? (
-                      <Image
-                        src={recentMemories[0].media[0].url}
-                        alt={recentMemories[0].title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 66vw"
-                      />
-                    ) : recentMemories[0].albumCoverUrl ? (
-                      <img
-                        src={recentMemories[0].albumCoverUrl}
-                        alt={recentMemories[0].title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-secondary flex items-center justify-center">
-                         <ImageIcon className="w-12 h-12 text-muted-foreground/30" />
-                      </div>
-                    )}
+                    {(() => {
+                      const cover = getMemoryCover(recentMemories[0]);
+                      if (!cover) return <div className="absolute inset-0 bg-secondary" />;
+                      return recentMemories[0].media?.length > 0 ? (
+                        <Image
+                          src={cover}
+                          alt={recentMemories[0].title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 66vw"
+                        />
+                      ) : (
+                        <img
+                          src={cover}
+                          alt={recentMemories[0].title}
+                          className="w-full h-full object-cover"
+                        />
+                      );
+                    })()}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
                     <div className="absolute bottom-0 left-0 p-8 w-full">
                        <span className="text-xs font-medium bg-primary/20 text-primary-foreground backdrop-blur-md px-3 py-1 rounded-full mb-3 inline-block">

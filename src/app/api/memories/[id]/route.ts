@@ -139,9 +139,14 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     if (error === 'NOT_FOUND') return errorResponse('NOT_FOUND', 'Memory not found', 404);
     if (error === 'FORBIDDEN') return errorResponse('FORBIDDEN', 'Access denied', 403);
 
-    await prisma.memory.delete({
-      where: { id }
-    });
+    // Remove only records owned by this memory. Members, member photos, relationships,
+    // other memories and timeline data are untouched. Cloudinary assets are intentionally
+    // not purged: memory media rows carry no publicId and URLs may be reused elsewhere.
+    await prisma.$transaction([
+      prisma.memoryMember.deleteMany({ where: { memoryId: id } }),
+      prisma.media.deleteMany({ where: { memoryId: id } }),
+      prisma.memory.delete({ where: { id } }),
+    ]);
 
     return successResponse({ success: true });
   } catch (error: any) {

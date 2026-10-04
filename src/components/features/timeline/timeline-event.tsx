@@ -111,7 +111,7 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
   return (
     <div className={`flex flex-col sm:flex-row gap-5 ${isDeath ? 'opacity-90' : ''}`}>
       {/* Editorial Portrait for standard events */}
-      {primaryMember && !isMarriage && (
+      {primaryMember && !isMarriage && !isMemory && (
         <div className={`hidden sm:block relative w-24 h-32 rounded-sm overflow-hidden bg-[#17211b] shrink-0 shadow-lg shadow-black/40 border border-[#efe6d2]/20 ${isDeath ? 'grayscale' : ''}`}>
           <MemberAvatar
             imageUrl={primaryMember.imageUrl}
