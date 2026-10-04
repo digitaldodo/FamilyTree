@@ -52,9 +52,6 @@ export const TemplateFestiveHeritage: React.FC<Props> = ({ state, scale = 1 }) =
       <div className="absolute bottom-8 left-8 w-16 h-16 border-b-[4px] border-l-[4px] border-[#D4AF37] z-20 pointer-events-none" />
       <div className="absolute bottom-8 right-8 w-16 h-16 border-b-[4px] border-r-[4px] border-[#D4AF37] z-20 pointer-events-none" />
 
-      {/* Advanced Arrangement Overlay */}
-      <AdvancedPhotoArrangement state={state} frameClass="border-[#D4AF37]" />
-
       {/* Main Content Container */}
       <div className="relative z-30 flex flex-col items-center justify-between w-full h-full p-16 text-center pointer-events-none">
         
@@ -73,7 +70,9 @@ export const TemplateFestiveHeritage: React.FC<Props> = ({ state, scale = 1 }) =
         </div>
 
         {/* Middle Content */}
-        <div className="flex-1 min-h-0 w-full py-4" />
+        <div className="flex-1 min-h-0 w-full py-4 relative pointer-events-none">
+          <AdvancedPhotoArrangement state={state} frameClass="border-[#D4AF37]" />
+        </div>
 
         {/* Bottom Content */}
         <div className="shrink-0 flex flex-col items-center mt-auto pb-4 pointer-events-auto">

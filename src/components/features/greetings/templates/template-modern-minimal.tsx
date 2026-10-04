@@ -41,14 +41,14 @@ export const TemplateModernMinimal: React.FC<Props> = ({ state, scale = 1 }) => 
         </div>
       )}
 
-      {/* Advanced Arrangement Overlay */}
-      <AdvancedPhotoArrangement state={state} frameClass="border-white" />
-
-      {/* Structural layout */}
-      <div className={`flex-1 w-full h-full relative z-10 flex flex-col pointer-events-none ${isBackgroundMode ? 'bg-white/40 backdrop-blur-[4px]' : ''}`}>
+      <div className={`w-full h-full relative z-10 flex flex-col pointer-events-none ${isBackgroundMode ? 'bg-white/60' : ''}`}>
         
+        <div className="flex-1 min-h-0 w-full relative pointer-events-none">
+          <AdvancedPhotoArrangement state={state} frameClass="border-white" />
+        </div>
+
         {/* Bottom half: Minimal typography */}
-        <div className="relative flex-1 min-h-0 w-full flex flex-col px-16 py-12 mt-auto pointer-events-auto">
+        <div className="shrink-0 w-full flex flex-col px-16 py-12 pointer-events-auto bg-white shadow-[0_-20px_40px_rgba(0,0,0,0.02)] border-t border-gray-100">
           
           {/* Date & Headline block */}
           <div className="flex justify-between items-end mb-6 border-b border-gray-900/10 pb-4 shrink-0">

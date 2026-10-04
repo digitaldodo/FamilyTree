@@ -45,9 +45,6 @@ export const TemplateHeritagePortrait: React.FC<Props> = ({ state, scale = 1 }) 
       <div className="absolute inset-0 border-[16px] border-solid border-[#E2D5C3] pointer-events-none z-10" />
       <div className="absolute inset-0 border border-solid border-[#4A3B32] m-[24px] opacity-20 pointer-events-none z-10" />
       
-      {/* Advanced Arrangement Overlay */}
-      <AdvancedPhotoArrangement state={state} frameClass="border-white" />
-
       <div className="z-20 relative flex flex-col w-full h-full p-12 justify-between pointer-events-none">
         {/* Top Text Content */}
         <div className="text-center text-[#4A3B32] w-full shrink-0 pointer-events-auto">
@@ -57,10 +54,13 @@ export const TemplateHeritagePortrait: React.FC<Props> = ({ state, scale = 1 }) 
         </div>
 
         {/* Middle Content spacer */}
-        <div className="flex-1 min-h-0 w-full" />
+        <div className="flex-1 min-h-0 w-full relative pointer-events-none">
+          {/* Advanced Arrangement Overlay */}
+          <AdvancedPhotoArrangement state={state} frameClass="border-white" />
+        </div>
 
         {/* Bottom Text Content */}
-        <div className="text-center text-[#4A3B32] shrink-0 mt-auto bg-[#F9F7F1]/80 p-6 rounded-xl backdrop-blur-sm shadow-sm border border-[#E2D5C3]/30 pointer-events-auto">
+        <div className="text-center text-[#4A3B32] shrink-0 mt-auto bg-[#F9F7F1]/95 p-6 rounded-xl shadow-sm border border-[#E2D5C3]/50 pointer-events-auto">
           {state.message && <p className="text-2xl italic mb-6 leading-relaxed font-medium drop-shadow-sm opacity-90 break-words">{state.message}</p>}
           {(state.senderName || state.footer) && (
             <div className="flex flex-col items-center">

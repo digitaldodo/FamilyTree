@@ -41,53 +41,57 @@ export const TemplateFamilyCollage: React.FC<Props> = ({ state, scale = 1 }) => 
         </div>
       )}
 
-      {/* Advanced Arrangement Overlay */}
-      <AdvancedPhotoArrangement state={state} frameClass="border-white" />
+      <div className="z-20 relative flex flex-col w-full h-full justify-between pointer-events-none">
+        <div className="flex-1 min-h-0 w-full relative pointer-events-none">
+          {/* Advanced Arrangement Overlay */}
+          <AdvancedPhotoArrangement state={state} frameClass="border-white" />
+        </div>
 
-      {/* Content Area */}
-      <div className={`relative z-20 flex-1 min-h-0 flex flex-col items-center justify-end p-12 text-center text-slate-800 ${isBackgroundMode ? 'bg-white/85 mt-auto backdrop-blur-md rounded-t-[4rem]' : 'bg-white/95 backdrop-blur-sm shadow-[0_-10px_40px_rgba(0,0,0,0.03)] rounded-t-[3rem] mt-auto pointer-events-auto'} pointer-events-none`}>
-        <div className="pointer-events-auto">
-        {state.headline && (
-          <span className="inline-block px-4 py-1 mb-6 text-xs font-bold tracking-widest text-white bg-slate-800 rounded-full uppercase shrink-0">
-            {state.headline}
-          </span>
-        )}
-        
-        <h1 className="text-6xl font-extrabold tracking-tight mb-4 text-slate-800 drop-shadow-sm shrink-0 break-words leading-tight">
-          {state.heroName}
-        </h1>
-        
-        {state.dateStr && (
-          <p className="text-sm font-medium tracking-widest text-slate-500 uppercase mb-6 shrink-0">
-            {state.dateStr}
-          </p>
-        )}
+        {/* Content Area */}
+        <div className={`relative z-20 shrink-0 flex flex-col items-center justify-end p-12 text-center text-slate-800 ${isBackgroundMode ? 'bg-white/95 mt-auto rounded-t-[4rem]' : 'bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.05)] rounded-t-[3rem] mt-auto pointer-events-auto'} pointer-events-none border-t border-slate-100`}>
+          <div className="pointer-events-auto flex flex-col items-center">
+          {state.headline && (
+            <span className="inline-block px-4 py-1 mb-6 text-xs font-bold tracking-widest text-white bg-slate-800 rounded-full uppercase shrink-0">
+              {state.headline}
+            </span>
+          )}
+          
+          <h1 className="text-6xl font-extrabold tracking-tight mb-4 text-slate-800 drop-shadow-sm shrink-0 break-words leading-tight">
+            {state.heroName}
+          </h1>
+          
+          {state.dateStr && (
+            <p className="text-sm font-medium tracking-widest text-slate-500 uppercase mb-6 shrink-0">
+              {state.dateStr}
+            </p>
+          )}
 
-        <div className="w-16 h-1 bg-slate-300 mb-6 rounded-full shrink-0" />
+          <div className="w-16 h-1 bg-slate-300 mb-6 rounded-full shrink-0" />
 
-        {state.message && (
-          <p className="text-xl leading-relaxed text-slate-600 mb-8 w-full max-w-[80%] font-medium break-words line-clamp-4">
-            {state.message}
-          </p>
-        )}
+          {state.message && (
+            <p className="text-xl leading-relaxed text-slate-600 mb-8 w-full max-w-[80%] font-medium break-words line-clamp-4">
+              {state.message}
+            </p>
+          )}
 
-        {state.senderName && (
-          <p className="text-base font-bold text-slate-800 uppercase tracking-widest shrink-0">
-            {state.senderName}
-          </p>
-        )}
-        
-        {state.footer && (
-          <p className="text-xs text-slate-400 mt-2 uppercase tracking-wider font-semibold shrink-0">
-            {state.footer}
-          </p>
-        )}
+          {state.senderName && (
+            <p className="text-base font-bold text-slate-800 uppercase tracking-widest shrink-0">
+              {state.senderName}
+            </p>
+          )}
+          
+          {state.footer && (
+            <p className="text-xs text-slate-400 mt-2 uppercase tracking-wider font-semibold shrink-0">
+              {state.footer}
+            </p>
+          )}
+          </div>
         </div>
       </div>
 
       {/* Logo Placeholder */}
-      <div className="absolute top-6 left-6 z-30">
-        <span className="text-[10px] uppercase tracking-widest opacity-80 font-bold bg-white/80 px-2 py-1 rounded shadow-sm text-slate-800">FamilyTree</span>
+      <div className="absolute top-6 left-6 z-30 pointer-events-none">
+        <span className="text-[10px] uppercase tracking-widest opacity-80 font-bold bg-white/90 px-2 py-1 rounded shadow-sm text-slate-800">FamilyTree</span>
       </div>
     </div>
   );
