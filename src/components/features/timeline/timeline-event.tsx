@@ -45,11 +45,11 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
 
   if (isMicro) {
     return (
-      <div className="flex flex-col gap-1 opacity-80 hover:opacity-100 transition-opacity">
-        <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+      <div className="flex flex-col gap-1 opacity-90 hover:opacity-100 transition-opacity">
+        <div className="text-xs font-semibold uppercase tracking-widest text-[#b5ad98]">
           {format(event.date, 'MMM d, yyyy')}
         </div>
-        <h4 className="text-base font-serif text-foreground">{event.title}</h4>
+        <h4 className="text-base font-serif text-[#f3ead3]">{event.title}</h4>
       </div>
     );
   }
@@ -61,7 +61,7 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
         onClick={() => onClick && onClick(event)}
         className="flex flex-col gap-4 cursor-pointer group"
       >
-        <div className="relative w-full aspect-[4/3] rounded-sm overflow-hidden bg-muted border border-border/40 shadow-sm">
+        <div className="relative w-full aspect-[4/3] rounded-sm overflow-hidden bg-[#17211b] border border-[#efe6d2]/20 shadow-lg shadow-black/40">
           <Image 
             src={memoryCoverUrl} 
             alt={event.title}
@@ -70,20 +70,20 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[#b5ad98]">
             <span>{format(event.date, 'MMMM d, yyyy')}</span>
             {event.memoryData?.location && (
               <>
-                <span className="w-1 h-1 rounded-full bg-border" />
+                <span className="w-1 h-1 rounded-full bg-[#efe6d2]/40" />
                 <span>{event.memoryData.location}</span>
               </>
             )}
           </div>
-          <h3 className="text-2xl sm:text-3xl font-serif font-medium leading-tight text-foreground group-hover:text-primary transition-colors">
+          <h3 className="text-2xl sm:text-3xl font-serif font-medium leading-tight text-[#f3ead3] group-hover:text-[#d8c984] transition-colors">
             {event.title}
           </h3>
           {event.description && (
-            <p className="text-[15px] leading-relaxed text-muted-foreground line-clamp-2 mt-2">
+            <p className="text-[15px] leading-relaxed text-[#b3ae9c] line-clamp-2 mt-2">
               {event.description}
             </p>
           )}
@@ -92,13 +92,13 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
             {safeMembers.length > 0 && (
               <div className="flex items-center -space-x-2">
                 {safeMembers.slice(0, 4).map((member) => (
-                  <div key={member.id} className="relative w-6 h-6 rounded-full ring-2 ring-background overflow-hidden bg-muted">
+                  <div key={member.id} className="relative w-6 h-6 rounded-full ring-2 ring-[#0b100d] overflow-hidden bg-[#17211b]">
                     <MemberAvatar imageUrl={member.imageUrl} firstName={member.name.split(' ')[0]} lastName={member.name.split(' ')[1] || ''} fallbackSize={10} />
                   </div>
                 ))}
               </div>
             )}
-            <span className="text-xs font-medium text-foreground/60 group-hover:text-primary transition-colors flex items-center gap-1">
+            <span className="text-xs font-medium text-[#d8c984] group-hover:text-[#ecdc98] transition-colors flex items-center gap-1">
               View Memory &rarr;
             </span>
           </div>
@@ -109,10 +109,10 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
 
   // STANDARD EVENT (Birth, Death, Marriage, or Memory without photo)
   return (
-    <div className={`flex flex-col sm:flex-row gap-5 ${isDeath ? 'opacity-80' : ''}`}>
+    <div className={`flex flex-col sm:flex-row gap-5 ${isDeath ? 'opacity-90' : ''}`}>
       {/* Editorial Portrait for standard events */}
       {primaryMember && !isMarriage && (
-        <div className={`hidden sm:block relative w-24 h-32 rounded-sm overflow-hidden bg-muted shrink-0 shadow-sm border border-border/40 ${isDeath ? 'grayscale' : ''}`}>
+        <div className={`hidden sm:block relative w-24 h-32 rounded-sm overflow-hidden bg-[#17211b] shrink-0 shadow-lg shadow-black/40 border border-[#efe6d2]/20 ${isDeath ? 'grayscale' : ''}`}>
           <MemberAvatar
             imageUrl={primaryMember.imageUrl}
             firstName={primaryMember.name.split(' ')[0]}
@@ -126,27 +126,27 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
       {/* Marriage Couples */}
       {isMarriage && safeMembers.length >= 2 && (
         <div className="hidden sm:flex shrink-0 -space-x-4">
-          <div className="relative w-20 h-28 rounded-sm overflow-hidden bg-muted shadow-sm border border-border/40 z-10">
+          <div className="relative w-20 h-28 rounded-sm overflow-hidden bg-[#17211b] shadow-lg shadow-black/40 border border-[#efe6d2]/20 z-10">
             <MemberAvatar imageUrl={safeMembers[0].imageUrl} firstName={safeMembers[0].name.split(' ')[0]} lastName={safeMembers[0].name.split(' ')[1] || ''} fallbackSize={24} className="w-full h-full rounded-none" />
           </div>
-          <div className="relative w-20 h-28 rounded-sm overflow-hidden bg-muted shadow-sm border border-border/40 translate-y-4">
+          <div className="relative w-20 h-28 rounded-sm overflow-hidden bg-[#17211b] shadow-lg shadow-black/40 border border-[#efe6d2]/20 translate-y-4">
             <MemberAvatar imageUrl={safeMembers[1].imageUrl} firstName={safeMembers[1].name.split(' ')[0]} lastName={safeMembers[1].name.split(' ')[1] || ''} fallbackSize={24} className="w-full h-full rounded-none" />
           </div>
         </div>
       )}
 
       <div className="flex-1 min-w-0 flex flex-col justify-center py-2">
-        <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1.5">
+        <div className="text-xs font-semibold uppercase tracking-widest text-[#b5ad98] mb-1.5">
           {format(event.date, 'MMMM d, yyyy')}
           {isDeath && event.description?.match(/Age \d+/) && ` • ${event.description.match(/Age \d+/)?.[0]}`}
         </div>
         
-        <h4 className={`text-xl sm:text-2xl font-serif font-medium leading-snug ${isDeath ? 'text-muted-foreground' : 'text-foreground'}`}>
+        <h4 className={`text-xl sm:text-2xl font-serif font-medium leading-snug ${isDeath ? 'text-[#b5ad98]' : 'text-[#f3ead3]'}`}>
           {event.title}
         </h4>
         
         {event.description && !isDeath && (
-          <p className="mt-2.5 text-[15px] leading-relaxed text-muted-foreground line-clamp-3">
+          <p className="mt-2.5 text-[15px] leading-relaxed text-[#b3ae9c] line-clamp-3">
             {event.description}
           </p>
         )}
@@ -158,11 +158,11 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
               {event.associatedMemories!.slice(0, 3).map((mem: any, i: number) => {
                 const hasCover = mem.media && mem.media.length > 0;
                 return (
-                  <div key={mem.id || i} className="w-6 h-6 rounded-sm bg-muted border border-background overflow-hidden relative shadow-sm z-10">
+                  <div key={mem.id || i} className="w-6 h-6 rounded-sm bg-[#17211b] border border-[#0b100d] overflow-hidden relative shadow-sm z-10">
                     {hasCover ? (
                       <Image src={mem.media[0].url} alt="Memory" fill className="object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-primary/5 text-primary">
+                      <div className="w-full h-full flex items-center justify-center bg-[#c9b872]/10 text-[#d8c984]">
                         <Camera className="w-2.5 h-2.5" />
                       </div>
                     )}
@@ -170,7 +170,7 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
                 );
               })}
             </div>
-            <span className="text-xs font-medium text-muted-foreground">
+            <span className="text-xs font-medium text-[#b5ad98]">
               +{associatedMemoriesCount}
             </span>
           </div>
@@ -181,7 +181,7 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
           <div className="mt-5">
             <button 
               onClick={(e) => { e.stopPropagation(); onAddContextualMemory(event); }}
-              className="text-xs font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1 uppercase tracking-wider"
+              className="text-xs font-medium text-[#d8c984] hover:text-[#ecdc98] transition-colors flex items-center gap-1 uppercase tracking-wider"
             >
               <Plus className="w-3 h-3" /> Add Memory
             </button>
