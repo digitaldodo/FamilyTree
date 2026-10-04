@@ -12,7 +12,7 @@ import { useMembers } from '@/hooks/use-members';
 import { GooglePhotosPicker } from '@/components/features/members/google-photos-picker';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { ZoomIn, ImagePlus, Upload, X } from 'lucide-react';
+import { ZoomIn, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 
@@ -476,9 +476,9 @@ export function GreetingsControls({ editor }: ControlsProps) {
                       setPickerMode('SUPPORTING');
                       setMemberPhotoPicker(memberId);
                     }}>
-                      <ImagePlus className="w-3 h-3 mr-1" /> Add
+                      View All Photos
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => editor.toggleSelectedMember(memberId)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => editor.removeMember(memberId)}>
                       <X className="w-3 h-3" />
                     </Button>
                   </div>
@@ -525,103 +525,172 @@ export function GreetingsControls({ editor }: ControlsProps) {
             </div>
           )}
           
-          <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
-            <div className="w-full sm:w-auto flex-1 min-w-[150px]">
-              <Select 
-                value=""
-                onValueChange={(val) => {
-                  if (!state.selectedMemberIds.includes(val)) {
-                    editor.toggleSelectedMember(val);
-                  }
-                }}
-              >
-                <SelectTrigger className="w-full text-xs h-8"><SelectValue placeholder="Add Family Member..." /></SelectTrigger>
-                <SelectContent>
-                  {members?.filter(m => m.id !== state.heroMemberId && !state.selectedMemberIds.includes(m.id)).map(m => (
-                    <SelectItem key={m.id} value={m.id}>{m.firstName} {m.lastName}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="relative flex-shrink-0">
-              <input 
-                type="file" 
-                multiple
-                accept="image/*" 
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
-                onChange={(e) => handleFileUpload(e, false)}
-                title="Upload custom photos"
-                disabled={isUploading}
-              />
-              <Button variant="outline" className="h-8 px-3" disabled={isUploading}>
-                <Upload className="w-3 h-3 mr-2" /> Upload
-              </Button>
-            </div>
+          <div className="flex flex-col gap-3 pt-2 border-t border-border/50">
+            <Button 
+              variant="outline" 
+              className="w-full font-semibold border-primary/20 hover:bg-primary/5 text-primary"
+              onClick={() => {
+                const eligibleMembers = members?.filter(m => m.id !== state.heroMemberId && m.id !== 'CUSTOM') || [];
+                if (eligibleMembers.length > 0) {
+                  editor.addMembers(eligibleMembers as any[]);
+                  toast.success(`Added ${eligibleMembers.length} family members`);
+                }
+              }}
+            >
+              + Add All Family Members
+            </Button>
             
-            <div className="flex-shrink-0 [&>div>button]:h-8 [&>div>button]:px-3">
-              <GooglePhotosPicker onPhotoSelected={(blob) => handleGooglePhoto(blob, false)} disabled={isUploading} />
+            <div className="flex flex-wrap gap-2">
+              <div className="w-full sm:w-auto flex-1 min-w-[150px]">
+                <Select 
+                  value=""
+                  onValueChange={(val) => {
+                    if (!state.selectedMemberIds.includes(val)) {
+                      const memberToAdd = members?.find(m => m.id === val);
+                      if (memberToAdd) editor.addMembers([memberToAdd as any]);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-full text-xs h-9"><SelectValue placeholder="Add Family Member..." /></SelectTrigger>
+                  <SelectContent>
+                    {members?.filter(m => m.id !== state.heroMemberId && !state.selectedMemberIds.includes(m.id)).map(m => (
+                      <SelectItem key={m.id} value={m.id}>{m.firstName} {m.lastName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex gap-2 w-full sm:w-auto">
+                <div className="relative flex-1 sm:flex-none">
+                  <input 
+                    type="file" 
+                    multiple
+                    accept="image/*" 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
+                    onChange={(e) => handleFileUpload(e, false)}
+                    title="Upload custom photos"
+                    disabled={isUploading}
+                  />
+                  <Button variant="outline" className="h-9 px-3 w-full" disabled={isUploading}>
+                    <Upload className="w-3 h-3 mr-2" /> Upload
+                  </Button>
+                </div>
+                
+                <div className="flex-1 sm:flex-none [&>div>button]:h-9 [&>div>button]:px-3 [&>div>button]:w-full">
+                  <GooglePhotosPicker onPhotoSelected={(blob) => handleGooglePhoto(blob, false)} disabled={isUploading} />
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </CollapsibleSection>
 
-      {/* Member Photo Picker Dialog */}
       <Dialog open={!!memberPhotoPicker} onOpenChange={(open) => !open && setMemberPhotoPicker(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
+        <DialogContent className="max-w-md w-[95vw] max-h-[90vh] flex flex-col p-4 rounded-xl">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>Select Photos</DialogTitle>
             <DialogDescription>
-              Choose one or more photos of this family member to include in the greeting.
+              Choose photos to include in the greeting.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-3 mt-4 max-h-[60vh] overflow-y-auto p-1">
-            {memberPhotoPicker && members?.find(m => m.id === memberPhotoPicker) && (() => {
-              const m = members.find(m => m.id === memberPhotoPicker)!;
-              const allPhotos: string[] = [];
-              if (m.imageUrl) allPhotos.push(m.imageUrl);
-              if (m.media && m.media.length > 0) {
-                m.media.filter((media: any) => media.type === 'image' && media.url !== m.imageUrl).forEach((media: any) => allPhotos.push(media.url));
-              }
-              if (allPhotos.length === 0) return <p className="text-sm text-muted-foreground col-span-2 text-center">No photos available.</p>;
+          <div className="flex-1 overflow-y-auto">
+            <div className="grid grid-cols-2 gap-3 mt-4 p-1">
+              {memberPhotoPicker && members?.find(m => m.id === memberPhotoPicker) && (() => {
+                const m = members.find(m => m.id === memberPhotoPicker)!;
+                const allPhotos: string[] = [];
+                if (m.imageUrl) allPhotos.push(m.imageUrl);
+                if (m.media && m.media.length > 0) {
+                  m.media.filter((media: any) => media.type === 'image' && media.url !== m.imageUrl).forEach((media: any) => allPhotos.push(media.url));
+                }
 
-              return allPhotos.map((url, i) => {
-                const isSelected = state.supportingPhotos.some(p => p.imageUrl === url && p.memberId === m.id);
                 return (
-                  <div key={i} className={`relative aspect-square rounded-md overflow-hidden group border-2 ${isSelected ? 'border-primary' : 'border-border'}`}>
-                    <Image src={url} alt="Photo" fill className="object-cover" unoptimized />
-                    {isSelected && pickerMode !== 'HERO' && (
-                      <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1 shadow-md z-10">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity z-20 cursor-pointer"
-                         onClick={() => {
-                          if (pickerMode === 'HERO') {
-                            editor.setHeroImage(url);
-                            setMemberPhotoPicker(null);
-                          } else {
-                            if (isSelected) {
-                              const existing = state.supportingPhotos.find(p => p.imageUrl === url && p.memberId === m.id);
-                              if (existing) editor.removeSupportingPhoto(existing.id);
+                  <>
+                    <div className="relative aspect-square rounded-md border-2 border-dashed border-border flex flex-col items-center justify-center text-muted-foreground hover:bg-muted/50 transition-colors cursor-pointer">
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setIsUploading(true);
+                          try {
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            formData.append('folder', 'family-tree/greetings');
+                            const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                            if (!res.ok) throw new Error('Upload failed');
+                            const data = await res.json();
+                            if (pickerMode === 'HERO') {
+                              editor.setHeroImage(data.url);
+                              setMemberPhotoPicker(null);
                             } else {
                               editor.addSupportingPhoto({
                                 id: Math.random().toString(),
                                 memberId: m.id,
-                                imageUrl: url,
+                                imageUrl: data.url,
                                 adjustment: { zoom: 1, x: 0, y: 0, opacity: 100 }
                               });
                             }
+                            toast.success('Photo added');
+                          } catch (err) {
+                            toast.error('Upload failed');
+                          } finally {
+                            setIsUploading(false);
+                            e.target.value = '';
                           }
-                         }}>
-                      <Button size="sm" variant={isSelected && pickerMode !== 'HERO' ? "destructive" : "secondary"} className="pointer-events-none">
-                        {pickerMode === 'HERO' ? 'Select Hero' : isSelected ? 'Remove' : 'Select'}
-                      </Button>
+                        }}
+                        disabled={isUploading}
+                      />
+                      {isUploading ? (
+                         <span className="text-xs">Uploading...</span>
+                      ) : (
+                        <>
+                          <Upload className="w-6 h-6 mb-2 opacity-50" />
+                          <span className="text-xs font-medium">Add New Photo</span>
+                        </>
+                      )}
                     </div>
-                  </div>
+                    {allPhotos.map((url, i) => {
+                      const isSelected = state.supportingPhotos.some(p => p.imageUrl === url && p.memberId === m.id);
+                      return (
+                        <div key={i} className={`relative aspect-square rounded-md overflow-hidden group border-2 ${isSelected ? 'border-primary' : 'border-border'}`}>
+                          <Image src={url} alt="Photo" fill className="object-cover" unoptimized />
+                          {isSelected && pickerMode !== 'HERO' && (
+                            <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1 shadow-md z-10">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity z-20 cursor-pointer"
+                              onClick={() => {
+                                if (pickerMode === 'HERO') {
+                                  editor.setHeroImage(url);
+                                  setMemberPhotoPicker(null);
+                                } else {
+                                  if (isSelected) {
+                                    const existing = state.supportingPhotos.find(p => p.imageUrl === url && p.memberId === m.id);
+                                    if (existing) editor.removeSupportingPhoto(existing.id);
+                                  } else {
+                                    editor.addSupportingPhoto({
+                                      id: Math.random().toString(),
+                                      memberId: m.id,
+                                      imageUrl: url,
+                                      adjustment: { zoom: 1, x: 0, y: 0, opacity: 100 }
+                                    });
+                                  }
+                                }
+                              }}>
+                            <Button size="sm" variant={isSelected && pickerMode !== 'HERO' ? "destructive" : "secondary"} className="pointer-events-none">
+                              {pickerMode === 'HERO' ? 'Select Hero' : isSelected ? 'Remove' : 'Select'}
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </>
                 );
-              });
-            })()}
+              })()}
+            </div>
           </div>
           {pickerMode !== 'HERO' && (
             <DialogFooter className="mt-4">

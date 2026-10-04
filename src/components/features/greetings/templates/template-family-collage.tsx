@@ -1,5 +1,6 @@
 import React from 'react';
 import { GreetingState, ImageAdjustment } from '@/types/greetings';
+import { SupportingPhotos } from './supporting-photos';
 
 interface Props {
   state: GreetingState;
@@ -24,6 +25,7 @@ export const TemplateFamilyCollage: React.FC<Props> = ({ state, scale = 1 }) => 
 
   const supportPhotos = state.supportingPhotos;
   const isBackgroundMode = state.heroMode === 'BACKGROUND';
+  const useSideSlots = !isBackgroundMode && supportPhotos.length <= 2;
 
   return (
     <div 
@@ -41,9 +43,9 @@ export const TemplateFamilyCollage: React.FC<Props> = ({ state, scale = 1 }) => 
         </div>
       )}
 
-      {/* Collage Grid (MODE B) */}
+      {/* Collage Grid (MODE B) — side slots only when there are ≤ 2 supporting photos */}
       {!isBackgroundMode && (
-        <div className="relative w-full h-[55%] z-10 p-6 pb-0 flex gap-4">
+        <div className={`relative w-full ${useSideSlots ? 'h-[55%]' : 'h-[42%]'} z-10 p-6 pb-0 flex gap-4`}>
           <div className="flex-[2] relative overflow-hidden rounded-2xl shadow-md border-[6px] border-white bg-slate-200">
             {state.heroImageUrl && (
               <img 
@@ -54,6 +56,7 @@ export const TemplateFamilyCollage: React.FC<Props> = ({ state, scale = 1 }) => 
               />
             )}
           </div>
+          {useSideSlots && (
           <div className="flex-1 flex flex-col gap-4">
             {supportPhotos[0] ? (
               <div className="flex-1 relative overflow-hidden rounded-2xl shadow-sm border-[4px] border-white bg-slate-200 transform rotate-1">
@@ -72,17 +75,19 @@ export const TemplateFamilyCollage: React.FC<Props> = ({ state, scale = 1 }) => 
               </div>
             )}
           </div>
+          )}
         </div>
       )}
 
-      {/* Circular Supporting Photos (MODE A) */}
-      {isBackgroundMode && supportPhotos.length > 0 && (
-        <div className="relative z-10 flex flex-wrap justify-center gap-6 p-8 mt-12 shrink-0">
-          {supportPhotos.map((photo) => (
-            <div key={photo.id} className="w-40 h-40 rounded-full overflow-hidden border-[6px] border-white shadow-2xl transform rotate-3 even:-rotate-3 bg-slate-100 relative shrink-0">
-              <img src={photo.imageUrl} alt="Family Member" className="absolute inset-0" style={getImageStyle(photo.adjustment, 1)} />
-            </div>
-          ))}
+      {/* Adaptive supporting photos (MODE A, or MODE B with more than two photos) */}
+      {!useSideSlots && supportPhotos.length > 0 && (
+        <div className={`relative z-10 flex justify-center shrink-0 ${isBackgroundMode ? 'px-8 pt-12 pb-4' : 'px-8 pt-6'}`}>
+          <SupportingPhotos
+            photos={supportPhotos}
+            format={state.format}
+            compact={!isBackgroundMode}
+            frameClass="border-white"
+          />
         </div>
       )}
 

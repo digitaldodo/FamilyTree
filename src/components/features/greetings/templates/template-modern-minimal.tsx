@@ -1,5 +1,6 @@
 import React from 'react';
 import { GreetingState, ImageAdjustment } from '@/types/greetings';
+import { SupportingPhotos } from './supporting-photos';
 
 interface Props {
   state: GreetingState;
@@ -45,7 +46,7 @@ export const TemplateModernMinimal: React.FC<Props> = ({ state, scale = 1 }) => 
         
         {/* Top half: The main hero image */}
         {!isBackgroundMode && (
-          <div className="relative w-full h-[50%] shrink-0">
+          <div className="relative w-full shrink-0" style={{ height: state.supportingPhotos.length > 4 ? '34%' : state.supportingPhotos.length > 0 ? '44%' : '50%' }}>
             {state.heroImageUrl ? (
               <img 
                 src={state.heroImageUrl} 
@@ -63,14 +64,15 @@ export const TemplateModernMinimal: React.FC<Props> = ({ state, scale = 1 }) => 
           </div>
         )}
 
-        {/* Circular Supporting Photos */}
+        {/* Supporting photos — composition adapts to the number of photos */}
         {state.supportingPhotos.length > 0 && (
-          <div className={`flex justify-end flex-wrap gap-3 px-16 ${isBackgroundMode ? 'mt-24' : '-mt-12 z-20 shrink-0'}`}>
-            {state.supportingPhotos.map((photo) => (
-              <div key={photo.id} className="w-24 h-24 rounded-full overflow-hidden border-[4px] border-white shadow-lg bg-gray-100 shrink-0 relative">
-                <img src={photo.imageUrl} alt="Supporting" className="absolute inset-0" style={getImageStyle(photo.adjustment, 1)} />
-              </div>
-            ))}
+          <div className={`flex justify-end px-16 ${isBackgroundMode ? 'mt-24' : '-mt-12 z-20 shrink-0'}`}>
+            <SupportingPhotos
+              photos={state.supportingPhotos}
+              format={state.format}
+              compact={!isBackgroundMode}
+              frameClass="border-white"
+            />
           </div>
         )}
 

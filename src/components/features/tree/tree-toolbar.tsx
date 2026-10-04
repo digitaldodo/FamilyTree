@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { useReactFlow } from '@xyflow/react';
-import { ZoomIn, ZoomOut, Maximize, Plus, Wrench, Loader2, Printer, Download } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize, Plus, Wrench, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/store/use-app-store';
 import { ShareTreeButton } from './share-tree-button';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { exportTreeToPDF } from '@/lib/pdf-export';
+import { TreeExportMenu } from './tree-export-menu';
 
 interface TreeToolbarProps {
   readOnly?: boolean;
@@ -122,35 +122,7 @@ export function TreeToolbar({
 
       {/* Navigation / View Actions */}
       <div className="flex items-center gap-1 p-1.5 bg-card/80 backdrop-blur-md border border-border rounded-xl shadow-sm">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-lg h-8 w-8 hover:bg-muted"
-          onClick={() => window.print()}
-          title="Print Tree"
-        >
-          <Printer className="h-4 w-4 text-muted-foreground" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-lg h-8 w-8 hover:bg-muted"
-          onClick={() => {
-            const nodes = getNodes();
-            if (!nodes.length) {
-              toast.error('Add family members before exporting.');
-              return;
-            }
-            toast.promise(exportTreeToPDF(treeName, nodes), {
-              loading: 'Building family tree PDF…',
-              success: 'PDF downloaded successfully!',
-              error: (err) => `Unable to generate PDF: ${err?.message ?? 'Please try again.'}`,
-            });
-          }}
-          title="Download PDF"
-        >
-          <Download className="h-4 w-4 text-muted-foreground" />
-        </Button>
+        <TreeExportMenu treeName={treeName} getNodes={getNodes} />
         <div className="h-4 w-px bg-border/80 mx-0.5" />
         <Button
           variant="ghost"

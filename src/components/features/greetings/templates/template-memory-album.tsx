@@ -1,5 +1,6 @@
 import React from 'react';
 import { GreetingState, ImageAdjustment } from '@/types/greetings';
+import { SupportingPhotos } from './supporting-photos';
 
 interface Props {
   state: GreetingState;
@@ -98,50 +99,13 @@ export const TemplateMemoryAlbum: React.FC<Props> = ({ state, scale = 1 }) => {
           </div>
         )}
 
-        {/* Supporting Circular Photos (BACKGROUND mode) */}
-        {isBackgroundMode && supportPhotos.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-8 mt-auto mb-8 shrink-0">
-            {supportPhotos.map(photo => (
-              <div key={photo.id} className="relative w-36 h-36">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-6 bg-white/50 backdrop-blur-sm shadow-sm transform rotate-3 z-30" />
-                <div className="w-full h-full rounded-full overflow-hidden bg-white p-2 shadow-xl transform -rotate-2 even:rotate-3 relative">
-                  <div className="w-full h-full rounded-full overflow-hidden relative">
-                    <img src={photo.imageUrl} alt="Memory" className="absolute inset-0" style={getImageStyle(photo.adjustment, 1)} />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Supporting Photo 1 (FOREGROUND mode) */}
-        {!isBackgroundMode && supportPhotos[0] && (
-          <div className="absolute top-[5%] left-[5%] z-20 bg-white p-2 pb-10 shadow-xl transform -rotate-6 w-[35%] max-w-[200px]">
-             <div className="w-full aspect-square bg-gray-100 overflow-hidden relative">
-               <img 
-                 src={supportPhotos[0].imageUrl} 
-                 alt="Memory 1"
-                 className="absolute inset-0"
-                 style={getImageStyle(supportPhotos[0].adjustment, 1)}
-               />
-             </div>
-          </div>
-        )}
-
-        {/* Supporting Photo 2 (FOREGROUND mode) */}
-        {!isBackgroundMode && supportPhotos[1] && (
-          <div className="absolute bottom-[10%] right-[5%] z-40 bg-white p-2 pb-10 shadow-xl transform rotate-3 w-[40%] max-w-[220px]">
-             <div className="absolute -top-3 right-1/2 translate-x-1/2 w-16 h-6 bg-white/40 backdrop-blur-md shadow-sm transform rotate-1" />
-             <div className="w-full aspect-[4/3] bg-gray-100 overflow-hidden relative">
-               <img 
-                 src={supportPhotos[1].imageUrl} 
-                 alt="Memory 2"
-                 className="absolute inset-0"
-                 style={getImageStyle(supportPhotos[1].adjustment, 1)}
-               />
-             </div>
-          </div>
-        )}
+        {/* Supporting Photos */}
+        <SupportingPhotos
+          photos={supportPhotos}
+          format={state.format}
+          compact={!isBackgroundMode}
+          className={isBackgroundMode ? "mt-auto mb-8" : "absolute bottom-8 right-8 pointer-events-none z-20 scale-75 origin-bottom-right"}
+        />
       </div>
 
       {/* Footer / Sign-off */}

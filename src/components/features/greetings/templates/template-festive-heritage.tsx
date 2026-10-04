@@ -1,5 +1,6 @@
 import React from 'react';
 import { GreetingState, ImageAdjustment } from '@/types/greetings';
+import { SupportingPhotos } from './supporting-photos';
 
 interface Props {
   state: GreetingState;
@@ -93,19 +94,14 @@ export const TemplateFestiveHeritage: React.FC<Props> = ({ state, scale = 1 }) =
             </div>
           )}
 
-          {/* Circular Supporting Photos */}
-          {state.supportingPhotos.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-6 shrink-0 mt-4">
-              {state.supportingPhotos.map(photo => (
-                <div key={photo.id} className="relative w-28 h-28">
-                  <div className="absolute inset-0 rounded-full border-[4px] border-[#D4AF37] z-20 pointer-events-none transform scale-105" />
-                  <div className="w-full h-full rounded-full overflow-hidden bg-[#5a0016] border-[2px] border-[#F3E5AB] relative">
-                    <img src={photo.imageUrl} alt="Supporting" className="absolute inset-0" style={getImageStyle(photo.adjustment, 1)} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          {/* Supporting photos — composition adapts to the number of photos */}
+          <SupportingPhotos
+            photos={state.supportingPhotos}
+            format={state.format}
+            compact={!isBackgroundMode}
+            className="mt-4"
+            frameClass="border-[#D4AF37]"
+          />
         </div>
 
         {/* Bottom Content */}

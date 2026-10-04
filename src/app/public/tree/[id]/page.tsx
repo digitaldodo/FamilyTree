@@ -16,14 +16,14 @@ import { RelationshipEdgeMemo } from '@/components/features/tree/relationship-ed
 import { GenerationLaneNode } from '@/components/features/tree/generation-lane-node';
 import { FamilyJunctionNode } from '@/components/features/tree/family-junction-node';
 import { TreeBackground } from '@/components/features/tree/tree-background';
-import { Loader2, TreePine, Eye, LogIn, Printer, Download, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
+import { Loader2, TreePine, Eye, LogIn, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/ui/dialog';
 import { Calendar, MapPin, Briefcase, Heart, Users } from 'lucide-react';
 import { MemberAvatar } from '@/components/features/members/member-avatar';
 import Image from 'next/image';
 import { GenealogyEngine } from '@/domain/inference/genealogy-engine';
 import { useFamilyTreeRenderer } from '@/components/features/tree/family-tree-renderer';
-import { exportTreeToPDF } from '@/lib/pdf-export';
+import { TreeExportMenu } from '@/components/features/tree/tree-export-menu';
 import { toast } from 'sonner';
 
 import { CoupleContainerNode } from '@/components/features/tree/couple-container-node';
@@ -212,31 +212,7 @@ function PublicTreeToolbar({ treeName }: { treeName: string }) {
   return (
     <div className="absolute bottom-6 right-6 z-10 flex flex-col sm:flex-row items-end sm:items-center gap-3 print:hidden">
       <div className="flex items-center gap-1 p-1.5 bg-card/90 backdrop-blur-md border border-border rounded-xl shadow-sm">
-        <button
-          className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground transition-colors"
-          onClick={() => window.print()}
-          title="Print Tree"
-        >
-          <Printer className="h-4 w-4" />
-        </button>
-        <button
-          className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground transition-colors"
-          onClick={() => {
-            const nodes = getNodes();
-            if (!nodes.length) {
-              toast.error('No family members to export.');
-              return;
-            }
-            toast.promise(exportTreeToPDF(treeName, nodes), {
-              loading: 'Building family tree PDF…',
-              success: 'PDF downloaded successfully!',
-              error: (err: Error) => `Unable to generate PDF: ${err?.message ?? 'Please try again.'}`,
-            });
-          }}
-          title="Download PDF"
-        >
-          <Download className="h-4 w-4" />
-        </button>
+        <TreeExportMenu treeName={treeName} getNodes={getNodes} className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground transition-colors" />
         <div className="h-4 w-px bg-border/80 mx-0.5" />
         <button
           className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground transition-colors"

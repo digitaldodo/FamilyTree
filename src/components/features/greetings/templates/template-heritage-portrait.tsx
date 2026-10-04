@@ -1,5 +1,6 @@
 import React from 'react';
 import { GreetingState, ImageAdjustment } from '@/types/greetings';
+import { SupportingPhotos } from './supporting-photos';
 
 interface Props {
   state: GreetingState;
@@ -74,21 +75,13 @@ export const TemplateHeritagePortrait: React.FC<Props> = ({ state, scale = 1 }) 
               </div>
             )}
 
-            {/* Supporting Photos (Circular) */}
-            {state.supportingPhotos.length > 0 && (
-              <div className="flex flex-wrap justify-center gap-4 shrink-0 mt-auto">
-                {state.supportingPhotos.map((photo) => (
-                  <div key={photo.id} className="w-32 h-32 rounded-full overflow-hidden border-[3px] border-white shadow-lg bg-[#E2D5C3] shrink-0 relative">
-                    <img 
-                      src={photo.imageUrl} 
-                      alt="Supporting Photo"
-                      className="absolute inset-0"
-                      style={getImageStyle(photo.adjustment, 1)}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
+            {/* Supporting Photos — composition adapts to the number of photos */}
+            <SupportingPhotos
+              photos={state.supportingPhotos}
+              format={state.format}
+              className="mt-auto"
+              frameClass="border-white"
+            />
         </div>
 
         {/* Bottom Text Content */}

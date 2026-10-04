@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowUpRight, Heart, LockKeyhole, Shield, Image as ImageIcon, Users } from 'lucide-react';
+import { ArrowUpRight, Shield, Image as ImageIcon, Users } from 'lucide-react';
 
 export default function HomePage() {
   return (
@@ -85,7 +85,7 @@ export default function HomePage() {
         {/* Final CTA */}
         <section className="py-24 bg-primary/5">
           <div className="max-w-4xl mx-auto px-4 text-center">
-            <h2 className="text-4xl font-bold tracking-tight mb-6">Don't let your family's stories disappear.</h2>
+            <h2 className="text-4xl font-bold tracking-tight mb-6">Don&apos;t let your family&apos;s stories disappear.</h2>
             <p className="text-lg text-muted-foreground mb-8">
               Start preserving the people, places and moments that matter—before they fade.
             </p>
