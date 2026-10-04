@@ -1,8 +1,9 @@
 'use client';
 import * as React from 'react';
 import { toast } from 'sonner';
-import { Camera, X, Loader2 } from 'lucide-react';
+import { Camera, X, Loader2, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
+import { GooglePhotosPicker } from '../members/google-photos-picker';
 
 interface MultiImageUploadProps {
   urls: string[];
@@ -90,6 +91,19 @@ export function MultiImageUpload({
     }
   };
 
+  const handleGooglePhoto = async (blob: Blob) => {
+    setIsProcessing(true);
+    const file = new File([blob], `google-photo-${Date.now()}.jpg`, {
+      type: blob.type || 'image/jpeg',
+    });
+    
+    const url = await uploadToCloudinary(file);
+    if (url) {
+      onChange([...urls, url]);
+    }
+    setIsProcessing(false);
+  };
+
   const removeImage = (indexToRemove: number) => {
     onChange(urls.filter((_, index) => index !== indexToRemove));
   };
@@ -133,6 +147,10 @@ export function MultiImageUpload({
             </>
           )}
         </button>
+
+      </div>
+      <div className="w-full sm:w-auto">
+        <GooglePhotosPicker onPhotoSelected={handleGooglePhoto} disabled={isProcessing} />
       </div>
 
       <input

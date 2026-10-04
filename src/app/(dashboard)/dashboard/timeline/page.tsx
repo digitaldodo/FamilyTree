@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/use-app-store';
 import { FamilyTimeline } from '@/components/features/timeline/family-timeline';
 import { TimelineEventProps } from '@/components/features/timeline/timeline-event';
@@ -150,10 +151,11 @@ export default function TimelinePage() {
     return timelineEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
   }, [members, memories]);
 
+  const router = useRouter();
+
   const handleEventClick = (event: any) => {
     if (event.type === 'MEMORY' && event.memoryData) {
-      setSelectedMemory(event.memoryData);
-      setIsDetailOpen(true);
+      router.push(`/memories/${event.memoryData.id}`);
     }
   };
 

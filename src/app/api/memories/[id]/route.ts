@@ -34,6 +34,35 @@ async function checkPermission(memoryId: string, userId: string) {
   return { memory, error: null };
 }
 
+export async function GET(request: NextRequest, { params }: Params) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return errorResponse('UNAUTHORIZED', 'Not authenticated', 401);
+    }
+    
+    const { id } = await params;
+    const { memory, error } = await checkPermission(id, session.user.id);
+    
+    if (error === 'NOT_FOUND') return errorResponse('NOT_FOUND', 'Memory not found', 404);
+    if (error === 'FORBIDDEN') return errorResponse('FORBIDDEN', 'Access denied', 403);
+    
+    const fullMemory = await prisma.memory.findUnique({
+      where: { id },
+      include: {
+        members: {
+          include: { member: true }
+        },
+        media: true
+      }
+    });
+    
+    return successResponse(fullMemory);
+  } catch (error: any) {
+    return errorResponse('INTERNAL_ERROR', error.message || 'Failed to fetch memory');
+  }
+}
+
 export async function PUT(request: NextRequest, { params }: Params) {
   try {
     const session = await auth();

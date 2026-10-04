@@ -185,19 +185,30 @@ function DashboardContent() {
             {recentMemories.length > 0 ? (
               <div className="space-y-6">
                 {/* Featured Memory */}
-                <div className="group relative rounded-3xl overflow-hidden bg-muted aspect-video border border-border shadow-sm transition-all hover:shadow-md cursor-pointer">
-                  {recentMemories[0].googlePhotosAlbumUrl ? (
-                    <div className="absolute inset-0 bg-secondary flex items-center justify-center">
-                       <ImageIcon className="w-12 h-12 text-muted-foreground/30" />
-                    </div>
-                  ) : (
-                    <div className="absolute inset-0 bg-secondary flex items-center justify-center">
-                       <ImageIcon className="w-12 h-12 text-muted-foreground/30" />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-8 w-full">
-                     <span className="text-xs font-medium bg-primary/20 text-primary-foreground backdrop-blur-md px-3 py-1 rounded-full mb-3 inline-block">
+                <Link href={`/memories/${recentMemories[0].id}`}>
+                  <div className="group relative rounded-3xl overflow-hidden bg-muted aspect-video border border-border shadow-sm transition-all hover:shadow-md cursor-pointer block">
+                    {recentMemories[0].media && recentMemories[0].media.length > 0 ? (
+                      <CldImage
+                        src={recentMemories[0].media[0].url}
+                        alt={recentMemories[0].title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 66vw"
+                      />
+                    ) : recentMemories[0].albumCoverUrl ? (
+                      <img
+                        src={recentMemories[0].albumCoverUrl}
+                        alt={recentMemories[0].title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-secondary flex items-center justify-center">
+                         <ImageIcon className="w-12 h-12 text-muted-foreground/30" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 p-8 w-full">
+                       <span className="text-xs font-medium bg-primary/20 text-primary-foreground backdrop-blur-md px-3 py-1 rounded-full mb-3 inline-block">
                        {new Date(recentMemories[0].date).getFullYear()}
                      </span>
                      <h3 className="text-2xl font-semibold text-foreground mb-2">{recentMemories[0].title}</h3>
@@ -206,22 +217,24 @@ function DashboardContent() {
                      )}
                   </div>
                 </div>
+                </Link>
 
-                {/* Supporting Memories */}
                 {recentMemories.length > 1 && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {recentMemories.slice(1).map((memory) => (
-                      <div key={memory.id} className="rounded-2xl p-6 bg-card border border-border flex flex-col justify-between">
-                         <div>
-                            <span className="text-xs font-medium text-muted-foreground mb-2 inline-block">
-                              {new Date(memory.date).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-                            </span>
-                            <h4 className="text-lg font-medium text-foreground mb-2">{memory.title}</h4>
-                            {memory.description && (
-                               <p className="text-sm text-muted-foreground line-clamp-2">{memory.description}</p>
-                            )}
-                         </div>
-                      </div>
+                      <Link key={memory.id} href={`/memories/${memory.id}`}>
+                        <div className="rounded-2xl p-6 bg-card border border-border flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer h-full">
+                           <div>
+                              <span className="text-xs font-medium text-muted-foreground mb-2 inline-block">
+                                {new Date(memory.date).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+                              </span>
+                              <h4 className="text-lg font-medium text-foreground mb-2">{memory.title}</h4>
+                              {memory.description && (
+                                 <p className="text-sm text-muted-foreground line-clamp-2">{memory.description}</p>
+                              )}
+                           </div>
+                        </div>
+                      </Link>
                     ))}
                   </div>
                 )}
