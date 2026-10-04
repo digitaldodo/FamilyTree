@@ -1,6 +1,6 @@
 import React from 'react';
 import { GreetingState, ImageAdjustment } from '@/types/greetings';
-import { SupportingPhotos } from './supporting-photos';
+import { AdvancedPhotoArrangement } from '../advanced-photo-arrangement';
 
 interface Props {
   state: GreetingState;
@@ -23,8 +23,7 @@ export const TemplateMemoryAlbum: React.FC<Props> = ({ state, scale = 1 }) => {
     transformOrigin: 'top left',
   };
 
-  const supportPhotos = state.supportingPhotos;
-  const isBackgroundMode = state.heroMode === 'BACKGROUND';
+  const isBackgroundMode = state.arrangement === 'FLOATING_BACKGROUND';
 
   return (
     <div 
@@ -45,71 +44,33 @@ export const TemplateMemoryAlbum: React.FC<Props> = ({ state, scale = 1 }) => {
       {/* Background Texture (Subtle grid/paper effect) */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAiLz4KPHBhdGggZD0iTTAgMEg0VjRIMEoiIGZpbGw9IiMzMzMiIGZpbGwtb3BhY2l0eT0iMC4wNSIvPgo8L3N2Zz4=')] opacity-30 z-0 pointer-events-none" />
 
+      {/* Advanced Arrangement Overlay */}
+      <AdvancedPhotoArrangement state={state} frameClass="border-white" />
+
       {/* Title & Header Strip */}
-      <div className="relative z-10 w-full mb-8 flex flex-col items-center text-center mt-4 shrink-0">
+      <div className="relative z-10 w-full mb-8 flex flex-col items-center text-center mt-4 shrink-0 pointer-events-none">
         {state.headline && (
-          <div className="bg-white/90 backdrop-blur-sm px-6 py-2 shadow-md rounded-sm mb-4 transform -rotate-1">
+          <div className="bg-white/90 backdrop-blur-sm px-6 py-2 shadow-md rounded-sm mb-4 transform -rotate-1 pointer-events-auto">
             <h2 className="font-sans text-sm font-bold tracking-[0.2em] uppercase text-gray-800">
               {state.headline}
             </h2>
           </div>
         )}
-        <h1 className="font-serif text-6xl italic text-gray-900 mb-2 drop-shadow-md bg-white/40 px-6 py-2 rounded-lg break-words max-w-full leading-tight">
+        <h1 className="font-serif text-6xl italic text-gray-900 mb-2 drop-shadow-md bg-white/40 px-6 py-2 rounded-lg break-words max-w-full leading-tight pointer-events-auto">
           {state.heroName}
         </h1>
         {state.dateStr && (
-          <p className="font-sans text-sm text-gray-700 tracking-wider font-semibold bg-white/60 px-4 py-1 rounded-sm mt-2">
+          <p className="font-sans text-sm text-gray-700 tracking-wider font-semibold bg-white/60 px-4 py-1 rounded-sm mt-2 pointer-events-auto">
             {state.dateStr}
           </p>
         )}
       </div>
 
-      {/* Album Layout */}
-      <div className="relative z-10 w-full flex-1 min-h-0 flex flex-col items-center justify-center">
-        
-        {/* Main Photo (Polaroid style) in FOREGROUND mode */}
-        {!isBackgroundMode && (
-          <div className="relative z-30 bg-white p-4 pb-16 shadow-2xl transform rotate-2 w-[70%] max-w-sm shrink-0">
-            {/* Tape */}
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-24 h-8 bg-white/40 backdrop-blur-md shadow-sm transform -rotate-2" />
-            
-            <div className="w-full aspect-square bg-gray-100 overflow-hidden relative">
-              {state.heroImageUrl ? (
-                 <img 
-                   src={state.heroImageUrl} 
-                   alt={state.heroName}
-                   className="absolute inset-0"
-                   style={getImageStyle(state.heroAdjustment)}
-                 />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-gray-400 font-sans text-xs uppercase tracking-widest">Main Memory</span>
-                </div>
-              )}
-            </div>
-            
-            {/* Polaroid caption */}
-            {state.message && (
-              <div className="absolute bottom-0 left-0 right-0 h-16 flex items-center justify-center px-4">
-                <p className="font-serif italic text-xl text-gray-700 text-center line-clamp-2">
-                  {state.message}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Supporting Photos */}
-        <SupportingPhotos
-          photos={supportPhotos}
-          format={state.format}
-          compact={!isBackgroundMode}
-          className={isBackgroundMode ? "mt-auto mb-8" : "absolute bottom-8 right-8 pointer-events-none z-20 scale-75 origin-bottom-right"}
-        />
-      </div>
+      {/* Album Layout spacer */}
+      <div className="relative z-10 w-full flex-1 min-h-0" />
 
       {/* Footer / Sign-off */}
-      <div className="relative z-10 w-full mt-auto pt-8 flex justify-between items-end text-gray-800 font-sans shrink-0">
+      <div className="relative z-10 w-full mt-auto pt-8 flex justify-between items-end text-gray-800 font-sans shrink-0 pointer-events-auto">
         <div className="flex flex-col bg-white/60 px-4 py-2 rounded-sm backdrop-blur-sm shadow-sm max-w-[60%]">
           {state.senderName && (
             <span className="text-lg font-serif italic font-bold truncate">

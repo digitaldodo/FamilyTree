@@ -35,6 +35,18 @@ export interface SupportingPhoto {
   rotation?: number;
 }
 
+export type ArrangementType =
+  | 'HERO_CIRCLE'
+  | 'FAMILY_ORBIT'
+  | 'ELEGANT_ARC'
+  | 'EDGE_PORTRAITS'
+  | 'FAMILY_GRID'
+  | 'PHOTO_STRIP'
+  | 'MEMORY_COLLAGE'
+  | 'POLAROID'
+  | 'MAIN_SIDE'
+  | 'FLOATING_BACKGROUND';
+
 export interface GreetingState {
   // Selections
   heroMemberId: string | null; // The primary subject (for name/date defaults)
@@ -42,6 +54,7 @@ export interface GreetingState {
   occasion: OccasionType;
   template: TemplateType;
   format: CanvasFormat;
+  arrangement: ArrangementType;
 
   // Hero Image
   heroImageUrl: string | null;

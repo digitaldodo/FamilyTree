@@ -1,6 +1,6 @@
 import React from 'react';
 import { GreetingState, ImageAdjustment } from '@/types/greetings';
-import { SupportingPhotos } from './supporting-photos';
+import { AdvancedPhotoArrangement } from '../advanced-photo-arrangement';
 
 interface Props {
   state: GreetingState;
@@ -23,9 +23,7 @@ export const TemplateFamilyCollage: React.FC<Props> = ({ state, scale = 1 }) => 
     transformOrigin: 'top left',
   };
 
-  const supportPhotos = state.supportingPhotos;
-  const isBackgroundMode = state.heroMode === 'BACKGROUND';
-  const useSideSlots = !isBackgroundMode && supportPhotos.length <= 2;
+  const isBackgroundMode = state.arrangement === 'FLOATING_BACKGROUND';
 
   return (
     <div 
@@ -43,56 +41,12 @@ export const TemplateFamilyCollage: React.FC<Props> = ({ state, scale = 1 }) => 
         </div>
       )}
 
-      {/* Collage Grid (MODE B) — side slots only when there are ≤ 2 supporting photos */}
-      {!isBackgroundMode && (
-        <div className={`relative w-full ${useSideSlots ? 'h-[55%]' : 'h-[42%]'} z-10 p-6 pb-0 flex gap-4`}>
-          <div className="flex-[2] relative overflow-hidden rounded-2xl shadow-md border-[6px] border-white bg-slate-200">
-            {state.heroImageUrl && (
-              <img 
-                src={state.heroImageUrl} 
-                alt={state.heroName}
-                className="absolute inset-0"
-                style={getImageStyle(state.heroAdjustment)}
-              />
-            )}
-          </div>
-          {useSideSlots && (
-          <div className="flex-1 flex flex-col gap-4">
-            {supportPhotos[0] ? (
-              <div className="flex-1 relative overflow-hidden rounded-2xl shadow-sm border-[4px] border-white bg-slate-200 transform rotate-1">
-                <img src={supportPhotos[0].imageUrl} alt="Supporting 1" className="absolute inset-0" style={getImageStyle(supportPhotos[0].adjustment, 1)} />
-              </div>
-            ) : (
-              <div className="flex-1 bg-amber-50/50 rounded-2xl border-[4px] border-white/50" />
-            )}
-            {supportPhotos[1] ? (
-              <div className="flex-1 relative overflow-hidden rounded-2xl shadow-sm border-[4px] border-white bg-slate-200 transform -rotate-2">
-                <img src={supportPhotos[1].imageUrl} alt="Supporting 2" className="absolute inset-0" style={getImageStyle(supportPhotos[1].adjustment, 1)} />
-              </div>
-            ) : (
-              <div className="flex-1 bg-blue-50/50 rounded-2xl flex items-center justify-center p-2 text-center border-[4px] border-white/50">
-                <span className="font-serif italic text-xs text-slate-400">Memories</span>
-              </div>
-            )}
-          </div>
-          )}
-        </div>
-      )}
-
-      {/* Adaptive supporting photos (MODE A, or MODE B with more than two photos) */}
-      {!useSideSlots && supportPhotos.length > 0 && (
-        <div className={`relative z-10 flex justify-center shrink-0 ${isBackgroundMode ? 'px-8 pt-12 pb-4' : 'px-8 pt-6'}`}>
-          <SupportingPhotos
-            photos={supportPhotos}
-            format={state.format}
-            compact={!isBackgroundMode}
-            frameClass="border-white"
-          />
-        </div>
-      )}
+      {/* Advanced Arrangement Overlay */}
+      <AdvancedPhotoArrangement state={state} frameClass="border-white" />
 
       {/* Content Area */}
-      <div className={`relative z-20 flex-1 min-h-0 flex flex-col items-center justify-center p-12 text-center text-slate-800 ${isBackgroundMode ? 'bg-white/85 mt-auto backdrop-blur-md rounded-t-[4rem]' : 'bg-white/95 backdrop-blur-sm shadow-[0_-10px_40px_rgba(0,0,0,0.03)] rounded-t-[3rem] mt-8'}`}>
+      <div className={`relative z-20 flex-1 min-h-0 flex flex-col items-center justify-end p-12 text-center text-slate-800 ${isBackgroundMode ? 'bg-white/85 mt-auto backdrop-blur-md rounded-t-[4rem]' : 'bg-white/95 backdrop-blur-sm shadow-[0_-10px_40px_rgba(0,0,0,0.03)] rounded-t-[3rem] mt-auto pointer-events-auto'} pointer-events-none`}>
+        <div className="pointer-events-auto">
         {state.headline && (
           <span className="inline-block px-4 py-1 mb-6 text-xs font-bold tracking-widest text-white bg-slate-800 rounded-full uppercase shrink-0">
             {state.headline}
@@ -128,6 +82,7 @@ export const TemplateFamilyCollage: React.FC<Props> = ({ state, scale = 1 }) => 
             {state.footer}
           </p>
         )}
+        </div>
       </div>
 
       {/* Logo Placeholder */}

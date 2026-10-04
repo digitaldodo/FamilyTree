@@ -321,24 +321,29 @@ export function GreetingsControls({ editor }: ControlsProps) {
         </div>
 
         <div className="space-y-2 mt-4">
-          <Label className="text-xs">Composition Mode</Label>
-          <div className="flex gap-2">
-            <Button 
-              variant={state.heroMode === 'BACKGROUND' ? 'default' : 'outline'} 
-              size="sm"
-              className="flex-1 text-xs" 
-              onClick={() => editor.setHeroMode('BACKGROUND')}
-            >
-              Background
-            </Button>
-            <Button 
-              variant={state.heroMode === 'FOREGROUND' ? 'default' : 'outline'} 
-              size="sm"
-              className="flex-1 text-xs" 
-              onClick={() => editor.setHeroMode('FOREGROUND')}
-            >
-              Foreground
-            </Button>
+          <Label className="text-xs">Photo Arrangement</Label>
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+            {[
+              { value: 'FLOATING_BACKGROUND', label: 'Floating Family', icon: <div className="relative w-8 h-8 bg-primary/20 rounded-sm"><div className="absolute bottom-1 left-1 w-2 h-2 rounded-full bg-primary"/><div className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-primary"/></div> },
+              { value: 'HERO_CIRCLE', label: 'Hero Circle', icon: <div className="relative w-8 h-8"><div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-primary/60"/><div className="absolute top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-primary/40"/><div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-primary/40"/></div> },
+              { value: 'FAMILY_ORBIT', label: 'Family Orbit', icon: <div className="relative w-8 h-8 rounded-full border border-primary/20"><div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-primary/60"/><div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary/40"/></div> },
+              { value: 'ELEGANT_ARC', label: 'Elegant Arc', icon: <div className="relative w-8 h-8"><div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-primary/60"/><div className="absolute top-2 left-1 w-2 h-2 rounded-full bg-primary/40"/><div className="absolute top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-primary/40"/><div className="absolute top-2 right-1 w-2 h-2 rounded-full bg-primary/40"/></div> },
+              { value: 'EDGE_PORTRAITS', label: 'Edge Portraits', icon: <div className="relative w-8 h-8 border border-primary/20"><div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-primary/60"/><div className="absolute top-1 left-1 w-2 h-2 rounded-full bg-primary/40"/><div className="absolute bottom-1 right-1 w-2 h-2 rounded-full bg-primary/40"/></div> },
+              { value: 'FAMILY_GRID', label: 'Family Grid', icon: <div className="grid grid-cols-2 gap-1 w-8 h-8 p-1 border border-primary/20"><div className="bg-primary/40 rounded-sm"/><div className="bg-primary/40 rounded-sm"/><div className="bg-primary/40 rounded-sm"/><div className="bg-primary/40 rounded-sm"/></div> },
+              { value: 'PHOTO_STRIP', label: 'Photo Strip', icon: <div className="flex flex-col gap-1 w-8 h-8 p-1 border border-primary/20"><div className="h-2 bg-primary/40 rounded-sm"/><div className="h-2 bg-primary/40 rounded-sm"/><div className="h-2 bg-primary/40 rounded-sm"/></div> },
+              { value: 'MEMORY_COLLAGE', label: 'Collage', icon: <div className="relative w-8 h-8"><div className="absolute top-1 left-1 w-4 h-4 bg-primary/40 rotate-6"/><div className="absolute bottom-1 right-1 w-4 h-4 bg-primary/60 -rotate-12"/></div> },
+              { value: 'POLAROID', label: 'Polaroid', icon: <div className="relative w-8 h-8 flex items-center justify-center"><div className="w-5 h-6 bg-white border shadow-sm flex flex-col p-[2px]"><div className="w-full flex-1 bg-primary/40"/><div className="h-1"/></div></div> },
+              { value: 'MAIN_SIDE', label: 'Main + Side', icon: <div className="flex gap-1 w-8 h-8 p-1 border border-primary/20"><div className="w-4 bg-primary/60 rounded-sm"/><div className="flex-1 flex flex-col gap-1"><div className="flex-1 bg-primary/40 rounded-sm"/><div className="flex-1 bg-primary/40 rounded-sm"/></div></div> },
+            ].map((a) => (
+              <button 
+                key={a.value} 
+                onClick={() => editor.setArrangement(a.value as any)}
+                className={`shrink-0 flex flex-col items-center justify-center gap-2 p-2 w-20 rounded-xl border-2 transition-all ${state.arrangement === a.value ? 'border-primary bg-primary/5 shadow-sm' : 'border-transparent hover:bg-muted opacity-60 hover:opacity-100'}`}
+              >
+                {a.icon}
+                <span className="text-[9px] font-medium leading-tight text-center">{a.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 

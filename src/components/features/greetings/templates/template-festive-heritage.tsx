@@ -1,6 +1,6 @@
 import React from 'react';
 import { GreetingState, ImageAdjustment } from '@/types/greetings';
-import { SupportingPhotos } from './supporting-photos';
+import { AdvancedPhotoArrangement } from '../advanced-photo-arrangement';
 
 interface Props {
   state: GreetingState;
@@ -23,7 +23,7 @@ export const TemplateFestiveHeritage: React.FC<Props> = ({ state, scale = 1 }) =
     transformOrigin: 'top left',
   };
 
-  const isBackgroundMode = state.heroMode === 'BACKGROUND';
+  const isBackgroundMode = state.arrangement === 'FLOATING_BACKGROUND';
 
   return (
     <div 
@@ -52,11 +52,14 @@ export const TemplateFestiveHeritage: React.FC<Props> = ({ state, scale = 1 }) =
       <div className="absolute bottom-8 left-8 w-16 h-16 border-b-[4px] border-l-[4px] border-[#D4AF37] z-20 pointer-events-none" />
       <div className="absolute bottom-8 right-8 w-16 h-16 border-b-[4px] border-r-[4px] border-[#D4AF37] z-20 pointer-events-none" />
 
+      {/* Advanced Arrangement Overlay */}
+      <AdvancedPhotoArrangement state={state} frameClass="border-[#D4AF37]" />
+
       {/* Main Content Container */}
-      <div className="relative z-30 flex flex-col items-center justify-between w-full h-full p-16 text-center">
+      <div className="relative z-30 flex flex-col items-center justify-between w-full h-full p-16 text-center pointer-events-none">
         
         {/* Header section */}
-        <div className="mb-8 shrink-0 mt-4">
+        <div className="mb-8 shrink-0 mt-4 pointer-events-auto">
           {state.headline && (
             <h2 className="text-xl tracking-[0.25em] uppercase text-[#D4AF37] mb-2 font-semibold drop-shadow-md">
               ✧ {state.headline} ✧
@@ -70,42 +73,10 @@ export const TemplateFestiveHeritage: React.FC<Props> = ({ state, scale = 1 }) =
         </div>
 
         {/* Middle Content */}
-        <div className="flex-1 min-h-0 flex flex-col items-center justify-center w-full py-4">
-          {/* Hero Image (Ornate Frame) when FOREGROUND mode */}
-          {!isBackgroundMode && (
-            <div className="relative w-3/4 max-w-sm aspect-square mb-6 shrink-0">
-              <div className="absolute inset-0 rounded-full border-[8px] border-[#D4AF37] shadow-[0_0_30px_rgba(212,175,55,0.3)] z-20 pointer-events-none transform scale-105" />
-              <div className="absolute inset-0 rounded-full border-[2px] border-[#F3E5AB] z-20 pointer-events-none transform scale-100" />
-              
-              <div className="w-full h-full rounded-full overflow-hidden bg-[#5a0016] relative">
-                {state.heroImageUrl ? (
-                  <img 
-                    src={state.heroImageUrl} 
-                    alt={state.heroName}
-                    className="absolute inset-0"
-                    style={getImageStyle(state.heroAdjustment)}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-[#D4AF37]/50 text-sm tracking-widest uppercase">Photo</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Supporting photos — composition adapts to the number of photos */}
-          <SupportingPhotos
-            photos={state.supportingPhotos}
-            format={state.format}
-            compact={!isBackgroundMode}
-            className="mt-4"
-            frameClass="border-[#D4AF37]"
-          />
-        </div>
+        <div className="flex-1 min-h-0 w-full py-4" />
 
         {/* Bottom Content */}
-        <div className="shrink-0 flex flex-col items-center mt-auto pb-4">
+        <div className="shrink-0 flex flex-col items-center mt-auto pb-4 pointer-events-auto">
           {/* Hero Name */}
           <h1 className="text-6xl font-normal tracking-wide text-[#F3E5AB] mb-6 break-words" style={{ textShadow: '0 4px 8px rgba(0,0,0,0.8)' }}>
             {state.heroName}

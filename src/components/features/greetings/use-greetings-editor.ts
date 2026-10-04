@@ -30,6 +30,7 @@ export function useGreetingsEditor() {
     updateSupportingPhoto: useCallback((id: string, updates: Partial<SupportingPhoto>) => dispatch({ type: 'UPDATE_SUPPORTING_PHOTO', payload: { id, updates } }), []),
     removeSupportingPhoto: useCallback((id: string) => dispatch({ type: 'REMOVE_SUPPORTING_PHOTO', payload: id }), []),
     setHeroMode: useCallback((mode: 'BACKGROUND' | 'FOREGROUND') => dispatch({ type: 'SET_HERO_MODE', payload: mode }), []),
+    setArrangement: useCallback((arrangement: import('@/types/greetings').ArrangementType) => dispatch({ type: 'SET_ARRANGEMENT', payload: arrangement }), []),
     /** Adds members (deduplicated); each new member's default photo is auto-selected. */
     addMembers: useCallback((members: GreetingMember[]) => dispatch({ type: 'ADD_MEMBERS', payload: members }), []),
     removeMember: useCallback((memberId: string) => dispatch({ type: 'REMOVE_MEMBER', payload: memberId }), []),

@@ -1,6 +1,6 @@
 import React from 'react';
 import { GreetingState, ImageAdjustment } from '@/types/greetings';
-import { SupportingPhotos } from './supporting-photos';
+import { AdvancedPhotoArrangement } from '../advanced-photo-arrangement';
 
 interface Props {
   state: GreetingState;
@@ -23,7 +23,7 @@ export const TemplateModernMinimal: React.FC<Props> = ({ state, scale = 1 }) => 
     transformOrigin: 'top left',
   };
 
-  const isBackgroundMode = state.heroMode === 'BACKGROUND';
+  const isBackgroundMode = state.arrangement === 'FLOATING_BACKGROUND';
 
   return (
     <div 
@@ -41,43 +41,14 @@ export const TemplateModernMinimal: React.FC<Props> = ({ state, scale = 1 }) => 
         </div>
       )}
 
+      {/* Advanced Arrangement Overlay */}
+      <AdvancedPhotoArrangement state={state} frameClass="border-white" />
+
       {/* Structural layout */}
-      <div className={`flex-1 w-full h-full relative z-10 flex flex-col ${isBackgroundMode ? 'bg-white/40 backdrop-blur-[4px]' : ''}`}>
+      <div className={`flex-1 w-full h-full relative z-10 flex flex-col pointer-events-none ${isBackgroundMode ? 'bg-white/40 backdrop-blur-[4px]' : ''}`}>
         
-        {/* Top half: The main hero image */}
-        {!isBackgroundMode && (
-          <div className="relative w-full shrink-0" style={{ height: state.supportingPhotos.length > 4 ? '34%' : state.supportingPhotos.length > 0 ? '44%' : '50%' }}>
-            {state.heroImageUrl ? (
-              <img 
-                src={state.heroImageUrl} 
-                alt={state.heroName}
-                style={getImageStyle(state.heroAdjustment)}
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-400 text-sm tracking-widest uppercase">Hero Image</span>
-              </div>
-            )}
-            
-            {/* Subtle overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#FAFAFA] to-transparent h-24 bottom-0 top-auto" />
-          </div>
-        )}
-
-        {/* Supporting photos — composition adapts to the number of photos */}
-        {state.supportingPhotos.length > 0 && (
-          <div className={`flex justify-end px-16 ${isBackgroundMode ? 'mt-24' : '-mt-12 z-20 shrink-0'}`}>
-            <SupportingPhotos
-              photos={state.supportingPhotos}
-              format={state.format}
-              compact={!isBackgroundMode}
-              frameClass="border-white"
-            />
-          </div>
-        )}
-
         {/* Bottom half: Minimal typography */}
-        <div className="relative flex-1 min-h-0 w-full flex flex-col px-16 py-12 mt-auto">
+        <div className="relative flex-1 min-h-0 w-full flex flex-col px-16 py-12 mt-auto pointer-events-auto">
           
           {/* Date & Headline block */}
           <div className="flex justify-between items-end mb-6 border-b border-gray-900/10 pb-4 shrink-0">

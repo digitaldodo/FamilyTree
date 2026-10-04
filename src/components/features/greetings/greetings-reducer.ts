@@ -5,6 +5,7 @@ import {
   CanvasFormat,
   ImageAdjustment,
   SupportingPhoto,
+  ArrangementType,
 } from '@/types/greetings';
 import { getDefaultMemberPhoto, type PhotoSourceMember } from '@/lib/member-photos';
 
@@ -33,6 +34,7 @@ export type GreetingsAction =
   | { type: 'TOGGLE_MEMBER_PHOTO'; payload: { memberId: string; url: string } }
   | { type: 'ADD_MEMBER_PHOTOS'; payload: { memberId: string; urls: string[] } }
   | { type: 'MAKE_MEMBER_PHOTO_MAIN'; payload: { memberId: string; url: string } }
+  | { type: 'SET_ARRANGEMENT'; payload: ArrangementType }
   | { type: 'RESET' };
 
 export const defaultAdjustment: ImageAdjustment = { zoom: 1, x: 0, y: 0, opacity: 100 };
@@ -42,6 +44,7 @@ export const initialGreetingState: GreetingState = {
   occasion: 'BIRTHDAY',
   template: 'HERITAGE_PORTRAIT',
   format: 'PORTRAIT',
+  arrangement: 'FLOATING_BACKGROUND',
   heroImageUrl: null,
   heroAdjustment: { ...defaultAdjustment, opacity: 30 }, // Defaulting to low opacity for background mode
   heroMode: 'BACKGROUND',
@@ -279,6 +282,8 @@ export function greetingsReducer(state: GreetingState, action: GreetingsAction):
         heroAdjustment: { ...defaultAdjustment, opacity: state.heroAdjustment.opacity },
       };
     }
+    case 'SET_ARRANGEMENT':
+      return { ...state, arrangement: action.payload };
     case 'RESET':
       return initialGreetingState;
     default:
