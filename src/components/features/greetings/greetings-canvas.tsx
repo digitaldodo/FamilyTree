@@ -45,23 +45,30 @@ export const GreetingsCanvas = forwardRef<HTMLDivElement, GreetingsCanvasProps>(
     return (
       <div 
         ref={containerRef}
-        className="relative w-full flex items-center justify-center overflow-hidden"
+        className="relative w-full flex items-center justify-center overflow-visible"
         style={{ height: isExporting ? originalHeight : originalHeight * scale + 32 }}
       >
         <div
-           className={cn(
-             "relative bg-white shadow-2xl",
-             isExporting && "shadow-none"
-           )}
-           style={{
-             width: originalWidth,
-             height: originalHeight,
-             transform: isExporting ? 'scale(1)' : `scale(${scale})`,
-             transformOrigin: 'top center',
-             marginTop: isExporting ? 0 : 16,
-           }}
+          className="relative"
+          style={{
+            width: isExporting ? originalWidth : originalWidth * scale,
+            height: isExporting ? originalHeight : originalHeight * scale,
+          }}
         >
-          <div ref={ref} className="absolute inset-0 bg-white overflow-hidden">
+          <div
+             className={cn(
+               "absolute top-0 left-0 bg-white shadow-2xl",
+               // Remove scale during export so html-to-image captures it exactly 1:1 at 1080px
+               isExporting && "shadow-none"
+             )}
+             style={{
+               width: originalWidth,
+               height: originalHeight,
+               transform: isExporting ? 'scale(1)' : `scale(${scale})`,
+               transformOrigin: 'top left',
+             }}
+          >
+            <div ref={ref} className="absolute inset-0 bg-white overflow-hidden">
             {state.template === 'HERITAGE_PORTRAIT' && <TemplateHeritagePortrait state={state} />}
             {state.template === 'FAMILY_COLLAGE' && <TemplateFamilyCollage state={state} />}
             {state.template === 'MODERN_MINIMAL' && <TemplateModernMinimal state={state} />}
@@ -69,6 +76,7 @@ export const GreetingsCanvas = forwardRef<HTMLDivElement, GreetingsCanvasProps>(
             {state.template === 'MEMORY_ALBUM' && <TemplateMemoryAlbum state={state} />}
           </div>
         </div>
+      </div>
       </div>
     );
   }
