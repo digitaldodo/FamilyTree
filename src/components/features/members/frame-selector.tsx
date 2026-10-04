@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
+import { CustomColorPicker } from './custom-color-picker';
 
 interface FrameSelectorProps {
   styleValue: string;
@@ -39,7 +39,8 @@ export function FrameSelector({
   colorValue,
   onColorChange,
 }: FrameSelectorProps) {
-  const isCustomColor = colorValue && !CURATED_COLORS.find((c) => c.value === colorValue);
+  const [forceCustom, setForceCustom] = React.useState(false);
+  const isCustomColor = forceCustom || (colorValue && !CURATED_COLORS.find((c) => c.value.toLowerCase() === colorValue.toLowerCase()));
 
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-slate-50 dark:bg-slate-900/50 mt-4 mb-6">
@@ -62,16 +63,20 @@ export function FrameSelector({
         </div>
         <div>
           <Label className="mb-2 block">Frame Color</Label>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2">
             <Select 
               value={isCustomColor ? 'custom' : (colorValue || '')} 
               onValueChange={(val) => {
                 if (val !== 'custom') {
+                  setForceCustom(false);
                   onColorChange(val);
+                } else {
+                  setForceCustom(true);
+                  if (!colorValue) onColorChange('#FFD700');
                 }
               }}
             >
-              <SelectTrigger className="flex-1">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select color" />
               </SelectTrigger>
               <SelectContent>
@@ -79,7 +84,7 @@ export function FrameSelector({
                 {CURATED_COLORS.map((color) => (
                   <SelectItem key={color.value} value={color.value}>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full border" style={{ backgroundColor: color.value }} />
+                      <div className="w-3 h-3 rounded-full border shadow-sm" style={{ backgroundColor: color.value }} />
                       {color.label}
                     </div>
                   </SelectItem>
@@ -87,18 +92,13 @@ export function FrameSelector({
                 <SelectItem value="custom">Custom Color</SelectItem>
               </SelectContent>
             </Select>
-            {(isCustomColor || colorValue) && (
-              <Input
-                type="color"
-                className="w-10 h-10 p-1 cursor-pointer shrink-0"
-                value={colorValue || '#FFD700'}
-                onChange={(e) => onColorChange(e.target.value)}
-                title="Choose custom color"
-              />
-            )}
           </div>
         </div>
       </div>
+      
+      {isCustomColor && (
+        <CustomColorPicker color={colorValue} onChange={onColorChange} />
+      )}
     </div>
   );
 }

@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useReactFlow, Node, Edge } from '@xyflow/react';
+import { useReactFlow } from '@xyflow/react';
 
 interface GlowStep {
   type: 'NODE' | 'EDGE';
   id: string; // member id or edge id
   color: string;
+  reverse?: boolean; // if true, animate backwards along edge
 }
 
 export function GlobalGlowController() {
@@ -16,32 +17,92 @@ export function GlobalGlowController() {
     isActive: false,
     sequence: [] as GlowStep[],
     currentStepIndex: 0,
-    progress: 0, // 0 to 1
+    progress: 0,
     pauseTime: 0,
+    currentColor: '#d4af37',
   });
 
-  // Build the cycle sequence based on current nodes
   const buildSequence = () => {
     const nodes = getNodes();
     const edges = getEdges();
     
     if (nodes.length === 0) return [];
     
-    // Group members by generation
-    const membersByGen: Record<number, any[]> = {};
-    const memberNodes = nodes.filter(n => n.type === 'member' || n.type === 'coupleContainer');
+    // Build adjacency list for BFS pathfinding
+    const adj = new Map<string, { target: string, edgeId: string, reverse: boolean }[]>();
+    const nodeMap = new Map<string, any>();
     
-    memberNodes.forEach(n => {
-      // Find generation by looking at the node's Y position or generations array
-      // React Flow nodes in this app are roughly sorted by Y (older = smaller Y)
-      const genIndex = Math.round(n.position.y / 450); // LEVEL_HEIGHT is 450
+    nodes.forEach(n => {
+      nodeMap.set(n.id, n);
+      if (n.type === 'coupleContainer') {
+        const members = n.data.members as any[];
+        members.forEach(m => {
+          nodeMap.set(m.id, n);
+        });
+      }
+    });
+
+    edges.forEach(e => {
+      const u = e.source;
+      const v = e.target;
+      if (!adj.has(u)) adj.set(u, []);
+      if (!adj.has(v)) adj.set(v, []);
+      adj.get(u)!.push({ target: v, edgeId: e.id, reverse: false });
+      adj.get(v)!.push({ target: u, edgeId: e.id, reverse: true });
+    });
+
+    const findShortestPath = (start: string, end: string): { nodes: string[], edges: { id: string, reverse: boolean }[] } | null => {
+      if (start === end) return { nodes: [start], edges: [] };
+      const queue = [[start]];
+      const visited = new Set([start]);
+      const edgePath = new Map<string, { id: string, reverse: boolean }[]>();
+      edgePath.set(start, []);
+
+      while (queue.length > 0) {
+        const path = queue.shift()!;
+        const node = path[path.length - 1];
+
+        if (node === end) {
+          return { nodes: path, edges: edgePath.get(node)! };
+        }
+
+        const neighbors = adj.get(node) || [];
+        for (const neighbor of neighbors) {
+          if (!visited.has(neighbor.target)) {
+            visited.add(neighbor.target);
+            const newPath = [...path, neighbor.target];
+            queue.push(newPath);
+            edgePath.set(neighbor.target, [...edgePath.get(node)!, { id: neighbor.edgeId, reverse: neighbor.reverse }]);
+          }
+        }
+      }
+      return null;
+    };
+
+    const membersByGen: Record<number, any[]> = {};
+    const allMembers: any[] = [];
+    
+    nodes.forEach(n => {
+      if (n.type === 'member') {
+        allMembers.push(n.data.member);
+      } else if (n.type === 'coupleContainer') {
+        const members = n.data.members as any[];
+        allMembers.push(...members);
+      }
+    });
+
+    allMembers.forEach(m => {
+      if (!m) return;
+      const genNode = nodeMap.get(m.id);
+      if (!genNode) return;
+      const genIndex = Math.round(genNode.position.y / 450);
       if (!membersByGen[genIndex]) membersByGen[genIndex] = [];
-      membersByGen[genIndex].push(n);
+      membersByGen[genIndex].push(m);
     });
 
     const genKeys = Object.keys(membersByGen).map(Number).sort((a, b) => a - b);
     const sequence: GlowStep[] = [];
-    const visited = new Set<string>();
+    const visitedMembers = new Set<string>();
 
     const shuffleArray = (array: any[]) => {
       for (let i = array.length - 1; i > 0; i--) {
@@ -50,56 +111,58 @@ export function GlobalGlowController() {
       }
     };
 
-    // Construct the sequence
+    let currentLocation: string | null = null;
+    let currentColor = '#d4af37';
+
     for (const gen of genKeys) {
-      const nodesInGen = membersByGen[gen];
-      shuffleArray(nodesInGen);
+      const genMembers = membersByGen[gen];
+      shuffleArray(genMembers);
 
-      for (const node of nodesInGen) {
-        // A node can be member or coupleContainer.
-        const members = node.type === 'coupleContainer' ? node.data.members as any[] : [node.data.member];
+      for (const member of genMembers) {
+        if (!member) continue;
+        if (visitedMembers.has(member.id)) continue;
         
-        for (const member of members) {
-          if (!member) continue;
-          if (visited.has(member.id)) continue;
-          visited.add(member.id);
-
-          const color = member.frameColor || '#d4af37';
-
-          // Animate member frame
-          sequence.push({
-            type: 'NODE',
-            id: member.id,
-            color
-          });
-
-          // Find outgoing edges (downwards). In React Flow, edges go from this node to a junction or child.
-          // Wait, edges are from parent member id to junction, then junction to child.
-          // Let's find edges from this member ID
-          const outgoingToJunction = edges.filter(e => e.source === member.id && e.data?.type === 'PARENT');
+        const targetColor = member.frameColor || '#d4af37';
+        
+        if (!currentLocation) {
+          sequence.push({ type: 'NODE', id: member.id, color: targetColor });
+          visitedMembers.add(member.id);
+          currentLocation = member.id;
+          currentColor = targetColor;
+        } else {
+          const pathInfo = findShortestPath(currentLocation, member.id);
           
-          if (outgoingToJunction.length > 0) {
-            // Pick a random edge to animate, or just one
-            shuffleArray(outgoingToJunction);
-            const edge = outgoingToJunction[0];
-            sequence.push({
-              type: 'EDGE',
-              id: edge.id,
-              color
-            });
-            
-            // Now find edge from junction to a child
-            const junctionId = edge.target;
-            const junctionToChildren = edges.filter(e => e.source === junctionId && e.data?.type === 'PARENT');
-            if (junctionToChildren.length > 0) {
-              shuffleArray(junctionToChildren);
-              const childEdge = junctionToChildren[0];
-              sequence.push({
-                type: 'EDGE',
-                id: childEdge.id,
-                color
-              });
+          if (pathInfo) {
+            for (let i = 0; i < pathInfo.edges.length; i++) {
+              const edge = pathInfo.edges[i];
+              const nextNodeId = pathInfo.nodes[i + 1];
+              
+              const isJunction = nextNodeId.startsWith('junction-');
+              
+              sequence.push({ type: 'EDGE', id: edge.id, color: targetColor, reverse: edge.reverse });
+              
+              if (!isJunction && nextNodeId !== member.id) {
+                const mNode = nodeMap.get(nextNodeId);
+                let passedColor = targetColor;
+                if (mNode) {
+                   const mData = mNode.type === 'member' ? mNode.data.member : (mNode.data.members as any[]).find((x: any) => x.id === nextNodeId);
+                   if (mData && mData.frameColor) passedColor = mData.frameColor;
+                }
+                sequence.push({ type: 'NODE', id: nextNodeId, color: passedColor });
+                visitedMembers.add(nextNodeId);
+              }
             }
+            
+            sequence.push({ type: 'NODE', id: member.id, color: targetColor });
+            visitedMembers.add(member.id);
+            currentLocation = member.id;
+            currentColor = targetColor;
+          } else {
+            sequence.push({ type: 'NODE', id: 'JUMP', color: 'transparent' });
+            sequence.push({ type: 'NODE', id: member.id, color: targetColor });
+            visitedMembers.add(member.id);
+            currentLocation = member.id;
+            currentColor = targetColor;
           }
         }
       }
@@ -108,8 +171,25 @@ export function GlobalGlowController() {
     return sequence;
   };
 
+  const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : { r: 212, g: 175, b: 55 };
+  };
+  
+  const interpolateColor = (color1: string, color2: string, factor: number) => {
+    const rgb1 = hexToRgb(color1);
+    const rgb2 = hexToRgb(color2);
+    const r = Math.round(rgb1.r + factor * (rgb2.r - rgb1.r));
+    const g = Math.round(rgb1.g + factor * (rgb2.g - rgb1.g));
+    const b = Math.round(rgb1.b + factor * (rgb2.b - rgb1.b));
+    return `rgb(${r}, ${g}, ${b})`;
+  };
+
   useEffect(() => {
-    // Check prefers reduced motion
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) return;
 
@@ -121,7 +201,6 @@ export function GlobalGlowController() {
       lastTime = time;
 
       if (!state.isActive) {
-        // Start new cycle
         const seq = buildSequence();
         if (seq.length > 0) {
           state.sequence = seq;
@@ -129,8 +208,8 @@ export function GlobalGlowController() {
           state.progress = 0;
           state.pauseTime = 0;
           state.isActive = true;
+          state.currentColor = seq[0].color;
           
-          // Clear all existing
           document.querySelectorAll('.gold-flow-card-perimeter, .gold-flow-edge-path').forEach(el => {
             (el as SVGPathElement).style.opacity = '0';
           });
@@ -141,14 +220,24 @@ export function GlobalGlowController() {
         if (state.pauseTime > 0) {
           state.pauseTime -= dt;
           if (state.pauseTime <= 0) {
-            // Restart cycle
             state.isActive = false;
           }
         } else {
           const step = state.sequence[state.currentStepIndex];
           if (step) {
-            // Speed: complete a node in 2s, an edge in 1s
-            const duration = step.type === 'NODE' ? 2000 : 1000;
+            if (step.id === 'JUMP') {
+              document.querySelectorAll('.gold-flow-card-perimeter, .gold-flow-edge-path').forEach(el => {
+                (el as SVGPathElement).style.opacity = '0';
+                (el as SVGPathElement).style.transition = 'opacity 0.5s ease-out';
+              });
+              state.pauseTime = 1000;
+              state.currentStepIndex++;
+              state.progress = 0;
+              requestRef.current = requestAnimationFrame(animate);
+              return;
+            }
+
+            const duration = step.type === 'NODE' ? 3000 : 2000;
             state.progress += dt / duration;
 
             let el: SVGPathElement | null = null;
@@ -159,11 +248,12 @@ export function GlobalGlowController() {
             }
 
             if (el) {
-              el.style.opacity = '1';
-              el.style.stroke = step.color;
+              const currentAnimatedColor = interpolateColor(state.currentColor, step.color, Math.min(1, state.progress * 2));
               
-              // We need the total length to animate stroke-dashoffset
-              let length = 864; // default for rect
+              el.style.opacity = '1';
+              el.style.stroke = currentAnimatedColor;
+              
+              let length = 864;
               if (step.type === 'EDGE') {
                 try {
                   length = el.getTotalLength();
@@ -172,37 +262,40 @@ export function GlobalGlowController() {
                 }
               }
               
-              // We want a glowing streak. 
-              // Dash array: streakLength, totalLength
-              const streakLength = step.type === 'NODE' ? 100 : 100;
+              const streakLength = step.type === 'NODE' ? 150 : 200;
               el.style.strokeDasharray = `${streakLength} ${length}`;
               
-              // Progress goes from 0 to 1
-              // Offset goes from (length) to (-streakLength)
-              const offset = length - (state.progress * (length + streakLength));
+              let offset;
+              if (step.reverse) {
+                const start = -length;
+                const end = streakLength;
+                offset = start + state.progress * (end - start);
+              } else {
+                const start = streakLength;
+                const end = -length;
+                offset = start + state.progress * (end - start);
+              }
+              
               el.style.strokeDashoffset = `${offset}`;
-              el.style.filter = `drop-shadow(0 0 5px ${step.color})`;
+              el.style.filter = `drop-shadow(0 0 8px ${currentAnimatedColor})`;
             }
 
             if (state.progress >= 1) {
-              // Fade out current element slowly
               if (el) {
                 el.style.opacity = '0';
-                el.style.transition = 'opacity 0.5s ease-out';
+                el.style.transition = 'opacity 0.8s ease-out';
               }
               
-              // Move to next step
+              state.currentColor = step.color;
               state.currentStepIndex++;
               state.progress = 0;
               
               if (state.currentStepIndex >= state.sequence.length) {
-                // Cycle complete
-                state.pauseTime = 2000; // 2 second pause before restart
+                state.pauseTime = 3000;
               }
             }
           } else {
-            // Invalid step, finish cycle
-            state.pauseTime = 2000;
+            state.pauseTime = 3000;
           }
         }
       }
@@ -210,7 +303,6 @@ export function GlobalGlowController() {
       requestRef.current = requestAnimationFrame(animate);
     };
 
-    // Delay start slightly to let the graph render
     setTimeout(() => {
       lastTime = performance.now();
       requestRef.current = requestAnimationFrame(animate);

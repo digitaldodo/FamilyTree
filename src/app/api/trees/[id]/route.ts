@@ -163,6 +163,8 @@ export async function GET(_request: NextRequest, { params }: Params) {
           bio: true,
           imageUrl: true,
           coverImage: true,
+          frameStyle: true,
+          frameColor: true,
           phone: true,
           email: true,
           address: true,
