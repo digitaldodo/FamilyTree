@@ -45,19 +45,20 @@ export const GreetingsCanvas = forwardRef<HTMLDivElement, GreetingsCanvasProps>(
     return (
       <div 
         ref={containerRef}
-        className="relative w-full flex items-center justify-center overflow-visible"
+        className="relative w-full flex items-center justify-center overflow-hidden"
         style={{ height: isExporting ? originalHeight : originalHeight * scale + 32 }}
       >
         <div
            className={cn(
-             "relative bg-white shadow-2xl origin-center",
-             // Remove scale during export so html-to-image captures it exactly 1:1 at 1080px
+             "relative bg-white shadow-2xl",
              isExporting && "shadow-none"
            )}
            style={{
              width: originalWidth,
              height: originalHeight,
              transform: isExporting ? 'scale(1)' : `scale(${scale})`,
+             transformOrigin: 'top center',
+             marginTop: isExporting ? 0 : 16,
            }}
         >
           <div ref={ref} className="absolute inset-0 bg-white overflow-hidden">

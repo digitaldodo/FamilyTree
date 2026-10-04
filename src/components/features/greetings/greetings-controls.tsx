@@ -35,13 +35,12 @@ const TEMPLATES: { value: TemplateType; label: string; desc: string }[] = [
   { value: 'FESTIVE_HERITAGE', label: 'Festive Heritage', desc: 'Subtle gold and botanical' },
   { value: 'MEMORY_ALBUM', label: 'Memory Album', desc: 'Like a page from an album' },
 ];
-const CollapsibleSection = ({ title, defaultOpen = true, children }: any) => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+const CollapsibleSection = ({ title, isOpen, onToggle, children }: any) => {
   return (
     <div className="border border-border rounded-lg overflow-hidden bg-card shadow-sm">
       <button 
         type="button" 
-        onClick={() => setIsOpen(!isOpen)} 
+        onClick={onToggle} 
         className="w-full flex items-center justify-between p-4 bg-muted/20 hover:bg-muted/40 transition-colors"
       >
         <h3 className="font-semibold text-sm tracking-wide">{title}</h3>
@@ -74,6 +73,8 @@ export function GreetingsControls({ editor }: ControlsProps) {
   const [pickerMode, setPickerMode] = useState<'HERO' | 'SUPPORTING'>('SUPPORTING');
   const [searchQuery, setSearchQuery] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+
+  const [openSection, setOpenSection] = useState<'hero'|'layout'|'message'|'photos'>('hero');
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isHero: boolean = false) => {
     const files = e.target.files;
@@ -290,7 +291,7 @@ export function GreetingsControls({ editor }: ControlsProps) {
   return (
     <div className="p-4 space-y-4 pb-20">
       {/* Selected Hero */}
-      <CollapsibleSection title="Main Photo (Hero)" defaultOpen={true}>
+      <CollapsibleSection title="Main Photo (Hero)" isOpen={openSection === 'hero'} onToggle={() => setOpenSection(openSection === 'hero' ? 'none' as any : 'hero')}>
         <div className="flex items-center justify-end">
           <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-primary" onClick={() => setIsSelectingMember(true)}>Change Person</Button>
         </div>
@@ -361,7 +362,7 @@ export function GreetingsControls({ editor }: ControlsProps) {
       </CollapsibleSection>
 
       {/* Occasion & Template */}
-      <CollapsibleSection title="Layout & Occasion" defaultOpen={false}>
+      <CollapsibleSection title="Layout & Occasion" isOpen={openSection === 'layout'} onToggle={() => setOpenSection(openSection === 'layout' ? 'none' as any : 'layout')}>
         <div className="space-y-4">
           <div className="space-y-2">
           <Select value={state.occasion} onValueChange={(v) => setOccasion(v as OccasionType)}>
@@ -419,7 +420,7 @@ export function GreetingsControls({ editor }: ControlsProps) {
       </CollapsibleSection>
 
       {/* Text Content */}
-      <CollapsibleSection title="Message & Text" defaultOpen={false}>
+      <CollapsibleSection title="Message & Text" isOpen={openSection === 'message'} onToggle={() => setOpenSection(openSection === 'message' ? 'none' as any : 'message')}>
         <div className="space-y-4">
         
         <div className="space-y-2">
@@ -460,7 +461,7 @@ export function GreetingsControls({ editor }: ControlsProps) {
       </CollapsibleSection>
 
       {/* Supporting Photos */}
-      <CollapsibleSection title={`Additional Photos (${state.supportingPhotos.length})`} defaultOpen={false}>
+      <CollapsibleSection title={`Family Photos (${state.supportingPhotos.length})`} isOpen={openSection === 'photos'} onToggle={() => setOpenSection(openSection === 'photos' ? 'none' as any : 'photos')}>
         <div className="space-y-4">
           
           {/* Members added to this card */}

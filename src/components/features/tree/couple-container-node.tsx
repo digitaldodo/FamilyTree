@@ -56,13 +56,29 @@ function CoupleContainerNodeComponent({ data }: CoupleContainerNodeProps) {
       />
       
       {members.map((member, index) => (
-        <TreeMemberCard
-          key={member.id}
-          member={member}
-          generationName={index === 0 ? generationName : undefined} // Only show generation on first partner to avoid clutter
-          isSelected={selectedMemberId === member.id}
-          onClick={handleMemberClick}
-        />
+        <div key={member.id} className="relative w-[190px] h-[250px]">
+          <TreeMemberCard
+            member={member}
+            generationName={index === 0 ? generationName : undefined} // Only show generation on first partner to avoid clutter
+            isSelected={selectedMemberId === member.id}
+            onClick={handleMemberClick}
+          />
+          {/* Gold Flow Card Perimeter Animation for EACH individual person */}
+          <svg className="absolute inset-0 pointer-events-none z-30" viewBox="0 0 190 250">
+            <rect
+              x="1"
+              y="1"
+              width="188"
+              height="248"
+              rx="11"
+              fill="none"
+              stroke="var(--color-tree-gold, #d4af37)"
+              strokeWidth="2"
+              className="gold-flow-card-animation"
+              style={{ opacity: 0.8 }}
+            />
+          </svg>
+        </div>
       ))}
       
       {/* Subtle spouse relationship connector line */}

@@ -514,14 +514,16 @@
 
 /* Gold Flow Animation */
 @keyframes gold-flow {
-  0% { stroke-dashoffset: 100; }
+  0% { stroke-dashoffset: 200; }
   100% { stroke-dashoffset: 0; }
 }
 
 .gold-flow-animation {
-  stroke-dasharray: 8 92;
-  animation: gold-flow 1.5s linear infinite;
+  /* 50px line, 150px gap creates a continuous stream effect */
+  stroke-dasharray: 50 150;
+  animation: gold-flow 3s linear infinite;
   pointer-events: none;
+  filter: drop-shadow(0 0 3px rgba(212, 175, 55, 0.7));
 }
 
 @keyframes gold-flow-card {
@@ -530,9 +532,14 @@
 }
 
 .gold-flow-card-animation {
-  stroke-dasharray: 8 856;
-  animation: gold-flow-card 13.5s linear infinite; /* scaled duration to match speed: perimeter 864 / 100 * 1.5s ≈ 13s */
+  /* The card perimeter is ~864px (190*2 + 250*2 minus corners). 
+     We want a similar stream length (e.g. 100px) and the rest gap. */
+  stroke-dasharray: 100 764;
+  /* Sync speed with the 200px / 3s = 66.6px/s. 
+     864 / 66.6 = 12.97s */
+  animation: gold-flow-card 13s linear infinite;
   pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.8));
 }
 
 @media (prefers-reduced-motion: reduce) {
