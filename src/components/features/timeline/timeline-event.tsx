@@ -111,7 +111,7 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
   return (
     <div className={`flex flex-col sm:flex-row gap-5 ${isDeath ? 'opacity-90' : ''}`}>
       {/* Editorial Portrait for standard events */}
-      {primaryMember && !isMarriage && !isMemory && (
+      {primaryMember?.imageUrl && !isMarriage && !isMemory && (
         <div className={`hidden sm:block relative w-24 h-32 rounded-sm overflow-hidden bg-[#17211b] shrink-0 shadow-lg shadow-black/40 border border-[#efe6d2]/20 ${isDeath ? 'grayscale' : ''}`}>
           <MemberAvatar
             imageUrl={primaryMember.imageUrl}
@@ -124,7 +124,7 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
       )}
       
       {/* Marriage Couples */}
-      {isMarriage && safeMembers.length >= 2 && (
+      {isMarriage && safeMembers.length >= 2 && safeMembers[0].imageUrl && safeMembers[1].imageUrl && (
         <div className="hidden sm:flex shrink-0 -space-x-4">
           <div className="relative w-20 h-28 rounded-sm overflow-hidden bg-[#17211b] shadow-lg shadow-black/40 border border-[#efe6d2]/20 z-10">
             <MemberAvatar imageUrl={safeMembers[0].imageUrl} firstName={safeMembers[0].name.split(' ')[0]} lastName={safeMembers[0].name.split(' ')[1] || ''} fallbackSize={24} className="w-full h-full rounded-none" />
@@ -144,6 +144,9 @@ export function TimelineEvent({ event, onClick, onAddContextualMemory }: Timelin
         <h4 className={`text-xl sm:text-2xl font-serif font-medium leading-snug ${isDeath ? 'text-[#b5ad98]' : 'text-[#f3ead3]'}`}>
           {event.title}
         </h4>
+        {isMemory && event.memoryData?.location && (
+          <p className="mt-1 text-sm text-[#b5ad98]">{event.memoryData.location}</p>
+        )}
         
         {event.description && !isDeath && (
           <p className="mt-2.5 text-[15px] leading-relaxed text-[#b3ae9c] line-clamp-3">

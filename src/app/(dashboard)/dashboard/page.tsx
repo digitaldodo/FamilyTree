@@ -186,6 +186,22 @@ function DashboardContent() {
             {recentMemories.length > 0 ? (
               <div className="space-y-6">
                 {/* Featured Memory */}
+                {!getMemoryCover(recentMemories[0]) ? (
+                  <Link href={`/memories/${recentMemories[0].id}`}>
+                    <div className="rounded-3xl p-6 sm:p-8 bg-card border border-border shadow-sm transition-all hover:shadow-md cursor-pointer">
+                      <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3 inline-block">
+                        {new Date(recentMemories[0].date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                      </span>
+                      <h3 className="text-2xl font-semibold text-foreground mb-2">{recentMemories[0].title}</h3>
+                      {recentMemories[0].location && (
+                        <p className="text-sm text-muted-foreground mb-2">{recentMemories[0].location}</p>
+                      )}
+                      {recentMemories[0].description && (
+                        <p className="text-muted-foreground line-clamp-3 max-w-2xl">{recentMemories[0].description}</p>
+                      )}
+                    </div>
+                  </Link>
+                ) : (
                 <Link href={`/memories/${recentMemories[0].id}`}>
                   <div className="group relative rounded-3xl overflow-hidden bg-muted aspect-video border border-border shadow-sm transition-all hover:shadow-md cursor-pointer block">
                     {(() => {
@@ -219,6 +235,7 @@ function DashboardContent() {
                   </div>
                 </div>
                 </Link>
+                )}
 
                 {recentMemories.length > 1 && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
