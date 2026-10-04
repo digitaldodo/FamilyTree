@@ -188,7 +188,7 @@ function DashboardContent() {
                 <Link href={`/memories/${recentMemories[0].id}`}>
                   <div className="group relative rounded-3xl overflow-hidden bg-muted aspect-video border border-border shadow-sm transition-all hover:shadow-md cursor-pointer block">
                     {recentMemories[0].media && recentMemories[0].media.length > 0 ? (
-                      <CldImage
+                      <Image
                         src={recentMemories[0].media[0].url}
                         alt={recentMemories[0].title}
                         fill

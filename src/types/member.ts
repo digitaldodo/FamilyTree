@@ -1,8 +1,6 @@
 // Member Types
 // Synchronized with Prisma schema
-
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
-
 /** Represents a family tree member */
 export interface Member {
   id: string;
@@ -19,14 +17,11 @@ export interface Member {
   email?: string | null;
   address?: string | null;
   occupation?: string | null;
-  frameStyle?: string | null;
-  frameColor?: string | null;
   generationId: string;
   treeId: string;
   createdAt: string;
   updatedAt: string;
 }
-
 /** Input for creating a new member */
 export interface CreateMemberInput {
   firstName: string;
@@ -42,12 +37,9 @@ export interface CreateMemberInput {
   email?: string | null;
   address?: string | null;
   occupation?: string | null;
-  frameStyle?: string | null;
-  frameColor?: string | null;
   generationId: string;
   treeId: string;
 }
-
 /** Input for updating an existing member */
 export interface UpdateMemberInput {
   firstName?: string | null;
@@ -63,11 +55,8 @@ export interface UpdateMemberInput {
   email?: string | null;
   address?: string | null;
   occupation?: string | null;
-  frameStyle?: string | null;
-  frameColor?: string | null;
   generationId?: string | null;
 }
-
 /** Relationship between two members */
 export interface Relationship {
   id: string;
@@ -76,7 +65,6 @@ export interface Relationship {
   toId: string;
   createdAt: string;
 }
-
 export interface InferredRelationships {
   parents: string[];
   children: string[];
@@ -85,13 +73,11 @@ export interface InferredRelationships {
   grandparents: string[];
   grandchildren: string[];
 }
-
 export interface Media {
   id: string;
   url: string;
   type: string;
 }
-
 /** A member with its relationships loaded */
 export interface MemberWithRelations extends Member {
   relationsFrom: Relationship[];
@@ -99,14 +85,12 @@ export interface MemberWithRelations extends Member {
   inferredRelationships?: InferredRelationships;
   media?: Media[];
 }
-
 /** Input for creating a relationship */
 export interface CreateRelationshipInput {
   type: 'PARENT' | 'SPOUSE';
   fromId: string;
   toId: string;
 }
-
 /** Represents a generation within a tree */
 export interface Generation {
   id: string;

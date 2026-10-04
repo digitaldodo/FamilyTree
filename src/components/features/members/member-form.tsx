@@ -1,5 +1,4 @@
 'use client';
-
 import * as React from 'react';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,27 +19,22 @@ import { MemberWithRelations } from '@/types/member';
 import { Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { ImageUpload } from './image-upload';
 import { RelationshipSelector } from './relationship-selector';
-import { FrameSelector } from './frame-selector';
 import { useAppStore } from '@/store/use-app-store';
 import { useGenerations } from '@/hooks/use-generations';
 import { useMembers } from '@/hooks/use-members';
-
 const formSchema = updateMemberSchema.extend({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']),
   generationId: z.string().trim().min(1, 'Generation is required'),
 });
-
 export type MemberFormData = z.infer<typeof formSchema>;
-
 interface MemberFormProps {
   member?: MemberWithRelations;
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
   isSubmitting: boolean;
 }
-
 export function MemberForm({
   member,
   onSubmit,
@@ -53,7 +47,6 @@ export function MemberForm({
   const [status, setStatus] = React.useState<'Alive' | 'Deceased'>(
     member?.deathDate ? 'Deceased' : 'Alive'
   );
-
   const {
     register,
     handleSubmit,
@@ -69,21 +62,15 @@ export function MemberForm({
       generationId: member?.generationId || defaultGenerationForNewMember || '',
     },
   });
-
   const imageUrl = useWatch({ control, name: 'imageUrl' });
   const generationIdWatch = useWatch({ control, name: 'generationId' });
   const genderWatch = useWatch({ control, name: 'gender' });
-  const frameStyleWatch = useWatch({ control, name: 'frameStyle' });
-  const frameColorWatch = useWatch({ control, name: 'frameColor' });
-
   // Relationships state
   const buildInitialRelations = React.useCallback(
     (sourceMember?: MemberWithRelations) => {
       if (!sourceMember) return [];
-
       const existing: { type: 'PARENT' | 'CHILD' | 'SPOUSE'; id: string }[] =
         [];
-
       sourceMember.relationsFrom.forEach((r) => {
         if (r.type === 'PARENT') {
           existing.push({ type: 'CHILD', id: r.toId });
@@ -91,7 +78,6 @@ export function MemberForm({
           existing.push({ type: r.type, id: r.toId });
         }
       });
-
       sourceMember.relationsTo.forEach((r) => {
         if (r.type === 'PARENT') {
           existing.push({ type: 'PARENT', id: r.fromId });
@@ -99,21 +85,18 @@ export function MemberForm({
           existing.push({ type: r.type, id: r.fromId });
         }
       });
-
       return existing.filter(
         (v, i, a) => a.findIndex((t) => t.id === v.id) === i
       );
     },
     []
   );
-
   const [relations, setRelations] = React.useState<
     { type: 'PARENT' | 'CHILD' | 'SPOUSE'; id: string }[]
   >(() => {
     if (!member) return [];
     return buildInitialRelations(member);
   });
-
   React.useEffect(() => {
     reset({
       ...(getMemberDefaultValues(member) as any),
@@ -128,9 +111,7 @@ export function MemberForm({
     reset,
     buildInitialRelations,
   ]);
-
   const allSelectedIds = relations.map((r) => r.id);
-
   const handleAddRelation = (
     id: string,
     type: 'PARENT' | 'CHILD' | 'SPOUSE'
@@ -141,7 +122,6 @@ export function MemberForm({
       setRelations((prev) => [...prev, { id, type }]);
       return;
     }
-
     if (type === 'PARENT') {
       const parentCount = relations.filter((r) => r.type === 'PARENT').length;
       if (parentCount >= 2) {
@@ -149,10 +129,8 @@ export function MemberForm({
         return;
       }
     }
-
     setRelations((prev) => [...prev, { id, type }]);
   };
-
   const handleRemoveRelation = (
     id: string,
     type: 'PARENT' | 'CHILD' | 'SPOUSE'
@@ -161,7 +139,6 @@ export function MemberForm({
       prev.filter((r) => !(r.id === id && r.type === type))
     );
   };
-
   const handleFormSubmit = async (data: MemberFormData) => {
     if (status === 'Deceased' && !data.deathDate) {
       setError('deathDate', {
@@ -170,7 +147,6 @@ export function MemberForm({
       });
       return;
     }
-
     // Zod schema already transforms DD-MM-YYYY to ISO strings
     const formattedData = {
       ...data,
@@ -191,7 +167,6 @@ export function MemberForm({
     };
     await onSubmit(formattedData);
   };
-
   const applyDateMask = (val: string) => {
     if (!val) return val;
     const cleaned = val.replace(/\D/g, '');
@@ -203,7 +178,6 @@ export function MemberForm({
     if (match[3]) formatted += '-' + match[3];
     return formatted;
   };
-
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Avatar Upload */}
@@ -219,14 +193,6 @@ export function MemberForm({
           folder="family-tree/avatars"
         />
       </div>
-
-      <FrameSelector
-        styleValue={frameStyleWatch || 'default'}
-        onStyleChange={(val) => setValue('frameStyle', val, { shouldDirty: true })}
-        colorValue={frameColorWatch || ''}
-        onColorChange={(val) => setValue('frameColor', val, { shouldDirty: true })}
-      />
-
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium mb-1 block">First Name</label>
@@ -255,7 +221,6 @@ export function MemberForm({
           )}
         </div>
       </div>
-
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium mb-1 block">Middle Name</label>
@@ -266,7 +231,6 @@ export function MemberForm({
           <Input {...register('occupation')} placeholder="Occupation" />
         </div>
       </div>
-
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium mb-1 block">Generation</label>
@@ -361,7 +325,6 @@ export function MemberForm({
           )}
         </div>
       </div>
-
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium mb-1 block">Status</label>
@@ -379,7 +342,6 @@ export function MemberForm({
           </Select>
         </div>
       </div>
-
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium mb-1 block">Birth Date</label>
@@ -470,7 +432,6 @@ export function MemberForm({
           </div>
         )}
       </div>
-
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium mb-1 block">Email</label>
@@ -491,12 +452,10 @@ export function MemberForm({
           <Input {...register('phone')} placeholder="Phone" />
         </div>
       </div>
-
       <div>
         <label className="text-sm font-medium mb-1 block">Address</label>
         <Input {...register('address')} placeholder="Address" />
       </div>
-
       <div>
         <label className="text-sm font-medium mb-1 block">Biography</label>
         <Textarea
@@ -508,7 +467,6 @@ export function MemberForm({
           <span className="text-xs text-destructive">{errors.bio.message}</span>
         )}
       </div>
-
       <div className="space-y-4 pt-4 border-t border-border">
         <h3 className="font-semibold">Relationships</h3>
         <div className="grid grid-cols-1 gap-4">
@@ -551,7 +509,6 @@ export function MemberForm({
           />
         </div>
       </div>
-
       <div className="flex justify-end gap-2 pt-4">
         <Button
           type="button"

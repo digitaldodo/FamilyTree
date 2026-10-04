@@ -5,30 +5,23 @@ import { getTreePermission, canEdit, canDelete } from '@/lib/permissions';
 import { successResponse, errorResponse } from '@/lib/utils';
 import { updateTreeSchema } from '@/validations/tree.schema';
 import { getErrorMessage } from '@/utils/helpers';
-
 type Params = { params: Promise<{ id: string }> };
-
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-
 function isValidTreeId(id: unknown): id is string {
   return typeof id === 'string' && /^[a-z0-9_-]{10,128}$/i.test(id);
 }
-
 function isLikelyJsonError(error: unknown) {
   const message = error instanceof Error ? error.message : String(error);
   return /json|deserialize|parse/i.test(message);
 }
-
 function getPrismaErrorCode(error: unknown) {
   return typeof error === 'object' && error !== null && 'code' in error
     ? String((error as { code?: unknown }).code)
     : null;
 }
-
 function databaseReadError(error: unknown, fallbackMessage: string) {
   console.error('[TREE_GET_DATABASE_ERROR]', error);
-
   if (getPrismaErrorCode(error) === 'P2022') {
     return errorResponse(
       'DATABASE_SCHEMA_OUT_OF_DATE',
@@ -36,7 +29,6 @@ function databaseReadError(error: unknown, fallbackMessage: string) {
       503
     );
   }
-
   if (isLikelyJsonError(error)) {
     return errorResponse(
       'TREE_DATA_INVALID',
@@ -44,14 +36,11 @@ function databaseReadError(error: unknown, fallbackMessage: string) {
       422
     );
   }
-
   return errorResponse('TREE_FETCH_ERROR', fallbackMessage, 500);
 }
-
 function safeJsonArray<T>(value: unknown, context: string): T[] {
   if (Array.isArray(value)) return value as T[];
   if (value == null) return [];
-
   if (typeof value === 'string') {
     try {
       const parsed = JSON.parse(value);
@@ -61,11 +50,9 @@ function safeJsonArray<T>(value: unknown, context: string): T[] {
       return [];
     }
   }
-
   console.warn(`[TREE_GET_INVALID_ARRAY] ${context}`, { receivedType: typeof value });
   return [];
 }
-
 function normalizeMember(member: any) {
   return {
     ...member,
@@ -74,7 +61,6 @@ function normalizeMember(member: any) {
     media: safeJsonArray(member?.media, `member:${member?.id}:media`),
   };
 }
-
 /** GET /api/trees/:id — Get a tree with all members and relationships */
 export async function GET(_request: NextRequest, { params }: Params) {
   try {
@@ -85,7 +71,6 @@ export async function GET(_request: NextRequest, { params }: Params) {
       console.error('[TREE_GET_AUTH_ERROR]', error);
       // Don't fail immediately, they might just want to view a public tree
     }
-
     let id: string;
     try {
       const resolvedParams = await params;
@@ -94,16 +79,13 @@ export async function GET(_request: NextRequest, { params }: Params) {
       console.error('[TREE_GET_PARAMS_ERROR]', error);
       return errorResponse('VALIDATION_ERROR', 'Invalid tree request parameters.', 400);
     }
-
     if (!isValidTreeId(id)) {
       return errorResponse('VALIDATION_ERROR', 'Invalid tree id.', 400);
     }
-
     const permission = await getTreePermission(session?.user?.id, id);
     if (!permission) {
       return errorResponse('FORBIDDEN', 'You do not have access to this tree', 403);
     }
-
     // Log VIEW activity if user is logged in
     if (session?.user?.id) {
       try {
@@ -119,7 +101,6 @@ export async function GET(_request: NextRequest, { params }: Params) {
         console.error('[TREE_ACTIVITY_LOG_ERROR]', error);
       }
     }
-
     let treeData;
     try {
       treeData = await prisma.tree.findUnique({
@@ -132,11 +113,9 @@ export async function GET(_request: NextRequest, { params }: Params) {
     } catch (error) {
       return databaseReadError(error, 'Unable to load tree metadata.');
     }
-
     if (!treeData) {
       return errorResponse('NOT_FOUND', 'Tree not found', 404);
     }
-
     let generations;
     try {
       generations = await prisma.generation.findMany({
@@ -146,7 +125,6 @@ export async function GET(_request: NextRequest, { params }: Params) {
     } catch (error) {
       return databaseReadError(error, 'Unable to load tree generations.');
     }
-
     let members;
     try {
       members = await prisma.member.findMany({
@@ -163,8 +141,6 @@ export async function GET(_request: NextRequest, { params }: Params) {
           bio: true,
           imageUrl: true,
           coverImage: true,
-          frameStyle: true,
-          frameColor: true,
           phone: true,
           email: true,
           address: true,
@@ -190,22 +166,18 @@ export async function GET(_request: NextRequest, { params }: Params) {
     } catch (error) {
       return databaseReadError(error, 'Unable to load tree members.');
     }
-
     const tree = {
       ...treeData,
       generations: safeJsonArray(generations, `tree:${id}:generations`),
       members: safeJsonArray<any>(members, `tree:${id}:members`).map(normalizeMember),
     };
-
     // Auto-create of version v1 removed as it violates GET idempotency and causes unnecessary writes.
-
     return successResponse(tree, 'Tree retrieved successfully');
   } catch (error) {
     console.error('[TREE_GET_ERROR]', error);
     return errorResponse('FETCH_ERROR', 'Unable to load this tree right now.', 500);
   }
 }
-
 /** PUT /api/trees/:id — Update a tree */
 export async function PUT(request: NextRequest, { params }: Params) {
   try {
@@ -213,14 +185,11 @@ export async function PUT(request: NextRequest, { params }: Params) {
     if (!session?.user?.id) {
       return errorResponse('UNAUTHORIZED', 'Authentication required', 401);
     }
-
     const { id } = await params;
-
     const permission = await getTreePermission(session.user.id, id);
     if (!canEdit(permission)) {
       return errorResponse('FORBIDDEN', 'You do not have permission to edit this tree', 403);
     }
-
     let body = null;
     try {
       body = await request.json();
@@ -228,19 +197,16 @@ export async function PUT(request: NextRequest, { params }: Params) {
       return errorResponse('VALIDATION_ERROR', 'Invalid request body', 400);
     }
     const validation = updateTreeSchema.safeParse(body);
-
     if (!validation.success) {
       const messages = validation.error.issues
         .map((e) => e.message)
         .join(', ');
       return errorResponse('VALIDATION_ERROR', messages, 400);
     }
-
     const existing = await prisma.tree.findUnique({ where: { id } });
     if (!existing) {
       return errorResponse('NOT_FOUND', 'Tree not found', 404);
     }
-
     const tree = await prisma.tree.update({
       where: { id },
       data: validation.data,
@@ -248,18 +214,15 @@ export async function PUT(request: NextRequest, { params }: Params) {
         _count: { select: { members: true } },
       },
     });
-
     if (!tree) {
       return errorResponse('FETCH_ERROR', 'No data returned', 500);
     }
-
     return successResponse(tree, 'Tree updated successfully');
   } catch (error) {
     console.error('[TREE_UPDATE_ERROR]', error);
     return errorResponse('UPDATE_ERROR', getErrorMessage(error), 500);
   }
 }
-
 /** DELETE /api/trees/:id — Delete a tree and all its members */
 export async function DELETE(_request: NextRequest, { params }: Params) {
   try {
@@ -267,26 +230,21 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     if (!session?.user?.id) {
       return errorResponse('UNAUTHORIZED', 'Authentication required', 401);
     }
-
     const { id } = await params;
-
     const permission = await getTreePermission(session.user.id, id);
     if (!canDelete(permission)) {
       return errorResponse('FORBIDDEN', 'Only the tree owner can delete this tree', 403);
     }
-
     const existing = await prisma.tree.findUnique({ where: { id } });
     if (!existing) {
       return errorResponse('NOT_FOUND', 'Tree not found', 404);
     }
-
     // Cascade: relationships → media → members → tree
     const memberIds = await prisma.member.findMany({
       where: { treeId: id },
       select: { id: true },
     });
     const ids = memberIds.map((m: any) => m.id);
-
     await prisma.$transaction([
       prisma.relationship.deleteMany({
         where: { OR: [{ fromId: { in: ids } }, { toId: { in: ids } }] },
@@ -297,7 +255,6 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
       prisma.invite.deleteMany({ where: { treeId: id } }),
       prisma.tree.delete({ where: { id } }),
     ]);
-
     return successResponse({ id }, 'Tree deleted successfully');
   } catch (error) {
     console.error('[TREE_DELETE_ERROR]', error);

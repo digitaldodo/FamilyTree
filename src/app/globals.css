@@ -553,35 +553,9 @@
 .exporting-pdf .gold-flow-card-animation {
   display: none !important;
 }
-.frame-royal_ornate .photo-area {
-  border: 6px solid var(--frame-color, #d4af37);
-  border-radius: 12px 12px 0 0;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-  box-sizing: border-box;
-}
-.frame-heritage .photo-area {
-  border: 4px double var(--frame-color, #8b4513);
-  border-radius: 12px 12px 0 0;
-  box-sizing: border-box;
-}
-.frame-antique .photo-area {
-  border: 8px ridge var(--frame-color, #cd7f32);
-  border-radius: 12px 12px 0 0;
-  box-sizing: border-box;
-}
-.frame-classic_gold .photo-area {
-  border: 3px solid var(--frame-color, #ffd700);
-  border-radius: 12px 12px 0 0;
-  box-sizing: border-box;
-}
-.frame-botanical .photo-area {
-  border: 4px groove var(--frame-color, #2e8b57);
-  border-radius: 12px 12px 0 0;
-  box-sizing: border-box;
-}
-.frame-modern_royal .photo-area {
-  border: 2px solid var(--frame-color, #4169e1);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  border-radius: 12px 12px 0 0;
-  box-sizing: border-box;
-}
+
+
+
+
+
+

@@ -1,15 +1,11 @@
 // Member Validation Schemas
 // Zod-based runtime validation for member CRUD operations
-
 import { z } from 'zod';
-
 /** Gender enum values */
 const genderEnum = z.enum(['MALE', 'FEMALE', 'OTHER']);
-
 /** Relationship type enum values */
 const relationshipTypeEnum = z.enum(['PARENT', 'SPOUSE']);
 const formRelationshipTypeEnum = z.enum(['PARENT', 'CHILD', 'SPOUSE']);
-
 export const memberRelationshipSchema = z.array(
   z.object({
     id: z.string().min(1, 'Relationship member ID is required'),
@@ -28,31 +24,26 @@ export const memberRelationshipSchema = z.array(
 }, {
   message: 'Duplicate or invalid relationships are not allowed.',
 });
-
 const nullWhenBlank = (value: unknown) => {
   if (typeof value === 'string' && value.trim() === '') return null;
   return value;
 };
-
 /** Optional URL: accepts a valid URL, blank string (→ null), null, or undefined */
 const optionalUrl = z.preprocess(
   nullWhenBlank,
   z.string().url('Must be a valid URL').nullable().optional()
 );
-
 /** Optional email: accepts a valid email, blank string (→ null), null, or undefined */
 const optionalEmail = z.preprocess(
   nullWhenBlank,
   z.string().email('Invalid email address').nullable().optional()
 );
-
 /** Optional trimmed string: accepts text, blank string (→ null), null, or undefined */
 const optionalString = (maxLen: number) =>
   z.preprocess(
     nullWhenBlank,
     z.string().max(maxLen).trim().nullable().optional()
   );
-
 /**
  * Date string schema — accepts DD-MM-YYYY or ISO 8601 format.
  * Transforms to ISO string for consistent storage.
@@ -62,14 +53,12 @@ const optionalString = (maxLen: number) =>
  * - ISO strings can come from client-side pre-processing
  */
 const dateStringSchema = z.preprocess(nullWhenBlank, z.string().trim().transform((val) => {
-
   // Already an ISO date string (e.g., from form-level Zod transform)
   if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
     const d = new Date(val);
     if (isNaN(d.getTime())) return null;
     return d.toISOString();
   }
-
   // DD-MM-YYYY format from form input
   if (/^\d{2}-\d{2}-\d{4}$/.test(val)) {
     const [d, m, y] = val.split('-');
@@ -77,10 +66,8 @@ const dateStringSchema = z.preprocess(nullWhenBlank, z.string().trim().transform
     if (isNaN(date.getTime())) return null;
     return date.toISOString();
   }
-
   return null;
 }).nullable().optional());
-
 /** Schema for creating a new member */
 export const createMemberSchema = z.object({
   firstName: z
@@ -104,13 +91,10 @@ export const createMemberSchema = z.object({
   email: optionalEmail,
   address: optionalString(500),
   occupation: optionalString(200),
-  frameStyle: optionalString(100),
-  frameColor: optionalString(50),
   generationId: z.string().trim().min(1, 'Generation is required'),
   treeId: z.string().min(1, 'Tree ID is required'),
   relations: memberRelationshipSchema.optional(),
 });
-
 /** Schema for updating a member (all fields optional, nullable where appropriate) */
 export const updateMemberSchema = z.object({
   firstName: z
@@ -136,12 +120,9 @@ export const updateMemberSchema = z.object({
   email: optionalEmail.nullable(),
   address: optionalString(500).nullable(),
   occupation: optionalString(200).nullable(),
-  frameStyle: optionalString(100).nullable(),
-  frameColor: optionalString(50).nullable(),
   generationId: z.string().optional(),
   relations: memberRelationshipSchema.optional(),
 });
-
 /** Schema for creating a relationship between members */
 export const createRelationshipSchema = z.object({
   type: relationshipTypeEnum,
@@ -152,7 +133,6 @@ export const createRelationshipSchema = z.object({
   message: 'A member cannot be related to themselves.',
   path: ['toId'],
 });
-
 /** Inferred types from schemas */
 export type CreateMemberSchemaType = z.infer<typeof createMemberSchema>;
 export type UpdateMemberSchemaType = z.infer<typeof updateMemberSchema>;

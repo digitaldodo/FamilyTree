@@ -122,7 +122,7 @@ export function GlobalGlowController() {
         if (!member) continue;
         if (visitedMembers.has(member.id)) continue;
         
-        const targetColor = member.frameColor || '#d4af37';
+        const targetColor = '#d4af37';
         
         if (!currentLocation) {
           sequence.push({ type: 'NODE', id: member.id, color: targetColor });
@@ -146,7 +146,7 @@ export function GlobalGlowController() {
                 let passedColor = targetColor;
                 if (mNode) {
                    const mData = mNode.type === 'member' ? mNode.data.member : (mNode.data.members as any[]).find((x: any) => x.id === nextNodeId);
-                   if (mData && mData.frameColor) passedColor = mData.frameColor;
+                   
                 }
                 sequence.push({ type: 'NODE', id: nextNodeId, color: passedColor });
                 visitedMembers.add(nextNodeId);

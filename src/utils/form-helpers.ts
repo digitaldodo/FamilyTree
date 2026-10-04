@@ -1,7 +1,5 @@
 // Form Helpers
-
 import { MemberWithRelations, UpdateMemberInput } from "@/types/member";
-
 export function getMemberDefaultValues(member?: MemberWithRelations): UpdateMemberInput {
   const formatDateToDDMMYYYY = (dateVal?: Date | string | null) => {
     if (!dateVal) return "";
@@ -12,7 +10,6 @@ export function getMemberDefaultValues(member?: MemberWithRelations): UpdateMemb
     const y = date.getUTCFullYear();
     return `${d}-${m}-${y}`;
   };
-
   if (!member) {
     return {
       firstName: "",
@@ -27,11 +24,8 @@ export function getMemberDefaultValues(member?: MemberWithRelations): UpdateMemb
       email: undefined,   // Don't default to "" — it fails .email() validation
       address: "",
       occupation: "",
-      frameStyle: "default",
-      frameColor: "",
     };
   }
-
   return {
     firstName: member.firstName,
     lastName: member.lastName,
@@ -45,7 +39,5 @@ export function getMemberDefaultValues(member?: MemberWithRelations): UpdateMemb
     email: member.email || undefined,
     address: member.address || "",
     occupation: member.occupation || "",
-    frameStyle: member.frameStyle || "default",
-    frameColor: member.frameColor || "",
   };
 }

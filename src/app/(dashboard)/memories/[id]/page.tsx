@@ -32,10 +32,10 @@ export default async function MemoryDetailPage({ params }: { params: Promise<{ i
   if (!memory) return notFound();
 
   // Validate permission
-  const isOwner = memory.tree.ownerId === session.user.id;
-  const isCreator = memory.createdById === session.user.id;
+  const isOwner = memory.tree.ownerId === session.user?.id;
+  const isCreator = memory.createdById === session.user?.id;
   const isCollaborator = memory.tree.collaborators.some(
-    (c: any) => c.userId === session.user.id && (c.role === 'EDITOR' || c.role === 'ADMIN')
+    (c: any) => c.userId === session.user?.id && (c.role === 'EDITOR' || c.role === 'ADMIN')
   );
 
   if (!isOwner && !isCreator && !isCollaborator) {
