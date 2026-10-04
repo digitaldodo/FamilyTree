@@ -1,6 +1,7 @@
 import React from 'react';
 import { GreetingState, ImageAdjustment } from '@/types/greetings';
 import { AdvancedPhotoArrangement } from '../advanced-photo-arrangement';
+import { TextRegion } from '../text/text-region';
 
 interface Props {
   state: GreetingState;
@@ -24,6 +25,7 @@ export const TemplateModernMinimal: React.FC<Props> = ({ state, scale = 1 }) => 
   };
 
   const isBackgroundMode = state.arrangement === 'FLOATING_BACKGROUND';
+  const heroNameLayer = state.textLayers?.find(l => l.id === 'heroName');
 
   return (
     <div 
@@ -35,7 +37,7 @@ export const TemplateModernMinimal: React.FC<Props> = ({ state, scale = 1 }) => 
         <div className="absolute inset-0 z-0">
           <img 
             src={state.heroImageUrl} 
-            alt={state.heroName}
+            alt={heroNameLayer?.content || 'Our Family'}
             style={getImageStyle(state.heroAdjustment)}
           />
         </div>
@@ -43,54 +45,20 @@ export const TemplateModernMinimal: React.FC<Props> = ({ state, scale = 1 }) => 
 
       <div className={`w-full h-full relative z-10 flex flex-col pointer-events-none ${isBackgroundMode ? 'bg-white/60' : ''}`}>
         
+        <div className="w-full flex flex-col px-16 pt-12 z-20 pointer-events-auto shrink-0">
+          <TextRegion state={state} region="top" />
+        </div>
+
         <div className="flex-1 min-h-0 w-full relative pointer-events-none">
+          <TextRegion state={state} region="middle" className="absolute inset-0 flex flex-col justify-center px-16" />
           <AdvancedPhotoArrangement state={state} frameClass="border-white" />
         </div>
 
         {/* Bottom half: Minimal typography */}
-        <div className="shrink-0 w-full flex flex-col px-16 py-12 pointer-events-auto bg-white shadow-[0_-20px_40px_rgba(0,0,0,0.02)] border-t border-gray-100">
+        <div className="shrink-0 w-full flex flex-col px-16 py-12 pointer-events-auto bg-white shadow-[0_-20px_40px_rgba(0,0,0,0.02)] border-t border-gray-100 min-h-[200px]">
+          <TextRegion state={state} region="bottom" />
           
-          {/* Date & Headline block */}
-          <div className="flex justify-between items-end mb-6 border-b border-gray-900/10 pb-4 shrink-0">
-            {state.headline && (
-              <h2 className="text-sm font-bold tracking-[0.3em] uppercase text-gray-900 truncate mr-4">
-                {state.headline}
-              </h2>
-            )}
-            {state.dateStr && (
-              <p className="text-xs font-semibold tracking-widest text-gray-600 uppercase shrink-0">
-                {state.dateStr}
-              </p>
-            )}
-          </div>
-          
-          {/* Main Name */}
-          <h1 className="text-6xl font-light tracking-tighter text-gray-900 mb-6 leading-tight drop-shadow-sm shrink-0 break-words">
-            {state.heroName}
-          </h1>
-
-          {/* Message */}
-          {state.message && (
-            <p className="text-xl leading-relaxed text-gray-700 font-medium w-full max-w-[80%] mb-12 break-words line-clamp-5">
-              {state.message}
-            </p>
-          )}
-
-          {/* Sender & Footer */}
-          <div className="mt-auto flex justify-between items-end shrink-0">
-            <div>
-              {state.senderName && (
-                <p className="text-sm font-bold tracking-wider text-gray-900 uppercase">
-                  {state.senderName}
-                </p>
-              )}
-              {state.footer && (
-                <p className="text-[10px] text-gray-500 mt-2 uppercase tracking-widest font-semibold">
-                  {state.footer}
-                </p>
-              )}
-            </div>
-            
+          <div className="mt-auto flex justify-end shrink-0 pt-8">
             {/* Logo */}
             <div className="text-right">
               <span className="text-[10px] uppercase tracking-widest text-gray-900 font-bold bg-white/50 px-2 py-1 rounded">

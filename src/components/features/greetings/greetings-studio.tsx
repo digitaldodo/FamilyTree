@@ -33,7 +33,8 @@ export function GreetingsStudio() {
       });
       
       const link = document.createElement('a');
-      link.download = `${editor.state.heroName || 'Family'}-Greeting.jpg`;
+      const heroName = editor.state.textLayers?.find(l => l.id === 'heroName')?.content || 'Family';
+      link.download = `${heroName}-Greeting.jpg`;
       link.href = dataUrl;
       link.click();
       toast.success('Greeting downloaded successfully!');
@@ -43,7 +44,7 @@ export function GreetingsStudio() {
     } finally {
       setIsExporting(false);
     }
-  }, [editor.state.heroName]);
+  }, [editor.state.textLayers]);
 
   const handleShare = useCallback(async () => {
     if (!canvasRef.current) return;
@@ -105,7 +106,7 @@ export function GreetingsStudio() {
         body: JSON.stringify({
           title: memoryTitle || 'Family Greeting',
           date: new Date(memoryDate).toISOString(),
-          description: editor.state.message || '',
+          description: editor.state.textLayers?.find(l => l.id === 'message')?.content || '',
           type: 'MEMORY',
           treeId: activeTreeId,
           memberIds: editor.state.heroMemberId && editor.state.heroMemberId !== 'CUSTOM' ? [editor.state.heroMemberId] : [],

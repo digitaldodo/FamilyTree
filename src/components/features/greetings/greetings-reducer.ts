@@ -22,7 +22,10 @@ export type GreetingsAction =
   | { type: 'SET_OCCASION'; payload: OccasionType }
   | { type: 'SET_TEMPLATE'; payload: TemplateType }
   | { type: 'SET_FORMAT'; payload: CanvasFormat }
-  | { type: 'UPDATE_TEXT'; payload: Partial<Pick<GreetingState, 'headline' | 'heroName' | 'message' | 'dateStr' | 'footer' | 'senderName'>> }
+  | { type: 'ADD_TEXT_LAYER'; payload: import('@/types/greetings').TextLayer }
+  | { type: 'UPDATE_TEXT_LAYER'; payload: { id: string; updates: Partial<import('@/types/greetings').TextLayer> } }
+  | { type: 'REMOVE_TEXT_LAYER'; payload: string }
+  | { type: 'REORDER_TEXT_LAYERS'; payload: string[] }
   | { type: 'SET_HERO_IMAGE'; payload: string }
   | { type: 'UPDATE_HERO_ADJUSTMENT'; payload: Partial<ImageAdjustment> }
   | { type: 'ADD_SUPPORTING_PHOTO'; payload: SupportingPhoto }
@@ -48,38 +51,47 @@ export const initialGreetingState: GreetingState = {
   heroImageUrl: null,
   heroAdjustment: { ...defaultAdjustment, opacity: 30 }, // Defaulting to low opacity for background mode
   heroMode: 'BACKGROUND',
-  headline: 'Happy Birthday',
-  heroName: '',
-  message: 'Wishing you a beautiful year ahead.',
-  dateStr: '',
-  footer: 'With love,',
-  senderName: 'Your Family',
+  textLayers: [
+    { id: 'headline', content: 'Happy Birthday', fontFamily: 'font-serif', fontSize: 1.5, color: '#4A3B32', isBold: false, isItalic: false, isUppercase: true, alignment: 'center', region: 'top', background: 'none', zIndex: 1 },
+    { id: 'heroName', content: '', fontFamily: 'font-serif', fontSize: 3.5, color: '#4A3B32', isBold: true, isItalic: false, isUppercase: false, alignment: 'center', region: 'top', background: 'none', zIndex: 2 },
+    { id: 'dateStr', content: '', fontFamily: 'font-sans', fontSize: 0.8, color: '#4A3B32', isBold: true, isItalic: false, isUppercase: true, alignment: 'center', region: 'top', background: 'none', zIndex: 3 },
+    { id: 'message', content: 'Wishing you a beautiful year ahead.', fontFamily: 'font-serif', fontSize: 1.2, color: '#4A3B32', isBold: false, isItalic: true, isUppercase: false, alignment: 'center', region: 'bottom', background: 'plate', zIndex: 4 },
+    { id: 'senderName', content: 'Your Family', fontFamily: 'font-sans', fontSize: 0.9, color: '#4A3B32', isBold: true, isItalic: false, isUppercase: true, alignment: 'center', region: 'bottom', background: 'none', zIndex: 5 },
+    { id: 'footer', content: 'With love,', fontFamily: 'font-sans', fontSize: 0.7, color: '#4A3B32', isBold: true, isItalic: false, isUppercase: true, alignment: 'center', region: 'bottom', background: 'none', zIndex: 6 }
+  ],
   supportingPhotos: [],
   selectedMemberIds: [],
 };
 
 // Smart defaults based on occasion
-function getOccasionDefaults(occasion: OccasionType) {
+function applyOccasionDefaults(occasion: OccasionType, layers: import('@/types/greetings').TextLayer[]) {
+  let headline = '';
+  let message = '';
   switch (occasion) {
     case 'BIRTHDAY':
-      return { headline: 'Happy Birthday', message: 'Wishing you a beautiful year ahead.' };
+      headline = 'Happy Birthday'; message = 'Wishing you a beautiful year ahead.'; break;
     case 'ANNIVERSARY':
     case 'WEDDING':
-      return { headline: 'Happy Anniversary', message: 'Celebrating another year of love, memories & togetherness.' };
+      headline = 'Happy Anniversary'; message = 'Celebrating another year of love, memories & togetherness.'; break;
     case 'ENGAGEMENT':
-      return { headline: 'Happy Engagement', message: 'Wishing you a lifetime of love and happiness.' };
+      headline = 'Happy Engagement'; message = 'Wishing you a lifetime of love and happiness.'; break;
     case 'GRADUATION':
-      return { headline: 'Congratulations', message: 'So proud of your achievement.' };
+      headline = 'Congratulations'; message = 'So proud of your achievement.'; break;
     case 'NEW_BABY':
-      return { headline: 'Welcome Little One', message: 'A new beautiful chapter begins.' };
+      headline = 'Welcome Little One'; message = 'A new beautiful chapter begins.'; break;
     case 'FAMILY_CELEBRATION':
-      return { headline: 'Our Family', message: 'Together is our favorite place to be.' };
+      headline = 'Our Family'; message = 'Together is our favorite place to be.'; break;
     case 'THANK_YOU':
-      return { headline: 'Thank You', message: 'For being a beautiful part of our family.' };
+      headline = 'Thank You'; message = 'For being a beautiful part of our family.'; break;
     case 'CUSTOM':
     default:
-      return { headline: 'A Special Day', message: 'Thinking of you today.' };
+      headline = 'A Special Day'; message = 'Thinking of you today.'; break;
   }
+  return layers.map(l => {
+    if (l.id === 'headline') return { ...l, content: headline };
+    if (l.id === 'message') return { ...l, content: message };
+    return l;
+  });
 }
 
 // ─── photo helpers ──────────────────────────────────────────────────────────
@@ -128,17 +140,21 @@ export function greetingsReducer(state: GreetingState, action: GreetingsAction):
     case 'SET_HERO_MEMBER': {
       const { member, defaultOccasion } = action.payload;
       const occasion = defaultOccasion || state.occasion;
-      const defaults = getOccasionDefaults(occasion);
+      let textLayers = applyOccasionDefaults(occasion, state.textLayers);
 
-      let dateStr = '';
       if (occasion === 'BIRTHDAY' && member.birthDate) {
         const d = new Date(member.birthDate);
-        dateStr = `${d.getDate()} ${d.toLocaleString('default', { month: 'long' })}`;
+        const dateStr = `${d.getDate()} ${d.toLocaleString('default', { month: 'long' })}`;
         const age = new Date().getFullYear() - d.getFullYear();
         if (age > 0) {
-          defaults.headline = `Happy ${age}th Birthday`; // very naive suffix, but works as placeholder
+          textLayers = textLayers.map(l => l.id === 'headline' ? { ...l, content: `Happy ${age}th Birthday` } : l);
         }
+        textLayers = textLayers.map(l => l.id === 'dateStr' ? { ...l, content: dateStr } : l);
+      } else {
+        textLayers = textLayers.map(l => l.id === 'dateStr' ? { ...l, content: '' } : l);
       }
+
+      textLayers = textLayers.map(l => l.id === 'heroName' ? { ...l, content: `${member.firstName} ${member.lastName}` } : l);
 
       // Hero's default photo is selected automatically (referenced, never re-uploaded).
       const heroUrl = getDefaultMemberPhoto(member);
@@ -152,38 +168,51 @@ export function greetingsReducer(state: GreetingState, action: GreetingsAction):
         selectedMemberIds: Array.from(new Set([...state.selectedMemberIds, member.id])),
         supportingPhotos,
         heroImageUrl: heroUrl,
-        heroName: `${member.firstName} ${member.lastName}`,
         heroAdjustment: { ...defaultAdjustment, opacity: state.heroMode === 'BACKGROUND' ? 30 : 100 },
         occasion,
-        ...defaults,
-        dateStr,
+        textLayers,
       };
     }
     case 'SET_CUSTOM_HERO': {
       const occasion = action.payload.defaultOccasion || state.occasion;
-      const defaults = getOccasionDefaults(occasion);
+      let textLayers = applyOccasionDefaults(occasion, state.textLayers);
+      textLayers = textLayers.map(l => l.id === 'heroName' ? { ...l, content: 'Our Family' } : l);
+      textLayers = textLayers.map(l => l.id === 'dateStr' ? { ...l, content: '' } : l);
+
       return {
         ...state,
         heroMemberId: 'CUSTOM',
         supportingPhotos: keepPreviousHeroPhoto(state, 'CUSTOM'),
         heroImageUrl: action.payload.imageUrl,
-        heroName: 'Our Family',
         heroAdjustment: { ...defaultAdjustment, opacity: state.heroMode === 'BACKGROUND' ? 30 : 100 },
         occasion,
-        ...defaults,
-        dateStr: '',
+        textLayers,
       };
     }
     case 'SET_OCCASION': {
-      const defaults = getOccasionDefaults(action.payload);
-      return { ...state, occasion: action.payload, ...defaults };
+      return { ...state, occasion: action.payload, textLayers: applyOccasionDefaults(action.payload, state.textLayers) };
     }
     case 'SET_TEMPLATE':
       return { ...state, template: action.payload };
     case 'SET_FORMAT':
       return { ...state, format: action.payload };
-    case 'UPDATE_TEXT':
-      return { ...state, ...action.payload };
+    case 'ADD_TEXT_LAYER':
+      return { ...state, textLayers: [...state.textLayers, action.payload] };
+    case 'UPDATE_TEXT_LAYER':
+      return {
+        ...state,
+        textLayers: state.textLayers.map((l) => (l.id === action.payload.id ? { ...l, ...action.payload.updates } : l)),
+      };
+    case 'REMOVE_TEXT_LAYER':
+      return {
+        ...state,
+        textLayers: state.textLayers.filter((l) => l.id !== action.payload),
+      };
+    case 'REORDER_TEXT_LAYERS': {
+      const idMap = new Map(state.textLayers.map((l) => [l.id, l]));
+      const newLayers = action.payload.map((id, index) => ({ ...idMap.get(id)!, zIndex: index }));
+      return { ...state, textLayers: newLayers };
+    }
     case 'SET_HERO_IMAGE':
       return { ...state, heroImageUrl: action.payload, heroAdjustment: { ...defaultAdjustment } };
     case 'UPDATE_HERO_ADJUSTMENT':

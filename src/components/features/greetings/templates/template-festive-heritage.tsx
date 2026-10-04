@@ -1,6 +1,7 @@
 import React from 'react';
 import { GreetingState, ImageAdjustment } from '@/types/greetings';
 import { AdvancedPhotoArrangement } from '../advanced-photo-arrangement';
+import { TextRegion } from '../text/text-region';
 
 interface Props {
   state: GreetingState;
@@ -24,6 +25,7 @@ export const TemplateFestiveHeritage: React.FC<Props> = ({ state, scale = 1 }) =
   };
 
   const isBackgroundMode = state.arrangement === 'FLOATING_BACKGROUND';
+  const heroNameLayer = state.textLayers?.find(l => l.id === 'heroName');
 
   return (
     <div 
@@ -35,7 +37,7 @@ export const TemplateFestiveHeritage: React.FC<Props> = ({ state, scale = 1 }) =
         <div className="absolute inset-0 z-0">
           <img 
             src={state.heroImageUrl} 
-            alt={state.heroName}
+            alt={heroNameLayer?.content || 'Our Family'}
             style={getImageStyle(state.heroAdjustment)}
           />
           <div className="absolute inset-0 bg-[#800020]/70 mix-blend-multiply" />
@@ -56,52 +58,19 @@ export const TemplateFestiveHeritage: React.FC<Props> = ({ state, scale = 1 }) =
       <div className="relative z-30 flex flex-col items-center justify-between w-full h-full p-16 text-center pointer-events-none">
         
         {/* Header section */}
-        <div className="mb-8 shrink-0 mt-4 pointer-events-auto">
-          {state.headline && (
-            <h2 className="text-xl tracking-[0.25em] uppercase text-[#D4AF37] mb-2 font-semibold drop-shadow-md">
-              ✧ {state.headline} ✧
-            </h2>
-          )}
-          {state.dateStr && (
-            <p className="text-xs font-sans tracking-[0.2em] text-[#F3E5AB]/90 uppercase font-bold drop-shadow-md">
-              {state.dateStr}
-            </p>
-          )}
+        <div className="w-full shrink-0 mt-4 pointer-events-auto flex flex-col items-center">
+          <TextRegion state={state} region="top" />
         </div>
 
         {/* Middle Content */}
-        <div className="flex-1 min-h-0 w-full py-4 relative pointer-events-none">
+        <div className="flex-1 min-h-0 w-full relative pointer-events-none flex flex-col justify-center">
+          <TextRegion state={state} region="middle" className="absolute inset-0 flex flex-col justify-center px-8" />
           <AdvancedPhotoArrangement state={state} frameClass="border-[#D4AF37]" />
         </div>
 
         {/* Bottom Content */}
-        <div className="shrink-0 flex flex-col items-center mt-auto pb-4 pointer-events-auto">
-          {/* Hero Name */}
-          <h1 className="text-6xl font-normal tracking-wide text-[#F3E5AB] mb-6 break-words" style={{ textShadow: '0 4px 8px rgba(0,0,0,0.8)' }}>
-            {state.heroName}
-          </h1>
-
-          {/* Message */}
-          {state.message && (
-            <p className="text-xl italic leading-relaxed text-[#F3E5AB] max-w-sm mb-8 drop-shadow-md font-medium break-words line-clamp-4">
-              {state.message}
-            </p>
-          )}
-
-          {/* Footer/Sender */}
-          <div className="flex flex-col items-center">
-            <div className="w-24 h-[1px] bg-[#D4AF37] mb-6 opacity-80" />
-            {state.senderName && (
-              <p className="font-sans text-sm font-bold tracking-[0.2em] uppercase text-[#D4AF37] drop-shadow-sm">
-                {state.senderName}
-              </p>
-            )}
-            {state.footer && (
-              <p className="font-sans text-[10px] text-[#F3E5AB]/80 mt-2 uppercase tracking-widest font-semibold">
-                {state.footer}
-              </p>
-            )}
-          </div>
+        <div className="shrink-0 flex flex-col items-center mt-auto pb-4 pointer-events-auto w-full">
+          <TextRegion state={state} region="bottom" />
         </div>
       </div>
 

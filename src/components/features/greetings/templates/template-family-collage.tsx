@@ -1,6 +1,7 @@
 import React from 'react';
 import { GreetingState, ImageAdjustment } from '@/types/greetings';
 import { AdvancedPhotoArrangement } from '../advanced-photo-arrangement';
+import { TextRegion } from '../text/text-region';
 
 interface Props {
   state: GreetingState;
@@ -24,6 +25,7 @@ export const TemplateFamilyCollage: React.FC<Props> = ({ state, scale = 1 }) => 
   };
 
   const isBackgroundMode = state.arrangement === 'FLOATING_BACKGROUND';
+  const heroNameLayer = state.textLayers?.find(l => l.id === 'heroName');
 
   return (
     <div 
@@ -35,56 +37,28 @@ export const TemplateFamilyCollage: React.FC<Props> = ({ state, scale = 1 }) => 
         <div className="absolute inset-0 z-0">
           <img 
             src={state.heroImageUrl} 
-            alt={state.heroName}
+            alt={heroNameLayer?.content || 'Our Family'}
             style={getImageStyle(state.heroAdjustment)}
           />
         </div>
       )}
 
       <div className="z-20 relative flex flex-col w-full h-full justify-between pointer-events-none">
-        <div className="flex-1 min-h-0 w-full relative pointer-events-none">
+        
+        <div className="w-full flex flex-col p-12 z-20 pointer-events-auto shrink-0 pt-16">
+          <TextRegion state={state} region="top" />
+        </div>
+
+        <div className="flex-1 min-h-0 w-full relative pointer-events-none flex flex-col justify-center">
+          <TextRegion state={state} region="middle" className="absolute inset-0 flex flex-col justify-center px-12" />
           {/* Advanced Arrangement Overlay */}
           <AdvancedPhotoArrangement state={state} frameClass="border-white" />
         </div>
 
         {/* Content Area */}
-        <div className={`relative z-20 shrink-0 flex flex-col items-center justify-end p-12 text-center text-slate-800 ${isBackgroundMode ? 'bg-white/95 mt-auto rounded-t-[4rem]' : 'bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.05)] rounded-t-[3rem] mt-auto pointer-events-auto'} pointer-events-none border-t border-slate-100`}>
-          <div className="pointer-events-auto flex flex-col items-center">
-          {state.headline && (
-            <span className="inline-block px-4 py-1 mb-6 text-xs font-bold tracking-widest text-white bg-slate-800 rounded-full uppercase shrink-0">
-              {state.headline}
-            </span>
-          )}
-          
-          <h1 className="text-6xl font-extrabold tracking-tight mb-4 text-slate-800 drop-shadow-sm shrink-0 break-words leading-tight">
-            {state.heroName}
-          </h1>
-          
-          {state.dateStr && (
-            <p className="text-sm font-medium tracking-widest text-slate-500 uppercase mb-6 shrink-0">
-              {state.dateStr}
-            </p>
-          )}
-
-          <div className="w-16 h-1 bg-slate-300 mb-6 rounded-full shrink-0" />
-
-          {state.message && (
-            <p className="text-xl leading-relaxed text-slate-600 mb-8 w-full max-w-[80%] font-medium break-words line-clamp-4">
-              {state.message}
-            </p>
-          )}
-
-          {state.senderName && (
-            <p className="text-base font-bold text-slate-800 uppercase tracking-widest shrink-0">
-              {state.senderName}
-            </p>
-          )}
-          
-          {state.footer && (
-            <p className="text-xs text-slate-400 mt-2 uppercase tracking-wider font-semibold shrink-0">
-              {state.footer}
-            </p>
-          )}
+        <div className={`relative z-20 shrink-0 flex flex-col items-center justify-end p-12 text-center text-slate-800 ${isBackgroundMode ? 'bg-white/95 mt-auto rounded-t-[4rem]' : 'bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.05)] rounded-t-[3rem] mt-auto pointer-events-auto'} pointer-events-none border-t border-slate-100 min-h-[250px]`}>
+          <div className="pointer-events-auto flex flex-col items-center w-full">
+            <TextRegion state={state} region="bottom" />
           </div>
         </div>
       </div>

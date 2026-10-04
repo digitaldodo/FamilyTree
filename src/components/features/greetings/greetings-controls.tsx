@@ -15,6 +15,7 @@ import Image from 'next/image';
 import { ZoomIn, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { TextLayersEditor } from './text/text-layers-editor';
 
 const OCCASIONS: { value: OccasionType; label: string }[] = [
   { value: 'BIRTHDAY', label: 'Birthday' },
@@ -61,7 +62,7 @@ interface ControlsProps {
 }
 
 export function GreetingsControls({ editor }: ControlsProps) {
-  const { state, setHeroMember, setOccasion, setTemplate, setFormat, updateText, updateHeroAdjustment } = editor;
+  const { state, setHeroMember, setOccasion, setTemplate, setFormat, updateHeroAdjustment } = editor;
   const activeTreeId = useAppStore((s) => s.activeTreeId);
   const { members } = useMembers(activeTreeId || '');
   
@@ -421,43 +422,7 @@ export function GreetingsControls({ editor }: ControlsProps) {
 
       {/* Text Content */}
       <CollapsibleSection title="Message & Text" isOpen={openSection === 'message'} onToggle={() => setOpenSection(openSection === 'message' ? 'none' as any : 'message')}>
-        <div className="space-y-4">
-        
-        <div className="space-y-2">
-          <Label className="text-xs">Headline</Label>
-          <Input value={state.headline} onChange={(e) => updateText({ headline: e.target.value })} />
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-xs">Person&apos;s Name</Label>
-          <Input value={state.heroName} onChange={(e) => updateText({ heroName: e.target.value })} />
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-xs">Date (Optional)</Label>
-          <Input value={state.dateStr} onChange={(e) => updateText({ dateStr: e.target.value })} placeholder="e.g. 24 October 2026" />
-        </div>
-
-        <div className="space-y-2">
-          <Label className="text-xs">Message</Label>
-          <Textarea 
-            value={state.message} 
-            onChange={(e) => updateText({ message: e.target.value })}
-            className="resize-none h-20"
-          />
-        </div>
-        
-        <div className="grid grid-cols-2 gap-2">
-          <div className="space-y-2">
-            <Label className="text-xs">Footer</Label>
-            <Input value={state.footer} onChange={(e) => updateText({ footer: e.target.value })} placeholder="With love," />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-xs">Sender Name</Label>
-            <Input value={state.senderName} onChange={(e) => updateText({ senderName: e.target.value })} />
-          </div>
-        </div>
-        </div>
+        <TextLayersEditor editor={editor} />
       </CollapsibleSection>
 
       {/* Supporting Photos */}

@@ -47,6 +47,21 @@ export type ArrangementType =
   | 'MAIN_SIDE'
   | 'FLOATING_BACKGROUND';
 
+export interface TextLayer {
+  id: string;
+  content: string;
+  fontFamily: string;
+  fontSize: number; // Size multiplier (e.g., 1 = base size)
+  color: string;
+  isBold: boolean;
+  isItalic: boolean;
+  isUppercase: boolean;
+  alignment: 'left' | 'center' | 'right';
+  region: 'top' | 'middle' | 'bottom';
+  background?: 'none' | 'shadow' | 'plate' | 'translucent';
+  zIndex: number;
+}
+
 export interface GreetingState {
   // Selections
   heroMemberId: string | null; // The primary subject (for name/date defaults)
@@ -61,13 +76,8 @@ export interface GreetingState {
   heroAdjustment: ImageAdjustment;
   heroMode: 'BACKGROUND' | 'FOREGROUND';
 
-  // Text
-  headline: string;
-  heroName: string;
-  message: string;
-  dateStr: string;
-  footer: string;
-  senderName: string;
+  // Advanced Custom Text
+  textLayers: TextLayer[];
 
   // Supporting Photos
   supportingPhotos: SupportingPhoto[];
