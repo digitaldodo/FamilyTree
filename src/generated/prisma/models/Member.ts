@@ -49,6 +49,8 @@ export type MemberMinAggregateOutputType = {
   email: string | null
   address: string | null
   occupation: string | null
+  frameStyle: string | null
+  frameColor: string | null
   generationId: string | null
   treeId: string | null
   createdAt: Date | null
@@ -71,6 +73,8 @@ export type MemberMaxAggregateOutputType = {
   email: string | null
   address: string | null
   occupation: string | null
+  frameStyle: string | null
+  frameColor: string | null
   generationId: string | null
   treeId: string | null
   createdAt: Date | null
@@ -93,6 +97,8 @@ export type MemberCountAggregateOutputType = {
   email: number
   address: number
   occupation: number
+  frameStyle: number
+  frameColor: number
   generationId: number
   treeId: number
   createdAt: number
@@ -125,6 +131,8 @@ export type MemberMinAggregateInputType = {
   email?: true
   address?: true
   occupation?: true
+  frameStyle?: true
+  frameColor?: true
   generationId?: true
   treeId?: true
   createdAt?: true
@@ -147,6 +155,8 @@ export type MemberMaxAggregateInputType = {
   email?: true
   address?: true
   occupation?: true
+  frameStyle?: true
+  frameColor?: true
   generationId?: true
   treeId?: true
   createdAt?: true
@@ -169,6 +179,8 @@ export type MemberCountAggregateInputType = {
   email?: true
   address?: true
   occupation?: true
+  frameStyle?: true
+  frameColor?: true
   generationId?: true
   treeId?: true
   createdAt?: true
@@ -278,6 +290,8 @@ export type MemberGroupByOutputType = {
   email: string | null
   address: string | null
   occupation: string | null
+  frameStyle: string | null
+  frameColor: string | null
   generationId: string
   treeId: string
   createdAt: Date
@@ -323,6 +337,8 @@ export type MemberWhereInput = {
   email?: Prisma.StringNullableFilter<"Member"> | string | null
   address?: Prisma.StringNullableFilter<"Member"> | string | null
   occupation?: Prisma.StringNullableFilter<"Member"> | string | null
+  frameStyle?: Prisma.StringNullableFilter<"Member"> | string | null
+  frameColor?: Prisma.StringNullableFilter<"Member"> | string | null
   generationId?: Prisma.StringFilter<"Member"> | string
   treeId?: Prisma.StringFilter<"Member"> | string
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
@@ -351,6 +367,8 @@ export type MemberOrderByWithRelationInput = {
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   occupation?: Prisma.SortOrderInput | Prisma.SortOrder
+  frameStyle?: Prisma.SortOrderInput | Prisma.SortOrder
+  frameColor?: Prisma.SortOrderInput | Prisma.SortOrder
   generationId?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -382,6 +400,8 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   email?: Prisma.StringNullableFilter<"Member"> | string | null
   address?: Prisma.StringNullableFilter<"Member"> | string | null
   occupation?: Prisma.StringNullableFilter<"Member"> | string | null
+  frameStyle?: Prisma.StringNullableFilter<"Member"> | string | null
+  frameColor?: Prisma.StringNullableFilter<"Member"> | string | null
   generationId?: Prisma.StringFilter<"Member"> | string
   treeId?: Prisma.StringFilter<"Member"> | string
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
@@ -410,6 +430,8 @@ export type MemberOrderByWithAggregationInput = {
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
   occupation?: Prisma.SortOrderInput | Prisma.SortOrder
+  frameStyle?: Prisma.SortOrderInput | Prisma.SortOrder
+  frameColor?: Prisma.SortOrderInput | Prisma.SortOrder
   generationId?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -440,6 +462,8 @@ export type MemberScalarWhereWithAggregatesInput = {
   email?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   address?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   occupation?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
+  frameStyle?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
+  frameColor?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   generationId?: Prisma.StringWithAggregatesFilter<"Member"> | string
   treeId?: Prisma.StringWithAggregatesFilter<"Member"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Member"> | Date | string
@@ -462,6 +486,8 @@ export type MemberCreateInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   revision?: number
@@ -488,6 +514,8 @@ export type MemberUncheckedCreateInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   generationId: string
   treeId: string
   createdAt?: Date | string
@@ -514,6 +542,8 @@ export type MemberUpdateInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revision?: Prisma.IntFieldUpdateOperationsInput | number
@@ -540,6 +570,8 @@ export type MemberUncheckedUpdateInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   generationId?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -566,6 +598,8 @@ export type MemberCreateManyInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   generationId: string
   treeId: string
   createdAt?: Date | string
@@ -588,6 +622,8 @@ export type MemberUpdateManyMutationInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revision?: Prisma.IntFieldUpdateOperationsInput | number
@@ -608,6 +644,8 @@ export type MemberUncheckedUpdateManyInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   generationId?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -640,6 +678,8 @@ export type MemberCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   address?: Prisma.SortOrder
   occupation?: Prisma.SortOrder
+  frameStyle?: Prisma.SortOrder
+  frameColor?: Prisma.SortOrder
   generationId?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -666,6 +706,8 @@ export type MemberMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   address?: Prisma.SortOrder
   occupation?: Prisma.SortOrder
+  frameStyle?: Prisma.SortOrder
+  frameColor?: Prisma.SortOrder
   generationId?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -688,6 +730,8 @@ export type MemberMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   address?: Prisma.SortOrder
   occupation?: Prisma.SortOrder
+  frameStyle?: Prisma.SortOrder
+  frameColor?: Prisma.SortOrder
   generationId?: Prisma.SortOrder
   treeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -870,6 +914,8 @@ export type MemberCreateWithoutTreeInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   revision?: number
@@ -895,6 +941,8 @@ export type MemberUncheckedCreateWithoutTreeInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   generationId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -949,6 +997,8 @@ export type MemberScalarWhereInput = {
   email?: Prisma.StringNullableFilter<"Member"> | string | null
   address?: Prisma.StringNullableFilter<"Member"> | string | null
   occupation?: Prisma.StringNullableFilter<"Member"> | string | null
+  frameStyle?: Prisma.StringNullableFilter<"Member"> | string | null
+  frameColor?: Prisma.StringNullableFilter<"Member"> | string | null
   generationId?: Prisma.StringFilter<"Member"> | string
   treeId?: Prisma.StringFilter<"Member"> | string
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
@@ -971,6 +1021,8 @@ export type MemberCreateWithoutGenerationInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   revision?: number
@@ -996,6 +1048,8 @@ export type MemberUncheckedCreateWithoutGenerationInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   treeId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1047,6 +1101,8 @@ export type MemberCreateWithoutRelationsFromInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   revision?: number
@@ -1072,6 +1128,8 @@ export type MemberUncheckedCreateWithoutRelationsFromInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   generationId: string
   treeId: string
   createdAt?: Date | string
@@ -1102,6 +1160,8 @@ export type MemberCreateWithoutRelationsToInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   revision?: number
@@ -1127,6 +1187,8 @@ export type MemberUncheckedCreateWithoutRelationsToInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   generationId: string
   treeId: string
   createdAt?: Date | string
@@ -1168,6 +1230,8 @@ export type MemberUpdateWithoutRelationsFromInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revision?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1193,6 +1257,8 @@ export type MemberUncheckedUpdateWithoutRelationsFromInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   generationId?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1229,6 +1295,8 @@ export type MemberUpdateWithoutRelationsToInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revision?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1254,6 +1322,8 @@ export type MemberUncheckedUpdateWithoutRelationsToInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   generationId?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1279,6 +1349,8 @@ export type MemberCreateWithoutMediaInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   revision?: number
@@ -1304,6 +1376,8 @@ export type MemberUncheckedCreateWithoutMediaInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   generationId: string
   treeId: string
   createdAt?: Date | string
@@ -1345,6 +1419,8 @@ export type MemberUpdateWithoutMediaInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revision?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1370,6 +1446,8 @@ export type MemberUncheckedUpdateWithoutMediaInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   generationId?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1395,6 +1473,8 @@ export type MemberCreateWithoutMemoryMembersInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   revision?: number
@@ -1420,6 +1500,8 @@ export type MemberUncheckedCreateWithoutMemoryMembersInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   generationId: string
   treeId: string
   createdAt?: Date | string
@@ -1461,6 +1543,8 @@ export type MemberUpdateWithoutMemoryMembersInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revision?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1486,6 +1570,8 @@ export type MemberUncheckedUpdateWithoutMemoryMembersInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   generationId?: Prisma.StringFieldUpdateOperationsInput | string
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1511,6 +1597,8 @@ export type MemberCreateManyTreeInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   generationId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1532,6 +1620,8 @@ export type MemberUpdateWithoutTreeInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revision?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1557,6 +1647,8 @@ export type MemberUncheckedUpdateWithoutTreeInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   generationId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1582,6 +1674,8 @@ export type MemberUncheckedUpdateManyWithoutTreeInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   generationId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1603,6 +1697,8 @@ export type MemberCreateManyGenerationInput = {
   email?: string | null
   address?: string | null
   occupation?: string | null
+  frameStyle?: string | null
+  frameColor?: string | null
   treeId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1624,6 +1720,8 @@ export type MemberUpdateWithoutGenerationInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revision?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1649,6 +1747,8 @@ export type MemberUncheckedUpdateWithoutGenerationInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1674,6 +1774,8 @@ export type MemberUncheckedUpdateManyWithoutGenerationInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameStyle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  frameColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   treeId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1753,6 +1855,8 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   email?: boolean
   address?: boolean
   occupation?: boolean
+  frameStyle?: boolean
+  frameColor?: boolean
   generationId?: boolean
   treeId?: boolean
   createdAt?: boolean
@@ -1782,6 +1886,8 @@ export type MemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   email?: boolean
   address?: boolean
   occupation?: boolean
+  frameStyle?: boolean
+  frameColor?: boolean
   generationId?: boolean
   treeId?: boolean
   createdAt?: boolean
@@ -1806,6 +1912,8 @@ export type MemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   email?: boolean
   address?: boolean
   occupation?: boolean
+  frameStyle?: boolean
+  frameColor?: boolean
   generationId?: boolean
   treeId?: boolean
   createdAt?: boolean
@@ -1830,6 +1938,8 @@ export type MemberSelectScalar = {
   email?: boolean
   address?: boolean
   occupation?: boolean
+  frameStyle?: boolean
+  frameColor?: boolean
   generationId?: boolean
   treeId?: boolean
   createdAt?: boolean
@@ -1837,7 +1947,7 @@ export type MemberSelectScalar = {
   revision?: boolean
 }
 
-export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "middleName" | "birthDate" | "deathDate" | "gender" | "bio" | "imageUrl" | "coverImage" | "phone" | "email" | "address" | "occupation" | "generationId" | "treeId" | "createdAt" | "updatedAt" | "revision", ExtArgs["result"]["member"]>
+export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "middleName" | "birthDate" | "deathDate" | "gender" | "bio" | "imageUrl" | "coverImage" | "phone" | "email" | "address" | "occupation" | "frameStyle" | "frameColor" | "generationId" | "treeId" | "createdAt" | "updatedAt" | "revision", ExtArgs["result"]["member"]>
 export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   media?: boolean | Prisma.Member$mediaArgs<ExtArgs>
   memoryMembers?: boolean | Prisma.Member$memoryMembersArgs<ExtArgs>
@@ -1881,6 +1991,8 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     email: string | null
     address: string | null
     occupation: string | null
+    frameStyle: string | null
+    frameColor: string | null
     generationId: string
     treeId: string
     createdAt: Date
@@ -2329,6 +2441,8 @@ export interface MemberFieldRefs {
   readonly email: Prisma.FieldRef<"Member", 'String'>
   readonly address: Prisma.FieldRef<"Member", 'String'>
   readonly occupation: Prisma.FieldRef<"Member", 'String'>
+  readonly frameStyle: Prisma.FieldRef<"Member", 'String'>
+  readonly frameColor: Prisma.FieldRef<"Member", 'String'>
   readonly generationId: Prisma.FieldRef<"Member", 'String'>
   readonly treeId: Prisma.FieldRef<"Member", 'String'>
   readonly createdAt: Prisma.FieldRef<"Member", 'DateTime'>

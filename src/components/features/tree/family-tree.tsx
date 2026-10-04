@@ -31,6 +31,7 @@ import { GenerationFilter } from '@/components/features/generations/generation-f
 import { TreeVersionsDropdown } from './tree-versions-dropdown';
 import { fetchJson } from '@/lib/fetcher';
 import { useUserTrees } from '@/hooks/use-user-trees';
+import { GlobalGlowController } from './global-glow-controller';
 
 const nodeTypes = {
   member: MemberNode,
@@ -268,6 +269,7 @@ function FamilyTreeCanvas() {
           proOptions={{ hideAttribution: true }}
           onlyRenderVisibleElements={true}
         >
+          <GlobalGlowController />
           <TreeBackground />
 
           <AnimatePresence>

@@ -2,6 +2,7 @@ import { memo, useState } from 'react';
 import { MemberWithRelations } from '@/types/member';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { FrameQuickAction } from './frame-quick-action';
 
 interface TreeMemberCardProps {
   member: MemberWithRelations;
@@ -55,6 +56,12 @@ function TreeMemberCardComponent({
 
   const initials = `${member.firstName?.charAt(0) || ''}${member.lastName?.charAt(0) || ''}`.toUpperCase();
 
+  const frameStyleClass = member.frameStyle && member.frameStyle !== 'default' ? `frame-${member.frameStyle}` : '';
+  const cardStyle = { 
+    boxShadow: 'var(--shadow-tree-card)',
+    ...(member.frameColor ? { '--frame-color': member.frameColor } : {})
+  } as React.CSSProperties;
+
   return (
     <div
       onClick={(e) => onClick?.(e, member.id)}
@@ -63,12 +70,13 @@ function TreeMemberCardComponent({
         isSelected
           ? 'ring-2 ring-primary/70 shadow-md'
           : 'hover:shadow-md hover:border-primary/40',
+        frameStyleClass,
         className
       )}
-      style={{ boxShadow: 'var(--shadow-tree-card)' }}
+      style={cardStyle}
     >
       {/* Photograph Area (Top ~64%) */}
-      <div className="w-full h-[160px] relative flex items-center justify-center overflow-hidden shrink-0">
+      <div className="photo-area w-full h-[160px] relative flex items-center justify-center overflow-hidden shrink-0">
         {member.imageUrl && !hasLoadError ? (
           <Image
             src={member.imageUrl}
@@ -115,6 +123,9 @@ function TreeMemberCardComponent({
       {member.deathDate && (
         <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-foreground/40 border border-background z-20 shadow-sm" title="Deceased" />
       )}
+
+      {/* Frame Quick Action */}
+      <FrameQuickAction member={member} />
     </div>
   );
 }

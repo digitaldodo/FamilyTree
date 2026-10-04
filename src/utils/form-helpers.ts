@@ -27,6 +27,8 @@ export function getMemberDefaultValues(member?: MemberWithRelations): UpdateMemb
       email: undefined,   // Don't default to "" — it fails .email() validation
       address: "",
       occupation: "",
+      frameStyle: "default",
+      frameColor: "",
     };
   }
 
@@ -43,5 +45,7 @@ export function getMemberDefaultValues(member?: MemberWithRelations): UpdateMemb
     email: member.email || undefined,
     address: member.address || "",
     occupation: member.occupation || "",
+    frameStyle: member.frameStyle || "default",
+    frameColor: member.frameColor || "",
   };
 }

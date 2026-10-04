@@ -20,6 +20,7 @@ import { MemberWithRelations } from '@/types/member';
 import { Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { ImageUpload } from './image-upload';
 import { RelationshipSelector } from './relationship-selector';
+import { FrameSelector } from './frame-selector';
 import { useAppStore } from '@/store/use-app-store';
 import { useGenerations } from '@/hooks/use-generations';
 import { useMembers } from '@/hooks/use-members';
@@ -72,6 +73,8 @@ export function MemberForm({
   const imageUrl = useWatch({ control, name: 'imageUrl' });
   const generationIdWatch = useWatch({ control, name: 'generationId' });
   const genderWatch = useWatch({ control, name: 'gender' });
+  const frameStyleWatch = useWatch({ control, name: 'frameStyle' });
+  const frameColorWatch = useWatch({ control, name: 'frameColor' });
 
   // Relationships state
   const buildInitialRelations = React.useCallback(
@@ -216,6 +219,13 @@ export function MemberForm({
           folder="family-tree/avatars"
         />
       </div>
+
+      <FrameSelector
+        styleValue={frameStyleWatch || 'default'}
+        onStyleChange={(val) => setValue('frameStyle', val, { shouldDirty: true })}
+        colorValue={frameColorWatch || ''}
+        onColorChange={(val) => setValue('frameColor', val, { shouldDirty: true })}
+      />
 
       <div className="grid grid-cols-2 gap-4">
         <div>

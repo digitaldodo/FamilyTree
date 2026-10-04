@@ -100,6 +100,8 @@ model Member {
   email         String?
   address       String?
   occupation    String?
+  frameStyle    String?
+  frameColor    String?
   generationId  String
   treeId        String
   createdAt     DateTime       @default(now())

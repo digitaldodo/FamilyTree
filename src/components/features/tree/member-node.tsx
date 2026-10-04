@@ -54,6 +54,7 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
       {/* Gold Flow Card Perimeter Animation */}
       <svg className="absolute inset-0 pointer-events-none z-30" viewBox="0 0 190 250">
         <rect
+          id={`glow-rect-${member.id}`}
           x="1"
           y="1"
           width="188"
@@ -62,8 +63,8 @@ function MemberNodeComponent({ data }: MemberNodeProps) {
           fill="none"
           stroke="var(--color-tree-gold, #d4af37)"
           strokeWidth="2"
-          className="gold-flow-card-animation"
-          style={{ opacity: 0.8 }}
+          className="gold-flow-card-perimeter opacity-0 transition-opacity"
+          style={{ strokeDasharray: '864', strokeDashoffset: '864' }}
         />
       </svg>
 

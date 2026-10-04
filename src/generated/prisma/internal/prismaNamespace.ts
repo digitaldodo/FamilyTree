@@ -1808,6 +1808,8 @@ export const MemberScalarFieldEnum = {
   email: 'email',
   address: 'address',
   occupation: 'occupation',
+  frameStyle: 'frameStyle',
+  frameColor: 'frameColor',
   generationId: 'generationId',
   treeId: 'treeId',
   createdAt: 'createdAt',

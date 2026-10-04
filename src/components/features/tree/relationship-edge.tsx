@@ -103,14 +103,15 @@ export function RelationshipEdge({
       {/* Gold Flow Animation Highlight (only for parent-child) */}
       {!isSpouse && (
         <path
+          id={`glow-path-${id}`}
           d={edgePath}
           fill="none"
           stroke="var(--color-tree-gold, #d4af37)"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="gold-flow-animation"
-          style={{ opacity: 0.8 }}
+          className="gold-flow-edge-path opacity-0 transition-opacity"
+          style={{ strokeDasharray: '2000', strokeDashoffset: '2000' }}
         />
       )}
     </g>

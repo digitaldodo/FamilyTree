@@ -19,6 +19,8 @@ export interface Member {
   email?: string | null;
   address?: string | null;
   occupation?: string | null;
+  frameStyle?: string | null;
+  frameColor?: string | null;
   generationId: string;
   treeId: string;
   createdAt: string;
@@ -40,6 +42,8 @@ export interface CreateMemberInput {
   email?: string | null;
   address?: string | null;
   occupation?: string | null;
+  frameStyle?: string | null;
+  frameColor?: string | null;
   generationId: string;
   treeId: string;
 }
@@ -59,6 +63,8 @@ export interface UpdateMemberInput {
   email?: string | null;
   address?: string | null;
   occupation?: string | null;
+  frameStyle?: string | null;
+  frameColor?: string | null;
   generationId?: string | null;
 }
 

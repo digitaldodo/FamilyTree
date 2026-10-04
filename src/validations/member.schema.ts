@@ -104,6 +104,8 @@ export const createMemberSchema = z.object({
   email: optionalEmail,
   address: optionalString(500),
   occupation: optionalString(200),
+  frameStyle: optionalString(100),
+  frameColor: optionalString(50),
   generationId: z.string().trim().min(1, 'Generation is required'),
   treeId: z.string().min(1, 'Tree ID is required'),
   relations: memberRelationshipSchema.optional(),
@@ -134,6 +136,8 @@ export const updateMemberSchema = z.object({
   email: optionalEmail.nullable(),
   address: optionalString(500).nullable(),
   occupation: optionalString(200).nullable(),
+  frameStyle: optionalString(100).nullable(),
+  frameColor: optionalString(50).nullable(),
   generationId: z.string().optional(),
   relations: memberRelationshipSchema.optional(),
 });
